@@ -6,12 +6,13 @@ import { TUNING, COLORS, PALETTES } from '../tuning.js';
 const TS = TUNING.tileSize;
 const AW = 16; // actor frame width
 const AH = 22; // actor frame height
+export const PORTRAIT_PX = 40; // portrait art is square and drawn once per palette
 
 // Tile index in the generated strip == position in this list.
 export const TILE_NAMES = [
   'grass', 'path', 'dirt', 'water', 'tree', 'wall', 'roof', 'door', 'wood', 'stone',
   'well', 'grave', 'bar', 'forge', 'shelf', 'altar', 'pew', 'crate', 'hearth', 'rug',
-  'treetop',
+  'treetop', 'sand', 'flotsam', 'spar', 'bed',
 ];
 
 export const TILE_INDEX = Object.fromEntries(TILE_NAMES.map((n, i) => [n, i]));
@@ -139,6 +140,28 @@ const TILE_DRAW = {
     fill(g, COLORS.rug[0], o + 1, 2, 14, 12);
     fill(g, COLORS.rug[1], o + 4, 5, 8, 6);
   },
+  bed: (g, o) => {
+    base(g, o, COLORS.wood[0]);
+    fill(g, COLORS.bed[0], o + 1, 2, 14, 13);
+    fill(g, COLORS.bed[1], o + 2, 3, 12, 4);
+  },
+  sand: (g, o) => {
+    base(g, o, COLORS.sand[0]);
+    specks(g, o, COLORS.sand[1], [[2, 4], [9, 2], [5, 11], [12, 9], [7, 14]], 3, 1);
+  },
+  flotsam: (g, o) => {
+    base(g, o, COLORS.sand[0]);
+    specks(g, o, COLORS.sand[1], [[11, 3], [3, 13]], 3, 1);
+    fill(g, COLORS.flotsam[1], o + 2, 6, 11, 2);
+    fill(g, COLORS.flotsam[1], o + 6, 10, 8, 2);
+    fill(g, COLORS.wood[0], o + 4, 2, 5, 2);
+  },
+  spar: (g, o) => {
+    base(g, o, COLORS.sand[0]);
+    fill(g, COLORS.spar[0], o + 1, 4, 14, 8);
+    fill(g, COLORS.spar[1], o + 1, 6, 14, 1);
+    fill(g, COLORS.spar[1], o + 1, 10, 14, 1);
+  },
   // the slice of a tree that draws over actors: crown only, so someone standing
   // below the treeline loses their head to the leaves and not their whole body
   treetop: (g, o) => {
@@ -183,6 +206,53 @@ function drawActor(g, p, dir, frame) {
   }
 }
 
+// Head-and-shoulders bust for the dialogue panel, front-on, built from the same four
+// palette colours as the walking sprite so a face and its body always match.
+function drawPortrait(g, p) {
+  const P = PORTRAIT_PX;
+  fill(g, COLORS.portraitBack, 0, 0, P, P);
+
+  fill(g, p.body, 1, 30, 38, 10); // shoulders, run out to the frame so the bust doesn't float
+  fill(g, p.body, 6, 28, 28, 2);
+  fill(g, p.trim, 1, 30, 38, 2); // collar
+  fill(g, p.head, 16, 25, 8, 6); // neck
+  fill(g, 0x000000, 16, 25, 8, 2, 0.25); // and the jaw's shadow across it
+
+  fill(g, p.head, 12, 7, 16, 20); // head
+  fill(g, 0x000000, 12, 7, 3, 20, 0.16); // light comes from the right
+  fill(g, 0x000000, 12, 24, 16, 3, 0.12); // under the cheekbones
+
+  fill(g, p.hair, 11, 4, 18, 6); // crown
+  fill(g, p.hair, 10, 5, 4, 13); // and a lock down each side
+  fill(g, p.hair, 26, 5, 4, 13);
+  fill(g, 0x000000, 12, 12, 16, 2, 0.22); // brow shadow
+
+  fill(g, 0x15120f, 16, 15, 3, 2); // eyes
+  fill(g, 0x15120f, 22, 15, 3, 2);
+  fill(g, 0x000000, 19, 17, 2, 3, 0.18); // nose
+  fill(g, 0x15120f, 18, 21, 4, 1); // mouth
+}
+
+// Face down where the tide left them. One frame; the scene does not need more.
+function drawProne(g, p) {
+  g.fillStyle(0x000000, 0.3);
+  g.fillEllipse(9, 19, 15, 4);
+  fill(g, p.trim, 1, 13, 5, 3); // legs
+  fill(g, p.body, 3, 10, 9, 7); // back
+  fill(g, p.trim, 6, 10, 2, 7);
+  fill(g, p.head, 4, 16, 4, 2); // an arm out at an angle
+  fill(g, p.head, 11, 9, 5, 6); // head, turned away
+  fill(g, p.hair, 12, 8, 4, 4);
+}
+
+export function proneKey(palette) {
+  return `prone_${palette}`;
+}
+
+export function portraitKey(palette) {
+  return `portrait_${palette}`;
+}
+
 export function actorFrame(palette, dir, frame) {
   return `${palette}_${dir}_${frame}`;
 }
@@ -200,6 +270,16 @@ export function buildTextures(scene) {
   g.destroy();
 
   for (const name of Object.keys(PALETTES)) {
+    const pg = scene.make.graphics({ x: 0, y: 0 }, false);
+    drawPortrait(pg, PALETTES[name]);
+    pg.generateTexture(portraitKey(name), PORTRAIT_PX, PORTRAIT_PX);
+    pg.destroy();
+
+    const lg = scene.make.graphics({ x: 0, y: 0 }, false);
+    drawProne(lg, PALETTES[name]);
+    lg.generateTexture(proneKey(name), AW, AH);
+    lg.destroy();
+
     for (const dir of DIRS) {
       for (const frame of [0, 1]) {
         const a = scene.make.graphics({ x: 0, y: 0 }, false);

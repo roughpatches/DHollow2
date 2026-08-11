@@ -13,11 +13,49 @@ export const TUNING = {
   interactReach: 12,
   interactRange: 20,
 
+  // A run is a line of nodes with a fork every so often. Node counts are [least, most]
+  // and are rolled when the quest is accepted.
+  questNodes: { short: [4, 8], medium: [8, 12], long: [12, 16] },
+  questForkEvery: 3, // a fork before every nth node; 0 turns forks off
+  questBiasWeight: 10, // taking a branch multiplies that encounter's weight by this
+  questBonusFactor: 2, // finishing pays this many times over what the run itself paid
+  questBonusXp: { short: 150, medium: 350, long: 700 }, // and this on top, flat
+  questNightHurt: 1.25, // a node at night costs this much more HP
+  questNightXp: 1.3, // and pays this much more for it
+
+  questPipSize: 14,
+  questPipGap: 8,
+  questPad: 26,
+  questTitleSize: 22,
+  questBodySize: 16,
+  questHintSize: 13,
+  questRowHeight: 26,
+
+  // Recruiting. A bond is counted in points; a band is bondPerBand of them, and the
+  // bands are named below. Someone comes along if their band is at or above what the
+  // job asks of them.
+  bondPerBand: 3,
+  bondNames: ['Stranger', 'Acquainted', 'Trusted', 'Sworn'],
+  bondPerRun: 1, // points added to everyone who walked a run to the end
+  recruitBase: 1, // the band an ordinary job asks for
+  recruitDraw: 1, // each trait drawn to the work asks one band less
+  recruitFear: 2, // each fear or scruple the work touches asks two bands more
+
+  traitsAtLevelOne: 3, // how many traits a character picks at level one
+  maxLevel: 10,
+  hpPerLevel: 3, // added to a character's own HP for every level past the first
+  xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
+
   dialogueCharsPerSec: 45,
   dialogueBoxHeight: 128,
   dialogueBoxMargin: 16,
   dialogueFontSize: 20,
   dialogueNameSize: 18,
+
+  dialoguePortraitSize: 128, // the portrait panel's side in screen pixels; art scales to fit it
+  dialoguePortraitGap: 8, // space between portrait panel and dialogue box
+  dialoguePortraitRise: 10, // how far the portrait travels as it pops up
+  dialoguePortraitPopMs: 130,
 
   menuMargin: 26,
   menuPad: 20,
@@ -26,6 +64,7 @@ export const TUNING = {
   menuRowHeight: 26,
   menuRowsVisible: 13,
   menuTabSize: 16,
+  menuTabGap: 22, // space between tab names; shrink it when a new tab crowds the strip
   menuTitleSize: 22,
   menuRowSize: 15,
   menuBodySize: 15,
@@ -42,6 +81,9 @@ export const COLORS = {
   dialogueEdge: 0x6b5a3a,
   dialogueText: 0xd9d3c4,
   dialogueName: 0xc9a95f,
+  portraitFill: 0x14161b,
+  portraitEdge: 0x6b5a3a,
+  portraitBack: 0x1d1a16, // the wash behind a bust, so a dark palette still reads as a head
 
   menuFill: 0x101216,
   menuPanel: 0x171a20,
@@ -55,6 +97,8 @@ export const COLORS = {
   menuMapDoor: 0xc9a95f,
   menuMapFolk: 0x9c5a46,
   menuMapMark: 0x7f9fa8,
+  questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
+  questNightEdge: 0x3f4a63,
 
   grass: [0x2f3d2b, 0x263422],
   path: [0x4f4a43, 0x413d37],
@@ -76,11 +120,16 @@ export const COLORS = {
   crate: [0x574328, 0x3b2c1a],
   hearth: [0x33302c, 0xc4601f],
   rug: [0x5a2b2b, 0x8a4a3a],
+  bed: [0x4a3b3a, 0x7a6a58],
+  sand: [0x494235, 0x3c362b],
+  flotsam: [0x494235, 0x362a1e], // small wreckage the tide left, walkable
+  spar: [0x3d3124, 0x241c14], // a beam off a ship, big enough to walk around
 };
 
 // Actor placeholder palettes. Add an entry, reference its name from content/npcs.js.
 export const PALETTES = {
   player: { body: 0x39566b, head: 0xc7a184, hair: 0x2a2119, trim: 0x8ba4b5 },
+  hunter: { body: 0x3f4a33, head: 0xbb9670, hair: 0x35291b, trim: 0x7d8a63 },
   warden: { body: 0x3c4048, head: 0xb99175, hair: 0x1f1c19, trim: 0x8d8f96 },
   elder: { body: 0x4a4640, head: 0xc9b19a, hair: 0xb9b4ad, trim: 0x6e6a63 },
   sexton: { body: 0x2c3128, head: 0xa88a6d, hair: 0x2b2a24, trim: 0x5c6153 },

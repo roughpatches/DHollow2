@@ -6,20 +6,36 @@ import { BESTIARY, QUESTS } from '../../content/codex.js';
 import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
+import { SCRIPT } from '../placeholders.js';
+import { partyRows, TRAIT_ROWS } from '../party.js';
+import { statusLines } from '../town.js';
+import { questRows, placeLines, canStart } from '../run.js';
+
+// Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
+// above the log of everything else the village has told you it wants.
+const questLog = () => [...questRows(), ...QUESTS];
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
 // array in content/. An entry carrying a `map` also gets that grid drawn above its
 // text — the one thing a list of paragraphs cannot say — and one carrying `options`
-// becomes a setting the player cycles with Enter.
+// becomes a setting the player cycles with Enter. Script is the one derived tab: it is
+// scanned out of the others rather than written, and lists every line still unwritten.
+// A tab's rows are an array, or a function returning one when the rows change while
+// the game runs — Party's level and HP move, so it is rebuilt on every draw.
 const TABS = [
   ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
+  ['Party', partyRows],
+  ['Traits', TRAIT_ROWS],
   ['Companions', COMPANIONS],
   ['Inventory', INVENTORY],
   ['Bestiary', BESTIARY],
-  ['Quest Log', QUESTS],
+  // one word each: at eleven tabs the spacing is tighter than a space inside a name,
+  // and 'Quest Log' read as two tabs
+  ['Quests', questLog],
   ['Map', PLACES],
+  ['Script', SCRIPT],
   ['Settings', SETTINGS],
 ];
 
@@ -76,7 +92,15 @@ export default class Menu extends Phaser.Scene {
   // Enter rather than being nudged along an axis
   change() {
     const entry = this.rows()[this.row[this.tab]];
-    if (!entry || !entry.options) return;
+    if (!entry) return;
+    // somewhere you set out for, rather than something you cycle
+    if (entry.quest) {
+      if (!canStart(entry.quest)) return;
+      this.close();
+      this.game.events.emit('quest:start', entry.quest);
+      return;
+    }
+    if (!entry.options) return;
     cycleSetting(entry.id);
     applyToWorld(this.scene.get('World'));
     this.draw();
@@ -113,7 +137,8 @@ export default class Menu extends Phaser.Scene {
   }
 
   rows() {
-    return TABS[this.tab][1];
+    const r = TABS[this.tab][1];
+    return typeof r === 'function' ? r() : r;
   }
 
   draw() {
@@ -141,19 +166,28 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
   }
 
+  // Laid out twice: once to measure, once to place. The strip gives up its spacing
+  // before it gives up a tab name, so adding a tab crowds the row rather than
+  // pushing the last one off the end of the panel.
   tabStrip() {
     const y = this.box.y + 12;
+    const texts = TABS.map(([name], i) =>
+      this.text(0, y, name, TUNING.menuTabSize, i === this.tab ? COLORS.menuAccent : COLORS.menuDim));
+
+    const room = this.box.x + this.box.w - TUNING.menuPad - this.listX;
+    const used = texts.reduce((w, t) => w + t.width, 0);
+    const gap = Math.max(6, Math.min(TUNING.menuTabGap, (room - used) / Math.max(1, TABS.length - 1)));
+
     let x = this.listX;
-    TABS.forEach(([name], i) => {
-      const on = i === this.tab;
-      const t = this.text(x, y, name, TUNING.menuTabSize, on ? COLORS.menuAccent : COLORS.menuDim);
-      if (on) {
+    texts.forEach((t, i) => {
+      t.setX(x);
+      if (i === this.tab) {
         const g = this.add.graphics();
         g.fillStyle(COLORS.menuAccent, 1);
         g.fillRect(x, y + t.height + 3, t.width, 2);
         this.layer.add(g);
       }
-      x += t.width + 26;
+      x += t.width + gap;
     });
   }
 
@@ -233,9 +267,15 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
     y += 18;
 
+    // a building's state is read live rather than written into the entry, so repairing
+    // it in the world changes what this page says about it
+    let body = entry.body;
+    if (entry.building) body = [...statusLines(entry.building), ...entry.body];
+    if (entry.quest) body = [...placeLines(entry.quest), ...entry.body];
+
     // the prose is measured first and the map takes whatever vertical room is left over,
     // so a long entry shrinks its map rather than running off the bottom of the panel
-    const paras = entry.body.map((p) =>
+    const paras = body.map((p) =>
       this.text(this.detailX, 0, p, TUNING.menuBodySize, COLORS.menuText, this.detailW));
     const proseH = paras.reduce((h, t) => h + t.height + 14, 0);
 
@@ -337,7 +377,9 @@ export default class Menu extends Phaser.Scene {
   }
 
   hint() {
-    const change = this.rows().some((r) => r.options) ? '    [Enter] Change' : '';
+    const rows = this.rows();
+    let change = rows.some((r) => r.options) ? '    [Enter] Change' : '';
+    if (rows.some((r) => r.quest)) change = '    [Enter] Set out';
     this.text(
       this.listX,
       this.box.y + this.box.h - 26,

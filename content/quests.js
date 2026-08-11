@@ -1,0 +1,77 @@
+// Work Gregorious hands out. A quest is a size and a goal; the nodes between here and
+// the goal are drawn fresh from content/encounters.js every time it is accepted, so a
+// quest is never the same run twice.
+//   id    — how src/run.js refers to it.
+//   label — shown on the board and in the Quest Log.
+//   size  — short, medium, or long. The node count for each is in tuning.js.
+//   when  — day, night, or any. A job fixed to one time can only be walked at that
+//           time; 'any' lets the party choose when they set out.
+//   party — how many recruits must agree to come before it can be attempted.
+//   tags  — what the job involves. Matched against traits' `draws` to find who is keen
+//           and against characters' `fears` to find who will refuse. A night run is
+//           tagged 'dark' on top of these.
+//   giver — the NPC id who hands it out.
+//   needs — a story flag. Until it is set the job does not exist as far as the game is
+//           concerned. See src/story.js.
+//   ready — a second flag, for a job that is known about but not yet agreed to.
+//   sets  — a flag raised the first time it is walked to the end.
+//   must  — character ids who have to be on it. Somebody the job will not go without.
+//   at    — the Map tab entry it is set out from, instead of Gregorious's board.
+//   goal  — what the last node is, in one line.
+//   body  — what the job is, in the world's voice. Yours to write.
+// Add a quest by adding a block. Nothing reads this list by position.
+
+export const QUESTS = [
+  {
+    id: 'firstday',
+    label: 'First Day in Dreadhollow',
+    size: 'short',
+    when: 'day',
+    party: 1,
+    must: ['aldis'], // he knows the Greywood and nobody else in town is going anywhere
+    needs: 'firstday-offered', // Gregorious has to ask first
+    ready: 'aldis-agreed', // and Aldis has to say yes
+    sets: 'firstday-done',
+    at: 'greywood',
+    tags: ['forest', 'timber', 'wild', 'leavingtown'],
+    giver: 'gregorious',
+    goal: 'Bring back enough timber and provisions to put the Sea Hag right.',
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'fenedge',
+    needs: 'firstday-done',
+    label: 'The fen edge',
+    size: 'short',
+    when: 'any',
+    party: 2,
+    tags: ['fen', 'water', 'thedead', 'leavingtown'],
+    giver: 'gregorious',
+    goal: 'Walk the black water end to end and come back saying what is in it.',
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'coastroad',
+    needs: 'firstday-done',
+    label: 'Down the coast road',
+    size: 'medium',
+    when: 'day',
+    party: 3,
+    tags: ['coast', 'water', 'leavingtown'],
+    giver: 'gregorious',
+    goal: 'Reach the wreck the Sea Hag was named for and bring back what is still on it.',
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'northroad',
+    needs: 'firstday-done',
+    label: 'Past the treeline',
+    size: 'long',
+    when: 'night',
+    party: 3,
+    tags: ['road', 'forest', 'thenorthroad', 'thedead', 'leavingtown'],
+    giver: 'gregorious',
+    goal: 'Follow the north road to where the carters stopped, and find out why they stopped there.',
+    body: ['[Placeholder Text]'],
+  },
+];

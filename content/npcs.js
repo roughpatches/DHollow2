@@ -1,7 +1,59 @@
 // Everyone in the world and everything they say. Plain strings — rewrite any of it.
 // palette names come from PALETTES in tuning.js. x/y are tile coordinates on that map.
+// The palette also picks the portrait shown while they speak; add `portrait: 'name'` to
+// give someone a face from a different palette than the one they walk around in.
+// Anywhere a line isn't written yet, put [Placeholder Text] — the Script tab in the
+// menu lists every one of them, and an NPC with no `lines` at all gets one for free.
+// `until` / `after` name a scene from content/scenes.js: someone with `until` is gone
+// once it has played, someone with `after` is not there until it has. The same id can
+// appear on more than one map — it is the same person, standing somewhere else.
+// `says` replaces `lines` with a list of answers, each with its own `needs` / `not`;
+// the first one whose conditions hold is what they say, and its `sets` is raised.
 
 export const NPCS = [
+  {
+    // The hunter. He is the one who finds the player on the strand in the opening,
+    // so he stands where the scene needs him to start from.
+    id: 'aldis',
+    name: 'Aldis Rooke',
+    map: 'shore',
+    x: 31,
+    y: 8,
+    facing: 'left',
+    palette: 'hunter',
+    until: 'washedup', // he is only out there while the opening is unplayed
+    lines: ['[Placeholder Text]'],
+  },
+  {
+    // The same man, at home, from the morning after onward. `says` is a list of
+    // answers: the first whose conditions hold is the one he gives. See src/story.js.
+    id: 'aldis',
+    name: 'Aldis Rooke',
+    map: 'hut',
+    x: 5,
+    y: 4,
+    facing: 'left',
+    palette: 'hunter',
+    says: [
+      {
+        needs: 'firstday-offered',
+        not: 'aldis-agreed',
+        sets: 'aldis-agreed',
+        beat: 'Gregorious has asked. Aldis agrees to walk them into the Greywood for the timber.',
+        lines: ['[Placeholder Text]'],
+      },
+      {
+        needs: 'aldis-agreed',
+        not: 'firstday-done',
+        beat: 'Already agreed. Ready when they are — the Greywood is on the map.',
+        lines: ['[Placeholder Text]'],
+      },
+      {
+        beat: 'Anything else. Before Gregorious asks, and after the first day is done.',
+        lines: ['[Placeholder Text]'],
+      },
+    ],
+  },
   {
     id: 'warden',
     name: 'Warden Ilse Marrow',
@@ -68,21 +120,17 @@ export const NPCS = [
     ],
   },
   {
-    id: 'ysolde',
-    name: 'Ysolde Fen',
+    // `quests: true` makes someone the quest dispenser: what is open in the Quest Log
+    // is read out after their own lines. Only one person needs it.
+    id: 'gregorious',
+    name: 'Gregorious',
     map: 'tavern',
     x: 12,
     y: 5,
     facing: 'down',
     palette: 'barkeep',
-    lines: [
-      'Bell keeps the door open and the fire lit. That is the whole of what I promise.',
-      "Ale's thin, stew's honest, and the beds upstairs are dry three nights in four.",
-      "You'll want the room at the back. The front one looks over the graveyard and people don't sleep.",
-      'My husband hung the bell out front. Salvage, off a wreck up the coast.',
-      "Rings itself sometimes. He said it was the wind. He said that right up until he stopped saying anything.",
-      "Sit. Eat. Don't ask me about the bell again.",
-    ],
+    quests: true,
+    lines: ['[Placeholder Text]'],
   },
   {
     id: 'tally',
