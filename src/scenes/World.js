@@ -4,6 +4,7 @@ import { NPCS } from '../../content/npcs.js';
 import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
 import { findTarget, faceToward } from '../interact.js';
+import { applyToWorld } from '../settings.js';
 
 const TS = TUNING.tileSize;
 
@@ -63,10 +64,9 @@ export default class World extends Phaser.Scene {
     }
 
     const cam = this.cameras.main;
-    cam.setZoom(TUNING.zoom);
     cam.setBounds(0, 0, w * TS, h * TS);
     cam.setRoundPixels(true);
-    cam.startFollow(this.player, true, 0.2, 0.2);
+    applyToWorld(this);
 
     this.keys = this.input.keyboard.addKeys('up,down,left,right,w,a,s,d');
     // event-driven, not polled: a quick tap between two frames must not be lost
@@ -74,6 +74,7 @@ export default class World extends Phaser.Scene {
     this.input.keyboard.on('keydown-SPACE', this.tryTalk, this);
 
     if (!this.scene.isActive('Dialogue')) this.scene.launch('Dialogue');
+    if (!this.scene.isActive('Menu')) this.scene.launch('Menu');
 
     this.frozen = false;
     this.doorLocked = true; // cleared once the player steps off the tile they spawned on
@@ -82,8 +83,18 @@ export default class World extends Phaser.Scene {
       this.frozen = false;
       haltPlayer(this.player);
     };
+    const freeze = () => {
+      this.frozen = true;
+      haltPlayer(this.player);
+    };
     this.game.events.on('dialogue:end', unfreeze);
-    this.events.once('shutdown', () => this.game.events.off('dialogue:end', unfreeze));
+    this.game.events.on('menu:open', freeze);
+    this.game.events.on('menu:close', unfreeze);
+    this.events.once('shutdown', () => {
+      this.game.events.off('dialogue:end', unfreeze);
+      this.game.events.off('menu:open', freeze);
+      this.game.events.off('menu:close', unfreeze);
+    });
   }
 
   buildLayer(data, depth) {

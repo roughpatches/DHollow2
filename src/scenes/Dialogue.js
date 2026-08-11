@@ -1,4 +1,5 @@
-import { TUNING, COLORS } from '../../tuning.js';
+import { TUNING, COLORS, hex } from '../../tuning.js';
+import { setting } from '../settings.js';
 
 // Runs alongside World. A line array and a box that reads it — nothing else.
 export default class Dialogue extends Phaser.Scene {
@@ -59,6 +60,7 @@ export default class Dialogue extends Phaser.Scene {
     this.open_ = true;
     this.swallowKey = true; // the same keypress opened this; it must not also advance it
     for (const o of this.group) o.setVisible(true);
+    this.hint.setVisible(setting('prompt'));
     this.nameText.setText(name);
     this.bodyText.setText('');
   }
@@ -93,12 +95,9 @@ export default class Dialogue extends Phaser.Scene {
 
     const line = this.lines[this.index];
     if (this.chars < line.length) {
-      this.chars = Math.min(line.length, this.chars + (TUNING.dialogueCharsPerSec * delta) / 1000);
+      const rate = TUNING.dialogueCharsPerSec * setting('text');
+      this.chars = Math.min(line.length, this.chars + (rate * delta) / 1000);
       this.bodyText.setText(line.slice(0, Math.floor(this.chars)));
     }
   }
-}
-
-function hex(n) {
-  return `#${n.toString(16).padStart(6, '0')}`;
 }
