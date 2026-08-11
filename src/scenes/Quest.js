@@ -1,0 +1,280 @@
+import { TUNING, COLORS, hex } from '../../tuning.js';
+import * as run from '../run.js';
+
+// The crawl. Runs over World, which freezes behind it. A row of pips across the top is
+// the whole run at a glance; everything below is the node you are standing on.
+export default class Quest extends Phaser.Scene {
+  constructor() {
+    super('Quest');
+  }
+
+  create() {
+    const p = TUNING.questPad;
+    this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
+    this.left = this.box.x + TUNING.menuPad;
+    this.wide = this.box.w - TUNING.menuPad * 2;
+
+    this.layer = this.add.container().setDepth(29000).setVisible(false);
+    this.open_ = false;
+    this.row = 0;
+
+    this.input.keyboard.on('keydown', this.onKey, this);
+    this.game.events.on('quest:board', this.openBoard, this);
+  }
+
+  openBoard() {
+    if (this.open_) return;
+    this.mode = 'board';
+    this.row = 0;
+    this.open_ = true;
+    this.swallow = true; // the keypress that closed Gregorious must not also pick a job
+    this.layer.setVisible(true);
+    this.draw();
+    this.game.events.emit('quest:open');
+  }
+
+  close() {
+    this.open_ = false;
+    this.layer.setVisible(false);
+    run.clear();
+    this.game.events.emit('quest:close');
+  }
+
+  update() {
+    this.swallow = false;
+  }
+
+  onKey(ev) {
+    if (!this.open_ || this.swallow) return;
+    const k = ev.key.toLowerCase();
+
+    if (this.mode === 'board') {
+      const jobs = run.offered();
+      if (k === 'escape') this.close();
+      else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + jobs.length) % Math.max(1, jobs.length);
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % Math.max(1, jobs.length);
+      else if ((k === 'enter' || k === ' ') && jobs.length) {
+        run.start(jobs[this.row].id);
+        this.mode = 'run';
+      }
+      this.draw();
+      return;
+    }
+
+    const r = run.active();
+    if (r.state !== 'running') {
+      if (k === 'escape' || k === 'enter' || k === 'e' || k === ' ') this.close();
+      return;
+    }
+    if (r.phase === 'fork') {
+      if (k === 'arrowup' || k === 'w') this.row = 0;
+      else if (k === 'arrowdown' || k === 's') this.row = 1;
+      else if (k === 'arrowleft' || k === 'a') this.row = 0;
+      else if (k === 'arrowright' || k === 'd') this.row = 1;
+      else if (k === 'enter' || k === ' ' || k === 'e') run.choose(this.row);
+      else if (k === 'escape') run.abandon();
+    } else if (k === 'e' || k === ' ' || k === 'enter') {
+      run.step();
+      this.row = 0;
+    } else if (k === 'escape') {
+      run.abandon();
+    }
+    this.draw();
+  }
+
+  // --- drawing --------------------------------------------------------------
+
+  draw() {
+    this.layer.removeAll(true);
+    this.panel();
+    if (this.mode === 'board') this.board();
+    else this.crawl();
+  }
+
+  panel() {
+    const b = this.box;
+    const g = this.add.graphics();
+    g.fillStyle(COLORS.menuFill, 0.98);
+    g.fillRect(b.x, b.y, b.w, b.h);
+    g.lineStyle(2, COLORS.menuEdge, 1);
+    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+    this.layer.add(g);
+  }
+
+  board() {
+    const jobs = run.offered();
+    let y = this.box.y + TUNING.menuPad;
+    y += this.text(this.left, y, 'Gregorious has work', TUNING.questTitleSize, COLORS.menuAccent).height + 10;
+    this.rule(y);
+    y += 16;
+
+    if (!jobs.length) {
+      this.text(this.left, y, 'Nothing on the board. Come back when something has gone wrong.', TUNING.questBodySize, COLORS.menuDim, this.wide);
+      this.hint('[Esc] Leave');
+      return;
+    }
+
+    jobs.forEach((q, i) => {
+      const on = i === this.row;
+      const h = TUNING.questRowHeight;
+      if (on) {
+        const g = this.add.graphics();
+        g.fillStyle(COLORS.menuSelectFill, 1);
+        g.fillRect(this.left - 8, y - 3, this.wide + 8, h);
+        g.fillStyle(COLORS.menuAccent, 1);
+        g.fillRect(this.left - 8, y - 3, 2, h);
+        this.layer.add(g);
+      }
+      const size = run.sizeOf(q);
+      this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes`, TUNING.menuRowSize,
+        on ? COLORS.menuAccent : COLORS.menuRule).setOrigin(1, 0);
+      this.text(this.left + 4, y, q.label, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
+      y += h;
+    });
+
+    y += 14;
+    const q = jobs[this.row];
+    this.rule(y);
+    y += 14;
+    y += this.text(this.left, y, q.goal, TUNING.questBodySize, COLORS.menuText, this.wide).height + 12;
+    for (const para of q.body) {
+      y += this.text(this.left, y, para, TUNING.questBodySize, COLORS.menuDim, this.wide).height + 10;
+    }
+    this.hint('[Up/Down] Choose    [Enter] Accept    [Esc] Leave');
+  }
+
+  crawl() {
+    const r = run.active();
+    let y = this.box.y + TUNING.menuPad;
+
+    this.text(this.left + this.wide, y + 4, `${r.quest.size} · ${r.nodes.length} nodes`,
+      TUNING.menuRowSize, COLORS.menuDim).setOrigin(1, 0);
+    y += this.text(this.left, y, r.quest.label, TUNING.questTitleSize, COLORS.menuAccent).height + 12;
+
+    y = this.pips(r, y) + 14;
+    this.rule(y);
+    y += 16;
+
+    if (r.state === 'running' && r.phase === 'fork') y = this.fork(r, y);
+    else if (r.state === 'running') y = this.node(r, y);
+    else y = this.ending(r, y);
+
+    this.text(this.left, this.box.y + this.box.h - 52, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
+
+    if (r.state !== 'running') this.hint('[Enter] Back to town');
+    else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
+    else this.hint('[E] Press on    [Esc] Turn back');
+  }
+
+  // the run at a glance: behind you filled, ahead of you hollow, the goal ringed
+  pips(r, y) {
+    const s = TUNING.questPipSize;
+    const gap = TUNING.questPipGap;
+    const g = this.add.graphics();
+    this.layer.add(g);
+    r.nodes.forEach((n, i) => {
+      const x = this.left + i * (s + gap);
+      const here = i === r.at;
+      if (i < r.at || (here && r.phase === 'node')) {
+        g.fillStyle(here ? COLORS.menuAccent : COLORS.menuMapFolk, 1);
+        g.fillRect(x, y, s, s);
+      } else {
+        g.lineStyle(1, here ? COLORS.menuAccent : COLORS.menuRule, 1);
+        g.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
+      }
+      if (n.goal) {
+        g.lineStyle(1, COLORS.menuMapMark, 1);
+        g.strokeRect(x - 2.5, y - 2.5, s + 4, s + 4);
+      }
+      if (n.fork) {
+        g.fillStyle(COLORS.menuMapMark, 1);
+        g.fillRect(x - gap + 2, y + s / 2 - 1, 3, 3);
+      }
+    });
+    return y + s;
+  }
+
+  node(r, y) {
+    const n = r.nodes[r.at];
+    const e = run.kindOf(n.kind);
+
+    y += this.text(this.left, y, `${r.at + 1}. ${e.name}${n.goal ? ' — the goal' : ''}`,
+      TUNING.questBodySize + 4, COLORS.menuText).height + 6;
+    if (e.activity) {
+      y += this.text(this.left, y, `${e.activity} — waiting on that engine. For now the party works it out and moves on.`,
+        TUNING.questHintSize, COLORS.menuDim, this.wide).height + 10;
+    }
+    for (const para of e.body) {
+      y += this.text(this.left, y, para, TUNING.questBodySize, COLORS.menuDim, this.wide).height + 10;
+    }
+
+    y += 6;
+    y += this.text(this.left, y, `Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`,
+      TUNING.questBodySize, COLORS.menuAccent).height + 6;
+    if (n.hurt > 0) {
+      y += this.text(this.left, y, `${n.hurtWho} takes ${n.hurt}.`, TUNING.questBodySize, COLORS.menuMapFolk).height + 6;
+    }
+    return y;
+  }
+
+  fork(r, y) {
+    const n = r.nodes[r.at];
+    y += this.text(this.left, y, 'The way splits.', TUNING.questBodySize + 4, COLORS.menuText).height + 12;
+
+    n.branches.forEach((br, i) => {
+      const on = i === this.row;
+      const label = `${on ? '>' : ' '} ${br.side}`;
+      y += this.text(this.left, y, label, TUNING.questBodySize, on ? COLORS.menuAccent : COLORS.menuDim).height + 4;
+      const said = br.read
+        ? `${br.read.who}: ${br.read.line}`
+        : 'Nobody in the party can tell you anything about this one.';
+      y += this.text(this.left + 24, y, said, TUNING.questBodySize, on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 14;
+    });
+    return y;
+  }
+
+  ending(r, y) {
+    const won = r.state === 'done';
+    const head = { done: 'Done.', failed: 'The party is down.', abandoned: 'Turned back.' }[r.state];
+    y += this.text(this.left, y, head, TUNING.questTitleSize, won ? COLORS.menuAccent : COLORS.menuMapFolk).height + 12;
+
+    if (won) y += this.text(this.left, y, r.quest.goal, TUNING.questBodySize, COLORS.menuText, this.wide).height + 12;
+
+    y += this.text(this.left, y, `Carried out of it: ${run.listOf(r.spoils)}.    ${r.xp} xp each.`,
+      TUNING.questBodySize, COLORS.menuText, this.wide).height + 8;
+
+    if (won) {
+      y += this.text(this.left, y, `Finishing pays again, ${TUNING.questBonusFactor} times over: ${run.listOf(r.bonus.spoils)}, and ${r.bonus.xp} xp each.`,
+        TUNING.questBodySize, COLORS.menuAccent, this.wide).height + 8;
+    } else {
+      y += this.text(this.left, y, 'The bonus for finishing is lost. What was carried out is kept.',
+        TUNING.questBodySize, COLORS.menuDim, this.wide).height + 8;
+    }
+    return y;
+  }
+
+  // --- bits ------------------------------------------------------------------
+
+  rule(y) {
+    const g = this.add.graphics();
+    g.lineStyle(1, COLORS.menuRule, 1);
+    g.lineBetween(this.left, y, this.left + this.wide, y);
+    this.layer.add(g);
+  }
+
+  hint(str) {
+    this.text(this.left, this.box.y + this.box.h - 26, str, TUNING.questHintSize, COLORS.menuDim);
+  }
+
+  text(x, y, str, size, color, wrap) {
+    const t = this.add.text(x, y, str, {
+      fontFamily: 'monospace',
+      fontSize: `${size}px`,
+      color: hex(color),
+      lineSpacing: 4,
+      ...(wrap ? { wordWrap: { width: wrap } } : {}),
+    });
+    this.layer.add(t);
+    return t;
+  }
+}

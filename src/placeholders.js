@@ -11,6 +11,8 @@ import { PARTY } from '../content/party.js';
 import { TRAITS } from '../content/traits.js';
 import { BUILDINGS } from '../content/buildings.js';
 import { MATERIALS } from '../content/materials.js';
+import { QUESTS as JOBS } from '../content/quests.js';
+import { ENCOUNTERS } from '../content/encounters.js';
 
 // One spelling, so one scan finds every one of them. Case is ignored when matching.
 export const PLACEHOLDER = '[Placeholder Text]';
@@ -42,6 +44,8 @@ const SOURCES = [
   ['Traits', TRAITS, (t) => t.name, proseSlots],
   ['Buildings', BUILDINGS, (b) => b.name, proseSlots],
   ['Materials', MATERIALS, (m) => m.name, proseSlots],
+  ['Jobs', JOBS, (q) => q.label, proseSlots],
+  ['Encounters', ENCOUNTERS, (e) => e.name, proseSlots],
   ['Equipment', EQUIPMENT, (e) => e.label, entrySlots],
   ['Character', CHARACTER, (e) => e.label, entrySlots],
   ['Companions', COMPANIONS, (e) => e.label, entrySlots],

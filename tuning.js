@@ -13,6 +13,22 @@ export const TUNING = {
   interactReach: 12,
   interactRange: 20,
 
+  // A run is a line of nodes with a fork every so often. Node counts are [least, most]
+  // and are rolled when the quest is accepted.
+  questNodes: { short: [4, 8], medium: [8, 12], long: [12, 16] },
+  questForkEvery: 3, // a fork before every nth node; 0 turns forks off
+  questBiasWeight: 10, // taking a branch multiplies that encounter's weight by this
+  questBonusFactor: 2, // finishing pays this many times over what the run itself paid
+  questBonusXp: { short: 150, medium: 350, long: 700 }, // and this on top, flat
+
+  questPipSize: 14,
+  questPipGap: 8,
+  questPad: 26,
+  questTitleSize: 22,
+  questBodySize: 16,
+  questHintSize: 13,
+  questRowHeight: 26,
+
   traitsAtLevelOne: 3, // how many traits a character picks at level one
   maxLevel: 10,
   hpPerLevel: 3, // added to a character's own HP for every level past the first

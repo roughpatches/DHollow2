@@ -5,7 +5,6 @@ import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
-import { questLines } from '../quests.js';
 import {
   siteAt, isOpen, patchesFor, patchOf, levelOf, contribute, contributeLines, statusLines, remaining,
 } from '../town.js';
@@ -84,6 +83,7 @@ export default class World extends Phaser.Scene {
 
     if (!this.scene.isActive('Dialogue')) this.scene.launch('Dialogue');
     if (!this.scene.isActive('Menu')) this.scene.launch('Menu');
+    if (!this.scene.isActive('Quest')) this.scene.launch('Quest');
 
     this.frozen = false;
     this.doorLocked = true; // cleared once the player steps off the tile they spawned on
@@ -96,13 +96,23 @@ export default class World extends Phaser.Scene {
       this.frozen = true;
       haltPlayer(this.player);
     };
-    this.game.events.on('dialogue:end', unfreeze);
+    const afterDialogue = () => {
+      unfreeze();
+      if (!this.pendingBoard) return;
+      this.pendingBoard = false;
+      this.game.events.emit('quest:board');
+    };
+    this.game.events.on('dialogue:end', afterDialogue);
     this.game.events.on('menu:open', freeze);
     this.game.events.on('menu:close', unfreeze);
+    this.game.events.on('quest:open', freeze);
+    this.game.events.on('quest:close', unfreeze);
     this.events.once('shutdown', () => {
-      this.game.events.off('dialogue:end', unfreeze);
+      this.game.events.off('dialogue:end', afterDialogue);
       this.game.events.off('menu:open', freeze);
       this.game.events.off('menu:close', unfreeze);
+      this.game.events.off('quest:open', freeze);
+      this.game.events.off('quest:close', unfreeze);
     });
   }
 
@@ -130,11 +140,10 @@ export default class World extends Phaser.Scene {
     if (npc) {
       npc.facing = faceToward(npc, this.player);
       npc.setTexture(actorFrame(npc.palette, npc.facing, 0));
-      this.say(npc.def.name, [
-        ...linesOf(npc.def),
-        ...(npc.def.quests ? questLines() : []),
-        // a face of their own if the def names one, otherwise the palette they walk in
-      ], npc.def.portrait || npc.def.palette);
+      // the quest giver's board opens as soon as he has finished speaking
+      this.pendingBoard = !!npc.def.quests;
+      // a face of their own if the def names one, otherwise the palette they walk in
+      this.say(npc.def.name, linesOf(npc.def), npc.def.portrait || npc.def.palette);
       return;
     }
     const site = this.siteAhead();

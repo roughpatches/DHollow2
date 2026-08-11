@@ -9,6 +9,11 @@ import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
 import { partyRows, TRAIT_ROWS } from '../party.js';
 import { statusLines } from '../town.js';
+import { questRows } from '../run.js';
+
+// Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
+// above the log of everything else the village has told you it wants.
+const questLog = () => [...questRows(), ...QUESTS];
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
@@ -28,7 +33,7 @@ const TABS = [
   ['Bestiary', BESTIARY],
   // one word each: at eleven tabs the spacing is tighter than a space inside a name,
   // and 'Quest Log' read as two tabs
-  ['Quests', QUESTS],
+  ['Quests', questLog],
   ['Map', PLACES],
   ['Script', SCRIPT],
   ['Settings', SETTINGS],
