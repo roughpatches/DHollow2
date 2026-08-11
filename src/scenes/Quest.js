@@ -22,6 +22,7 @@ export default class Quest extends Phaser.Scene {
 
     this.input.keyboard.on('keydown', this.onKey, this);
     this.game.events.on('quest:board', this.openBoard, this);
+    this.game.events.on('quest:start', this.openJob, this);
   }
 
   openBoard() {
@@ -31,6 +32,22 @@ export default class Quest extends Phaser.Scene {
     this.open_ = true;
     this.swallow = true; // the keypress that closed Gregorious must not also pick a job
     this.layer.setVisible(true);
+    this.draw();
+    this.game.events.emit('quest:open');
+  }
+
+  // set out for somewhere named on the map: no board, straight to the hour or the crew
+  openJob(id) {
+    if (this.open_) return;
+    this.job = run.questOf(id);
+    if (!this.job) return;
+    this.times = run.timesFor(this.job);
+    this.row = 0;
+    this.open_ = true;
+    this.swallow = true;
+    this.layer.setVisible(true);
+    if (this.times.length === 1) this.toRecruiting(this.times[0]);
+    else this.mode = 'when';
     this.draw();
     this.game.events.emit('quest:open');
   }
@@ -79,7 +96,11 @@ export default class Quest extends Phaser.Scene {
 
     if (this.mode === 'party') {
       const all = roster();
-      if (k === 'escape') { this.mode = this.times.length === 1 ? 'board' : 'when'; this.row = 0; }
+      if (k === 'escape') {
+        if (this.times.length > 1) { this.mode = 'when'; this.row = 0; }
+        else if (this.job.at) this.close();
+        else { this.mode = 'board'; this.row = 0; }
+      }
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + all.length) % all.length;
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % all.length;
       else if (k === ' ') this.toggleWalker(all[this.row].id);
@@ -114,12 +135,15 @@ export default class Quest extends Phaser.Scene {
   // everyone who will come is taken by default; the player pares that back
   toRecruiting(when) {
     this.when_ = when;
-    this.taking = recruit.willing(this.job, when).slice(0, this.job.party);
+    const must = (this.job.must || []).filter((id) => recruit.asked(id, this.job, when).willing);
+    const rest = recruit.willing(this.job, when).filter((id) => !must.includes(id));
+    this.taking = [...must, ...rest].slice(0, this.job.party);
     this.mode = 'party';
     this.row = 0;
   }
 
   toggleWalker(id) {
+    if ((this.job.must || []).includes(id)) return; // the job does not go without them
     if (this.taking.includes(id)) this.taking = this.taking.filter((x) => x !== id);
     else if (recruit.asked(id, this.job, this.when_).willing) this.taking.push(id);
   }
@@ -242,11 +266,15 @@ export default class Quest extends Phaser.Scene {
       const a = recruit.asked(c.id, this.job, this.when_);
       const on = i === this.row;
       const taken = this.taking.includes(c.id);
-      const mark = taken ? '[x]' : a.willing ? '[ ]' : ' × ';
+      const required = (this.job.must || []).includes(c.id);
+      const mark = required ? '[!]' : taken ? '[x]' : a.willing ? '[ ]' : ' × ';
       const colour = taken ? COLORS.menuAccent : a.willing ? COLORS.menuText : COLORS.menuRule;
       y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
         TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;
-      y += this.text(this.left + 40, y, recruit.why(c.id, this.job, this.when_),
+      const why = required
+        ? `This job does not go without them. ${recruit.why(c.id, this.job, this.when_)}`
+        : recruit.why(c.id, this.job, this.when_);
+      y += this.text(this.left + 40, y, why,
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule, this.wide - 40).height + 10;
     });
 

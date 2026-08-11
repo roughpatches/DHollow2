@@ -7,6 +7,8 @@
 // `until` / `after` name a scene from content/scenes.js: someone with `until` is gone
 // once it has played, someone with `after` is not there until it has. The same id can
 // appear on more than one map — it is the same person, standing somewhere else.
+// `says` replaces `lines` with a list of answers, each with its own `needs` / `not`;
+// the first one whose conditions hold is what they say, and its `sets` is raised.
 
 export const NPCS = [
   {
@@ -23,7 +25,8 @@ export const NPCS = [
     lines: ['[Placeholder Text]'],
   },
   {
-    // the same man, at home, from the morning after onward
+    // The same man, at home, from the morning after onward. `says` is a list of
+    // answers: the first whose conditions hold is the one he gives. See src/story.js.
     id: 'aldis',
     name: 'Aldis Rooke',
     map: 'hut',
@@ -31,7 +34,25 @@ export const NPCS = [
     y: 4,
     facing: 'left',
     palette: 'hunter',
-    lines: ['[Placeholder Text]'],
+    says: [
+      {
+        needs: 'firstday-offered',
+        not: 'aldis-agreed',
+        sets: 'aldis-agreed',
+        beat: 'Gregorious has asked. Aldis agrees to walk them into the Greywood for the timber.',
+        lines: ['[Placeholder Text]'],
+      },
+      {
+        needs: 'aldis-agreed',
+        not: 'firstday-done',
+        beat: 'Already agreed. Ready when they are — the Greywood is on the map.',
+        lines: ['[Placeholder Text]'],
+      },
+      {
+        beat: 'Anything else. Before Gregorious asks, and after the first day is done.',
+        lines: ['[Placeholder Text]'],
+      },
+    ],
   },
   {
     id: 'warden',

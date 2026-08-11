@@ -5,20 +5,17 @@
 import { TUNING } from '../tuning.js';
 import { NPCS } from '../content/npcs.js';
 import { actorFrame, walkAnim, proneKey } from './textures.js';
+import * as story from './story.js';
 
 const TS = TUNING.tileSize;
-const played = new Set();
 
+// a scene that has played is just another flag
 export function hasPlayed(id) {
-  return played.has(id);
+  return story.has(`scene:${id}`);
 }
 
 export function markPlayed(id) {
-  played.add(id);
-}
-
-export function reset() {
-  played.clear();
+  story.set(`scene:${id}`);
 }
 
 // Runs one scene against a live World. The scene owns the player and the camera for
@@ -42,7 +39,9 @@ export function play(scene, script, id) {
   next();
 }
 
+// 'player' is an actor too, so a scene can walk them across a room
 function actorFor(scene, npcId) {
+  if (npcId === 'player') return scene.player;
   return scene.npcs.find((n) => n.def.id === npcId);
 }
 
@@ -62,6 +61,9 @@ function run(scene, step, done) {
     say(scene, step, done);
   } else if (step.prone !== undefined) {
     prone(scene, step.prone);
+    done();
+  } else if (step.flag) {
+    story.set(step.flag);
     done();
   } else if (step.fade) {
     fade(scene, step, done);

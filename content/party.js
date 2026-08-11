@@ -8,6 +8,7 @@
 //              complains to the console if the count is wrong.
 //   fears    — ids from content/fears.js. A quest carrying one of these as a tag needs
 //              a deeper bond before they will walk out on it.
+//   needs    — a story flag they are not recruitable before. See src/story.js.
 //   bond     — how well they know you at the start, in points. A band is bondPerBand
 //              points, so 0 is a stranger and 9 is sworn. See tuning.js.
 //   body     — who they are. Yours to write.
@@ -32,6 +33,7 @@ export const PARTY = [
   },
   {
     id: 'tally',
+    needs: 'firstday-done', // nobody else in town is going anywhere yet
     name: 'Tally Ruin',
     palette: 'drunk',
     hp: 12,
@@ -42,6 +44,7 @@ export const PARTY = [
   },
   {
     id: 'grast',
+    needs: 'firstday-done', // nobody else in town is going anywhere yet
     name: 'Sexton Grast',
     palette: 'sexton',
     hp: 13,
@@ -52,6 +55,7 @@ export const PARTY = [
   },
   {
     id: 'vesna',
+    needs: 'firstday-done', // nobody else in town is going anywhere yet
     name: 'Vesna Quill',
     palette: 'herbalist',
     hp: 10,
@@ -62,6 +66,7 @@ export const PARTY = [
   },
   {
     id: 'krael',
+    needs: 'firstday-done', // nobody else in town is going anywhere yet
     name: 'Bertran Krael',
     palette: 'smith',
     hp: 15,

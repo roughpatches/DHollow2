@@ -11,13 +11,36 @@
 //           and against characters' `fears` to find who will refuse. A night run is
 //           tagged 'dark' on top of these.
 //   giver — the NPC id who hands it out.
+//   needs — a story flag. Until it is set the job does not exist as far as the game is
+//           concerned. See src/story.js.
+//   ready — a second flag, for a job that is known about but not yet agreed to.
+//   sets  — a flag raised the first time it is walked to the end.
+//   must  — character ids who have to be on it. Somebody the job will not go without.
+//   at    — the Map tab entry it is set out from, instead of Gregorious's board.
 //   goal  — what the last node is, in one line.
 //   body  — what the job is, in the world's voice. Yours to write.
 // Add a quest by adding a block. Nothing reads this list by position.
 
 export const QUESTS = [
   {
+    id: 'firstday',
+    label: 'First Day in Dreadhollow',
+    size: 'short',
+    when: 'day',
+    party: 1,
+    must: ['aldis'], // he knows the Greywood and nobody else in town is going anywhere
+    needs: 'firstday-offered', // Gregorious has to ask first
+    ready: 'aldis-agreed', // and Aldis has to say yes
+    sets: 'firstday-done',
+    at: 'greywood',
+    tags: ['forest', 'timber', 'wild', 'leavingtown'],
+    giver: 'gregorious',
+    goal: 'Bring back enough timber and provisions to put the Sea Hag right.',
+    body: ['[Placeholder Text]'],
+  },
+  {
     id: 'fenedge',
+    needs: 'firstday-done',
     label: 'The fen edge',
     size: 'short',
     when: 'any',
@@ -29,6 +52,7 @@ export const QUESTS = [
   },
   {
     id: 'coastroad',
+    needs: 'firstday-done',
     label: 'Down the coast road',
     size: 'medium',
     when: 'day',
@@ -40,6 +64,7 @@ export const QUESTS = [
   },
   {
     id: 'northroad',
+    needs: 'firstday-done',
     label: 'Past the treeline',
     size: 'long',
     when: 'night',

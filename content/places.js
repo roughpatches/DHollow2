@@ -1,6 +1,8 @@
 // The Map tab. Same label/note/body as the other tabs, plus two fields it alone reads:
 //   map      — which grid in content/maps.js to draw. Required; an entry without it is a list row.
 //   at       — optional [x, y] tile to ring on that map, for a landmark inside a larger place.
+//   quest    — optional id from content/quests.js. The entry becomes somewhere you set
+//              out for: its state is read live, and Enter starts the job when it can be.
 //   building — optional id from content/buildings.js. The building's repair state and what
 //              it still wants are shown above the prose, read live from the town.
 // Doors, everyone standing on the map, and the player's own position are drawn from the
@@ -26,6 +28,14 @@ export const PLACES = [
     label: 'Aldis Rooke\'s house',
     note: 'Indoors',
     map: 'hut',
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // No walkable map: the Greywood is where a run happens, not somewhere you stroll.
+    // `quest` makes the entry somewhere you set out for — Enter starts the job.
+    label: 'The Greywood',
+    note: 'Wilds',
+    quest: 'firstday',
     body: ['[Placeholder Text]'],
   },
   {

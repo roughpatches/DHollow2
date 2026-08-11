@@ -9,6 +9,8 @@
 //   prone   — { prone: true } lays the player out; false stands them up.
 //   fade    — { fade: 'out' | 'in', ms }.
 //   go      — { go: mapKey, spawn: [x, y] } ends the scene and loads that map.
+//   flag    — { flag: 'name' } raises a story flag. See src/story.js.
+// 'player' works anywhere an npcId does, for walk and face.
 // `beat` on a say or narrate is a note to whoever writes the lines. It is never shown.
 // The first scene's map is where the game boots. Add a scene by adding a block.
 
@@ -77,6 +79,37 @@ export const SCENES = [
       {
         say: 'aldis',
         beat: 'Sends them to the Sea Hag. Gregorious has work — for the town, or just for the coin to get wherever they were going.',
+        lines: ['[Placeholder Text]'],
+      },
+    ],
+  },
+  {
+    id: 'seahag',
+    map: 'tavern',
+    steps: [
+      { wait: 400 },
+      { walk: 'player', to: [12, 7] },
+      { face: 'player', dir: 'up' },
+      { wait: 500 },
+      {
+        say: 'gregorious',
+        beat: 'Takes them in. Word travels; he knows who Aldis pulled off the strand.',
+        lines: ['[Placeholder Text]'],
+      },
+      {
+        say: 'gregorious',
+        beat: 'The history. How Dreadhollow got to be in this state, and how long it took.',
+        lines: ['[Placeholder Text]'],
+      },
+      {
+        say: 'gregorious',
+        beat: 'What he wants: provisions and timber enough to put the Sea Hag right. Work, and pay for it.',
+        lines: ['[Placeholder Text]'],
+      },
+      { flag: 'firstday-offered' },
+      {
+        say: 'gregorious',
+        beat: 'Take Aldis. He knows the Greywood and they do not. Go and ask him.',
         lines: ['[Placeholder Text]'],
       },
     ],

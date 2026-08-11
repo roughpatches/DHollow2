@@ -7,6 +7,7 @@ import { report } from './placeholders.js';
 import * as party from './party.js';
 import * as town from './town.js';
 import * as run from './run.js';
+import * as story from './story.js';
 
 // so a character can be levelled, hurt, or healed from the browser console while
 // there is no content that does it yet: party.award('aldis', 40)
@@ -15,6 +16,8 @@ window.party = party;
 window.town = town;
 // and so a run can be started without walking to the Sea Hag: run.start('fenedge')
 window.run = run;
+// and so the story can be inspected or pushed along: story.set('firstday-done')
+window.story = story;
 
 // unwritten text is announced on every boot, so it can't quietly accumulate
 console.info(report());

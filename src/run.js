@@ -11,6 +11,8 @@ import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import { roster, charOf, stateOf, damage, heal, award, raiseBond, traitsOf, hpMax } from './party.js';
 import { give, nameOf } from './town.js';
+import * as story from './story.js';
+import { asked } from './recruit.js';
 
 const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
 const READABLE = ENCOUNTERS.filter((e) => e.read);
@@ -41,9 +43,40 @@ export function timesWalked(id) {
   return walked.get(id) || 0;
 }
 
-// everything on the board. Work does not run out.
+// Everything known about and not set out for from somewhere else. Work does not run
+// out, but it does have to be offered first.
 export function offered() {
-  return QUESTS;
+  return QUESTS.filter((q) => story.ok(q) && !q.at);
+}
+
+// every job the story has unlocked, wherever it is set out from
+export function known() {
+  return QUESTS.filter((q) => story.ok(q));
+}
+
+// Whether a job can be walked right now, and what is in the way if not. The reasons
+// are the readout on the Map tab, so they say what to go and do about it.
+export function blockers(id, when) {
+  const q = questOf(id);
+  const out = [];
+  if (!q) return ['No such job.'];
+  if (!story.ok(q)) return ['Nobody has offered this.'];
+  if (q.ready && !story.has(q.ready)) out.push('Not agreed to yet.');
+
+  const at = when || timesFor(q)[0];
+  for (const cid of q.must || []) {
+    const c = charOf(cid);
+    if (!c) out.push('Somebody this job needs is not here.');
+    else if (!roster().includes(c)) out.push(`${c.name} is not available.`);
+    else if (!asked(cid, q, at).willing) out.push(`${c.name} will not come on this.`);
+  }
+  const crew = roster().filter((c) => asked(c.id, q, at).willing).length;
+  if (crew < q.party) out.push(`Needs ${q.party}; ${crew} will come.`);
+  return out;
+}
+
+export function canStart(id, when) {
+  return blockers(id, when).length === 0;
 }
 
 export function active() {
@@ -217,6 +250,7 @@ function partyDown() {
 function finish() {
   run.state = 'done';
   walked.set(run.quest.id, timesWalked(run.quest.id) + 1);
+  story.set(run.quest.sets);
 
   run.bonus = { spoils: {}, xp: TUNING.questBonusXp[run.quest.size] };
   for (const [m, n] of Object.entries(run.spoils)) {
@@ -239,16 +273,28 @@ export function listOf(spoils) {
   return parts.length ? parts.join(', ') : 'nothing';
 }
 
+// what the Map tab says about somewhere a job is set out from
+export function placeLines(id) {
+  const q = questOf(id);
+  if (!q) return ['No such job.'];
+  if (!story.ok(q)) return ['Nothing here yet.'];
+  const stop = blockers(id);
+  const head = `${q.label} — ${q.size} work, ${q.when === 'any' ? 'day or night' : q.when + ' only'}.`;
+  if (stop.length) return [head, q.goal, ...stop];
+  return [head, q.goal, 'Ready. [Enter] to set out.'];
+}
+
 export function partyLine(who = walkers()) {
   return who.map((c) => `${c.name} ${stateOf(c.id).hp}/${hpMax(c.id)}`).join('    ');
 }
 
 // the Quest Log, with whatever the run state has to say about each job on top of it
 export function questRows() {
-  return QUESTS.map((q) => {
+  return known().map((q) => {
     const live = run && run.quest.id === q.id ? run : null;
     const n = timesWalked(q.id);
     let note = n ? `Walked ${n}×` : 'Open';
+    if (!n && q.ready && !story.has(q.ready)) note = 'Not agreed';
     if (live && live.state === 'running') note = `Node ${live.at + 1}/${live.nodes.length}`;
     else if (live && live.state === 'failed') note = 'Lost';
     else if (live && live.state === 'abandoned') note = 'Turned back';
@@ -257,6 +303,7 @@ export function questRows() {
       note,
       body: [
         `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it.`
+          + (q.must ? `  ${q.must.map((m) => charOf(m).name).join(' and ')} must be on it.` : '')
           + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`),
         q.goal,
         ...q.body,

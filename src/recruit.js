@@ -8,11 +8,11 @@
 
 import { TUNING } from '../tuning.js';
 import { FEARS } from '../content/fears.js';
-import { roster, charOf, traitsOf, bandOf, bandName } from './party.js';
+import { roster, everyone, charOf, traitsOf, bandOf, bandName } from './party.js';
 
 const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
-for (const c of roster()) {
+for (const c of everyone()) {
   const bad = (c.fears || []).filter((f) => !FEAR[f]);
   if (bad.length) console.warn(`${c.name}: no such fear — ${bad.join(', ')}`);
 }

@@ -6,6 +6,7 @@ import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
 import { TRAITS } from '../content/traits.js';
 import { FEARS } from '../content/fears.js';
+import * as story from './story.js';
 
 const TRAIT = Object.fromEntries(TRAITS.map((t) => [t.id, t]));
 const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
@@ -22,8 +23,14 @@ for (const c of PARTY) {
   }
 }
 
-export function roster() {
+// everyone who could ever be recruited, whether or not they are yet
+export function everyone() {
   return PARTY;
+}
+
+// and everyone who can be, right now
+export function roster() {
+  return PARTY.filter((c) => story.ok(c));
 }
 
 export function charOf(id) {
@@ -118,7 +125,7 @@ export function unlocksFor(id, activity) {
 // Rebuilt on every draw rather than held, because level and HP move while the game runs.
 
 export function partyRows() {
-  return PARTY.map((c) => {
+  return roster().map((c) => {
     const s = stateOf(c.id);
     const next = xpToNext(s.level);
     const traits = traitsOf(c.id);

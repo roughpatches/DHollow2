@@ -9,7 +9,7 @@ import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
 import { partyRows, TRAIT_ROWS } from '../party.js';
 import { statusLines } from '../town.js';
-import { questRows } from '../run.js';
+import { questRows, placeLines, canStart } from '../run.js';
 
 // Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
 // above the log of everything else the village has told you it wants.
@@ -92,7 +92,15 @@ export default class Menu extends Phaser.Scene {
   // Enter rather than being nudged along an axis
   change() {
     const entry = this.rows()[this.row[this.tab]];
-    if (!entry || !entry.options) return;
+    if (!entry) return;
+    // somewhere you set out for, rather than something you cycle
+    if (entry.quest) {
+      if (!canStart(entry.quest)) return;
+      this.close();
+      this.game.events.emit('quest:start', entry.quest);
+      return;
+    }
+    if (!entry.options) return;
     cycleSetting(entry.id);
     applyToWorld(this.scene.get('World'));
     this.draw();
@@ -261,7 +269,9 @@ export default class Menu extends Phaser.Scene {
 
     // a building's state is read live rather than written into the entry, so repairing
     // it in the world changes what this page says about it
-    const body = entry.building ? [...statusLines(entry.building), ...entry.body] : entry.body;
+    let body = entry.body;
+    if (entry.building) body = [...statusLines(entry.building), ...entry.body];
+    if (entry.quest) body = [...placeLines(entry.quest), ...entry.body];
 
     // the prose is measured first and the map takes whatever vertical room is left over,
     // so a long entry shrinks its map rather than running off the bottom of the panel
@@ -367,7 +377,9 @@ export default class Menu extends Phaser.Scene {
   }
 
   hint() {
-    const change = this.rows().some((r) => r.options) ? '    [Enter] Change' : '';
+    const rows = this.rows();
+    let change = rows.some((r) => r.options) ? '    [Enter] Change' : '';
+    if (rows.some((r) => r.quest)) change = '    [Enter] Set out';
     this.text(
       this.listX,
       this.box.y + this.box.h - 26,

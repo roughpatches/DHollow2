@@ -11,6 +11,7 @@ import {
 import { applyToWorld } from '../settings.js';
 import { SCENES, OPENING } from '../../content/scenes.js';
 import { play, hasPlayed } from '../script.js';
+import * as story from '../story.js';
 
 const TS = TUNING.tileSize;
 
@@ -157,8 +158,13 @@ export default class World extends Phaser.Scene {
       npc.setTexture(actorFrame(npc.palette, npc.facing, 0));
       // the quest giver's board opens as soon as he has finished speaking
       this.pendingBoard = !!npc.def.quests;
+      // somebody with `says` has more than one answer; the first that fits is the one
+      // they give, and giving it is what raises its flag
+      const answer = (npc.def.says || []).find((a) => story.ok(a));
+      if (answer) story.set(answer.sets);
+      const lines = answer ? answer.lines : linesOf(npc.def);
       // a face of their own if the def names one, otherwise the palette they walk in
-      this.say(npc.def.name, linesOf(npc.def), npc.def.portrait || npc.def.palette);
+      this.say(npc.def.name, lines, npc.def.portrait || npc.def.palette);
       return;
     }
     const site = this.siteAhead();
