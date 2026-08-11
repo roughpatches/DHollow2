@@ -30,6 +30,9 @@ export const TUNING = {
   menuRowSize: 15,
   menuBodySize: 15,
   menuHintSize: 13,
+
+  menuMapCell: 12, // a map tile's size on the Map tab; shrinks to fit a big map
+  menuMapHeight: 208,
 };
 
 // [base, detail] per tile. Retint the whole world from this table.
@@ -48,6 +51,10 @@ export const COLORS = {
   menuDim: 0x8b8578,
   menuAccent: 0xc9a95f,
   menuSelectFill: 0x2a2418,
+  menuMapYou: 0xe8e2d2,
+  menuMapDoor: 0xc9a95f,
+  menuMapFolk: 0x9c5a46,
+  menuMapMark: 0x7f9fa8,
 
   grass: [0x2f3d2b, 0x263422],
   path: [0x4f4a43, 0x413d37],

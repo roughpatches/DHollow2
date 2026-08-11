@@ -1,10 +1,14 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
+import { MAPS, LEGEND } from '../../content/maps.js';
+import { NPCS } from '../../content/npcs.js';
 import { CHARACTER, EQUIPMENT, INVENTORY, COMPANIONS } from '../../content/character.js';
 import { BESTIARY, QUESTS } from '../../content/codex.js';
+import { PLACES } from '../../content/places.js';
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
-// array in content/ — there is no per-tab drawing code to keep in step.
+// array in content/. An entry carrying a `map` also gets that grid drawn above its
+// text — the one thing a list of paragraphs cannot say.
 const TABS = [
   ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
@@ -12,6 +16,7 @@ const TABS = [
   ['Inventory', INVENTORY],
   ['Bestiary', BESTIARY],
   ['Quest Log', QUESTS],
+  ['Map', PLACES],
 ];
 
 const EMPTY = { label: '—', note: '', body: ['Nothing recorded yet.'] };
@@ -207,10 +212,82 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
     y += 18;
 
-    for (const para of entry.body) {
-      const t = this.text(this.detailX, y, para, TUNING.menuBodySize, COLORS.menuText, this.detailW);
+    // the prose is measured first and the map takes whatever vertical room is left over,
+    // so a long entry shrinks its map rather than running off the bottom of the panel
+    const paras = entry.body.map((p) =>
+      this.text(this.detailX, 0, p, TUNING.menuBodySize, COLORS.menuText, this.detailW));
+    const proseH = paras.reduce((h, t) => h + t.height + 14, 0);
+
+    if (entry.map) y = this.miniMap(entry, y, this.box.y + this.box.h - 44 - proseH - y) + 16;
+
+    for (const t of paras) {
+      t.setY(y);
       y += t.height + 14;
     }
+  }
+
+  // The map is the world's own grid at a smaller size, drawn in the same tile colours,
+  // so retinting tuning.js retints the map with it. Pins come from the live world rather
+  // than from content/places.js: move an NPC or a door and the map follows on its own.
+  miniMap(entry, y, room) {
+    const map = MAPS[entry.map];
+    const cols = map.rows[0].length;
+    const rows = map.rows.length;
+    const cell = Math.max(
+      2,
+      Math.min(
+        TUNING.menuMapCell,
+        Math.floor(this.detailW / cols),
+        Math.floor(TUNING.menuMapHeight / rows),
+        Math.floor((room - 22) / rows), // 22 leaves the key its line
+      ),
+    );
+    const x0 = this.detailX;
+
+    const g = this.add.graphics();
+    for (let ty = 0; ty < rows; ty++) {
+      for (let tx = 0; tx < cols; tx++) {
+        g.fillStyle(COLORS[LEGEND[map.rows[ty][tx]]][0], 1);
+        g.fillRect(x0 + tx * cell, y + ty * cell, cell, cell);
+      }
+    }
+    g.lineStyle(1, COLORS.menuRule, 1);
+    g.strokeRect(x0 - 1, y - 1, cols * cell + 2, rows * cell + 2);
+
+    // grown pins read at a cell size of a few pixels, where a single tile does not
+    const pin = (tx, ty, color, grow) => {
+      g.fillStyle(color, 1);
+      g.fillRect(x0 + tx * cell - grow, y + ty * cell - grow, cell + grow * 2, cell + grow * 2);
+    };
+
+    for (const d of map.doors) pin(d.x, d.y, COLORS.menuMapDoor, 0);
+    for (const n of NPCS) if (n.map === entry.map) pin(n.x, n.y, COLORS.menuMapFolk, 0);
+    if (entry.at) pin(entry.at[0], entry.at[1], COLORS.menuMapMark, 1);
+
+    const world = this.scene.get('World');
+    if (world.mapKey === entry.map) {
+      const TS = TUNING.tileSize;
+      pin(Math.floor(world.player.x / TS), Math.floor((world.player.y - 1) / TS), COLORS.menuMapYou, 1);
+    }
+    this.layer.add(g);
+
+    return y + rows * cell + 8 + this.key(x0, y + rows * cell + 8, entry).height;
+  }
+
+  key(x, y, entry) {
+    const swatches = [[COLORS.menuMapYou, 'you'], [COLORS.menuMapDoor, 'door'], [COLORS.menuMapFolk, 'folk']];
+    if (entry.at) swatches.push([COLORS.menuMapMark, 'here']);
+
+    const g = this.add.graphics();
+    this.layer.add(g);
+    let last = null;
+    for (const [color, name] of swatches) {
+      g.fillStyle(color, 1);
+      g.fillRect(x, y + 3, 7, 7);
+      last = this.text(x + 12, y, name, TUNING.menuHintSize, COLORS.menuDim);
+      x += 12 + last.width + 16;
+    }
+    return last;
   }
 
   hint() {
