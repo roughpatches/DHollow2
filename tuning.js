@@ -41,8 +41,10 @@ export const TUNING = {
   recruitDraw: 1, // each trait drawn to the work asks one band less
   recruitFear: 2, // each fear or scruple the work touches asks two bands more
 
-  // Traits are points, not badges. A character spends traitPointsAtLevelOne of them
-  // across content/traits.js; what they never put a point in they are untrained at.
+  // Traits are points, not badges. A character picks traitsAtLevelOne of them from
+  // content/traits.js and spreads traitPointsAtLevelOne between those three; the rest
+  // of the list is what they are untrained at.
+  traitsAtLevelOne: 3,
   traitPointsAtLevelOne: 6,
   traitBonusPerPoint: 2, // what one point is worth to an activity
   traitYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the

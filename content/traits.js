@@ -1,6 +1,7 @@
-// The things a character is good at. A trait is a number of points, not a badge: a
-// character puts traitPointsAtLevelOne of them across this list at level one, and what
-// they never spent on is what they are untrained at.
+// The things a character is good at. A trait is a number of points, not a badge: at
+// level one a character takes traitsAtLevelOne of these and spreads
+// traitPointsAtLevelOne between them, and the rest of the list is what they are
+// untrained at.
 //   id         — how src/party.js and any activity refers to the trait.
 //   name       — shown in the menu and on a character's sheet.
 //   activities — which activities the points apply to. Named here rather than in the

@@ -276,10 +276,8 @@ export default class Quest extends Phaser.Scene {
       const required = (this.job.must || []).includes(c.id);
       const mark = required ? '[!]' : taken ? '[x]' : a.willing ? '[ ]' : ' × ';
       const colour = taken ? COLORS.menuAccent : a.willing ? COLORS.menuText : COLORS.menuRule;
-      // what they are worth is on the row itself: it is half of why you take somebody.
-      // Their best three, so a wide spread does not run over the top of their name.
-      this.text(this.left + this.wide, y + 2,
-        traitsOf(c.id).slice(0, 3).map((t) => `${t.name} ${t.rank}`).join('   '),
+      // what they are worth is on the row itself: it is half of why you take somebody
+      this.text(this.left + this.wide, y + 2, traitsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   '),
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
       y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
         TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;

@@ -19,6 +19,9 @@ for (const c of PARTY) {
   const spent = Object.entries(c.traits);
   const bad = spent.filter(([t]) => !TRAIT[t]).map(([t]) => t);
   if (bad.length) console.warn(`${c.name}: no such trait — ${bad.join(', ')}`);
+  if (spent.length !== TUNING.traitsAtLevelOne) {
+    console.warn(`${c.name}: ${spent.length} traits, expected ${TUNING.traitsAtLevelOne}`);
+  }
   const points = spent.reduce((n, [, r]) => n + r, 0);
   if (points !== TUNING.traitPointsAtLevelOne) {
     console.warn(`${c.name}: ${points} trait points, expected ${TUNING.traitPointsAtLevelOne}`);
