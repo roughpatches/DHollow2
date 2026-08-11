@@ -31,6 +31,16 @@ export const TUNING = {
   questHintSize: 13,
   questRowHeight: 26,
 
+  // Recruiting. A bond is counted in points; a band is bondPerBand of them, and the
+  // bands are named below. Someone comes along if their band is at or above what the
+  // job asks of them.
+  bondPerBand: 3,
+  bondNames: ['Stranger', 'Acquainted', 'Trusted', 'Sworn'],
+  bondPerRun: 1, // points added to everyone who walked a run to the end
+  recruitBase: 1, // the band an ordinary job asks for
+  recruitDraw: 1, // each trait drawn to the work asks one band less
+  recruitFear: 2, // each fear or scruple the work touches asks two bands more
+
   traitsAtLevelOne: 3, // how many traits a character picks at level one
   maxLevel: 10,
   hpPerLevel: 3, // added to a character's own HP for every level past the first

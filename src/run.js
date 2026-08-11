@@ -9,13 +9,16 @@
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
-import { roster, stateOf, damage, heal, award, traitsOf, hpMax } from './party.js';
+import { roster, charOf, stateOf, damage, heal, award, raiseBond, traitsOf, hpMax } from './party.js';
 import { give, nameOf } from './town.js';
 
 const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
 const READABLE = ENCOUNTERS.filter((e) => e.read);
 
-const done = new Set();
+// how many times each job has been walked to the end. Gregorious keeps a standing
+// board rather than a story: the same job can be taken again, which is what lets a
+// bond grow far enough to crew the ones nobody will touch yet.
+const walked = new Map();
 let run = null;
 
 function roll([lo, hi]) {
@@ -34,13 +37,13 @@ export function kindOf(id) {
   return KIND[id];
 }
 
-export function completed(id) {
-  return done.has(id);
+export function timesWalked(id) {
+  return walked.get(id) || 0;
 }
 
-// what Gregorious still has on the board
+// everything on the board. Work does not run out.
 export function offered() {
-  return QUESTS.filter((q) => !done.has(q.id));
+  return QUESTS;
 }
 
 export function active() {
@@ -69,9 +72,12 @@ export function mixAt(when) {
 
 // --- starting --------------------------------------------------------------
 
-export function start(id, when) {
+export function start(id, when, party) {
   const quest = questOf(id);
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
+  // only the recruited walk it: they take the wounds, earn the experience, and are the
+  // only ones who can read anything at a fork
+  const who = (party && party.length ? party : roster().map((c) => c.id));
   const count = roll(sizeOf(quest));
   const nodes = [];
   for (let i = 0; i < count; i++) {
@@ -82,7 +88,7 @@ export function start(id, when) {
       goal: i === count - 1,
     });
   }
-  run = { quest, when: at, nodes, at: -1, state: 'running', bias: null, spoils: {}, xp: 0 };
+  run = { quest, when: at, party: who, nodes, at: -1, state: 'running', bias: null, spoils: {}, xp: 0 };
   step();
   return run;
 }
@@ -135,9 +141,13 @@ function branches() {
   }));
 }
 
-// who in the party can see this coming, and what they say about it
+export function walkers() {
+  return run ? run.party.map((id) => charOf(id)) : roster();
+}
+
+// who on the run can see this coming, and what they say about it
 function readOf(kind) {
-  for (const c of roster()) {
+  for (const c of walkers()) {
     if (traitsOf(c.id).some((t) => t.id === kind.read.trait)) {
       return { who: c.name, line: kind.read.line };
     }
@@ -182,7 +192,7 @@ function resolve(node) {
   }
   node.xp = Math.round(roll(e.xp) * (night ? TUNING.questNightXp : 1));
   run.xp += node.xp;
-  for (const c of roster()) award(c.id, node.xp);
+  for (const c of walkers()) award(c.id, node.xp);
 
   node.hurt = Math.round(roll(e.hurt) * (night ? TUNING.questNightHurt : 1));
   if (node.hurt > 0) node.hurtWho = takeHit(node.hurt);
@@ -191,7 +201,7 @@ function resolve(node) {
 
 // the one still on their feet with the most left in them takes it
 function takeHit(n) {
-  const standing = roster().filter((c) => stateOf(c.id).hp > 0);
+  const standing = walkers().filter((c) => stateOf(c.id).hp > 0);
   if (!standing.length) return null;
   const who = standing.reduce((a, b) => (stateOf(a.id).hp >= stateOf(b.id).hp ? a : b));
   damage(who.id, n);
@@ -199,14 +209,14 @@ function takeHit(n) {
 }
 
 function partyDown() {
-  return roster().every((c) => stateOf(c.id).hp <= 0);
+  return walkers().every((c) => stateOf(c.id).hp <= 0);
 }
 
 // --- finishing -------------------------------------------------------------
 
 function finish() {
   run.state = 'done';
-  done.add(run.quest.id);
+  walked.set(run.quest.id, timesWalked(run.quest.id) + 1);
 
   run.bonus = { spoils: {}, xp: TUNING.questBonusXp[run.quest.size] };
   for (const [m, n] of Object.entries(run.spoils)) {
@@ -214,7 +224,10 @@ function finish() {
     run.bonus.spoils[m] = extra;
     give(m, extra);
   }
-  for (const c of roster()) award(c.id, run.bonus.xp);
+  for (const c of walkers()) {
+    award(c.id, run.bonus.xp);
+    raiseBond(c.id); // walking a job to the end is how anyone here comes to know you
+  }
   return run;
 }
 
@@ -226,15 +239,16 @@ export function listOf(spoils) {
   return parts.length ? parts.join(', ') : 'nothing';
 }
 
-export function partyLine() {
-  return roster().map((c) => `${c.name} ${stateOf(c.id).hp}/${hpMax(c.id)}`).join('    ');
+export function partyLine(who = walkers()) {
+  return who.map((c) => `${c.name} ${stateOf(c.id).hp}/${hpMax(c.id)}`).join('    ');
 }
 
 // the Quest Log, with whatever the run state has to say about each job on top of it
 export function questRows() {
   return QUESTS.map((q) => {
     const live = run && run.quest.id === q.id ? run : null;
-    let note = done.has(q.id) ? 'Done' : 'Open';
+    const n = timesWalked(q.id);
+    let note = n ? `Walked ${n}×` : 'Open';
     if (live && live.state === 'running') note = `Node ${live.at + 1}/${live.nodes.length}`;
     else if (live && live.state === 'failed') note = 'Lost';
     else if (live && live.state === 'abandoned') note = 'Turned back';
@@ -242,7 +256,7 @@ export function questRows() {
       label: q.label,
       note,
       body: [
-        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes.`
+        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it.`
           + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`),
         q.goal,
         ...q.body,

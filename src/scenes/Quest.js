@@ -1,5 +1,7 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
+import * as recruit from '../recruit.js';
+import { roster, charOf, bandName, bandOf } from '../party.js';
 
 // The crawl. Runs over World, which freezes behind it. A row of pips across the top is
 // the whole run at a glance; everything below is the node you are standing on.
@@ -58,7 +60,8 @@ export default class Quest extends Phaser.Scene {
         this.job = jobs[this.row];
         this.times = run.timesFor(this.job);
         this.row = 0;
-        if (this.times.length === 1) this.begin(this.times[0]);
+        // a job fixed to one hour has nothing to ask, so it goes straight to recruiting
+        if (this.times.length === 1) this.toRecruiting(this.times[0]);
         else this.mode = 'when';
       }
       this.draw();
@@ -66,10 +69,21 @@ export default class Quest extends Phaser.Scene {
     }
 
     if (this.mode === 'when') {
-      if (k === 'escape') this.mode = 'board';
+      if (k === 'escape') { this.mode = 'board'; this.row = 0; }
       else if (k === 'arrowup' || k === 'w' || k === 'arrowleft' || k === 'a') this.row = 0;
       else if (k === 'arrowdown' || k === 's' || k === 'arrowright' || k === 'd') this.row = 1;
-      else if (k === 'enter' || k === ' ') this.begin(this.times[this.row]);
+      else if (k === 'enter' || k === ' ') this.toRecruiting(this.times[this.row]);
+      this.draw();
+      return;
+    }
+
+    if (this.mode === 'party') {
+      const all = roster();
+      if (k === 'escape') { this.mode = this.times.length === 1 ? 'board' : 'when'; this.row = 0; }
+      else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + all.length) % all.length;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % all.length;
+      else if (k === ' ') this.toggleWalker(all[this.row].id);
+      else if (k === 'enter' && this.taking.length >= this.job.party) this.begin(this.when_);
       this.draw();
       return;
     }
@@ -97,8 +111,21 @@ export default class Quest extends Phaser.Scene {
 
   // --- drawing --------------------------------------------------------------
 
+  // everyone who will come is taken by default; the player pares that back
+  toRecruiting(when) {
+    this.when_ = when;
+    this.taking = recruit.willing(this.job, when).slice(0, this.job.party);
+    this.mode = 'party';
+    this.row = 0;
+  }
+
+  toggleWalker(id) {
+    if (this.taking.includes(id)) this.taking = this.taking.filter((x) => x !== id);
+    else if (recruit.asked(id, this.job, this.when_).willing) this.taking.push(id);
+  }
+
   begin(when) {
-    run.start(this.job.id, when);
+    run.start(this.job.id, when, this.taking);
     this.mode = 'run';
     this.row = 0;
   }
@@ -109,6 +136,7 @@ export default class Quest extends Phaser.Scene {
     this.panel(this.mode === 'run' && r && r.when === 'night');
     if (this.mode === 'board') this.board();
     else if (this.mode === 'when') this.when();
+    else if (this.mode === 'party') this.party();
     else this.crawl();
   }
 
@@ -148,8 +176,10 @@ export default class Quest extends Phaser.Scene {
       }
       const size = run.sizeOf(q);
       const when = q.when === 'any' ? 'day or night' : `${q.when} only`;
-      this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes · ${when}`,
-        TUNING.menuRowSize, on ? COLORS.menuAccent : COLORS.menuRule).setOrigin(1, 0);
+      // whether it can be crewed at all is the first thing worth knowing about a job
+      const crewed = run.timesFor(q).some((t) => recruit.enough(q, t));
+      this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes · ${q.party} to walk it · ${when}`,
+        TUNING.menuRowSize, on ? COLORS.menuAccent : (crewed ? COLORS.menuRule : COLORS.menuMapFolk)).setOrigin(1, 0);
       this.text(this.left + 4, y, q.label, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
       y += h;
     });
@@ -189,6 +219,43 @@ export default class Quest extends Phaser.Scene {
 
     this.text(this.left, this.box.y + this.box.h - 52, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
     this.hint('[Up/Down] Choose    [Enter] Set out    [Esc] Back to the board');
+  }
+
+  // Who will come, who will not, and the arithmetic behind both. A refusal the player
+  // cannot account for reads as unfairness, so the whole sum is on the page.
+  party() {
+    const all = roster();
+    const short = this.job.party - this.taking.length;
+    let y = this.box.y + TUNING.menuPad;
+
+    this.text(this.left + this.wide, y + 4, `${this.when_ === 'night' ? 'after dark' : 'by day'}`,
+      TUNING.menuRowSize, this.when_ === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
+    y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
+    y += this.text(this.left, y,
+      short > 0 ? `Needs ${this.job.party}. ${this.taking.length} coming — ${short} short.`
+        : `Needs ${this.job.party}. ${this.taking.length} coming.`,
+      TUNING.questBodySize, short > 0 ? COLORS.menuMapFolk : COLORS.menuText).height + 10;
+    this.rule(y);
+    y += 14;
+
+    all.forEach((c, i) => {
+      const a = recruit.asked(c.id, this.job, this.when_);
+      const on = i === this.row;
+      const taken = this.taking.includes(c.id);
+      const mark = taken ? '[x]' : a.willing ? '[ ]' : ' × ';
+      const colour = taken ? COLORS.menuAccent : a.willing ? COLORS.menuText : COLORS.menuRule;
+      y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
+        TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;
+      y += this.text(this.left + 40, y, recruit.why(c.id, this.job, this.when_),
+        TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule, this.wide - 40).height + 10;
+    });
+
+    this.text(this.left, this.box.y + this.box.h - 52,
+      this.taking.length ? run.partyLine(this.taking.map((id) => charOf(id))) : 'Nobody is coming.',
+      TUNING.menuRowSize, COLORS.menuText);
+    this.hint(short > 0
+      ? '[Up/Down] Look    [Space] Take or leave    [Esc] Back'
+      : '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back');
   }
 
   crawl() {

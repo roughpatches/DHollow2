@@ -5,10 +5,12 @@
 import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
 import { TRAITS } from '../content/traits.js';
+import { FEARS } from '../content/fears.js';
 
 const TRAIT = Object.fromEntries(TRAITS.map((t) => [t.id, t]));
+const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
-const state = new Map(PARTY.map((c) => [c.id, { level: 1, xp: 0, hp: c.hp }]));
+const state = new Map(PARTY.map((c) => [c.id, { level: 1, xp: 0, hp: c.hp, bond: c.bond || 0 }]));
 
 // a miscounted or misspelt trait list is a content mistake, and content mistakes are
 // said out loud at boot rather than found later in a wrong bonus
@@ -73,6 +75,23 @@ export function heal(id, n) {
   return s.hp;
 }
 
+// --- bonds ----------------------------------------------------------------
+// A number that goes up. Everything that reads it reads it through bandOf.
+
+export function bandOf(id) {
+  return Math.min(TUNING.bondNames.length - 1, Math.floor(stateOf(id).bond / TUNING.bondPerBand));
+}
+
+export function bandName(band) {
+  return TUNING.bondNames[Math.max(0, Math.min(TUNING.bondNames.length - 1, band))];
+}
+
+export function raiseBond(id, n = TUNING.bondPerRun) {
+  const s = stateOf(id);
+  s.bond = Math.min(s.bond + n, (TUNING.bondNames.length - 1) * TUNING.bondPerBand);
+  return s.bond;
+}
+
 export function traitsOf(id) {
   return charOf(id).traits.map((t) => TRAIT[t]).filter(Boolean);
 }
@@ -103,13 +122,18 @@ export function partyRows() {
     const s = stateOf(c.id);
     const next = xpToNext(s.level);
     const traits = traitsOf(c.id);
+    const fears = (c.fears || []).map((f) => FEAR[f]).filter(Boolean);
     return {
       label: c.name,
       note: `Lv ${s.level} · ${s.hp}/${hpMax(c.id)}`,
       body: [
         `Level ${s.level}    HP ${s.hp} of ${hpMax(c.id)}    `
           + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`),
+        `Bond: ${bandName(bandOf(c.id))} (${s.bond} points).`,
         traits.map((t) => `${t.name} +${t.bonus} — ${t.activities.join(', ')}`).join('\n'),
+        fears.length
+          ? fears.map((f) => `${f.name} — ${f.kind === 'scruple' ? 'will not do it' : 'will not face it'}`).join('\n')
+          : 'Nothing they will not walk into.',
         ...c.body,
       ],
     };
