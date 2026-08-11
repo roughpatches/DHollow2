@@ -104,7 +104,7 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + all.length) % all.length;
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % all.length;
       else if (k === ' ') this.toggleWalker(all[this.row].id);
-      else if (k === 'enter' && this.taking.length >= this.job.party) this.begin(this.when_);
+      else if (k === 'enter' && 1 + this.taking.length >= this.job.party) this.begin(this.when_);
       this.draw();
       return;
     }
@@ -132,12 +132,14 @@ export default class Quest extends Phaser.Scene {
 
   // --- drawing --------------------------------------------------------------
 
-  // everyone who will come is taken by default; the player pares that back
+  // Everyone who will come is taken by default; the player pares that back. You are one
+  // of the number the job asks for, so it wants job.party - 1 others — unless it names
+  // more than that as people it will not go without.
   toRecruiting(when) {
     this.when_ = when;
     const must = (this.job.must || []).filter((id) => recruit.asked(id, this.job, when).willing);
     const rest = recruit.willing(this.job, when).filter((id) => !must.includes(id));
-    this.taking = [...must, ...rest].slice(0, this.job.party);
+    this.taking = [...must, ...rest].slice(0, Math.max(must.length, this.job.party - 1));
     this.mode = 'party';
     this.row = 0;
   }
@@ -249,15 +251,17 @@ export default class Quest extends Phaser.Scene {
   // cannot account for reads as unfairness, so the whole sum is on the page.
   party() {
     const all = roster();
-    const short = this.job.party - this.taking.length;
+    const short = this.job.party - (1 + this.taking.length); // you are already on it
     let y = this.box.y + TUNING.menuPad;
 
     this.text(this.left + this.wide, y + 4, `${this.when_ === 'night' ? 'after dark' : 'by day'}`,
       TUNING.menuRowSize, this.when_ === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
+    const others = this.taking.length === 1 ? 'one other' : `${this.taking.length} others`;
+    const coming = this.taking.length ? `You and ${others} coming` : 'You, and nobody else';
     y += this.text(this.left, y,
-      short > 0 ? `Needs ${this.job.party}. ${this.taking.length} coming — ${short} short.`
-        : `Needs ${this.job.party}. ${this.taking.length} coming.`,
+      short > 0 ? `Needs ${this.job.party}. ${coming} — ${short} short.`
+        : `Needs ${this.job.party}. ${coming}.`,
       TUNING.questBodySize, short > 0 ? COLORS.menuMapFolk : COLORS.menuText).height + 10;
     // the job's own roll is named before the crew is picked, because it is the reason
     // to pick one crew over another

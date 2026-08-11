@@ -73,8 +73,8 @@ export function blockers(id, when) {
     else if (!roster().includes(c)) out.push(`${c.name} is not available.`);
     else if (!asked(cid, q, at).willing) out.push(`${c.name} will not come on this.`);
   }
-  const crew = roster().filter((c) => asked(c.id, q, at).willing).length;
-  if (crew < q.party) out.push(`Needs ${q.party}; ${crew} will come.`);
+  const crew = 1 + roster().filter((c) => asked(c.id, q, at).willing).length; // you, and them
+  if (crew < q.party) out.push(`Needs ${q.party}; counting you, ${crew} will walk it.`);
   return out;
 }
 
@@ -343,7 +343,7 @@ export function questRows() {
       label: q.label,
       note,
       body: [
-        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it.`
+        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it, you included.`
           + (q.must ? `  ${q.must.map((m) => charOf(m).name).join(' and ')} must be on it.` : '')
           + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`),
         q.goal,

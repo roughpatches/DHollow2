@@ -44,8 +44,9 @@ export function willing(quest, when) {
   return roster().filter((c) => asked(c.id, quest, when).willing).map((c) => c.id);
 }
 
+// you are one of the number a job asks for, and the only one who never has to be asked
 export function enough(quest, when) {
-  return willing(quest, when).length >= (quest.party || 1);
+  return 1 + willing(quest, when).length >= (quest.party || 1);
 }
 
 // --- text ------------------------------------------------------------------
