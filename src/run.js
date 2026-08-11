@@ -9,7 +9,7 @@
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
-import { roster, stateOf, damage, award, traitsOf, hpMax } from './party.js';
+import { roster, stateOf, damage, heal, award, traitsOf, hpMax } from './party.js';
 import { give, nameOf } from './town.js';
 
 const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
@@ -51,10 +51,27 @@ export function sizeOf(q) {
   return TUNING.questNodes[q.size];
 }
 
+// a job fixed to one time can only be walked at that time; the rest are the party's call
+export function timesFor(q) {
+  return q.when === 'any' ? ['day', 'night'] : [q.when];
+}
+
+// what a run at this hour is mostly made of, so the choice is made on something
+export function mixAt(when) {
+  const by = {};
+  for (const e of ENCOUNTERS) by[e.nature] = (by[e.nature] || 0) + e.weight[when];
+  const total = Object.values(by).reduce((a, b) => a + b, 0);
+  return Object.entries(by)
+    .sort((a, b) => b[1] - a[1])
+    .map(([nature, n]) => `${nature} ${Math.round((n / total) * 100)}%`)
+    .join('   ');
+}
+
 // --- starting --------------------------------------------------------------
 
-export function start(id) {
+export function start(id, when) {
   const quest = questOf(id);
+  const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
   const count = roll(sizeOf(quest));
   const nodes = [];
   for (let i = 0; i < count; i++) {
@@ -65,7 +82,7 @@ export function start(id) {
       goal: i === count - 1,
     });
   }
-  run = { quest, nodes, at: -1, state: 'running', bias: null, spoils: {}, xp: 0 };
+  run = { quest, when: at, nodes, at: -1, state: 'running', bias: null, spoils: {}, xp: 0 };
   step();
   return run;
 }
@@ -76,7 +93,15 @@ export function abandon() {
   return run;
 }
 
+// Getting back to the Sea Hag is what mends people. HP is a within-run resource: the
+// question a run asks is whether the party survives this one, not whether they have
+// been worn down since the first. Move this the day beds and food cost something.
+export function recover() {
+  for (const c of roster()) heal(c.id, hpMax(c.id));
+}
+
 export function clear() {
+  if (run) recover();
   run = null;
 }
 
@@ -97,11 +122,12 @@ export function step() {
   return run;
 }
 
-// two ways on, each leaning toward something, and whatever the party can read about them
+// two ways on, each leaning toward something, and whatever the party can read about them.
+// The two on offer are drawn against the hour, so a night fork offers night things.
 function branches() {
-  const a = pick(READABLE);
-  let b = pick(READABLE);
-  while (b === a && READABLE.length > 1) b = pick(READABLE);
+  const a = weighted(null, READABLE);
+  let b = weighted(null, READABLE);
+  for (let i = 0; b === a && READABLE.length > 1 && i < 8; i++) b = weighted(null, READABLE);
   return [a, b].map((kind, i) => ({
     kind: kind.id,
     side: i === 0 ? 'Left' : 'Right',
@@ -128,18 +154,19 @@ export function choose(i) {
   return run;
 }
 
-function weighted(bias) {
-  const total = ENCOUNTERS.reduce((n, e) => n + e.weight * (e.id === bias ? TUNING.questBiasWeight : 1), 0);
-  let r = Math.random() * total;
-  for (const e of ENCOUNTERS) {
-    r -= e.weight * (e.id === bias ? TUNING.questBiasWeight : 1);
+function weighted(bias, from = ENCOUNTERS) {
+  const of = (e) => e.weight[run.when] * (e.id === bias ? TUNING.questBiasWeight : 1);
+  let r = Math.random() * from.reduce((n, e) => n + of(e), 0);
+  for (const e of from) {
+    r -= of(e);
     if (r <= 0) return e;
   }
-  return ENCOUNTERS[ENCOUNTERS.length - 1];
+  return from[from.length - 1];
 }
 
 function resolve(node) {
   const e = weighted(run.bias);
+  const night = run.when === 'night';
   run.bias = null;
   run.phase = 'node';
 
@@ -153,11 +180,11 @@ function resolve(node) {
       give(m, n);
     }
   }
-  node.xp = roll(e.xp);
+  node.xp = Math.round(roll(e.xp) * (night ? TUNING.questNightXp : 1));
   run.xp += node.xp;
   for (const c of roster()) award(c.id, node.xp);
 
-  node.hurt = roll(e.hurt);
+  node.hurt = Math.round(roll(e.hurt) * (night ? TUNING.questNightHurt : 1));
   if (node.hurt > 0) node.hurtWho = takeHit(node.hurt);
   if (partyDown()) run.state = 'failed';
 }
@@ -215,7 +242,8 @@ export function questRows() {
       label: q.label,
       note,
       body: [
-        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes.`,
+        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes.`
+          + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`),
         q.goal,
         ...q.body,
       ],

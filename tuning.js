@@ -20,6 +20,8 @@ export const TUNING = {
   questBiasWeight: 10, // taking a branch multiplies that encounter's weight by this
   questBonusFactor: 2, // finishing pays this many times over what the run itself paid
   questBonusXp: { short: 150, medium: 350, long: 700 }, // and this on top, flat
+  questNightHurt: 1.25, // a node at night costs this much more HP
+  questNightXp: 1.3, // and pays this much more for it
 
   questPipSize: 14,
   questPipGap: 8,
@@ -85,6 +87,8 @@ export const COLORS = {
   menuMapDoor: 0xc9a95f,
   menuMapFolk: 0x9c5a46,
   menuMapMark: 0x7f9fa8,
+  questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
+  questNightEdge: 0x3f4a63,
 
   grass: [0x2f3d2b, 0x263422],
   path: [0x4f4a43, 0x413d37],

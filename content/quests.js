@@ -4,6 +4,8 @@
 //   id    — how src/run.js refers to it.
 //   label — shown on the board and in the Quest Log.
 //   size  — short, medium, or long. The node count for each is in tuning.js.
+//   when  — day, night, or any. A job fixed to one time can only be walked at that
+//           time; 'any' lets the party choose when they set out.
 //   giver — the NPC id who hands it out.
 //   goal  — what the last node is, in one line.
 //   body  — what the job is, in the world's voice. Yours to write.
@@ -14,6 +16,7 @@ export const QUESTS = [
     id: 'fenedge',
     label: 'The fen edge',
     size: 'short',
+    when: 'any',
     giver: 'gregorious',
     goal: 'Walk the black water end to end and come back saying what is in it.',
     body: ['[Placeholder Text]'],
@@ -22,6 +25,7 @@ export const QUESTS = [
     id: 'coastroad',
     label: 'Down the coast road',
     size: 'medium',
+    when: 'day',
     giver: 'gregorious',
     goal: 'Reach the wreck the Sea Hag was named for and bring back what is still on it.',
     body: ['[Placeholder Text]'],
@@ -30,6 +34,7 @@ export const QUESTS = [
     id: 'northroad',
     label: 'Past the treeline',
     size: 'long',
+    when: 'night',
     giver: 'gregorious',
     goal: 'Follow the north road to where the carters stopped, and find out why they stopped there.',
     body: ['[Placeholder Text]'],

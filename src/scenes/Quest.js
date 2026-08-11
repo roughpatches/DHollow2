@@ -54,9 +54,22 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + jobs.length) % Math.max(1, jobs.length);
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % Math.max(1, jobs.length);
       else if ((k === 'enter' || k === ' ') && jobs.length) {
-        run.start(jobs[this.row].id);
-        this.mode = 'run';
+        // a job fixed to one hour skips the question; the rest ask it
+        this.job = jobs[this.row];
+        this.times = run.timesFor(this.job);
+        this.row = 0;
+        if (this.times.length === 1) this.begin(this.times[0]);
+        else this.mode = 'when';
       }
+      this.draw();
+      return;
+    }
+
+    if (this.mode === 'when') {
+      if (k === 'escape') this.mode = 'board';
+      else if (k === 'arrowup' || k === 'w' || k === 'arrowleft' || k === 'a') this.row = 0;
+      else if (k === 'arrowdown' || k === 's' || k === 'arrowright' || k === 'd') this.row = 1;
+      else if (k === 'enter' || k === ' ') this.begin(this.times[this.row]);
       this.draw();
       return;
     }
@@ -84,19 +97,27 @@ export default class Quest extends Phaser.Scene {
 
   // --- drawing --------------------------------------------------------------
 
+  begin(when) {
+    run.start(this.job.id, when);
+    this.mode = 'run';
+    this.row = 0;
+  }
+
   draw() {
     this.layer.removeAll(true);
-    this.panel();
+    const r = run.active();
+    this.panel(this.mode === 'run' && r && r.when === 'night');
     if (this.mode === 'board') this.board();
+    else if (this.mode === 'when') this.when();
     else this.crawl();
   }
 
-  panel() {
+  panel(night) {
     const b = this.box;
     const g = this.add.graphics();
-    g.fillStyle(COLORS.menuFill, 0.98);
+    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 0.98);
     g.fillRect(b.x, b.y, b.w, b.h);
-    g.lineStyle(2, COLORS.menuEdge, 1);
+    g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
     g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
     this.layer.add(g);
   }
@@ -126,8 +147,9 @@ export default class Quest extends Phaser.Scene {
         this.layer.add(g);
       }
       const size = run.sizeOf(q);
-      this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes`, TUNING.menuRowSize,
-        on ? COLORS.menuAccent : COLORS.menuRule).setOrigin(1, 0);
+      const when = q.when === 'any' ? 'day or night' : `${q.when} only`;
+      this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes · ${when}`,
+        TUNING.menuRowSize, on ? COLORS.menuAccent : COLORS.menuRule).setOrigin(1, 0);
       this.text(this.left + 4, y, q.label, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
       y += h;
     });
@@ -143,12 +165,38 @@ export default class Quest extends Phaser.Scene {
     this.hint('[Up/Down] Choose    [Enter] Accept    [Esc] Leave');
   }
 
+  // Set out when? The mix behind each hour is shown rather than described, so the
+  // choice is made on what the run will actually be made of.
+  when() {
+    let y = this.box.y + TUNING.menuPad;
+    y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
+    y += this.text(this.left, y, 'Set out when?', TUNING.questBodySize, COLORS.menuText).height + 10;
+    this.rule(y);
+    y += 16;
+
+    this.times.forEach((t, i) => {
+      const on = i === this.row;
+      y += this.text(this.left, y, `${on ? '>' : ' '} ${t === 'day' ? 'By day' : 'After dark'}`,
+        TUNING.questBodySize + 2, on ? COLORS.menuAccent : COLORS.menuDim).height + 4;
+      y += this.text(this.left + 24, y, run.mixAt(t), TUNING.questBodySize,
+        on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 4;
+      const cost = t === 'night'
+        ? `Wounds run ${TUNING.questNightHurt}× and pay ${TUNING.questNightXp}× for it.`
+        : 'Wounds and pay as written.';
+      y += this.text(this.left + 24, y, cost, TUNING.questHintSize,
+        on ? COLORS.menuDim : COLORS.menuRule).height + 14;
+    });
+
+    this.text(this.left, this.box.y + this.box.h - 52, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
+    this.hint('[Up/Down] Choose    [Enter] Set out    [Esc] Back to the board');
+  }
+
   crawl() {
     const r = run.active();
     let y = this.box.y + TUNING.menuPad;
 
-    this.text(this.left + this.wide, y + 4, `${r.quest.size} · ${r.nodes.length} nodes`,
-      TUNING.menuRowSize, COLORS.menuDim).setOrigin(1, 0);
+    this.text(this.left + this.wide, y + 4, `${r.quest.size} · ${r.when} · ${r.nodes.length} nodes`,
+      TUNING.menuRowSize, r.when === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
     y += this.text(this.left, y, r.quest.label, TUNING.questTitleSize, COLORS.menuAccent).height + 12;
 
     y = this.pips(r, y) + 14;
@@ -250,6 +298,8 @@ export default class Quest extends Phaser.Scene {
       y += this.text(this.left, y, 'The bonus for finishing is lost. What was carried out is kept.',
         TUNING.questBodySize, COLORS.menuDim, this.wide).height + 8;
     }
+    y += this.text(this.left, y, 'The Sea Hag mends what the road did. The party comes back whole.',
+      TUNING.questHintSize, COLORS.menuDim, this.wide).height + 8;
     return y;
   }
 
