@@ -4,6 +4,7 @@ import { NPCS } from '../../content/npcs.js';
 import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
 import { findTarget, faceToward } from '../interact.js';
+import { applyToWorld } from '../settings.js';
 
 const TS = TUNING.tileSize;
 
@@ -63,10 +64,9 @@ export default class World extends Phaser.Scene {
     }
 
     const cam = this.cameras.main;
-    cam.setZoom(TUNING.zoom);
     cam.setBounds(0, 0, w * TS, h * TS);
     cam.setRoundPixels(true);
-    cam.startFollow(this.player, true, 0.2, 0.2);
+    applyToWorld(this);
 
     this.keys = this.input.keyboard.addKeys('up,down,left,right,w,a,s,d');
     // event-driven, not polled: a quick tap between two frames must not be lost

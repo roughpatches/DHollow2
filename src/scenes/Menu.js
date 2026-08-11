@@ -4,11 +4,14 @@ import { NPCS } from '../../content/npcs.js';
 import { CHARACTER, EQUIPMENT, INVENTORY, COMPANIONS } from '../../content/character.js';
 import { BESTIARY, QUESTS } from '../../content/codex.js';
 import { PLACES } from '../../content/places.js';
+import { SETTINGS } from '../../content/settings.js';
+import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
 // array in content/. An entry carrying a `map` also gets that grid drawn above its
-// text — the one thing a list of paragraphs cannot say.
+// text — the one thing a list of paragraphs cannot say — and one carrying `options`
+// becomes a setting the player cycles with Enter.
 const TABS = [
   ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
@@ -17,7 +20,13 @@ const TABS = [
   ['Bestiary', BESTIARY],
   ['Quest Log', QUESTS],
   ['Map', PLACES],
+  ['Settings', SETTINGS],
 ];
+
+// a setting's right-hand column is whichever option it is currently on
+function noteOf(entry) {
+  return entry.options ? option(entry.id).name : entry.note;
+}
 
 const EMPTY = { label: '—', note: '', body: ['Nothing recorded yet.'] };
 
@@ -60,6 +69,17 @@ export default class Menu extends Phaser.Scene {
     else if (k === 'arrowright' || k === 'd') this.step('tab', 1);
     else if (k === 'arrowup' || k === 'w') this.step('row', -1);
     else if (k === 'arrowdown' || k === 's') this.step('row', 1);
+    else if (k === 'enter' || k === ' ') this.change();
+  }
+
+  // left and right already belong to the tab strip, so a setting cycles forward on
+  // Enter rather than being nudged along an axis
+  change() {
+    const entry = this.rows()[this.row[this.tab]];
+    if (!entry || !entry.options) return;
+    cycleSetting(entry.id);
+    applyToWorld(this.scene.get('World'));
+    this.draw();
   }
 
   toggle() {
@@ -166,7 +186,7 @@ export default class Menu extends Phaser.Scene {
       const note = this.text(
         this.listX + TUNING.menuListWidth - 12,
         y,
-        rows[i].note,
+        noteOf(rows[i]),
         TUNING.menuRowSize,
         on ? COLORS.menuAccent : COLORS.menuRule,
       ).setOrigin(1, 0);
@@ -202,8 +222,9 @@ export default class Menu extends Phaser.Scene {
     let y = this.bodyY - 6;
 
     y += this.text(this.detailX, y, entry.label, TUNING.menuTitleSize, COLORS.menuAccent).height + 4;
-    if (entry.note) {
-      y += this.text(this.detailX, y, entry.note, TUNING.menuRowSize, COLORS.menuDim).height + 6;
+    const note = noteOf(entry);
+    if (note) {
+      y += this.text(this.detailX, y, note, TUNING.menuRowSize, COLORS.menuDim).height + 6;
     }
 
     const g = this.add.graphics();
@@ -219,11 +240,32 @@ export default class Menu extends Phaser.Scene {
     const proseH = paras.reduce((h, t) => h + t.height + 14, 0);
 
     if (entry.map) y = this.miniMap(entry, y, this.box.y + this.box.h - 44 - proseH - y) + 16;
+    if (entry.options) y = this.choices(entry, y) + 20;
 
     for (const t of paras) {
       t.setY(y);
       y += t.height + 14;
     }
+  }
+
+  // Every option laid out at once, current one boxed, so the whole range of a setting
+  // is visible without cycling through it to find out what is there.
+  choices(entry, y) {
+    const current = option(entry.id);
+    const g = this.add.graphics();
+    this.layer.add(g);
+
+    let x = this.detailX;
+    let bottom = y;
+    for (const o of entry.options) {
+      const on = o === current;
+      const t = this.text(x + 8, y + 4, o.name, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
+      g.lineStyle(1, on ? COLORS.menuAccent : COLORS.menuRule, 1);
+      g.strokeRect(x, y, t.width + 16, t.height + 8);
+      x += t.width + 16 + 10;
+      bottom = y + t.height + 8;
+    }
+    return bottom;
   }
 
   // The map is the world's own grid at a smaller size, drawn in the same tile colours,
@@ -260,8 +302,9 @@ export default class Menu extends Phaser.Scene {
       g.fillRect(x0 + tx * cell - grow, y + ty * cell - grow, cell + grow * 2, cell + grow * 2);
     };
 
-    for (const d of map.doors) pin(d.x, d.y, COLORS.menuMapDoor, 0);
-    for (const n of NPCS) if (n.map === entry.map) pin(n.x, n.y, COLORS.menuMapFolk, 0);
+    const pins = setting('pins');
+    if (pins !== 'none') for (const d of map.doors) pin(d.x, d.y, COLORS.menuMapDoor, 0);
+    if (pins === 'all') for (const n of NPCS) if (n.map === entry.map) pin(n.x, n.y, COLORS.menuMapFolk, 0);
     if (entry.at) pin(entry.at[0], entry.at[1], COLORS.menuMapMark, 1);
 
     const world = this.scene.get('World');
@@ -275,7 +318,10 @@ export default class Menu extends Phaser.Scene {
   }
 
   key(x, y, entry) {
-    const swatches = [[COLORS.menuMapYou, 'you'], [COLORS.menuMapDoor, 'door'], [COLORS.menuMapFolk, 'folk']];
+    const pins = setting('pins');
+    const swatches = [[COLORS.menuMapYou, 'you']];
+    if (pins !== 'none') swatches.push([COLORS.menuMapDoor, 'door']);
+    if (pins === 'all') swatches.push([COLORS.menuMapFolk, 'folk']);
     if (entry.at) swatches.push([COLORS.menuMapMark, 'here']);
 
     const g = this.add.graphics();
@@ -291,10 +337,11 @@ export default class Menu extends Phaser.Scene {
   }
 
   hint() {
+    const change = this.rows().some((r) => r.options) ? '    [Enter] Change' : '';
     this.text(
       this.listX,
       this.box.y + this.box.h - 26,
-      '[<-/->] Tab    [Up/Down] Select    [M] or [Esc] Close',
+      `[<-/->] Tab    [Up/Down] Select${change}    [M] or [Esc] Close`,
       TUNING.menuHintSize,
       COLORS.menuDim,
     );
