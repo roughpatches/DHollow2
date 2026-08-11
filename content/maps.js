@@ -23,6 +23,9 @@ export const TILES = {
   pew: { solid: true },
   crate: { solid: true },
   hearth: { solid: true },
+  sand: {},
+  flotsam: {}, // small wreckage; you walk over it
+  spar: { solid: true }, // ship timber; you walk around it
 };
 
 export const LEGEND = {
@@ -46,9 +49,37 @@ export const LEGEND = {
   c: 'crate',
   h: 'hearth',
   r: 'rug',
+  S: 'sand',
+  w: 'flotsam',
+  W: 'spar',
 };
 
 export const MAPS = {
+  // Where the game opens. The tide put the player here and the storm put everything
+  // else. Reachable afterwards from the west end of the village lane.
+  shore: {
+    name: 'The strand',
+    spawn: [16, 8],
+    rows: [
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
+      'SS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SS',
+      'SSSSS~~~~~~~~~~~~~~~~~~~~~~~~SSSSS',
+      'SSSSSSSSwSSS~~~~~~~~~~~SSSSSSSSSSS',
+      'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+      'SSSwSSSSSSSSSSSSSSSSSSWSSSwSSSSSSS',
+      'SSSSSSSSSSWSSSSSSSSSSSSSSSSSSSSSSS',
+      'SSSSwSSSSSSSSSSSwSSSSSSSSSSSWSSSSS',
+      'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
+      '..SSSSSS..SSSS....SSSS..SSSSSS....',
+      '.................,................',
+      'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
+      'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
+    ],
+    doors: [{ x: 17, y: 15, to: 'village', spawn: [3, 21] }],
+  },
   village: {
     name: 'Dreadhollow',
     spawn: [19, 12],
@@ -74,7 +105,7 @@ export const MAPS = {
       'TT..#######..,.....,,....,.########...TT',
       'TT..###D###..,.....,,....,.###D####...TT',
       'TT.....,.....,.....,,....,....,.......TT',
-      'TT.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.TT',
+      'T,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.TT',
       'TT.................,,.................TT',
       'TT.~~~~~~~~~.......,,....x.x.x.x.x....TT',
       'TT.~~~~~~~~~.......,,.................TT',
@@ -87,6 +118,7 @@ export const MAPS = {
       { x: 31, y: 7, to: 'smithy', spawn: [9, 13] },
       { x: 7, y: 19, to: 'apothecary', spawn: [9, 13] },
       { x: 30, y: 19, to: 'chapel', spawn: [9, 13] },
+      { x: 2, y: 21, to: 'shore', spawn: [17, 14] },
     ],
   },
 

@@ -14,6 +14,7 @@ import { MATERIALS } from '../content/materials.js';
 import { QUESTS as JOBS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import { FEARS } from '../content/fears.js';
+import { OPENING } from '../content/opening.js';
 
 // One spelling, so one scan finds every one of them. Case is ignored when matching.
 export const PLACEHOLDER = '[Placeholder Text]';
@@ -39,8 +40,13 @@ function proseSlots(e) {
   return (e.body || []).map((s, i) => [`paragraph ${i + 1}`, s]);
 }
 
+// a scripted scene's lines are written by whoever wrote the scene, and go unwritten
+// the same way anyone's do
+const SCENES = [{ label: 'The opening', body: OPENING.steps.flatMap((s) => s.lines || []) }];
+
 const SOURCES = [
   ['Dialogue', NPCS, (n) => n.name, dialogueSlots],
+  ['Scenes', SCENES, (s) => s.label, proseSlots],
   ['Party', PARTY, (c) => c.name, proseSlots],
   ['Traits', TRAITS, (t) => t.name, proseSlots],
   ['Buildings', BUILDINGS, (b) => b.name, proseSlots],

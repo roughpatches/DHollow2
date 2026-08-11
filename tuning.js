@@ -120,11 +120,15 @@ export const COLORS = {
   crate: [0x574328, 0x3b2c1a],
   hearth: [0x33302c, 0xc4601f],
   rug: [0x5a2b2b, 0x8a4a3a],
+  sand: [0x494235, 0x3c362b],
+  flotsam: [0x494235, 0x362a1e], // small wreckage the tide left, walkable
+  spar: [0x3d3124, 0x241c14], // a beam off a ship, big enough to walk around
 };
 
 // Actor placeholder palettes. Add an entry, reference its name from content/npcs.js.
 export const PALETTES = {
   player: { body: 0x39566b, head: 0xc7a184, hair: 0x2a2119, trim: 0x8ba4b5 },
+  hunter: { body: 0x3f4a33, head: 0xbb9670, hair: 0x35291b, trim: 0x7d8a63 },
   warden: { body: 0x3c4048, head: 0xb99175, hair: 0x1f1c19, trim: 0x8d8f96 },
   elder: { body: 0x4a4640, head: 0xc9b19a, hair: 0xb9b4ad, trim: 0x6e6a63 },
   sexton: { body: 0x2c3128, head: 0xa88a6d, hair: 0x2b2a24, trim: 0x5c6153 },

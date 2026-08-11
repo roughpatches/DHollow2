@@ -17,6 +17,12 @@ export const PLACES = [
     ],
   },
   {
+    label: 'The strand',
+    note: 'Open ground',
+    map: 'shore',
+    body: ['[Placeholder Text]'],
+  },
+  {
     label: 'The Sea Hag',
     note: 'Indoors',
     map: 'tavern',

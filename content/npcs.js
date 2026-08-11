@@ -7,6 +7,18 @@
 
 export const NPCS = [
   {
+    // The hunter. He is the one who finds the player on the strand in the opening,
+    // so he stands where the scene needs him to start from.
+    id: 'aldis',
+    name: 'Aldis Rooke',
+    map: 'shore',
+    x: 31,
+    y: 8,
+    facing: 'left',
+    palette: 'hunter',
+    lines: ['[Placeholder Text]'],
+  },
+  {
     id: 'warden',
     name: 'Warden Ilse Marrow',
     map: 'village',

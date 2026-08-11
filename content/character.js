@@ -7,12 +7,11 @@
 
 export const CHARACTER = [
   {
+    // The player came in off the sea, not down the south road: see content/opening.js.
+    // Aldis Rooke is the hunter who found them, and is a recruit, not the player.
     label: 'Name',
-    note: 'Aldis Rooke',
-    body: [
-      'Came down the south road on foot with a dead man\'s boots and no good answer for why.',
-      'Nobody in Dreadhollow has asked for a surname twice. That is either courtesy or it is a habit they got into for a reason.',
-    ],
+    note: '[Placeholder Text]',
+    body: ['[Placeholder Text]'],
   },
   {
     label: 'Vitality',

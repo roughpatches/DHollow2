@@ -9,6 +9,8 @@ import {
   siteAt, isOpen, patchesFor, patchOf, levelOf, contribute, contributeLines, statusLines, remaining,
 } from '../town.js';
 import { applyToWorld } from '../settings.js';
+import { OPENING } from '../../content/opening.js';
+import { play, hasPlayed } from '../script.js';
 
 const TS = TUNING.tileSize;
 
@@ -18,7 +20,7 @@ export default class World extends Phaser.Scene {
   }
 
   init(data) {
-    this.mapKey = data.map || 'village';
+    this.mapKey = data.map || OPENING.map;
     this.spawnTile = data.spawn || MAPS[this.mapKey].spawn;
   }
 
@@ -87,8 +89,10 @@ export default class World extends Phaser.Scene {
 
     this.frozen = false;
     this.doorLocked = true; // cleared once the player steps off the tile they spawned on
+    this.scripted = false;
 
     const unfreeze = () => {
+      if (this.scripted) return; // a scene in progress keeps hold of the player
       this.frozen = false;
       haltPlayer(this.player);
     };
@@ -98,6 +102,7 @@ export default class World extends Phaser.Scene {
     };
     const afterDialogue = () => {
       unfreeze();
+      if (this.scripted) return;
       if (!this.pendingBoard) return;
       this.pendingBoard = false;
       this.game.events.emit('quest:board');
@@ -107,6 +112,10 @@ export default class World extends Phaser.Scene {
     this.game.events.on('menu:close', unfreeze);
     this.game.events.on('quest:open', freeze);
     this.game.events.on('quest:close', unfreeze);
+
+    // the opening plays itself the first time its map is walked into, and never again
+    if (this.mapKey === OPENING.map && !hasPlayed('opening')) play(this, OPENING, 'opening');
+
     this.events.once('shutdown', () => {
       this.game.events.off('dialogue:end', afterDialogue);
       this.game.events.off('menu:open', freeze);

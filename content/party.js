@@ -23,8 +23,8 @@ export const PARTY = [
   {
     id: 'aldis',
     name: 'Aldis Rooke',
-    palette: 'player',
-    hp: 11, // the Vitality on their Character sheet
+    palette: 'hunter',
+    hp: 11,
     traits: ['woodcraft', 'animalhandling', 'charisma'],
     fears: ['thedead'], // the grave-pin in their pack that they have mentioned to nobody
     bond: 9,
