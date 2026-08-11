@@ -1,31 +1,38 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { setting } from '../settings.js';
+import { buildTextures, portraitKey, PORTRAIT_PX } from '../textures.js';
 
-// Runs alongside World. A line array and a box that reads it — nothing else.
+// Runs alongside World. A line array, a box that reads it, and the speaker's face
+// beside it — nothing else.
 export default class Dialogue extends Phaser.Scene {
   constructor() {
     super('Dialogue');
   }
 
   create() {
+    buildTextures(this);
+
     const m = TUNING.dialogueBoxMargin;
-    const w = this.scale.width - m * 2;
+    const ps = TUNING.dialoguePortraitSize;
     const h = TUNING.dialogueBoxHeight;
     const top = this.scale.height - h - m;
+    // the box gives up its left end to the portrait; everything in it starts from there
+    const bx = m + ps + TUNING.dialoguePortraitGap;
+    const w = this.scale.width - bx - m;
 
     this.box = this.add.graphics();
     this.box.fillStyle(COLORS.dialogueFill, 0.94);
-    this.box.fillRect(m, top, w, h);
+    this.box.fillRect(bx, top, w, h);
     this.box.lineStyle(2, COLORS.dialogueEdge, 1);
-    this.box.strokeRect(m + 1, top + 1, w - 2, h - 2);
+    this.box.strokeRect(bx + 1, top + 1, w - 2, h - 2);
 
-    this.nameText = this.add.text(m + 18, top + 12, '', {
+    this.nameText = this.add.text(bx + 18, top + 12, '', {
       fontFamily: 'monospace',
       fontSize: `${TUNING.dialogueNameSize}px`,
       color: hex(COLORS.dialogueName),
     });
 
-    this.bodyText = this.add.text(m + 18, top + 40, '', {
+    this.bodyText = this.add.text(bx + 18, top + 40, '', {
       fontFamily: 'monospace',
       fontSize: `${TUNING.dialogueFontSize}px`,
       color: hex(COLORS.dialogueText),
@@ -33,13 +40,26 @@ export default class Dialogue extends Phaser.Scene {
       lineSpacing: 4,
     });
 
-    this.hint = this.add.text(m + w - 18, top + h - 26, '[E]', {
+    this.hint = this.add.text(bx + w - 18, top + h - 26, '[E]', {
       fontFamily: 'monospace',
       fontSize: '14px',
       color: hex(COLORS.dialogueEdge),
     }).setOrigin(1, 0);
 
-    this.group = [this.box, this.nameText, this.bodyText, this.hint];
+    // panel and face travel together, so the pop is one tween on one thing
+    this.portraitY = top + h - ps;
+    this.portrait = this.add.container(m, this.portraitY);
+    const frame = this.add.graphics();
+    frame.fillStyle(COLORS.portraitFill, 0.94);
+    frame.fillRect(0, 0, ps, ps);
+    frame.lineStyle(2, COLORS.dialogueEdge, 1);
+    frame.strokeRect(1, 1, ps - 2, ps - 2);
+    // whole multiples only: a portrait scaled 2.7x is a blurred portrait
+    const scale = Math.max(1, Math.floor((ps - 8) / PORTRAIT_PX));
+    this.face = this.add.image(ps / 2, ps / 2, portraitKey('player')).setScale(scale);
+    this.portrait.add([frame, this.face]);
+
+    this.group = [this.box, this.nameText, this.bodyText, this.hint, this.portrait];
     this.hide();
 
     this.input.keyboard.on('keydown-E', this.advance, this);
@@ -53,7 +73,7 @@ export default class Dialogue extends Phaser.Scene {
     this.open_ = false;
   }
 
-  open({ name, lines }) {
+  open({ name, lines, portrait }) {
     this.lines = lines;
     this.index = 0;
     this.chars = 0;
@@ -63,6 +83,27 @@ export default class Dialogue extends Phaser.Scene {
     this.hint.setVisible(setting('prompt'));
     this.nameText.setText(name);
     this.bodyText.setText('');
+    this.showPortrait(portrait);
+  }
+
+  // a speaker with no portrait of their own leaves the panel out rather than
+  // borrowing someone else's face
+  showPortrait(palette) {
+    const key = palette && portraitKey(palette);
+    if (!key || !this.textures.exists(key)) {
+      this.portrait.setVisible(false);
+      return;
+    }
+    this.face.setTexture(key);
+    this.tweens.killTweensOf(this.portrait);
+    this.portrait.setY(this.portraitY + TUNING.dialoguePortraitRise).setAlpha(0);
+    this.tweens.add({
+      targets: this.portrait,
+      y: this.portraitY,
+      alpha: 1,
+      duration: TUNING.dialoguePortraitPopMs,
+      ease: 'Quad.Out',
+    });
   }
 
   advance() {

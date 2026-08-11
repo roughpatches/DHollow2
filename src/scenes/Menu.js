@@ -6,12 +6,14 @@ import { BESTIARY, QUESTS } from '../../content/codex.js';
 import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
+import { SCRIPT } from '../placeholders.js';
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
 // array in content/. An entry carrying a `map` also gets that grid drawn above its
 // text — the one thing a list of paragraphs cannot say — and one carrying `options`
-// becomes a setting the player cycles with Enter.
+// becomes a setting the player cycles with Enter. Script is the one derived tab: it is
+// scanned out of the others rather than written, and lists every line still unwritten.
 const TABS = [
   ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
@@ -20,6 +22,7 @@ const TABS = [
   ['Bestiary', BESTIARY],
   ['Quest Log', QUESTS],
   ['Map', PLACES],
+  ['Script', SCRIPT],
   ['Settings', SETTINGS],
 ];
 
@@ -153,7 +156,7 @@ export default class Menu extends Phaser.Scene {
         g.fillRect(x, y + t.height + 3, t.width, 2);
         this.layer.add(g);
       }
-      x += t.width + 26;
+      x += t.width + TUNING.menuTabGap;
     });
   }
 

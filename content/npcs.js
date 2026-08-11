@@ -1,5 +1,9 @@
 // Everyone in the world and everything they say. Plain strings — rewrite any of it.
 // palette names come from PALETTES in tuning.js. x/y are tile coordinates on that map.
+// The palette also picks the portrait shown while they speak; add `portrait: 'name'` to
+// give someone a face from a different palette than the one they walk around in.
+// Anywhere a line isn't written yet, put [Placeholder Text] — the Script tab in the
+// menu lists every one of them, and an NPC with no `lines` at all gets one for free.
 
 export const NPCS = [
   {

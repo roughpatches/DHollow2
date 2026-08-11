@@ -4,6 +4,7 @@ import { NPCS } from '../../content/npcs.js';
 import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
 import { findTarget, faceToward } from '../interact.js';
+import { linesOf } from '../placeholders.js';
 import { applyToWorld } from '../settings.js';
 
 const TS = TUNING.tileSize;
@@ -123,7 +124,12 @@ export default class World extends Phaser.Scene {
     npc.setTexture(actorFrame(npc.palette, npc.facing, 0));
     haltPlayer(this.player);
     this.frozen = true;
-    this.game.events.emit('dialogue:start', { name: npc.def.name, lines: npc.def.lines });
+    this.game.events.emit('dialogue:start', {
+      name: npc.def.name,
+      lines: linesOf(npc.def),
+      // a face of their own if the def names one, otherwise the palette they walk around in
+      portrait: npc.def.portrait || npc.def.palette,
+    });
   }
 
   checkDoors() {

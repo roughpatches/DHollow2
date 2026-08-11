@@ -19,6 +19,11 @@ export const TUNING = {
   dialogueFontSize: 20,
   dialogueNameSize: 18,
 
+  dialoguePortraitSize: 128, // the portrait panel's side in screen pixels; art scales to fit it
+  dialoguePortraitGap: 8, // space between portrait panel and dialogue box
+  dialoguePortraitRise: 10, // how far the portrait travels as it pops up
+  dialoguePortraitPopMs: 130,
+
   menuMargin: 26,
   menuPad: 20,
   menuTabStripHeight: 42,
@@ -26,6 +31,7 @@ export const TUNING = {
   menuRowHeight: 26,
   menuRowsVisible: 13,
   menuTabSize: 16,
+  menuTabGap: 22, // space between tab names; shrink it when a new tab crowds the strip
   menuTitleSize: 22,
   menuRowSize: 15,
   menuBodySize: 15,
@@ -42,6 +48,9 @@ export const COLORS = {
   dialogueEdge: 0x6b5a3a,
   dialogueText: 0xd9d3c4,
   dialogueName: 0xc9a95f,
+  portraitFill: 0x14161b,
+  portraitEdge: 0x6b5a3a,
+  portraitBack: 0x1d1a16, // the wash behind a bust, so a dark palette still reads as a head
 
   menuFill: 0x101216,
   menuPanel: 0x171a20,
