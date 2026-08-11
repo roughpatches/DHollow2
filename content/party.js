@@ -1,6 +1,9 @@
-// Everyone who can be recruited onto a run. One block each; add a character by adding
-// a block.
+// Everyone who walks a run: the player, and everyone who can be recruited onto one.
+// One block each; add a character by adding a block.
 //   id       — how src/party.js refers to them. Never shown.
+//   you      — the player. They are on every run without being recruited, and their
+//              traits are the three chosen in the hut rather than the three written
+//              here, so the block below leaves them empty.
 //   name     — shown in the menu and on the recruiting screen.
 //   palette  — their sprite and portrait colours, from PALETTES in tuning.js.
 //   hp       — their own HP at level one. Levels add hpPerLevel on top of it.
@@ -25,6 +28,16 @@
 // of them is plainly the best in town at one thing. Every one is a one-line change.
 
 export const PARTY = [
+  {
+    id: 'you',
+    you: true,
+    name: 'You',
+    palette: 'player',
+    hp: 11, // the Vitality on the Character tab, and the same number for the same reason
+    traits: {}, // filled in by the scene in Aldis's hut. See content/scenes.js.
+    bond: 0,
+    body: ['[Placeholder Text]'],
+  },
   {
     id: 'aldis',
     name: 'Aldis Rooke',

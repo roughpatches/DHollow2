@@ -11,11 +11,16 @@ import * as story from './story.js';
 const TRAIT = Object.fromEntries(TRAITS.map((t) => [t.id, t]));
 const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
-const state = new Map(PARTY.map((c) => [c.id, { level: 1, xp: 0, hp: c.hp, bond: c.bond || 0 }]));
+// Traits live here rather than in content/party.js because the player's are chosen in
+// the hut and everyone's could move later; content says what they start as.
+const state = new Map(PARTY.map((c) => [c.id, {
+  level: 1, xp: 0, hp: c.hp, bond: c.bond || 0, traits: { ...c.traits },
+}]));
 
 // a misspent or misspelt trait list is a content mistake, and content mistakes are
-// said out loud at boot rather than found later in a wrong bonus
-for (const c of PARTY) {
+// said out loud at boot rather than found later in a wrong bonus. The player's three
+// are not written down anywhere to be wrong yet.
+for (const c of PARTY.filter((x) => !x.you)) {
   const spent = Object.entries(c.traits);
   const bad = spent.filter(([t]) => !TRAIT[t]).map(([t]) => t);
   if (bad.length) console.warn(`${c.name}: no such trait — ${bad.join(', ')}`);
@@ -30,12 +35,22 @@ for (const c of PARTY) {
 
 // everyone who could ever be recruited, whether or not they are yet
 export function everyone() {
-  return PARTY;
+  return PARTY.filter((c) => !c.you);
 }
 
 // and everyone who can be, right now
 export function roster() {
-  return PARTY.filter((c) => story.ok(c));
+  return everyone().filter((c) => story.ok(c));
+}
+
+// The player is nobody's recruit: they are on every run without being asked, and are
+// left out of every list of who might come. This is the only place that knows which
+// character they are.
+export const YOU = PARTY.find((c) => c.you).id;
+
+// what the hut scene hands back: three traits against the points put on each
+export function setTraits(id, traits) {
+  stateOf(id).traits = { ...traits };
 }
 
 export function charOf(id) {
@@ -113,7 +128,7 @@ export function traitOf(traitId) {
 }
 
 export function rankOf(id, traitId) {
-  return charOf(id).traits[traitId] || 0;
+  return stateOf(id).traits[traitId] || 0;
 }
 
 // what one point is worth to an activity, and so what a rank is worth
@@ -123,7 +138,7 @@ export function worthOf(rank) {
 
 // best first, because a sheet is read for what somebody is good at
 export function traitsOf(id) {
-  return Object.entries(charOf(id).traits)
+  return Object.entries(stateOf(id).traits)
     .filter(([t]) => TRAIT[t])
     .map(([t, rank]) => ({ ...TRAIT[t], rank }))
     .sort((a, b) => b.rank - a.rank);
@@ -163,6 +178,7 @@ export function check(ids, traitId, dc) {
   const total = die + rank;
   return {
     name: who ? charOf(who).name : 'Nobody',
+    you: who === YOU, // 'You roll', not 'You rolls'
     trait: TRAIT[traitId],
     rank,
     die,
@@ -190,8 +206,13 @@ export function scoreLine(ids) {
 // --- menu rows ------------------------------------------------------------
 // Rebuilt on every draw rather than held, because level and HP move while the game runs.
 
+// the player first, because they are on every run, then whoever else can be asked
+export function walking() {
+  return [charOf(YOU), ...roster()];
+}
+
 export function partyRows() {
-  return roster().map((c) => {
+  return walking().map((c) => {
     const s = stateOf(c.id);
     const next = xpToNext(s.level);
     const traits = traitsOf(c.id);
@@ -202,11 +223,15 @@ export function partyRows() {
       body: [
         `Level ${s.level}    HP ${s.hp} of ${hpMax(c.id)}    `
           + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`),
-        `Bond: ${bandName(bandOf(c.id))} (${s.bond} points).`,
-        traits.map((t) => `${t.name} ${t.rank} — +${worthOf(t.rank)} to ${t.activities.join(', ')}`).join('\n'),
+        c.you
+          ? 'On every run. Nobody has to be asked to bring you.'
+          : `Bond: ${bandName(bandOf(c.id))} (${s.bond} points).`,
+        traits.length
+          ? traits.map((t) => `${t.name} ${t.rank} — +${worthOf(t.rank)} to ${t.activities.join(', ')}`).join('\n')
+          : 'Nothing settled yet. Every roll is the die on its own.',
         fears.length
           ? fears.map((f) => `${f.name} — ${f.kind === 'scruple' ? 'will not do it' : 'will not face it'}`).join('\n')
-          : 'Nothing they will not walk into.',
+          : `Nothing ${c.you ? 'you' : 'they'} will not walk into.`,
         ...c.body,
       ],
     };
@@ -217,10 +242,10 @@ export function partyRows() {
 // on every draw and says it out loud rather than describing the trait in the abstract.
 export function traitRows() {
   return TRAITS.map((t) => {
-    const held = roster()
+    const held = walking()
       .filter((c) => has(c.id, t.id))
       .sort((a, b) => rankOf(b.id, t.id) - rankOf(a.id, t.id));
-    const score = scoreOf(roster().map((c) => c.id), t.id);
+    const score = scoreOf(walking().map((c) => c.id), t.id);
     return {
       label: t.name,
       note: `${score} in town`,

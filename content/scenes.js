@@ -7,6 +7,8 @@
 //   narrate — { narrate: [...] } the same box with nobody speaking, for what the player
 //             notices rather than what anyone says to them.
 //   prone   — { prone: true } lays the player out; false stands them up.
+//   traits  — { traits: true } hands the player the trait sheet and waits while they
+//             fill it in. Once, in the hut. See src/scenes/Traits.js.
 //   fade    — { fade: 'out' | 'in', ms }.
 //   go      — { go: mapKey, spawn: [x, y] } ends the scene and loads that map.
 //   flag    — { flag: 'name' } raises a story flag. See src/story.js.
@@ -63,6 +65,11 @@ export const SCENES = [
         narrate: ['[Placeholder Text]'],
         beat: 'The amnesia. What they reach for and do not find — name, ship, why they were at sea.',
       },
+      {
+        narrate: ['[Placeholder Text]'],
+        beat: 'What is still there. Not memories — the hands know things the head has lost, and they know them before you decide anything.',
+      },
+      { traits: true },
       { prone: false },
       { face: 'aldis', dir: 'right' },
       { wait: 500 },

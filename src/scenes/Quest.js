@@ -1,7 +1,7 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
-import { roster, charOf, bandName, bandOf, scoreLine, traitsOf, traitOf } from '../party.js';
+import { roster, charOf, bandName, bandOf, scoreLine, traitsOf, traitOf, YOU } from '../party.js';
 
 // The crawl. Runs over World, which freezes behind it. A row of pips across the top is
 // the whole run at a glance; everything below is the node you are standing on.
@@ -288,11 +288,12 @@ export default class Quest extends Phaser.Scene {
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule, this.wide - 40).height + 10;
     });
 
+    // you are on it whoever else is, so you are in both readouts
+    const crew = [YOU, ...this.taking];
     this.text(this.left, this.box.y + this.box.h - 74,
-      this.taking.length ? run.partyLine(this.taking.map((id) => charOf(id))) : 'Nobody is coming.',
-      TUNING.menuRowSize, COLORS.menuText);
+      run.partyLine(crew.map((id) => charOf(id))), TUNING.menuRowSize, COLORS.menuText);
     // the crew added up: what this party would be good at if it walked out now
-    this.text(this.left, this.box.y + this.box.h - 50, scoreLine(this.taking),
+    this.text(this.left, this.box.y + this.box.h - 50, scoreLine(crew),
       TUNING.questHintSize, COLORS.menuDim);
     this.hint(short > 0
       ? '[Up/Down] Look    [Space] Take or leave    [Esc] Back'

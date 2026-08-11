@@ -11,7 +11,7 @@ import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import {
   roster, charOf, stateOf, damage, heal, award, raiseBond, hpMax,
-  rankOf, scoreOf, check, traitOf,
+  rankOf, scoreOf, check, traitOf, walking, YOU,
 } from './party.js';
 import { give, nameOf } from './town.js';
 import * as story from './story.js';
@@ -111,9 +111,11 @@ export function mixAt(when) {
 export function start(id, when, party) {
   const quest = questOf(id);
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
-  // only the recruited walk it: they take the wounds, earn the experience, and are the
-  // only ones who can read anything at a fork
-  const who = (party && party.length ? party : roster().map((c) => c.id));
+  // The player and the recruited walk it: they take the wounds, earn the experience,
+  // and are the only ones who can read anything at a fork. The player is on it whoever
+  // else is, so their three traits are the three the party always has.
+  const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
+    .filter((id, i, all) => all.indexOf(id) === i);
   const count = roll(sizeOf(quest));
   const nodes = [];
   for (let i = 0; i < count; i++) {
@@ -139,7 +141,7 @@ export function abandon() {
 // question a run asks is whether the party survives this one, not whether they have
 // been worn down since the first. Move this the day beds and food cost something.
 export function recover() {
-  for (const c of roster()) heal(c.id, hpMax(c.id));
+  for (const c of walking()) heal(c.id, hpMax(c.id));
 }
 
 export function clear() {
@@ -178,7 +180,7 @@ function branches() {
 }
 
 export function walkers() {
-  return run ? run.party.map((id) => charOf(id)) : roster();
+  return run ? run.party.map((id) => charOf(id)) : walking();
 }
 
 // who on the run can see this coming, and what they say about it. The one with the most
@@ -314,7 +316,7 @@ export function placeLines(id) {
 
 // a roll, said the way a table says it: die, what the trait added, and what it came to
 export function checkLine(c) {
-  return `${c.trait.name} DC ${c.dc} — ${c.name} rolls ${c.die}${c.rank ? ` +${c.rank}` : ''}`
+  return `${c.trait.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
     + ` = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
 }
 

@@ -59,6 +59,8 @@ function run(scene, step, done) {
     done();
   } else if (step.say || step.narrate) {
     say(scene, step, done);
+  } else if (step.traits) {
+    traits(scene, done);
   } else if (step.prone !== undefined) {
     prone(scene, step.prone);
     done();
@@ -130,6 +132,16 @@ function say(scene, step, done) {
     lines: step.narrate || step.lines,
     portrait: def ? (def.portrait || def.palette) : null,
   });
+}
+
+// the same shape as a line of dialogue: the scene stops until the player has answered
+function traits(scene, done) {
+  const once = () => {
+    scene.game.events.off('traits:done', once);
+    done();
+  };
+  scene.game.events.on('traits:done', once);
+  scene.game.events.emit('traits:choose');
 }
 
 function prone(scene, down) {
