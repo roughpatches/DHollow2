@@ -74,6 +74,7 @@ export default class World extends Phaser.Scene {
     this.input.keyboard.on('keydown-SPACE', this.tryTalk, this);
 
     if (!this.scene.isActive('Dialogue')) this.scene.launch('Dialogue');
+    if (!this.scene.isActive('Menu')) this.scene.launch('Menu');
 
     this.frozen = false;
     this.doorLocked = true; // cleared once the player steps off the tile they spawned on
@@ -82,8 +83,18 @@ export default class World extends Phaser.Scene {
       this.frozen = false;
       haltPlayer(this.player);
     };
+    const freeze = () => {
+      this.frozen = true;
+      haltPlayer(this.player);
+    };
     this.game.events.on('dialogue:end', unfreeze);
-    this.events.once('shutdown', () => this.game.events.off('dialogue:end', unfreeze));
+    this.game.events.on('menu:open', freeze);
+    this.game.events.on('menu:close', unfreeze);
+    this.events.once('shutdown', () => {
+      this.game.events.off('dialogue:end', unfreeze);
+      this.game.events.off('menu:open', freeze);
+      this.game.events.off('menu:close', unfreeze);
+    });
   }
 
   buildLayer(data, depth) {

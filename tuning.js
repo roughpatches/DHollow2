@@ -18,6 +18,18 @@ export const TUNING = {
   dialogueBoxMargin: 16,
   dialogueFontSize: 20,
   dialogueNameSize: 18,
+
+  menuMargin: 26,
+  menuPad: 20,
+  menuTabStripHeight: 42,
+  menuListWidth: 300,
+  menuRowHeight: 26,
+  menuRowsVisible: 13,
+  menuTabSize: 16,
+  menuTitleSize: 22,
+  menuRowSize: 15,
+  menuBodySize: 15,
+  menuHintSize: 13,
 };
 
 // [base, detail] per tile. Retint the whole world from this table.
@@ -27,6 +39,15 @@ export const COLORS = {
   dialogueEdge: 0x6b5a3a,
   dialogueText: 0xd9d3c4,
   dialogueName: 0xc9a95f,
+
+  menuFill: 0x101216,
+  menuPanel: 0x171a20,
+  menuEdge: 0x6b5a3a,
+  menuRule: 0x2e3138,
+  menuText: 0xd9d3c4,
+  menuDim: 0x8b8578,
+  menuAccent: 0xc9a95f,
+  menuSelectFill: 0x2a2418,
 
   grass: [0x2f3d2b, 0x263422],
   path: [0x4f4a43, 0x413d37],
@@ -63,3 +84,9 @@ export const PALETTES = {
   priest: { body: 0x23262c, head: 0xc5a68d, hair: 0xa8a49b, trim: 0xc0a45e },
   child: { body: 0x5b4a6b, head: 0xd2b193, hair: 0x3a2a1d, trim: 0x9782ab },
 };
+
+// Phaser text wants '#rrggbb'; every colour above is a number. Lives here so the
+// two places that draw text don't each keep their own copy.
+export function hex(n) {
+  return `#${n.toString(16).padStart(6, '0')}`;
+}

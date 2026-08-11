@@ -1,4 +1,4 @@
-import { TUNING, COLORS } from '../../tuning.js';
+import { TUNING, COLORS, hex } from '../../tuning.js';
 
 // Runs alongside World. A line array and a box that reads it — nothing else.
 export default class Dialogue extends Phaser.Scene {
@@ -97,8 +97,4 @@ export default class Dialogue extends Phaser.Scene {
       this.bodyText.setText(line.slice(0, Math.floor(this.chars)));
     }
   }
-}
-
-function hex(n) {
-  return `#${n.toString(16).padStart(6, '0')}`;
 }
