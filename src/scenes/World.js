@@ -5,6 +5,10 @@ import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
+import { questLines } from '../quests.js';
+import {
+  siteAt, isOpen, patchesFor, patchOf, levelOf, contribute, contributeLines, statusLines, remaining,
+} from '../town.js';
 import { applyToWorld } from '../settings.js';
 
 const TS = TUNING.tileSize;
@@ -25,6 +29,10 @@ export default class World extends Phaser.Scene {
     const w = map.rows[0].length;
     const h = map.rows.length;
 
+    // the map as written, then whatever state the town has got itself into on top of it
+    const names = map.rows.map((row) => [...row].map((ch) => LEGEND[ch]));
+    for (const [x, y, ch] of patchesFor(this.mapKey)) names[y][x] = LEGEND[ch];
+
     // Two grids from one: a tile with `above` also draws a second tile on a layer
     // over the actors, so you pass behind foliage instead of in front of it.
     const ground = [];
@@ -33,7 +41,7 @@ export default class World extends Phaser.Scene {
       ground.push([]);
       above.push([]);
       for (let x = 0; x < w; x++) {
-        const name = LEGEND[map.rows[y][x]];
+        const name = names[y][x];
         ground[y].push(TILE_INDEX[name]);
         above[y].push(TILES[name].above ? TILE_INDEX[TILES[name].above] : -1);
       }
@@ -44,7 +52,7 @@ export default class World extends Phaser.Scene {
 
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
-        if (TILES[LEGEND[map.rows[y][x]]].solid) this.ground.getTileAt(x, y).setCollision(true);
+        if (TILES[names[y][x]].solid) this.ground.getTileAt(x, y).setCollision(true);
       }
     }
 
@@ -119,17 +127,53 @@ export default class World extends Phaser.Scene {
   tryTalk() {
     if (this.frozen) return;
     const npc = findTarget(this.player, this.npcs);
-    if (!npc) return;
-    npc.facing = faceToward(npc, this.player);
-    npc.setTexture(actorFrame(npc.palette, npc.facing, 0));
+    if (npc) {
+      npc.facing = faceToward(npc, this.player);
+      npc.setTexture(actorFrame(npc.palette, npc.facing, 0));
+      this.say(npc.def.name, [
+        ...linesOf(npc.def),
+        ...(npc.def.quests ? questLines() : []),
+        // a face of their own if the def names one, otherwise the palette they walk in
+      ], npc.def.portrait || npc.def.palette);
+      return;
+    }
+    const site = this.siteAhead();
+    if (site) this.workOn(site);
+  }
+
+  say(name, lines, portrait) {
     haltPlayer(this.player);
     this.frozen = true;
-    this.game.events.emit('dialogue:start', {
-      name: npc.def.name,
-      lines: linesOf(npc.def),
-      // a face of their own if the def names one, otherwise the palette they walk around in
-      portrait: npc.def.portrait || npc.def.palette,
-    });
+    this.game.events.emit('dialogue:start', { name, lines, portrait });
+  }
+
+  // the tile you are facing, or the one under your feet — a site with no door is
+  // ground you can stand on, and standing on it should count as being there
+  siteAhead() {
+    const TS_ = TS;
+    const here = [Math.floor(this.player.x / TS_), Math.floor((this.player.y - 1) / TS_)];
+    const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[this.player.facing];
+    return siteAt(this.mapKey, here[0] + dx, here[1] + dy) || siteAt(this.mapKey, here[0], here[1]);
+  }
+
+  workOn(b) {
+    if (!remaining(b.id)) {
+      this.say(b.name, statusLines(b.id), null);
+      return;
+    }
+    const before = levelOf(b.id);
+    const result = contribute(b.id);
+    if (result.levelled) this.applyPatch(patchOf(b.id, before + 1));
+    this.say(b.name, contributeLines(b.id, result), null);
+  }
+
+  // a stage's tiles go down without rebuilding the map, so the town changes under you
+  applyPatch(patch) {
+    for (const [x, y, ch] of patch) {
+      const name = LEGEND[ch];
+      this.ground.putTileAt(TILE_INDEX[name], x, y).setCollision(!!TILES[name].solid);
+      this.above.putTileAt(TILES[name].above ? TILE_INDEX[TILES[name].above] : -1, x, y);
+    }
   }
 
   checkDoors() {
@@ -142,6 +186,10 @@ export default class World extends Phaser.Scene {
     }
 
     const door = MAPS[this.mapKey].doors.find((d) => d.x === tx && d.y === ty);
-    if (door) this.scene.restart({ map: door.to, spawn: door.spawn });
+    if (!door) return;
+    // a building still under repair keeps its door shut; E on it says what it wants
+    const site = siteAt(this.mapKey, tx, ty);
+    if (site && !isOpen(site.id)) return;
+    this.scene.restart({ map: door.to, spawn: door.spawn });
   }
 }

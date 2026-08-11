@@ -1,6 +1,8 @@
 // The Map tab. Same label/note/body as the other tabs, plus two fields it alone reads:
-//   map — which grid in content/maps.js to draw. Required; an entry without it is a list row.
-//   at  — optional [x, y] tile to ring on that map, for a landmark inside a larger place.
+//   map      — which grid in content/maps.js to draw. Required; an entry without it is a list row.
+//   at       — optional [x, y] tile to ring on that map, for a landmark inside a larger place.
+//   building — optional id from content/buildings.js. The building's repair state and what
+//              it still wants are shown above the prose, read live from the town.
 // Doors, everyone standing on the map, and the player's own position are drawn from the
 // live world, so a place only needs writing about once and never needs its pins updating.
 
@@ -15,24 +17,30 @@ export const PLACES = [
     ],
   },
   {
-    label: 'The Drowned Bell',
+    label: 'The Sea Hag',
     note: 'Indoors',
     map: 'tavern',
-    body: [
-      'Ysolde Fen keeps the door open and the fire lit, and says that is the whole of what she promises.',
-      'Ale is thin, stew is honest, beds upstairs are dry three nights in four. Take the back room — the front one looks over the graveyard and people do not sleep in it.',
-      'The bell itself hangs outside on the post, salvage off a wreck up the coast, and it is not on any map because nobody wants to mark it.',
-    ],
+    building: 'tavern',
+    body: ['[Placeholder Text]'],
   },
   {
-    label: "Krael's Forge",
+    label: 'The Smithy',
     note: 'Indoors',
     map: 'smithy',
+    building: 'smithy',
     body: [
       'Cinder floor, and Bertran Krael will tell you to keep left across it before he tells you anything else.',
       'Leave work on the bench and come back tomorrow. He does not wait while you watch.',
       'Nails, hinges, hooks, and grave-pins. Mostly grave-pins, lately, and all of those go to one customer.',
     ],
+  },
+  {
+    label: 'The Docks',
+    note: 'Landmark',
+    map: 'village',
+    at: [7, 22],
+    building: 'docks',
+    body: ['[Placeholder Text]'],
   },
   {
     label: 'The Green Room',
@@ -48,6 +56,7 @@ export const PLACES = [
     label: 'Chapel of the Quiet Hour',
     note: 'Indoors',
     map: 'chapel',
+    building: 'chapel',
     body: [
       'Four ranks of pews, an altar, and Father Emeric Stang, who will tell you the pews are all equally unkind.',
       'At dusk the village sits here in silence. No sermon, no singing. It began as mourning and has become the only hour anybody in Dreadhollow is honest.',

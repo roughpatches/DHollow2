@@ -91,7 +91,7 @@ export const MAPS = {
   },
 
   tavern: {
-    name: 'The Drowned Bell',
+    name: 'The Sea Hag',
     spawn: [9, 13],
     rows: [
       '######################',

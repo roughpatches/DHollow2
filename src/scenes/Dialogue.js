@@ -16,31 +16,24 @@ export default class Dialogue extends Phaser.Scene {
     const ps = TUNING.dialoguePortraitSize;
     const h = TUNING.dialogueBoxHeight;
     const top = this.scale.height - h - m;
-    // the box gives up its left end to the portrait; everything in it starts from there
-    const bx = m + ps + TUNING.dialoguePortraitGap;
-    const w = this.scale.width - bx - m;
+    this.metrics = { m, ps, h, top };
 
     this.box = this.add.graphics();
-    this.box.fillStyle(COLORS.dialogueFill, 0.94);
-    this.box.fillRect(bx, top, w, h);
-    this.box.lineStyle(2, COLORS.dialogueEdge, 1);
-    this.box.strokeRect(bx + 1, top + 1, w - 2, h - 2);
 
-    this.nameText = this.add.text(bx + 18, top + 12, '', {
+    this.nameText = this.add.text(0, top + 12, '', {
       fontFamily: 'monospace',
       fontSize: `${TUNING.dialogueNameSize}px`,
       color: hex(COLORS.dialogueName),
     });
 
-    this.bodyText = this.add.text(bx + 18, top + 40, '', {
+    this.bodyText = this.add.text(0, top + 40, '', {
       fontFamily: 'monospace',
       fontSize: `${TUNING.dialogueFontSize}px`,
       color: hex(COLORS.dialogueText),
-      wordWrap: { width: w - 36 },
       lineSpacing: 4,
     });
 
-    this.hint = this.add.text(bx + w - 18, top + h - 26, '[E]', {
+    this.hint = this.add.text(0, top + h - 26, '[E]', {
       fontFamily: 'monospace',
       fontSize: '14px',
       color: hex(COLORS.dialogueEdge),
@@ -60,12 +53,31 @@ export default class Dialogue extends Phaser.Scene {
     this.portrait.add([frame, this.face]);
 
     this.group = [this.box, this.nameText, this.bodyText, this.hint, this.portrait];
+    this.layout(false);
     this.hide();
 
     this.input.keyboard.on('keydown-E', this.advance, this);
     this.input.keyboard.on('keydown-SPACE', this.advance, this);
 
     this.game.events.on('dialogue:start', this.open, this);
+  }
+
+  // With a face beside it the box gives up its left end; without one it takes the whole
+  // width back, so a readout with no speaker doesn't leave a panel-shaped hole.
+  layout(withPortrait) {
+    const { m, ps, h, top } = this.metrics;
+    const bx = withPortrait ? m + ps + TUNING.dialoguePortraitGap : m;
+    const w = this.scale.width - bx - m;
+
+    this.box.clear();
+    this.box.fillStyle(COLORS.dialogueFill, 0.94);
+    this.box.fillRect(bx, top, w, h);
+    this.box.lineStyle(2, COLORS.dialogueEdge, 1);
+    this.box.strokeRect(bx + 1, top + 1, w - 2, h - 2);
+
+    this.nameText.setX(bx + 18);
+    this.bodyText.setX(bx + 18).setWordWrapWidth(w - 36);
+    this.hint.setX(bx + w - 18);
   }
 
   hide() {
@@ -92,8 +104,10 @@ export default class Dialogue extends Phaser.Scene {
     const key = palette && portraitKey(palette);
     if (!key || !this.textures.exists(key)) {
       this.portrait.setVisible(false);
+      this.layout(false);
       return;
     }
+    this.layout(true);
     this.face.setTexture(key);
     this.tweens.killTweensOf(this.portrait);
     this.portrait.setY(this.portraitY + TUNING.dialoguePortraitRise).setAlpha(0);

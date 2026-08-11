@@ -8,6 +8,7 @@ import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
 import { partyRows, TRAIT_ROWS } from '../party.js';
+import { statusLines } from '../town.js';
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
@@ -253,9 +254,13 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
     y += 18;
 
+    // a building's state is read live rather than written into the entry, so repairing
+    // it in the world changes what this page says about it
+    const body = entry.building ? [...statusLines(entry.building), ...entry.body] : entry.body;
+
     // the prose is measured first and the map takes whatever vertical room is left over,
     // so a long entry shrinks its map rather than running off the bottom of the panel
-    const paras = entry.body.map((p) =>
+    const paras = body.map((p) =>
       this.text(this.detailX, 0, p, TUNING.menuBodySize, COLORS.menuText, this.detailW));
     const proseH = paras.reduce((h, t) => h + t.height + 14, 0);
 

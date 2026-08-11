@@ -4,10 +4,13 @@ import Dialogue from './scenes/Dialogue.js';
 import Menu from './scenes/Menu.js';
 import { report } from './placeholders.js';
 import * as party from './party.js';
+import * as town from './town.js';
 
 // so a character can be levelled, hurt, or healed from the browser console while
 // there is no content that does it yet: party.award('aldis', 40)
 window.party = party;
+// and so materials can be handed out before any activity produces them: town.give('timber', 20)
+window.town = town;
 
 // unwritten text is announced on every boot, so it can't quietly accumulate
 console.info(report());

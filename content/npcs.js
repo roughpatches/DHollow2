@@ -72,21 +72,17 @@ export const NPCS = [
     ],
   },
   {
-    id: 'ysolde',
-    name: 'Ysolde Fen',
+    // `quests: true` makes someone the quest dispenser: what is open in the Quest Log
+    // is read out after their own lines. Only one person needs it.
+    id: 'gregorious',
+    name: 'Gregorious',
     map: 'tavern',
     x: 12,
     y: 5,
     facing: 'down',
     palette: 'barkeep',
-    lines: [
-      'Bell keeps the door open and the fire lit. That is the whole of what I promise.',
-      "Ale's thin, stew's honest, and the beds upstairs are dry three nights in four.",
-      "You'll want the room at the back. The front one looks over the graveyard and people don't sleep.",
-      'My husband hung the bell out front. Salvage, off a wreck up the coast.',
-      "Rings itself sometimes. He said it was the wind. He said that right up until he stopped saying anything.",
-      "Sit. Eat. Don't ask me about the bell again.",
-    ],
+    quests: true,
+    lines: ['[Placeholder Text]'],
   },
   {
     id: 'tally',

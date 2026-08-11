@@ -9,6 +9,8 @@ import { PLACES } from '../content/places.js';
 import { SETTINGS } from '../content/settings.js';
 import { PARTY } from '../content/party.js';
 import { TRAITS } from '../content/traits.js';
+import { BUILDINGS } from '../content/buildings.js';
+import { MATERIALS } from '../content/materials.js';
 
 // One spelling, so one scan finds every one of them. Case is ignored when matching.
 export const PLACEHOLDER = '[Placeholder Text]';
@@ -38,6 +40,8 @@ const SOURCES = [
   ['Dialogue', NPCS, (n) => n.name, dialogueSlots],
   ['Party', PARTY, (c) => c.name, proseSlots],
   ['Traits', TRAITS, (t) => t.name, proseSlots],
+  ['Buildings', BUILDINGS, (b) => b.name, proseSlots],
+  ['Materials', MATERIALS, (m) => m.name, proseSlots],
   ['Equipment', EQUIPMENT, (e) => e.label, entrySlots],
   ['Character', CHARACTER, (e) => e.label, entrySlots],
   ['Companions', COMPANIONS, (e) => e.label, entrySlots],
