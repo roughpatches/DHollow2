@@ -41,7 +41,21 @@ export const TUNING = {
   recruitDraw: 1, // each trait drawn to the work asks one band less
   recruitFear: 2, // each fear or scruple the work touches asks two bands more
 
-  traitsAtLevelOne: 3, // how many traits a character picks at level one
+  // Traits are points, not badges. A character spends traitPointsAtLevelOne of them
+  // across content/traits.js; what they never put a point in they are untrained at.
+  traitPointsAtLevelOne: 6,
+  traitBonusPerPoint: 2, // what one point is worth to an activity
+  traitYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
+  // party's score for that work adds this much on top of the roll
+
+  // Skill checks. A die, plus the trait, against a DC written on the encounter or the
+  // job. The best in the party rolls it. A natural top always holds and a natural 1
+  // never does, so no DC is a wall and none is a formality.
+  checkDie: 20,
+  checkPassXp: 1.25, // a check held pays this much more
+  checkFailKeep: 0.5, // a check lost keeps this much of what was there to take
+  checkFailHurt: 2, // and costs this much on top of the node's own wounds
+
   maxLevel: 10,
   hpPerLevel: 3, // added to a character's own HP for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate

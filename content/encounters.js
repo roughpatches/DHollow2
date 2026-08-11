@@ -10,7 +10,15 @@
 //              weights. Nothing is ever zero: a night run still has timber in it and a
 //              day run can still be followed home.
 //   read     — the trait that can spot this kind coming at a fork, and what they say.
-//              A kind with no read is one nobody can see coming.
+//              A kind with no read is one nobody can see coming. Whoever has the most
+//              points in it is the one who speaks.
+//   harvest  — the trait this work is done with. Every point the walking party has in
+//              it adds traitYieldPerPoint to the spoils, so who you take decides what
+//              you carry home. A kind with no harvest pays the same to anybody.
+//   check    — a roll against a difficulty, in the manner of the table: the party's
+//              best at the trait rolls a die and adds their points, and needs the DC.
+//              `held` and `lost` are the line said either way. What holding and losing
+//              are worth is in tuning.js, not here.
 //   spoils   — materials taken, [least, most] each. Rolled per node.
 //   xp       — experience, [least, most].
 //   hurt     — HP it costs, [least, most]. Night multiplies this; see tuning.js.
@@ -24,6 +32,13 @@ export const ENCOUNTERS = [
     activity: 'Felling',
     weight: { day: 5, night: 1 },
     read: { trait: 'woodcraft', line: 'Old cut stumps. Somebody worked this side, and there is more of it standing.' },
+    harvest: 'woodcraft',
+    check: {
+      trait: 'woodcraft',
+      dc: 12,
+      held: 'It comes down where it was told to.',
+      lost: 'It goes over the wrong way, takes a second tree with it, and most of the good wood is under both.',
+    },
     spoils: { timber: [2, 4] },
     xp: [8, 14],
     hurt: [0, 1],
@@ -36,6 +51,13 @@ export const ENCOUNTERS = [
     activity: 'Hauling',
     weight: { day: 4, night: 1 },
     read: null,
+    harvest: 'smithing',
+    check: {
+      trait: 'smithing',
+      dc: 12,
+      held: 'The face splits where it was struck and the blocks come away square.',
+      lost: 'The face shatters. What is left is rubble, and one of you was standing under it.',
+    },
     spoils: { stone: [2, 4] },
     xp: [8, 14],
     hurt: [0, 2],
@@ -48,6 +70,13 @@ export const ENCOUNTERS = [
     activity: 'Calming',
     weight: { day: 4, night: 3 },
     read: { trait: 'animalhandling', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
+    harvest: 'animalhandling',
+    check: {
+      trait: 'animalhandling',
+      dc: 13,
+      held: 'It stands still long enough to be worth the standing still.',
+      lost: 'It bolts, and it does not bolt away from you first.',
+    },
     // a cured hide is the same material as sailcloth to anyone patching a roof with it
     spoils: { canvas: [1, 2] },
     xp: [12, 20],
@@ -61,6 +90,13 @@ export const ENCOUNTERS = [
     activity: 'Rigging',
     weight: { day: 3, night: 2 },
     read: { trait: 'sailing', line: 'The water runs wrong ahead. Something is aground on that side.' },
+    harvest: 'sailing',
+    check: {
+      trait: 'sailing',
+      dc: 13,
+      held: 'She holds while you strip her.',
+      lost: 'She shifts on the tide with the party still aboard her.',
+    },
     spoils: { canvas: [1, 3], timber: [1, 2] },
     xp: [10, 18],
     hurt: [0, 2],
@@ -73,6 +109,13 @@ export const ENCOUNTERS = [
     activity: 'Casting',
     weight: { day: 4, night: 2 },
     read: { trait: 'fishing', line: 'Rings on the surface, and they are not the rain. There is a lane feeding that way.' },
+    harvest: 'fishing',
+    check: {
+      trait: 'fishing',
+      dc: 11,
+      held: 'The lane is where somebody said it was.',
+      lost: 'An hour of wet standing for nothing, and the light going while you do it.',
+    },
     spoils: { pitch: [1, 2] },
     xp: [10, 16],
     hurt: [0, 1],
@@ -82,12 +125,38 @@ export const ENCOUNTERS = [
     id: 'find',
     name: 'Left behind',
     nature: 'gather',
-    activity: null,
+    activity: 'Searching',
     weight: { day: 3, night: 2 },
-    read: null,
+    read: { trait: 'perception', line: 'Something is stacked too neatly on that side to have got there by weather.' },
+    harvest: 'perception',
+    check: {
+      trait: 'perception',
+      dc: 10,
+      held: 'The rest of it is under the sacking, where anybody would have put it.',
+      lost: 'You take what is on top and walk past the rest without ever knowing it was there.',
+    },
     spoils: { timber: [1, 2], nails: [1, 3] },
     xp: [6, 10],
     hurt: [0, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'oldiron',
+    name: 'Iron in the ditch',
+    nature: 'gather',
+    activity: 'Salvage',
+    weight: { day: 3, night: 2 },
+    read: { trait: 'smithing', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
+    harvest: 'smithing',
+    check: {
+      trait: 'smithing',
+      dc: 12,
+      held: 'Half of it is sound under the scale, and the sound half comes free.',
+      lost: 'It is rust holding hands with rust. It comes apart in the lifting.',
+    },
+    spoils: { nails: [2, 5], stone: [0, 1] },
+    xp: [10, 16],
+    hurt: [0, 1],
     body: ['[Placeholder Text]'],
   },
   {
@@ -97,6 +166,8 @@ export const ENCOUNTERS = [
     activity: 'Haggling',
     weight: { day: 5, night: 1 },
     read: { trait: 'charisma', line: 'Somebody has walked this recently and stopped to talk while they did.' },
+    harvest: 'charisma',
+    check: null,
     spoils: { nails: [2, 4] },
     xp: [10, 16],
     hurt: [0, 1],
@@ -109,6 +180,13 @@ export const ENCOUNTERS = [
     activity: 'Persuasion',
     weight: { day: 2, night: 4 },
     read: { trait: 'charisma', line: 'Somebody stood here a while and did not want to be seen doing it.' },
+    harvest: 'charisma',
+    check: {
+      trait: 'charisma',
+      dc: 14,
+      held: 'They decide, out loud, that you are nobody worth the trouble.',
+      lost: 'They decide the other thing, and they decide it first.',
+    },
     spoils: { nails: [1, 3] },
     xp: [12, 20],
     hurt: [0, 2],
@@ -121,6 +199,13 @@ export const ENCOUNTERS = [
     activity: null,
     weight: { day: 2, night: 4 },
     read: null,
+    harvest: null,
+    check: {
+      trait: 'perception',
+      dc: 12,
+      held: 'Somebody calls the halt a pace before it matters.',
+      lost: 'Nobody calls anything, and the ground takes the first one across it.',
+    },
     spoils: {},
     xp: [4, 8],
     hurt: [1, 3],
@@ -133,6 +218,13 @@ export const ENCOUNTERS = [
     activity: 'Fighting',
     weight: { day: 1, night: 5 },
     read: { trait: 'animalhandling', line: 'Everything that should be making noise on that side has stopped.' },
+    harvest: null,
+    check: {
+      trait: 'perception',
+      dc: 14,
+      held: 'You see it before it means you to, and it goes back to being weather in the trees.',
+      lost: 'The first anybody knows of it is the weight of it.',
+    },
     spoils: {},
     xp: [18, 28],
     hurt: [2, 4],
@@ -145,6 +237,13 @@ export const ENCOUNTERS = [
     activity: 'Fighting',
     weight: { day: 1, night: 4 },
     read: null,
+    harvest: null,
+    check: {
+      trait: 'perception',
+      dc: 15,
+      held: 'The turned earth is noticed while it is still only turned earth.',
+      lost: 'It is noticed afterwards, from the far side of it.',
+    },
     spoils: { nails: [0, 2] },
     xp: [16, 24],
     hurt: [1, 4],

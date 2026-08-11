@@ -17,6 +17,9 @@
 //   sets  — a flag raised the first time it is walked to the end.
 //   must  — character ids who have to be on it. Somebody the job will not go without.
 //   at    — the Map tab entry it is set out from, instead of Gregorious's board.
+//   check — the roll the last node asks for, in the same shape encounters use: a trait,
+//           a DC, and the line said whether it is held or lost. The job's own test,
+//           standing in front of the goal, rather than whatever the road threw up.
 //   goal  — what the last node is, in one line.
 //   body  — what the job is, in the world's voice. Yours to write.
 // Add a quest by adding a block. Nothing reads this list by position.
@@ -35,6 +38,12 @@ export const QUESTS = [
     at: 'greywood',
     tags: ['forest', 'timber', 'wild', 'leavingtown'],
     giver: 'gregorious',
+    check: {
+      trait: 'woodcraft',
+      dc: 12,
+      held: 'Aldis picks the stand, and the stand gives up what the inn needs.',
+      lost: 'You cut what was nearest instead of what was best, and half of it is green.',
+    },
     goal: 'Bring back enough timber and provisions to put the Sea Hag right.',
     body: ['[Placeholder Text]'],
   },
@@ -47,6 +56,12 @@ export const QUESTS = [
     party: 2,
     tags: ['fen', 'water', 'thedead', 'leavingtown'],
     giver: 'gregorious',
+    check: {
+      trait: 'perception',
+      dc: 13,
+      held: 'Somebody counts the black water twice and gets a different number the second time — and can say where.',
+      lost: 'You walk it end to end and come back able to say only that it is wet.',
+    },
     goal: 'Walk the black water end to end and come back saying what is in it.',
     body: ['[Placeholder Text]'],
   },
@@ -59,6 +74,12 @@ export const QUESTS = [
     party: 3,
     tags: ['coast', 'water', 'leavingtown'],
     giver: 'gregorious',
+    check: {
+      trait: 'sailing',
+      dc: 14,
+      held: 'Somebody reads the tide off her list and calls how long you have on board.',
+      lost: 'The water is around your knees before anybody thinks to look at it.',
+    },
     goal: 'Reach the wreck the Sea Hag was named for and bring back what is still on it.',
     body: ['[Placeholder Text]'],
   },
@@ -71,6 +92,12 @@ export const QUESTS = [
     party: 3,
     tags: ['road', 'forest', 'thenorthroad', 'thedead', 'leavingtown'],
     giver: 'gregorious',
+    check: {
+      trait: 'perception',
+      dc: 15,
+      held: 'The carts are where they stopped, and so is the reason, and somebody sees the second one.',
+      lost: 'You find the carts. Nobody finds the rest of it, and the dark is not lending anybody a lamp.',
+    },
     goal: 'Follow the north road to where the carters stopped, and find out why they stopped there.',
     body: ['[Placeholder Text]'],
   },

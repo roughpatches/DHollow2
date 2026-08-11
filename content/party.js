@@ -4,8 +4,10 @@
 //   name     — shown in the menu and on the recruiting screen.
 //   palette  — their sprite and portrait colours, from PALETTES in tuning.js.
 //   hp       — their own HP at level one. Levels add hpPerLevel on top of it.
-//   traits   — exactly traitsAtLevelOne ids from content/traits.js. src/party.js
-//              complains to the console if the count is wrong.
+//   traits   — trait ids from content/traits.js against the points spent on each. The
+//              points must add up to traitPointsAtLevelOne; src/party.js complains to
+//              the console if they do not. A trait not listed is one they are untrained
+//              at, and rolls for it on the die alone.
 //   fears    — ids from content/fears.js. A quest carrying one of these as a tag needs
 //              a deeper bond before they will walk out on it.
 //   needs    — a story flag they are not recruitable before. See src/story.js.
@@ -18,7 +20,8 @@
 // Traits and fears below were read off what content/npcs.js and content/character.js
 // already say about these people — Tally will not walk the north road, Grast goes out
 // at first light and not after, Krael has no interest in leaving the smithy. The
-// traits are spread so the roster covers all five. Every one is a one-line change.
+// points are spread so the roster covers every trait, and so that each of them is
+// plainly the best in town at one thing. Every one is a one-line change.
 
 export const PARTY = [
   {
@@ -26,7 +29,7 @@ export const PARTY = [
     name: 'Aldis Rooke',
     palette: 'hunter',
     hp: 11,
-    traits: ['woodcraft', 'animalhandling', 'charisma'],
+    traits: { woodcraft: 2, animalhandling: 2, perception: 1, smithing: 1 },
     fears: ['thedead'], // the grave-pin in their pack that they have mentioned to nobody
     bond: 9,
     body: ['[Placeholder Text]'],
@@ -37,7 +40,7 @@ export const PARTY = [
     name: 'Tally Ruin',
     palette: 'drunk',
     hp: 12,
-    traits: ['animalhandling', 'sailing', 'charisma'],
+    traits: { sailing: 2, charisma: 2, animalhandling: 1, perception: 1 },
     fears: ['thenorthroad', 'dark'],
     bond: 3,
     body: ['[Placeholder Text]'],
@@ -48,7 +51,7 @@ export const PARTY = [
     name: 'Sexton Grast',
     palette: 'sexton',
     hp: 13,
-    traits: ['woodcraft', 'fishing', 'animalhandling'],
+    traits: { perception: 2, woodcraft: 2, fishing: 1, animalhandling: 1 },
     fears: ['dark', 'thedead'],
     bond: 3,
     body: ['[Placeholder Text]'],
@@ -59,7 +62,7 @@ export const PARTY = [
     name: 'Vesna Quill',
     palette: 'herbalist',
     hp: 10,
-    traits: ['fishing', 'charisma', 'animalhandling'],
+    traits: { charisma: 2, perception: 2, fishing: 1, animalhandling: 1 },
     fears: ['water', 'harm'],
     bond: 3,
     body: ['[Placeholder Text]'],
@@ -70,7 +73,7 @@ export const PARTY = [
     name: 'Bertran Krael',
     palette: 'smith',
     hp: 15,
-    traits: ['woodcraft', 'sailing', 'fishing'],
+    traits: { smithing: 3, woodcraft: 1, sailing: 1, fishing: 1 },
     fears: ['leavingtown', 'water'],
     bond: 0,
     body: ['[Placeholder Text]'],
