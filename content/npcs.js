@@ -4,6 +4,9 @@
 // give someone a face from a different palette than the one they walk around in.
 // Anywhere a line isn't written yet, put [Placeholder Text] — the Script tab in the
 // menu lists every one of them, and an NPC with no `lines` at all gets one for free.
+// `until` / `after` name a scene from content/scenes.js: someone with `until` is gone
+// once it has played, someone with `after` is not there until it has. The same id can
+// appear on more than one map — it is the same person, standing somewhere else.
 
 export const NPCS = [
   {
@@ -14,6 +17,18 @@ export const NPCS = [
     map: 'shore',
     x: 31,
     y: 8,
+    facing: 'left',
+    palette: 'hunter',
+    until: 'washedup', // he is only out there while the opening is unplayed
+    lines: ['[Placeholder Text]'],
+  },
+  {
+    // the same man, at home, from the morning after onward
+    id: 'aldis',
+    name: 'Aldis Rooke',
+    map: 'hut',
+    x: 5,
+    y: 4,
     facing: 'left',
     palette: 'hunter',
     lines: ['[Placeholder Text]'],

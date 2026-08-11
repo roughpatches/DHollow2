@@ -1,5 +1,5 @@
-// Plays a scripted scene over the World: the six verbs in content/opening.js and
-// nothing else. Each step calls back when it is finished, so a step that takes time
+// Plays a scripted scene over the World: the verbs in content/scenes.js and nothing
+// else. Each step calls back when it is finished, so a step that takes time
 // holds the scene until it is done rather than the scene running on a timer.
 
 import { TUNING } from '../tuning.js';
@@ -58,7 +58,7 @@ function run(scene, step, done) {
       a.setTexture(actorFrame(a.palette, step.dir, 0));
     }
     done();
-  } else if (step.say) {
+  } else if (step.say || step.narrate) {
     say(scene, step, done);
   } else if (step.prone !== undefined) {
     prone(scene, step.prone);
@@ -108,8 +108,15 @@ function walk(scene, actor, [tx, ty], done) {
   }));
 }
 
+// the live actor's def first, so the same person standing on two maps is still one
+// person to a scene
+function defOf(scene, id) {
+  const actor = actorFor(scene, id);
+  return actor ? actor.def : NPCS.find((n) => n.id === id);
+}
+
 function say(scene, step, done) {
-  const def = NPCS.find((n) => n.id === step.say);
+  const def = step.narrate ? null : defOf(scene, step.say);
   const once = () => {
     scene.game.events.off('dialogue:end', once);
     scene.frozen = true; // World let go on dialogue:end; the scene has not finished
@@ -117,8 +124,8 @@ function say(scene, step, done) {
   };
   scene.game.events.on('dialogue:end', once);
   scene.game.events.emit('dialogue:start', {
-    name: def ? def.name : step.say,
-    lines: step.lines,
+    name: def ? def.name : '',
+    lines: step.narrate || step.lines,
     portrait: def ? (def.portrait || def.palette) : null,
   });
 }

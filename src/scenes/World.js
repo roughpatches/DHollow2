@@ -9,7 +9,7 @@ import {
   siteAt, isOpen, patchesFor, patchOf, levelOf, contribute, contributeLines, statusLines, remaining,
 } from '../town.js';
 import { applyToWorld } from '../settings.js';
-import { OPENING } from '../../content/opening.js';
+import { SCENES, OPENING } from '../../content/scenes.js';
 import { play, hasPlayed } from '../script.js';
 
 const TS = TUNING.tileSize;
@@ -63,7 +63,12 @@ export default class World extends Phaser.Scene {
     this.physics.add.collider(this.player, this.ground);
 
     this.npcs = [];
-    for (const def of NPCS.filter((n) => n.map === this.mapKey)) {
+    // `until` and `after` name a scene: someone can be on the strand only until the
+    // opening has played, and in the house only once it has
+    const here = NPCS.filter((n) => n.map === this.mapKey
+      && !(n.until && hasPlayed(n.until))
+      && !(n.after && !hasPlayed(n.after)));
+    for (const def of here) {
       const npc = spawnActor(this, def.palette, def.x, def.y, def.facing || 'down');
       // taller than the player's foot-box so you stop beside someone rather than inside them
       npc.body.setSize(12, 20).setOffset(2, 8);
@@ -114,7 +119,8 @@ export default class World extends Phaser.Scene {
     this.game.events.on('quest:close', unfreeze);
 
     // the opening plays itself the first time its map is walked into, and never again
-    if (this.mapKey === OPENING.map && !hasPlayed('opening')) play(this, OPENING, 'opening');
+    const scene = SCENES.find((sc) => sc.map === this.mapKey && !hasPlayed(sc.id));
+    if (scene) play(this, scene, scene.id);
 
     this.events.once('shutdown', () => {
       this.game.events.off('dialogue:end', afterDialogue);

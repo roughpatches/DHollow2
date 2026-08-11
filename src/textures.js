@@ -12,7 +12,7 @@ export const PORTRAIT_PX = 40; // portrait art is square and drawn once per pale
 export const TILE_NAMES = [
   'grass', 'path', 'dirt', 'water', 'tree', 'wall', 'roof', 'door', 'wood', 'stone',
   'well', 'grave', 'bar', 'forge', 'shelf', 'altar', 'pew', 'crate', 'hearth', 'rug',
-  'treetop', 'sand', 'flotsam', 'spar',
+  'treetop', 'sand', 'flotsam', 'spar', 'bed',
 ];
 
 export const TILE_INDEX = Object.fromEntries(TILE_NAMES.map((n, i) => [n, i]));
@@ -139,6 +139,11 @@ const TILE_DRAW = {
     base(g, o, COLORS.wood[0]);
     fill(g, COLORS.rug[0], o + 1, 2, 14, 12);
     fill(g, COLORS.rug[1], o + 4, 5, 8, 6);
+  },
+  bed: (g, o) => {
+    base(g, o, COLORS.wood[0]);
+    fill(g, COLORS.bed[0], o + 1, 2, 14, 13);
+    fill(g, COLORS.bed[1], o + 2, 3, 12, 4);
   },
   sand: (g, o) => {
     base(g, o, COLORS.sand[0]);

@@ -23,6 +23,7 @@ export const TILES = {
   pew: { solid: true },
   crate: { solid: true },
   hearth: { solid: true },
+  bed: {}, // you can lie on it
   sand: {},
   flotsam: {}, // small wreckage; you walk over it
   spar: { solid: true }, // ship timber; you walk around it
@@ -49,12 +50,34 @@ export const LEGEND = {
   c: 'crate',
   h: 'hearth',
   r: 'rug',
+  B: 'bed',
   S: 'sand',
   w: 'flotsam',
   W: 'spar',
 };
 
 export const MAPS = {
+  // Where the player wakes up the morning after. Aldis carried them here.
+  hut: {
+    name: 'Aldis Rooke\'s house',
+    spawn: [8, 10],
+    rows: [
+      '##################',
+      '#hh______________#',
+      '#hh______________#',
+      '#________________#',
+      '#BBB_____cc______#',
+      '#________cc______#',
+      '#________________#',
+      '#___ss___________#',
+      '#______rrrr______#',
+      '#______rrrr______#',
+      '#________________#',
+      '########D#########',
+    ],
+    doors: [{ x: 8, y: 11, to: 'village', spawn: [16, 16] }],
+  },
+
   // Where the game opens. The tide put the player here and the storm put everything
   // else. Reachable afterwards from the west end of the village lane.
   shore: {
@@ -96,10 +119,10 @@ export const MAPS = {
       'TT.....,...........,,..........,......TT',
       'TT.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.TT',
       'TT.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.TT',
-      'TT...........,.....,,....,............TT',
-      'TT...........,.....,,.oo.,............TT',
-      'TT...........,.....,,.oo.,............TT',
-      'TT...........,.....,,....,.========...TT',
+      'TT...........,=====,,....,............TT',
+      'TT...........,=====,,.oo.,............TT',
+      'TT...........,#####,,.oo.,............TT',
+      'TT...........,##D##,,....,.========...TT',
       'TT..=======..,.....,,....,.========...TT',
       'TT..=======..,.....,,....,.########...TT',
       'TT..#######..,.....,,....,.########...TT',
@@ -119,6 +142,7 @@ export const MAPS = {
       { x: 7, y: 19, to: 'apothecary', spawn: [9, 13] },
       { x: 30, y: 19, to: 'chapel', spawn: [9, 13] },
       { x: 2, y: 21, to: 'shore', spawn: [17, 14] },
+      { x: 16, y: 15, to: 'hut', spawn: [8, 10] },
     ],
   },
 

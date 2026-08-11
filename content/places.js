@@ -23,6 +23,19 @@ export const PLACES = [
     body: ['[Placeholder Text]'],
   },
   {
+    label: 'Aldis Rooke\'s house',
+    note: 'Indoors',
+    map: 'hut',
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // No map of its own yet: it is somewhere the fiction points at rather than
+    // somewhere you can walk. An entry with no `map` is just a list row.
+    label: 'The Blighthaven road',
+    note: 'Cut off',
+    body: ['[Placeholder Text]'],
+  },
+  {
     label: 'The Sea Hag',
     note: 'Indoors',
     map: 'tavern',

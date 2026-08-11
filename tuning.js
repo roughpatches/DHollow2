@@ -120,6 +120,7 @@ export const COLORS = {
   crate: [0x574328, 0x3b2c1a],
   hearth: [0x33302c, 0xc4601f],
   rug: [0x5a2b2b, 0x8a4a3a],
+  bed: [0x4a3b3a, 0x7a6a58],
   sand: [0x494235, 0x3c362b],
   flotsam: [0x494235, 0x362a1e], // small wreckage the tide left, walkable
   spar: [0x3d3124, 0x241c14], // a beam off a ship, big enough to walk around
