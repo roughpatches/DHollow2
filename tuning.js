@@ -13,6 +13,11 @@ export const TUNING = {
   interactReach: 12,
   interactRange: 20,
 
+  traitsAtLevelOne: 3, // how many traits a character picks at level one
+  maxLevel: 10,
+  hpPerLevel: 3, // added to a character's own HP for every level past the first
+  xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
+
   dialogueCharsPerSec: 45,
   dialogueBoxHeight: 128,
   dialogueBoxMargin: 16,

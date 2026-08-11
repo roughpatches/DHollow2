@@ -7,6 +7,8 @@ import { CHARACTER, EQUIPMENT, INVENTORY, COMPANIONS } from '../content/characte
 import { BESTIARY, QUESTS } from '../content/codex.js';
 import { PLACES } from '../content/places.js';
 import { SETTINGS } from '../content/settings.js';
+import { PARTY } from '../content/party.js';
+import { TRAITS } from '../content/traits.js';
 
 // One spelling, so one scan finds every one of them. Case is ignored when matching.
 export const PLACEHOLDER = '[Placeholder Text]';
@@ -26,8 +28,16 @@ function entrySlots(e) {
   return slots.concat((e.body || []).map((s, i) => [`paragraph ${i + 1}`, s]));
 }
 
+// party and trait entries name themselves and derive their note, so only the prose
+// in `body` is text somebody has to write
+function proseSlots(e) {
+  return (e.body || []).map((s, i) => [`paragraph ${i + 1}`, s]);
+}
+
 const SOURCES = [
   ['Dialogue', NPCS, (n) => n.name, dialogueSlots],
+  ['Party', PARTY, (c) => c.name, proseSlots],
+  ['Traits', TRAITS, (t) => t.name, proseSlots],
   ['Equipment', EQUIPMENT, (e) => e.label, entrySlots],
   ['Character', CHARACTER, (e) => e.label, entrySlots],
   ['Companions', COMPANIONS, (e) => e.label, entrySlots],

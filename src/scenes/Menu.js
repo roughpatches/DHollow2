@@ -7,6 +7,7 @@ import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
+import { partyRows, TRAIT_ROWS } from '../party.js';
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
@@ -14,13 +15,19 @@ import { SCRIPT } from '../placeholders.js';
 // text — the one thing a list of paragraphs cannot say — and one carrying `options`
 // becomes a setting the player cycles with Enter. Script is the one derived tab: it is
 // scanned out of the others rather than written, and lists every line still unwritten.
+// A tab's rows are an array, or a function returning one when the rows change while
+// the game runs — Party's level and HP move, so it is rebuilt on every draw.
 const TABS = [
   ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
+  ['Party', partyRows],
+  ['Traits', TRAIT_ROWS],
   ['Companions', COMPANIONS],
   ['Inventory', INVENTORY],
   ['Bestiary', BESTIARY],
-  ['Quest Log', QUESTS],
+  // one word each: at eleven tabs the spacing is tighter than a space inside a name,
+  // and 'Quest Log' read as two tabs
+  ['Quests', QUESTS],
   ['Map', PLACES],
   ['Script', SCRIPT],
   ['Settings', SETTINGS],
@@ -116,7 +123,8 @@ export default class Menu extends Phaser.Scene {
   }
 
   rows() {
-    return TABS[this.tab][1];
+    const r = TABS[this.tab][1];
+    return typeof r === 'function' ? r() : r;
   }
 
   draw() {
@@ -144,19 +152,28 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
   }
 
+  // Laid out twice: once to measure, once to place. The strip gives up its spacing
+  // before it gives up a tab name, so adding a tab crowds the row rather than
+  // pushing the last one off the end of the panel.
   tabStrip() {
     const y = this.box.y + 12;
+    const texts = TABS.map(([name], i) =>
+      this.text(0, y, name, TUNING.menuTabSize, i === this.tab ? COLORS.menuAccent : COLORS.menuDim));
+
+    const room = this.box.x + this.box.w - TUNING.menuPad - this.listX;
+    const used = texts.reduce((w, t) => w + t.width, 0);
+    const gap = Math.max(6, Math.min(TUNING.menuTabGap, (room - used) / Math.max(1, TABS.length - 1)));
+
     let x = this.listX;
-    TABS.forEach(([name], i) => {
-      const on = i === this.tab;
-      const t = this.text(x, y, name, TUNING.menuTabSize, on ? COLORS.menuAccent : COLORS.menuDim);
-      if (on) {
+    texts.forEach((t, i) => {
+      t.setX(x);
+      if (i === this.tab) {
         const g = this.add.graphics();
         g.fillStyle(COLORS.menuAccent, 1);
         g.fillRect(x, y + t.height + 3, t.width, 2);
         this.layer.add(g);
       }
-      x += t.width + TUNING.menuTabGap;
+      x += t.width + gap;
     });
   }
 
