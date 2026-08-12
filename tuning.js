@@ -121,6 +121,41 @@ export const COLORS = {
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,
 
+  // The minigame UI kit, drawn into the generated 'ui' atlas at boot. Retint here and
+  // every widget an activity engine draws follows; nothing else reads these.
+  ui: {
+    stage: 0x0b0d10,
+    panel: 0x171a20,
+    inset: 0x101216,
+    edge: 0x6b5a3a,
+    rule: 0x2e3138,
+    text: 0xd9d3c4,
+    muted: 0x8b8578,
+    gold: 0xc9a95f,
+    goldBright: 0xf0d68f,
+    grass: 0x6f8f4a,
+    danger: 0x9c5a46,
+    cool: 0x7f9fa8,
+    warn: 0xc08040,
+    ink: 0x0b0d10,
+  },
+  // A judgment ribbon carries a dark label, so these stay light enough to read it.
+  uiRibbons: {
+    fb_perfect: 0xf0d68f,
+    fb_clean: 0x8fae66,
+    fb_good: 0xc9a95f,
+    fb_wild: 0xd39a55,
+    fb_miss: 0xc07a63,
+  },
+  // what each bar kind is filled with
+  uiBars: {
+    bar_hp: 0x9c5a46,
+    bar_stamina: 0x6f8f4a,
+    bar_atb: 0x7f9fa8,
+    bar_quality: 0xc9a95f,
+    bar_integrity: 0xc08040,
+  },
+
   grass: [0x2f3d2b, 0x263422],
   path: [0x4f4a43, 0x413d37],
   dirt: [0x453a2e, 0x392f25],

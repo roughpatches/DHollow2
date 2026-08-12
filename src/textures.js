@@ -3,6 +3,7 @@
 // names instead — see src/art.js — so nothing downstream cares which they are.
 
 import { TUNING, COLORS, PALETTES } from '../tuning.js';
+import { buildUiAtlas } from './uiatlas.js';
 
 const TS = TUNING.tileSize;
 const AW = 16; // actor frame width
@@ -263,6 +264,9 @@ export function walkAnim(palette, dir) {
 }
 
 export function buildTextures(scene) {
+  // the minigame kit's atlas is drawn here too, so an imported activity engine works
+  // without any wiring of its own
+  buildUiAtlas(scene);
   if (scene.textures.exists('tiles16')) return;
 
   // the generated strip, at the size it is drawn at. src/art.js blows it up to tilePx
