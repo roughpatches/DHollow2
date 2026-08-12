@@ -11,7 +11,7 @@ import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
 import {
-  roster, charOf, stateOf, damage, heal, award, raiseBond, hpMax,
+  roster, charOf, award, raiseBond, conOf, conTotal,
   rankOf, scoreOf, check, skillOf, walking, fighters, YOU,
 } from './party.js';
 import { give, nameOf } from './town.js';
@@ -171,7 +171,11 @@ export function start(id, when, party) {
       goal: i === count - 1,
     });
   }
-  run = { quest, when: at, party: who, nodes, at: -1, state: 'running', bias: null, spoils: {}, xp: 0 };
+  const con = conTotal(who);
+  run = {
+    quest, when: at, party: who, nodes, at: -1, state: 'running', bias: null,
+    spoils: {}, xp: 0, con, conMax: con,
+  };
   step();
   return run;
 }
@@ -182,15 +186,10 @@ export function abandon() {
   return run;
 }
 
-// Getting back to the Sea Hag is what mends people. HP is a within-run resource: the
-// question a run asks is whether the party survives this one, not whether they have
-// been worn down since the first. Move this the day beds and food cost something.
-export function recover() {
-  for (const c of walking()) heal(c.id, hpMax(c.id));
-}
-
+// Constitution is a within-run resource and nothing carries out of the run: the question
+// a run asks is whether the party has enough left to finish this one, not whether they
+// have been worn down since the first. Move this the day beds and food cost something.
 export function clear() {
-  if (run) recover();
   run = null;
 }
 
@@ -281,6 +280,7 @@ function resolve(node) {
   run.phase = 'node';
 
   node.kind = e.id;
+  node.conBefore = run.con;
   node.harvest = harvestOf(node, e);
   node.check = checkOf(node, e);
   const failed = node.check && !node.check.pass;
@@ -302,23 +302,34 @@ function resolve(node) {
   run.xp += node.xp;
   for (const c of walkers()) award(c.id, node.xp);
 
-  node.hurt = Math.round(roll(e.hurt) * (night ? TUNING.questNightHurt : 1))
-    + (failed ? TUNING.checkFailHurt : 0);
-  if (node.hurt > 0) node.hurtWho = takeHit(node.hurt);
-  if (partyDown()) run.state = 'failed';
+  // What the node did to the party, in one number: the road's standing cost, what the
+  // encounter itself takes or puts back, and how the party bore up in front of it. The
+  // three are kept apart so the readout can say which was which.
+  const taken = roll(e.con);
+  node.conRoad = -TUNING.questConDecay;
+  node.conKind = taken < 0 && night ? -Math.round(-taken * TUNING.questNightCon) : taken;
+  node.conCheck = node.check ? (node.check.pass ? TUNING.questConHeld : -TUNING.questConLost) : 0;
+  node.con = node.conRoad + node.conKind + node.conCheck;
+
+  run.con = Math.max(0, Math.min(run.conMax, run.con + node.con));
+  node.conAfter = run.con;
+  // Nothing left in them: they turn for home from wherever they are standing.
+  if (run.con <= 0) spend();
 }
 
-// the one still on their feet with the most left in them takes it
-function takeHit(n) {
-  const standing = walkers().filter((c) => stateOf(c.id).hp > 0);
-  if (!standing.length) return null;
-  const who = standing.reduce((a, b) => (stateOf(a.id).hp >= stateOf(b.id).hp ? a : b));
-  damage(who.id, n);
-  return who.name;
-}
-
-function partyDown() {
-  return walkers().every((c) => stateOf(c.id).hp <= 0);
+// A run that ran out of constitution is over where it stands. Half of everything the
+// party was carrying goes back — they came home light, and it is not a finished job.
+function spend() {
+  run.state = 'spent';
+  run.lost = {};
+  for (const [m, n] of Object.entries(run.spoils)) {
+    const back = n - Math.floor(n * TUNING.questSpentKeep);
+    if (back > 0) {
+      run.lost[m] = back;
+      run.spoils[m] = n - back;
+      give(m, -back);
+    }
+  }
 }
 
 // --- finishing -------------------------------------------------------------
@@ -345,7 +356,7 @@ function finish() {
 // Flat and mechanical on purpose: this is a readout, not a voice. Rewrite freely.
 
 export function listOf(spoils) {
-  const parts = Object.entries(spoils).map(([m, n]) => `${n} ${nameOf(m)}`);
+  const parts = Object.entries(spoils).filter(([, n]) => n > 0).map(([m, n]) => `${n} ${nameOf(m)}`);
   return parts.length ? parts.join(', ') : 'nothing';
 }
 
@@ -371,8 +382,25 @@ export function harvestLine(h) {
   return `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more out of it.`;
 }
 
+// who is walking it and what each of them is worth to the pool — the readout under the
+// crew screen and along the bottom of the crawl
 export function partyLine(who = walkers()) {
-  return who.map((c) => `${c.name} ${stateOf(c.id).hp}/${hpMax(c.id)}`).join('    ');
+  return who.map((c) => `${c.name} ${conOf(c.id)}`).join('    ');
+}
+
+// what the bar across the top of the crawl says next to itself
+export function conLine(r = run) {
+  return r ? `Constitution ${r.con} of ${r.conMax}` : '';
+}
+
+// what a node did to it, in the order it happened, for the card under the encounter
+export function conLines(node) {
+  const out = [];
+  const say = (n, why) => { if (n) out.push(`${n > 0 ? '+' : ''}${n} ${why}`); };
+  say(node.conRoad, 'walking it');
+  say(node.conKind, node.conKind > 0 ? 'put back here' : 'taken here');
+  say(node.conCheck, node.conCheck > 0 ? 'for holding' : 'for losing it');
+  return out.length ? `${out.join('    ')}    →  ${node.conAfter}` : '';
 }
 
 // the Quest Log, with whatever the run state has to say about each job on top of it
@@ -383,7 +411,7 @@ export function questRows() {
     let note = n ? `Walked ${n}×` : 'Open';
     if (!n && q.ready && !story.has(q.ready)) note = 'Not agreed';
     if (live && live.state === 'running') note = `Node ${live.at + 1}/${live.nodes.length}`;
-    else if (live && live.state === 'failed') note = 'Lost';
+    else if (live && live.state === 'spent') note = 'Spent';
     else if (live && live.state === 'abandoned') note = 'Turned back';
     return {
       label: q.label,

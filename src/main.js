@@ -10,8 +10,8 @@ import * as town from './town.js';
 import * as run from './run.js';
 import * as story from './story.js';
 
-// so a character can be levelled, hurt, or healed from the browser console while
-// there is no content that does it yet: party.award('aldis', 40)
+// so a character can be levelled from the browser console while there is no content that
+// does it yet: party.award('aldis', 40)
 window.party = party;
 // and so materials can be handed out before any activity produces them: town.give('timber', 20)
 window.town = town;

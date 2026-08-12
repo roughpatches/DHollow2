@@ -23,7 +23,9 @@
 //              are worth is in tuning.js, not here.
 //   spoils   — materials taken, [least, most] each. Rolled per node.
 //   xp       — experience, [least, most].
-//   hurt     — HP it costs, [least, most]. Night multiplies this; see tuning.js.
+//   con      — what it does to the party's constitution, [least, most]. Negative takes
+//              and positive gives, so a spring or a dry barn can be written as a kind
+//              that puts something back. Night multiplies what it takes; see tuning.js.
 //   body     — what the encounter is, in the world's voice. Yours to write.
 
 export const ENCOUNTERS = [
@@ -43,7 +45,7 @@ export const ENCOUNTERS = [
     },
     spoils: { timber: [2, 4] },
     xp: [8, 14],
-    hurt: [0, 1],
+    con: [-1, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -62,7 +64,7 @@ export const ENCOUNTERS = [
     },
     spoils: { stone: [2, 4] },
     xp: [8, 14],
-    hurt: [0, 2],
+    con: [-2, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -82,7 +84,7 @@ export const ENCOUNTERS = [
     // a cured hide is the same material as sailcloth to anyone patching a roof with it
     spoils: { canvas: [1, 2] },
     xp: [12, 20],
-    hurt: [0, 2],
+    con: [-2, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -101,7 +103,7 @@ export const ENCOUNTERS = [
     },
     spoils: { canvas: [1, 3], timber: [1, 2] },
     xp: [10, 18],
-    hurt: [0, 2],
+    con: [-2, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -120,7 +122,7 @@ export const ENCOUNTERS = [
     },
     spoils: { pitch: [1, 2] },
     xp: [10, 16],
-    hurt: [0, 1],
+    con: [-1, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -139,7 +141,7 @@ export const ENCOUNTERS = [
     },
     spoils: { timber: [1, 2], nails: [1, 3] },
     xp: [6, 10],
-    hurt: [0, 0],
+    con: [0, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -158,7 +160,7 @@ export const ENCOUNTERS = [
     },
     spoils: { nails: [2, 5], stone: [0, 1] },
     xp: [10, 16],
-    hurt: [0, 1],
+    con: [-1, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -172,7 +174,7 @@ export const ENCOUNTERS = [
     check: null,
     spoils: { nails: [2, 4] },
     xp: [10, 16],
-    hurt: [0, 1],
+    con: [-1, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -191,7 +193,7 @@ export const ENCOUNTERS = [
     },
     spoils: { nails: [1, 3] },
     xp: [12, 20],
-    hurt: [0, 2],
+    con: [-2, 0],
     body: ['[Placeholder Text]'],
   },
   {
@@ -210,7 +212,7 @@ export const ENCOUNTERS = [
     },
     spoils: {},
     xp: [4, 8],
-    hurt: [1, 3],
+    con: [-3, -1],
     body: ['[Placeholder Text]'],
   },
   {
@@ -229,7 +231,7 @@ export const ENCOUNTERS = [
     },
     spoils: {},
     xp: [18, 28],
-    hurt: [2, 4],
+    con: [-4, -2],
     body: ['[Placeholder Text]'],
   },
   {
@@ -248,7 +250,7 @@ export const ENCOUNTERS = [
     },
     spoils: { nails: [0, 2] },
     xp: [16, 24],
-    hurt: [1, 4],
+    con: [-4, -1],
     body: ['[Placeholder Text]'],
   },
 ];

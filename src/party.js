@@ -1,6 +1,10 @@
-// What a playable character is right now: level, XP, the HP they have left, and what
-// their skills are worth. content/party.js says what they start as; this says where
-// they have got to. Every number it works from is in tuning.js.
+// What a playable character is right now: level, XP, what their constitution is worth,
+// and what their skills are worth. content/party.js says what they start as; this says
+// where they have got to. Every number it works from is in tuning.js.
+//
+// Constitution is not tracked here. A run pools everyone's into one number and spends it
+// down (src/run.js); between runs there is nothing to remember, because a party that got
+// home is a party that got home.
 
 import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
@@ -14,7 +18,7 @@ const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 // Skills live here rather than in content/party.js because the player's are chosen in
 // the hut and everyone's could move later; content says what they start as.
 const state = new Map(PARTY.map((c) => [c.id, {
-  level: 1, xp: 0, hp: c.hp, bond: c.bond || 0, skills: { ...c.skills },
+  level: 1, xp: 0, bond: c.bond || 0, skills: { ...c.skills },
 }]));
 
 // a misspent or misspelt skill list is a content mistake, and content mistakes are
@@ -71,8 +75,15 @@ export function stateOf(id) {
   return state.get(id);
 }
 
-export function hpMax(id) {
-  return charOf(id).hp + TUNING.hpPerLevel * (stateOf(id).level - 1);
+// What this character is worth to a run's constitution: their own score, and what every
+// level past the first added to it.
+export function conOf(id) {
+  return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1);
+}
+
+// what a set of people are worth as a body — the number a run starts with
+export function conTotal(ids) {
+  return ids.reduce((n, id) => n + conOf(id), 0);
 }
 
 // leaving a level costs more than leaving the one before it
@@ -89,7 +100,6 @@ export function award(id, xp) {
   while (s.xp >= xpToNext(s.level)) {
     s.xp -= xpToNext(s.level);
     s.level += 1;
-    s.hp += TUNING.hpPerLevel; // a level heals you by exactly what it gave you
     gained += 1;
   }
   return gained;
@@ -98,18 +108,6 @@ export function award(id, xp) {
 export function levelUp(id) {
   const s = stateOf(id);
   return award(id, Math.max(0, xpToNext(s.level) - s.xp));
-}
-
-export function damage(id, n) {
-  const s = stateOf(id);
-  s.hp = Math.max(0, s.hp - n);
-  return s.hp;
-}
-
-export function heal(id, n) {
-  const s = stateOf(id);
-  s.hp = Math.min(hpMax(id), s.hp + n);
-  return s.hp;
 }
 
 // --- bonds ----------------------------------------------------------------
@@ -234,9 +232,9 @@ export function partyRows() {
     const fears = (c.fears || []).map((f) => FEAR[f]).filter(Boolean);
     return {
       label: c.name,
-      note: `Lv ${s.level} · ${s.hp}/${hpMax(c.id)}`,
+      note: `Lv ${s.level} · Con ${conOf(c.id)}`,
       body: [
-        `Level ${s.level}    HP ${s.hp} of ${hpMax(c.id)}    `
+        `Level ${s.level}    Constitution ${conOf(c.id)}    `
           + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`),
         c.you
           ? 'On every run. Nobody has to be asked to bring you.'

@@ -23,8 +23,29 @@ export const TUNING = {
   questBiasWeight: 10, // taking a branch multiplies that encounter's weight by this
   questBonusFactor: 2, // finishing pays this many times over what the run itself paid
   questBonusXp: { short: 150, medium: 350, long: 700 }, // and this on top, flat
-  questNightHurt: 1.25, // a node at night costs this much more HP
+  questNightCon: 1.25, // a node at night takes this much more constitution
   questNightXp: 1.3, // and pays this much more for it
+
+  // Constitution is what a party has to spend on being out there: everyone's own score
+  // added up at the gate, drained by the road, and gone when the run ends either way.
+  // At zero the party turns for home with half of what it was carrying.
+  questConDecay: 1, // taken at every node, before the node itself is felt
+  questConHeld: 1, // a check held steadies them by this much
+  questConLost: 3, // a check lost costs this on top of whatever the node takes
+  questSpentKeep: 0.5, // what a party with nothing left in it carries home
+
+  // The crawl is three bands: the constitution bar across the top, the party walking in
+  // the middle, and the trail behind and ahead of them along the bottom.
+  questBarHeight: 26,
+  questTrailHeight: 74,
+  questWalkGroundFrac: 0.68, // where the ground line sits inside the walking band
+  questBodyPx: 62, // how tall a walking placeholder is drawn on the road
+  questArtScale: 1.25, // drawn art carries air around the body; this brings it up to size
+  questMarkScale: 2.5, // and how big the thing up ahead is drawn
+  questScrollPxPerSec: 46, // the near ground's speed; the layers behind it run slower
+  questParallax: [0.15, 0.4, 1], // far, mid, near, as a fraction of that speed
+  questApproachMs: 1400, // how long a node takes to walk into view
+  questConTweenMs: 500, // and how long the bar takes to catch up with it
 
   questPipSize: 14,
   questPipGap: 8,
@@ -62,7 +83,7 @@ export const TUNING = {
   checkFailHurt: 2, // and costs this much on top of the node's own wounds
 
   maxLevel: 10,
-  hpPerLevel: 3, // added to a character's own HP for every level past the first
+  conPerLevel: 3, // added to a character's own constitution for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
 
   dialogueCharsPerSec: 45,
@@ -120,6 +141,10 @@ export const COLORS = {
   menuMapMark: 0x7f9fa8,
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,
+  questSkyDay: 0x2c333c, // what the party is walking under in the middle band
+  questSkyNight: 0x11141d,
+  questNightTint: 0x6a7590, // laid over the landscape after dark
+  questTrailFill: 0x0d0f13, // the strip along the bottom the trail is drawn on
 
   // The minigame UI kit, drawn into the generated 'ui' atlas at boot. Retint here and
   // every widget an activity engine draws follows; nothing else reads these.
