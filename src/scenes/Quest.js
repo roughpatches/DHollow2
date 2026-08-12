@@ -5,6 +5,7 @@ import { roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isComba
 import { createWalk } from '../walk.js';
 import { markKey } from '../textures.js';
 import { meterBar } from '../minigames/meters.js';
+import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
 // The crawl. Runs over World, which freezes behind it. Three bands: the party's
 // constitution across the top, the party walking the landscape in the middle, and the
@@ -27,6 +28,10 @@ export default class Quest extends Phaser.Scene {
     this.row = 0;
 
     this.input.keyboard.on('keydown', this.onKey, this);
+    // an axe swing is a key held and let go, so the release needs its own listener
+    this.input.keyboard.on('keyup', (ev) => {
+      if (this.open_ && this.activity && ev.key === ' ') this.activity.strike();
+    });
     this.game.events.on('quest:board', this.openBoard, this);
     this.game.events.on('quest:start', this.openJob, this);
   }
@@ -61,6 +66,9 @@ export default class Quest extends Phaser.Scene {
   close() {
     this.open_ = false;
     this.layer.setVisible(false);
+    this.activity = null;
+    this.scrim?.destroy();
+    this.scrim = null;
     this.walk?.destroy();
     this.walk = null;
     run.clear();
@@ -69,6 +77,7 @@ export default class Quest extends Phaser.Scene {
 
   update(time, delta) {
     this.swallow = false;
+    this.activity?.update(time);
     if (!this.walk) return;
     this.walk.update(delta);
     const r = run.active();
@@ -122,6 +131,14 @@ export default class Quest extends Phaser.Scene {
     }
 
     const r = run.active();
+    if (this.activity) {
+      // the engine has the controls: space winds up and releases, left and right pick
+      // the side of the cut. Nothing else is listening.
+      if (k === ' ') this.activity.chargeStart();
+      else if (k === 'arrowleft' || k === 'a') this.activity.setSide('left');
+      else if (k === 'arrowright' || k === 'd') this.activity.setSide('right');
+      return;
+    }
     if (r.state !== 'running') {
       if (k === 'escape' || k === 'enter' || k === 'e' || k === ' ') this.close();
       return;
@@ -180,6 +197,7 @@ export default class Quest extends Phaser.Scene {
     const r = run.start(this.job.id, when, this.taking);
     this.mode = 'run';
     this.row = 0;
+    this.activity = null;
     this.walk?.destroy();
     this.walk = createWalk(this, this.bands().walk, r.party, when);
     this.con = null;
@@ -391,11 +409,12 @@ export default class Quest extends Phaser.Scene {
 
     // A node the party has not walked up to yet is not a node they know anything about,
     // so the approach runs first and the card only opens when it has arrived.
-    if (r.state === 'running' && r.phase === 'node' && this.shownAt !== r.at) {
+    if (r.state === 'running' && (r.phase === 'node' || r.phase === 'activity') && this.shownAt !== r.at) {
       this.shownAt = r.at;
       this.approaching = true;
       this.walk.approach(run.kindOf(r.nodes[r.at].kind).nature, () => {
         this.approaching = false;
+        if (run.active()?.phase === 'activity') this.startActivity();
         this.draw();
       });
     }
@@ -408,12 +427,14 @@ export default class Quest extends Phaser.Scene {
     this.trail(r, band.trail);
 
     if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
+    else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
     else if (r.state === 'running' && !this.approaching) this.card(band.walk, this.nodeLines(r), this.nodeHead(r));
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r));
 
     if (r.state !== 'running') this.hint('[Enter] Back to town');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
-    else if (this.approaching) this.hint('Walking.    [Esc] Turn back');
+    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.kindOf(r.nodes[r.at].kind).activity) : 'Walking.');
+    else if (this.approaching) this.hint('[E] Press on    [Esc] Turn back');
     else this.hint('[E] Press on    [Esc] Turn back');
   }
 
@@ -513,6 +534,44 @@ export default class Quest extends Phaser.Scene {
     }
   }
 
+  // --- activities -------------------------------------------------------------
+  // A node with an engine behind it hands the player the controls where they stand. The
+  // landscape drops below the engine's own drawing so the party stays at the tree.
+
+  startActivity() {
+    const r = run.active();
+    const e = run.kindOf(r.nodes[r.at].kind);
+    if (!hasEngine(e.activity) || this.activity) return;
+    const band = this.bands().walk;
+    // the landscape drops below the engine's own drawing, with a scrim between them so
+    // the readouts are read against something rather than against a hedge
+    this.walk.depth(-200);
+    this.scrim = this.add.graphics().setDepth(-100);
+    this.scrim.fillStyle(COLORS.menuFill, 0.82);
+    this.scrim.fillRect(band.x, band.y, band.w, band.h);
+    this.activity = engineFor(e.activity, this, {
+      x: this.left + 40,
+      top: band.y + 34,
+      barW: Math.min(430, this.wide - 80),
+    });
+    this.activity.start((judgments) => {
+      const failed = this.activity?.failed;
+      this.activity = null;
+      this.scrim?.destroy();
+      this.scrim = null;
+      this.walk.depth(28900);
+      run.settle({ judgments, failed });
+      this.draw();
+    });
+  }
+
+  // just the name of the work over the top of it; the engine draws everything else
+  activityHead(r, rect) {
+    const e = run.kindOf(r.nodes[r.at].kind);
+    this.text(this.left, rect.y + 4, `${r.at + 1}. ${e.name} — ${e.activity}`,
+      TUNING.questBodySize + 2, COLORS.menuText);
+  }
+
   nodeHead(r) {
     const n = r.nodes[r.at];
     const e = run.kindOf(n.kind);
@@ -532,6 +591,8 @@ export default class Quest extends Phaser.Scene {
       out.push([run.checkLine(n.check), TUNING.questBodySize, n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk]);
       out.push([n.check.pass ? n.check.held : n.check.lost, TUNING.questBodySize, COLORS.menuText]);
     }
+    const worked = qualityLine(n);
+    if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
     out.push([`Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`, TUNING.questBodySize, COLORS.menuAccent]);
     const harvest = run.harvestLine(n.harvest);
     if (harvest) out.push([harvest, TUNING.questHintSize, COLORS.menuDim]);

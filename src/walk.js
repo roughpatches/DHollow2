@@ -115,6 +115,12 @@ export function createWalk(scene, rect, party, when) {
       layer.setVisible(on);
     },
 
+    // An activity draws at the scene's own depth, so the landscape drops below it and
+    // the party stays visible at the tree while the work is done.
+    depth(d) {
+      layer.setDepth(d);
+    },
+
     destroy() {
       layer.destroy(true);
     },

@@ -26,6 +26,8 @@
 //   con      — what it does to the party's constitution, [least, most]. Negative takes
 //              and positive gives, so a spring or a dry barn can be written as a kind
 //              that puts something back. Night multiplies what it takes; see tuning.js.
+//   only     — true if this kind is never drawn at random and only turns up where a
+//              quest's `line` names it. Authored nodes carry it; the road's own do not.
 //   body     — what the encounter is, in the world's voice. Yours to write.
 
 export const ENCOUNTERS = [
@@ -251,6 +253,98 @@ export const ENCOUNTERS = [
     spoils: { nails: [0, 2] },
     xp: [16, 24],
     con: [-4, -1],
+    body: ['[Placeholder Text]'],
+  },
+
+  // --- authored: the first job ------------------------------------------------
+  // Named by firstday's `line` in content/quests.js and drawn by nothing else. The two
+  // check events and the plot event are placeholders for the designer to write; the
+  // shape they need is here, the words are not.
+
+  {
+    id: 'firstcut',
+    name: 'The first stand',
+    nature: 'gather',
+    activity: 'Felling',
+    only: true,
+    weight: { day: 0, night: 0 },
+    read: { skill: 'woodcutting', line: 'Aldis puts a hand on one and says this one. He does not say why.' },
+    harvest: 'woodcutting',
+    check: null, // the axe is the test here, not a roll
+    spoils: { timber: [3, 5] },
+    xp: [12, 18],
+    con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'greenwood',
+    name: '[Placeholder — the Woodcraft way]',
+    nature: 'gather',
+    activity: null,
+    only: true,
+    weight: { day: 0, night: 0 },
+    read: { skill: 'woodcraft', line: '[Placeholder Text]' },
+    harvest: 'woodcraft',
+    check: {
+      skill: 'woodcraft',
+      dc: 12,
+      held: '[Placeholder Text]',
+      lost: '[Placeholder Text]',
+    },
+    spoils: { timber: [1, 2] },
+    xp: [10, 16],
+    con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'fenherbs',
+    name: '[Placeholder — the Alchemy way]',
+    nature: 'gather',
+    activity: null,
+    only: true,
+    weight: { day: 0, night: 0 },
+    read: { skill: 'alchemy', line: '[Placeholder Text]' },
+    harvest: 'alchemy',
+    check: {
+      skill: 'alchemy',
+      dc: 12,
+      held: '[Placeholder Text]',
+      lost: '[Placeholder Text]',
+    },
+    spoils: { pitch: [1, 2] },
+    xp: [10, 16],
+    con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'secondcut',
+    name: 'The second stand',
+    nature: 'gather',
+    activity: 'Felling',
+    only: true,
+    weight: { day: 0, night: 0 },
+    read: { skill: 'woodcutting', line: 'The same again, and the light going.' },
+    harvest: 'woodcutting',
+    check: null,
+    spoils: { timber: [3, 5] },
+    xp: [12, 18],
+    con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    id: 'aldiswood',
+    name: '[Placeholder — the plot event]',
+    nature: 'talk',
+    activity: null,
+    only: true,
+    weight: { day: 0, night: 0 },
+    read: null,
+    harvest: null,
+    // no check of its own: the goal takes the job's own roll, from content/quests.js
+    check: null,
+    spoils: {},
+    xp: [20, 20],
+    con: [0, 0],
     body: ['[Placeholder Text]'],
   },
 ];

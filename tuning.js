@@ -47,6 +47,36 @@ export const TUNING = {
   questApproachMs: 1400, // how long a node takes to walk into view
   questConTweenMs: 500, // and how long the bar takes to catch up with it
 
+  // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
+  // is. Every number the axe answers to lives here.
+  fell: {
+    chargeDurationMs: 1700, // how long a full wind-up takes
+    ventPerSec: 3.2, // and how fast the power bleeds back off after a swing
+    overchargeAt: 1.0, // past this the swing goes wild and splinters the trunk
+    wildChip: 0.12, // what a wild swing costs the trunk's soundness
+    cutPerSwing: 0.125, // a clean bite this deep, so eight of them fell it
+    strikePips: 8, // and a pip apiece, once there is art for them
+    leanStep: 0.07, // how far a swing shifts the lean toward the side you cut
+    leanDrift: 0.021, // and how fast the tree tips that way on its own
+    leanBand: { low: 0.34, high: 0.66 }, // the lean it will take without straining
+    leanBandRoam: 0.12, // how far that band wanders
+    bandStepPerSwing: 0.013, // and how far it moves per swing
+    zoneShiftPerSwing: 0.05, // the bite target walks this far with every strike
+    powerZone: { width: 0.2, min: 0.28, max: 0.88 }, // where the bite sits on the wind-up
+    soundnessDrainPerSec: 0.18, // straining the trunk costs this
+    soundnessRegenPerSec: 0.18, // and a balanced cut puts it back
+  },
+
+  // What playing an activity is worth. A judgment of perfect counts full, good most of
+  // the way, a miss barely — averaged into one 0..1 quality, which is what the node then
+  // pays on. A run where the party never touches an activity is unaffected by any of it.
+  activityWorth: { perfect: 1, good: 0.7, miss: 0.2 },
+  activityKeepFloor: 0.4, // the worst performance still carries this much of the spoils
+  activityFailKeep: 0.25, // and a botched activity — a split trunk — this much
+  activityConBest: 2, // a quality above activityConGood puts this much constitution back
+  activityConGood: 0.8,
+  activityConWorst: -3, // and a botched one costs this
+
   questPipSize: 14,
   questPipGap: 8,
   questPad: 26,

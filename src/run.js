@@ -17,14 +17,17 @@ import {
 import { give, nameOf } from './town.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
+import { hasEngine, qualityOf } from './activity.js';
 
 const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
 
 // Nothing is fought by daylight. What comes out of the ground and what follows a party
 // home only does either after dark, so a day run draws from the table with the combat
 // kinds taken out of it and a night run draws from the whole of it.
+// An authored kind is only ever reached by a quest naming it, so it is out of the table
+// the road draws from whatever the hour is.
 function poolAt(when) {
-  return when === 'night' ? ENCOUNTERS : ENCOUNTERS.filter((e) => e.nature !== 'combat');
+  return ENCOUNTERS.filter((e) => !e.only && (when === 'night' || e.nature !== 'combat'));
 }
 
 function readableAt(when) {
@@ -161,16 +164,7 @@ export function start(id, when, party) {
   // else is, so their three skills are the three the party always has.
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
     .filter((id, i, all) => all.indexOf(id) === i);
-  const count = roll(sizeOf(quest));
-  const nodes = [];
-  for (let i = 0; i < count; i++) {
-    nodes.push({
-      // no fork in front of the first node, and none in front of the goal: the last
-      // step of a job is not a choice about where the job is
-      fork: TUNING.questForkEvery > 0 && i > 0 && i < count - 1 && i % TUNING.questForkEvery === 0,
-      goal: i === count - 1,
-    });
-  }
+  const nodes = quest.line ? authored(quest.line) : drawn(quest);
   const con = conTotal(who);
   run = {
     quest, when: at, party: who, nodes, at: -1, state: 'running', bias: null,
@@ -178,6 +172,31 @@ export function start(id, when, party) {
   };
   step();
   return run;
+}
+
+// A run the designer wrote out: every node is the kind named for it, and an entry that
+// names two is a fork offering exactly those two ways on.
+function authored(line) {
+  return line.map((entry, i) => {
+    const pair = Array.isArray(entry);
+    return {
+      fork: pair,
+      pick: pair ? entry : null,
+      only: pair ? null : entry,
+      goal: i === line.length - 1,
+    };
+  });
+}
+
+// and one the road wrote: a length rolled at the gate and a fork every so often
+function drawn(quest) {
+  const count = roll(sizeOf(quest));
+  return Array.from({ length: count }, (_, i) => ({
+    // no fork in front of the first node, and none in front of the goal: the last
+    // step of a job is not a choice about where the job is
+    fork: TUNING.questForkEvery > 0 && i > 0 && i < count - 1 && i % TUNING.questForkEvery === 0,
+    goal: i === count - 1,
+  }));
 }
 
 export function abandon() {
@@ -202,7 +221,7 @@ export function step() {
 
   const node = run.nodes[run.at];
   if (node.fork && !node.taken) {
-    node.branches = branches();
+    node.branches = branches(node.pick);
     run.phase = 'fork';
     return run;
   }
@@ -212,11 +231,17 @@ export function step() {
 
 // two ways on, each leaning toward something, and whatever the party can read about them.
 // The two on offer are drawn against the hour, so a night fork offers night things.
-function branches() {
-  const readable = readableAt(run.when);
-  const a = weighted(null, readable);
-  let b = weighted(null, readable);
-  for (let i = 0; b === a && readable.length > 1 && i < 8; i++) b = weighted(null, readable);
+function branches(pick) {
+  let a;
+  let b;
+  if (pick) {
+    [a, b] = pick.map((id) => KIND[id]);
+  } else {
+    const readable = readableAt(run.when);
+    a = weighted(null, readable);
+    b = weighted(null, readable);
+    for (let i = 0; b === a && readable.length > 1 && i < 8; i++) b = weighted(null, readable);
+  }
   return [a, b].map((kind, i) => ({
     kind: kind.id,
     side: i === 0 ? 'Left' : 'Right',
@@ -241,7 +266,10 @@ export function choose(i) {
   if (!run || run.phase !== 'fork') return run;
   const node = run.nodes[run.at];
   node.taken = node.branches[i];
-  run.bias = node.taken.kind;
+  // An authored fork is the two ways it names, so taking one is taking that one. A
+  // drawn fork only leans: the kind it points at gets much likelier, not certain.
+  if (node.pick) node.only = node.taken.kind;
+  else run.bias = node.taken.kind;
   resolve(node);
   return run;
 }
@@ -274,18 +302,45 @@ function checkOf(node, e) {
 }
 
 function resolve(node) {
-  const e = weighted(run.bias);
-  const night = run.when === 'night';
+  const e = node.only ? KIND[node.only] : weighted(run.bias);
   run.bias = null;
-  run.phase = 'node';
 
   node.kind = e.id;
   node.conBefore = run.con;
   node.harvest = harvestOf(node, e);
   node.check = checkOf(node, e);
+
+  // A node with an engine behind it does not pay out until it has been played. The run
+  // waits here; the scene hands back what the player made of it.
+  if (hasEngine(e.activity)) {
+    run.phase = 'activity';
+    return;
+  }
+  settle(null);
+}
+
+// What the node came to. `played` is what an engine handed back — { judgments, failed } —
+// or null for a node nobody had to do anything at.
+export function settle(played) {
+  if (!run || run.at < 0) return run;
+  const node = run.nodes[run.at];
+  const e = KIND[node.kind];
+  const night = run.when === 'night';
+  run.phase = 'node';
+
   const failed = node.check && !node.check.pass;
   // points in the work swell what it pays; a check lost costs part of it
-  const take = (1 + (node.harvest ? node.harvest.more : 0)) * (failed ? TUNING.checkFailKeep : 1);
+  let take = (1 + (node.harvest ? node.harvest.more : 0)) * (failed ? TUNING.checkFailKeep : 1);
+
+  if (played) {
+    node.played = true;
+    node.failed = !!played.failed;
+    node.quality = played.failed ? 0 : qualityOf(played.judgments);
+    node.swings = (played.judgments || []).length;
+    take *= node.failed
+      ? TUNING.activityFailKeep
+      : TUNING.activityKeepFloor + (1 - TUNING.activityKeepFloor) * node.quality;
+  }
 
   node.spoils = {};
   for (const [m, range] of Object.entries(e.spoils)) {
@@ -303,18 +358,22 @@ function resolve(node) {
   for (const c of walkers()) award(c.id, node.xp);
 
   // What the node did to the party, in one number: the road's standing cost, what the
-  // encounter itself takes or puts back, and how the party bore up in front of it. The
-  // three are kept apart so the readout can say which was which.
+  // encounter itself takes or puts back, how the party bore up in front of it, and how
+  // well they did the work. They are kept apart so the readout can say which was which.
   const taken = roll(e.con);
   node.conRoad = -TUNING.questConDecay;
   node.conKind = taken < 0 && night ? -Math.round(-taken * TUNING.questNightCon) : taken;
   node.conCheck = node.check ? (node.check.pass ? TUNING.questConHeld : -TUNING.questConLost) : 0;
-  node.con = node.conRoad + node.conKind + node.conCheck;
+  node.conWork = !played ? 0
+    : node.failed ? TUNING.activityConWorst
+      : node.quality >= TUNING.activityConGood ? TUNING.activityConBest : 0;
+  node.con = node.conRoad + node.conKind + node.conCheck + node.conWork;
 
   run.con = Math.max(0, Math.min(run.conMax, run.con + node.con));
   node.conAfter = run.con;
   // Nothing left in them: they turn for home from wherever they are standing.
   if (run.con <= 0) spend();
+  return run;
 }
 
 // A run that ran out of constitution is over where it stands. Half of everything the
@@ -400,6 +459,7 @@ export function conLines(node) {
   say(node.conRoad, 'walking it');
   say(node.conKind, node.conKind > 0 ? 'put back here' : 'taken here');
   say(node.conCheck, node.conCheck > 0 ? 'for holding' : 'for losing it');
+  say(node.conWork, node.conWork > 0 ? 'for good work' : 'for botching it');
   return out.length ? `${out.join('    ')}    →  ${node.conAfter}` : '';
 }
 

@@ -23,6 +23,10 @@
 //   check — the roll the last node asks for, in the same shape encounters use: a skill,
 //           a DC, and the line said whether it is held or lost. The job's own test,
 //           standing in front of the goal, rather than whatever the road threw up.
+//   line  — an authored run, in order, instead of one drawn from the table. Each entry
+//           is an encounter id; an entry that is a pair of ids is a fork offering those
+//           two ways on. A quest with a line ignores `size` for its node count, and the
+//           last entry is its goal. Leave it out and the run is drawn fresh every time.
 //   goal  — what the last node is, in one line.
 //   body  — what the job is, in the world's voice. Yours to write.
 // Add a quest by adding a block. Nothing reads this list by position.
@@ -41,6 +45,14 @@ export const QUESTS = [
     at: 'greywood',
     tags: ['forest', 'timber', 'wild', 'leavingtown'],
     giver: 'gregorious',
+    // The first job is authored rather than drawn: fell a tree, take one of two ways
+    // through the wood, fell another, and then whatever Aldis has been walking toward.
+    line: [
+      'firstcut',
+      ['greenwood', 'fenherbs'],
+      'secondcut',
+      'aldiswood',
+    ],
     check: {
       skill: 'woodcraft',
       dc: 12,
