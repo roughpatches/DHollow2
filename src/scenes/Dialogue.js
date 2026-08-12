@@ -1,9 +1,11 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { setting } from '../settings.js';
 import { buildTextures, portraitKey } from '../textures.js';
+import { fill } from '../party.js';
 
 // Runs alongside World. A line array, a box that reads it, and the speaker's face
-// beside it — nothing else.
+// beside it — nothing else. The same box also puts a choice in front of the player:
+// what they do rather than what they say, because the player has no voice.
 export default class Dialogue extends Phaser.Scene {
   constructor() {
     super('Dialogue');
@@ -51,14 +53,19 @@ export default class Dialogue extends Phaser.Scene {
     this.fitFace();
     this.portrait.add([frame, this.face]);
 
+    this.options = null; // the list, while a choice is up; null while a line is
+    this.chose = null; // and which of them was taken, handed on as the box closes
+
     this.group = [this.box, this.nameText, this.bodyText, this.hint, this.portrait];
     this.layout(false);
     this.hide();
 
     this.input.keyboard.on('keydown-E', this.advance, this);
     this.input.keyboard.on('keydown-SPACE', this.advance, this);
+    this.input.keyboard.on('keydown', this.onKey, this);
 
     this.game.events.on('dialogue:start', this.open, this);
+    this.game.events.on('choice:start', this.ask, this);
   }
 
   // With a face beside it the box gives up its left end; without one it takes the whole
@@ -82,19 +89,53 @@ export default class Dialogue extends Phaser.Scene {
   hide() {
     for (const o of this.group) o.setVisible(false);
     this.open_ = false;
+    this.options = null;
   }
 
   open({ name, lines, portrait }) {
-    this.lines = lines;
+    this.lines = lines.map(fill);
     this.index = 0;
     this.chars = 0;
     this.open_ = true;
+    this.options = null;
+    this.chose = null;
     this.swallowKey = true; // the same keypress opened this; it must not also advance it
     for (const o of this.group) o.setVisible(true);
     this.hint.setVisible(setting('prompt'));
-    this.nameText.setText(name);
+    this.nameText.setText(fill(name));
     this.bodyText.setText('');
     this.showPortrait(portrait);
+  }
+
+  // A choice is the same box with nobody in it: no name, no face, and the options
+  // listed where the line would be. It never types itself out — a list you are reading
+  // to decide from is not a line somebody is saying to you.
+  ask({ options }) {
+    this.options = options.map(fill);
+    this.pick = 0;
+    this.chose = null;
+    this.open_ = true;
+    this.swallowKey = true;
+    for (const o of this.group) o.setVisible(true);
+    this.hint.setVisible(setting('prompt'));
+    this.nameText.setText('');
+    this.showPortrait(null);
+    this.drawOptions();
+  }
+
+  drawOptions() {
+    this.bodyText.setText(this.options
+      .map((o, i) => `${i === this.pick ? '>' : ' '} ${o}`)
+      .join('\n'));
+  }
+
+  onKey(ev) {
+    if (!this.options || this.swallowKey || this.closing) return;
+    const k = ev.key.toLowerCase();
+    if (k === 'arrowup' || k === 'w') this.pick = (this.pick - 1 + this.options.length) % this.options.length;
+    else if (k === 'arrowdown' || k === 's') this.pick = (this.pick + 1) % this.options.length;
+    else return;
+    this.drawOptions();
   }
 
   // A drawn placeholder is 40 pixels and a painted face is 128, and both have to sit in
@@ -131,6 +172,13 @@ export default class Dialogue extends Phaser.Scene {
 
   advance() {
     if (!this.open_ || this.swallowKey || this.closing) return;
+
+    if (this.options) {
+      this.chose = this.pick;
+      this.closing = true;
+      return;
+    }
+
     const line = this.lines[this.index];
 
     if (this.chars < line.length) {
@@ -150,12 +198,17 @@ export default class Dialogue extends Phaser.Scene {
   update(time, delta) {
     if (this.closing) {
       this.closing = false;
+      const chose = this.chose;
+      this.chose = null;
       this.hide();
-      this.game.events.emit('dialogue:end');
+      // a choice answers whoever asked it; a line answers World, which unfreezes on it
+      if (chose === null) this.game.events.emit('dialogue:end');
+      else this.game.events.emit('choice:end', chose);
       return;
     }
     if (!this.open_) return;
     this.swallowKey = false;
+    if (this.options) return; // nothing types itself out; the list is already up
 
     const line = this.lines[this.index];
     if (this.chars < line.length) {

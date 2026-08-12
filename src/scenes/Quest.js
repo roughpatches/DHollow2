@@ -1,7 +1,9 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
-import { roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, YOU } from '../party.js';
+import {
+  roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, nameOf, YOU,
+} from '../party.js';
 import { createWalk } from '../walk.js';
 import { markKey } from '../textures.js';
 import { meterBar } from '../minigames/meters.js';
@@ -382,7 +384,7 @@ export default class Quest extends Phaser.Scene {
         + (isCombat(c.id) ? '   fights' : '');
       this.text(this.left + this.wide, y + 2, worth,
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
-      y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
+      y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${nameOf(c.id)}`,
         TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;
       const why = required
         ? `This job does not go without them. ${recruit.why(c.id, this.job, this.when_)}`

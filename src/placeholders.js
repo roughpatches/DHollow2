@@ -47,7 +47,7 @@ function proseSlots(e) {
 // the same way anyone's do
 const SCENE_ROWS = SCENES.map((sc) => ({
   label: sc.id,
-  body: sc.steps.flatMap((s) => s.narrate || s.lines || []),
+  body: sc.steps.flatMap((s) => s.narrate || s.lines || s.choose || []),
 }));
 
 const SOURCES = [

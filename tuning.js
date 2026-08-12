@@ -116,6 +116,9 @@ export const TUNING = {
   conPerLevel: 3, // added to a character's own constitution for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
 
+  nameMaxLength: 16, // what fits in the dialogue box beside a portrait
+  nameCaretBlinkMs: 450,
+
   dialogueCharsPerSec: 45,
   dialogueBoxHeight: 128,
   dialogueBoxMargin: 16,

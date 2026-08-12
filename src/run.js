@@ -13,6 +13,7 @@ import { SKILLS } from '../content/skills.js';
 import {
   roster, charOf, award, raiseBond, conOf, conTotal,
   rankOf, scoreOf, check, skillOf, walking, fighters, YOU,
+  nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
 import { give, nameOf } from './town.js';
 import * as story from './story.js';
@@ -105,8 +106,8 @@ export function blockers(id, when) {
   for (const cid of q.must || []) {
     const c = charOf(cid);
     if (!c) out.push('Somebody this job needs is not here.');
-    else if (!roster().includes(c)) out.push(`${c.name} is not available.`);
-    else if (!asked(cid, q, at).willing) out.push(`${c.name} will not come on this.`);
+    else if (!roster().includes(c)) out.push(`${whoIs(cid)} is not available.`);
+    else if (!asked(cid, q, at).willing) out.push(`${whoIs(cid)} will not come on this.`);
   }
   const willing = [YOU, ...roster().filter((c) => asked(c.id, q, at).willing).map((c) => c.id)];
   if (willing.length < q.party) out.push(`Needs ${q.party}; counting you, ${willing.length} will walk it.`);
@@ -259,7 +260,7 @@ function readOf(kind) {
   const seen = walkers().filter((c) => rankOf(c.id, kind.read.skill) > 0);
   if (!seen.length) return null;
   const c = seen.reduce((a, b) => (rankOf(b.id, kind.read.skill) > rankOf(a.id, kind.read.skill) ? b : a));
-  return { who: c.name, line: kind.read.line };
+  return { who: whoIs(c.id), line: kind.read.line };
 }
 
 export function choose(i) {
@@ -444,7 +445,7 @@ export function harvestLine(h) {
 // who is walking it and what each of them is worth to the pool — the readout under the
 // crew screen and along the bottom of the crawl
 export function partyLine(who = walkers()) {
-  return who.map((c) => `${c.name} ${conOf(c.id)}`).join('    ');
+  return who.map((c) => `${whoIs(c.id)} ${conOf(c.id)}`).join('    ');
 }
 
 // what the bar across the top of the crawl says next to itself
@@ -478,7 +479,7 @@ export function questRows() {
       note,
       body: [
         `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it, you included.`
-          + (q.must ? `  ${q.must.map((m) => charOf(m).name).join(' and ')} must be on it.` : '')
+          + (q.must ? `  ${q.must.map((m) => whoIs(m)).join(' and ')} must be on it.` : '')
           + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`)
           + (q.when === 'day' ? '  Nothing to fight by daylight.' : '  After dark wants a fighter along.'),
         q.goal,

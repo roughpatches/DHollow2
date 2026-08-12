@@ -7,7 +7,7 @@ import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
-import { partyRows, skillRows } from '../party.js';
+import { partyRows, skillRows, fill } from '../party.js';
 import { statusLines } from '../town.js';
 import { questRows, placeLines, canStart } from '../run.js';
 
@@ -39,9 +39,10 @@ const TABS = [
   ['Settings', SETTINGS],
 ];
 
-// a setting's right-hand column is whichever option it is currently on
+// a setting's right-hand column is whichever option it is currently on. {playerName}
+// resolves here as well as in dialogue, so the sheet can carry a name nobody wrote.
 function noteOf(entry) {
-  return entry.options ? option(entry.id).name : entry.note;
+  return fill(entry.options ? option(entry.id).name : entry.note || '');
 }
 
 const EMPTY = { label: '—', note: '', body: ['Nothing recorded yet.'] };
@@ -276,7 +277,7 @@ export default class Menu extends Phaser.Scene {
     // the prose is measured first and the map takes whatever vertical room is left over,
     // so a long entry shrinks its map rather than running off the bottom of the panel
     const paras = body.map((p) =>
-      this.text(this.detailX, 0, p, TUNING.menuBodySize, COLORS.menuText, this.detailW));
+      this.text(this.detailX, 0, fill(p), TUNING.menuBodySize, COLORS.menuText, this.detailW));
     const proseH = paras.reduce((h, t) => h + t.height + 14, 0);
 
     if (entry.map) y = this.miniMap(entry, y, this.box.y + this.box.h - 44 - proseH - y) + 16;
