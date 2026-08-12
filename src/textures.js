@@ -3,6 +3,7 @@
 // names instead — see src/art.js — so nothing downstream cares which they are.
 
 import { TUNING, COLORS, PALETTES } from '../tuning.js';
+import { buildUiAtlas } from './uiatlas.js';
 
 const TS = TUNING.tileSize;
 const AW = 16; // actor frame width
@@ -262,7 +263,118 @@ export function walkAnim(palette, dir) {
   return `${palette}_walk_${dir}`;
 }
 
+// --- the crawl's landscape --------------------------------------------------
+// Three bands the walking party moves past, tiled and scrolled at three speeds, and one
+// silhouette per encounter nature for the node that walks into view. Placeholder art in
+// the same spirit as everything above it: shapes that read at a glance and no more.
+
+export const BAND = { far: [128, 56], mid: [128, 44], near: [128, 76] };
+const MARK = [26, 34];
+
+export function markKey(nature) {
+  return `mark_${nature}`;
+}
+
+const BAND_DRAW = {
+  // a ridge of conifers a long way off, flattened by the distance
+  far: (g, [w, h]) => {
+    g.fillStyle(COLORS.tree[0], 1);
+    for (let i = 0; i < 10; i++) {
+      const x = i * 13;
+      const top = h - 12 - (14 + ((i * 11) % 16));
+      g.fillTriangle(x - 2, h - 10, x + 7, top, x + 16, h - 10);
+    }
+    g.fillRect(0, h - 12, w, 12);
+  },
+  // the near treeline, and a boulder or two out of the same dark
+  mid: (g, [w, h]) => {
+    g.fillStyle(COLORS.tree[1], 1);
+    for (let i = 0; i < 6; i++) {
+      const x = i * 22;
+      const top = h - 8 - (20 + ((i * 13) % 14));
+      g.fillTriangle(x - 4, h - 6, x + 9, top, x + 22, h - 6);
+    }
+    g.fillStyle(COLORS.stone[0], 1);
+    g.fillRect(70, h - 14, 13, 8);
+    g.fillRect(18, h - 11, 9, 5);
+    g.fillStyle(COLORS.tree[1], 1);
+    g.fillRect(0, h - 6, w, 6);
+  },
+  // The ground going by under their feet: the verge they walk on, then the road opening
+  // out toward the bottom of the screen, so the band has depth in it rather than a line.
+  near: (g, [w, h]) => {
+    g.fillStyle(COLORS.dirt[0], 1);
+    g.fillRect(0, 0, w, h);
+    g.fillStyle(COLORS.grass[0], 1);
+    for (let i = 0; i < 16; i++) g.fillRect(i * 8 + ((i * 5) % 6), 0, 3, 5);
+    g.fillStyle(COLORS.path[1], 1);
+    g.fillRect(0, 8, w, h - 8);
+    g.fillStyle(COLORS.path[0], 1);
+    for (const [x, y, ww, hh] of [[6, 14, 22, 3], [46, 26, 30, 4], [90, 18, 24, 3],
+      [16, 42, 34, 4], [70, 54, 40, 5], [0, 66, 28, 5], [100, 70, 26, 4]]) g.fillRect(x, y, ww, hh);
+    g.fillStyle(COLORS.dirt[1], 1);
+    for (const [x, y] of [[34, 34], [82, 46], [12, 58], [118, 30]]) g.fillRect(x, y, 6, 3);
+  },
+};
+
+const MARK_DRAW = {
+  // a cut stump: something to work at
+  gather: (g, [w, h]) => {
+    g.fillStyle(COLORS.wood[0], 1);
+    g.fillRect(w / 2 - 7, h - 16, 14, 16);
+    g.fillStyle(COLORS.wood[1], 1);
+    g.fillRect(w / 2 - 9, h - 20, 18, 5);
+  },
+  // two of them, standing about
+  talk: (g, [w, h]) => {
+    g.fillStyle(COLORS.menuMapFolk, 1);
+    g.fillRect(w / 2 - 10, h - 22, 6, 22);
+    g.fillRect(w / 2 - 11, h - 27, 8, 6);
+    g.fillStyle(COLORS.menuDim, 1);
+    g.fillRect(w / 2 + 3, h - 19, 6, 19);
+    g.fillRect(w / 2 + 2, h - 24, 8, 6);
+  },
+  // something with a shape to it, and nothing friendly in the shape
+  combat: (g, [w, h]) => {
+    g.fillStyle(COLORS.menuMapFolk, 1);
+    g.fillTriangle(w / 2 - 12, h, w / 2, h - 30, w / 2 + 12, h);
+    g.fillStyle(COLORS.questNightEdge, 1);
+    g.fillRect(w / 2 - 5, h - 18, 3, 3);
+    g.fillRect(w / 2 + 2, h - 18, 3, 3);
+  },
+  // ground that is not where it looks
+  hazard: (g, [w, h]) => {
+    g.fillStyle(COLORS.water[0], 1);
+    g.fillRect(w / 2 - 12, h - 8, 24, 8);
+    g.fillStyle(COLORS.stone[1], 1);
+    g.fillRect(w / 2 - 13, h - 11, 8, 4);
+    g.fillRect(w / 2 + 5, h - 10, 9, 4);
+  },
+};
+
+function buildLandscape(scene) {
+  for (const [name, size] of Object.entries(BAND)) {
+    const key = `band_${name}`;
+    if (scene.textures.exists(key)) continue;
+    const g = scene.make.graphics({ x: 0, y: 0 }, false);
+    BAND_DRAW[name](g, size);
+    g.generateTexture(key, size[0], size[1]);
+    g.destroy();
+  }
+  for (const nature of Object.keys(MARK_DRAW)) {
+    if (scene.textures.exists(markKey(nature))) continue;
+    const g = scene.make.graphics({ x: 0, y: 0 }, false);
+    MARK_DRAW[nature](g, MARK);
+    g.generateTexture(markKey(nature), MARK[0], MARK[1]);
+    g.destroy();
+  }
+}
+
 export function buildTextures(scene) {
+  buildLandscape(scene);
+  // the minigame kit's atlas is drawn here too, so an imported activity engine works
+  // without any wiring of its own
+  buildUiAtlas(scene);
   if (scene.textures.exists('tiles16')) return;
 
   // the generated strip, at the size it is drawn at. src/art.js blows it up to tilePx

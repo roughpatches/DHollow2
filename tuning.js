@@ -23,8 +23,59 @@ export const TUNING = {
   questBiasWeight: 10, // taking a branch multiplies that encounter's weight by this
   questBonusFactor: 2, // finishing pays this many times over what the run itself paid
   questBonusXp: { short: 150, medium: 350, long: 700 }, // and this on top, flat
-  questNightHurt: 1.25, // a node at night costs this much more HP
+  questNightCon: 1.25, // a node at night takes this much more constitution
   questNightXp: 1.3, // and pays this much more for it
+
+  // Constitution is what a party has to spend on being out there: everyone's own score
+  // added up at the gate, drained by the road, and gone when the run ends either way.
+  // At zero the party turns for home with half of what it was carrying.
+  questConDecay: 1, // taken at every node, before the node itself is felt
+  questConHeld: 1, // a check held steadies them by this much
+  questConLost: 3, // a check lost costs this on top of whatever the node takes
+  questSpentKeep: 0.5, // what a party with nothing left in it carries home
+
+  // The crawl is three bands: the constitution bar across the top, the party walking in
+  // the middle, and the trail behind and ahead of them along the bottom.
+  questBarHeight: 26,
+  questTrailHeight: 74,
+  questWalkGroundFrac: 0.68, // where the ground line sits inside the walking band
+  questBodyPx: 62, // how tall a walking placeholder is drawn on the road
+  questArtScale: 1.25, // drawn art carries air around the body; this brings it up to size
+  questMarkScale: 2.5, // and how big the thing up ahead is drawn
+  questScrollPxPerSec: 46, // the near ground's speed; the layers behind it run slower
+  questParallax: [0.15, 0.4, 1], // far, mid, near, as a fraction of that speed
+  questApproachMs: 1400, // how long a node takes to walk into view
+  questConTweenMs: 500, // and how long the bar takes to catch up with it
+
+  // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
+  // is. Every number the axe answers to lives here.
+  fell: {
+    chargeDurationMs: 1700, // how long a full wind-up takes
+    ventPerSec: 3.2, // and how fast the power bleeds back off after a swing
+    overchargeAt: 1.0, // past this the swing goes wild and splinters the trunk
+    wildChip: 0.12, // what a wild swing costs the trunk's soundness
+    cutPerSwing: 0.125, // a clean bite this deep, so eight of them fell it
+    strikePips: 8, // and a pip apiece, once there is art for them
+    leanStep: 0.07, // how far a swing shifts the lean toward the side you cut
+    leanDrift: 0.021, // and how fast the tree tips that way on its own
+    leanBand: { low: 0.34, high: 0.66 }, // the lean it will take without straining
+    leanBandRoam: 0.12, // how far that band wanders
+    bandStepPerSwing: 0.013, // and how far it moves per swing
+    zoneShiftPerSwing: 0.05, // the bite target walks this far with every strike
+    powerZone: { width: 0.2, min: 0.28, max: 0.88 }, // where the bite sits on the wind-up
+    soundnessDrainPerSec: 0.18, // straining the trunk costs this
+    soundnessRegenPerSec: 0.18, // and a balanced cut puts it back
+  },
+
+  // What playing an activity is worth. A judgment of perfect counts full, good most of
+  // the way, a miss barely — averaged into one 0..1 quality, which is what the node then
+  // pays on. A run where the party never touches an activity is unaffected by any of it.
+  activityWorth: { perfect: 1, good: 0.7, miss: 0.2 },
+  activityKeepFloor: 0.4, // the worst performance still carries this much of the spoils
+  activityFailKeep: 0.25, // and a botched activity — a split trunk — this much
+  activityConBest: 2, // a quality above activityConGood puts this much constitution back
+  activityConGood: 0.8,
+  activityConWorst: -3, // and a botched one costs this
 
   questPipSize: 14,
   questPipGap: 8,
@@ -41,19 +92,19 @@ export const TUNING = {
   bondNames: ['Stranger', 'Acquainted', 'Trusted', 'Sworn'],
   bondPerRun: 1, // points added to everyone who walked a run to the end
   recruitBase: 1, // the band an ordinary job asks for
-  recruitDraw: 1, // each trait drawn to the work asks one band less
+  recruitDraw: 1, // each skill drawn to the work asks one band less
   recruitFear: 2, // each fear or scruple the work touches asks two bands more
 
-  // Traits are points, not badges. A character picks traitsAtLevelOne of them from
-  // content/traits.js and spreads traitPointsAtLevelOne between those three; the rest
+  // Skills are points, not badges. A character picks skillsAtLevelOne of them from
+  // content/skills.js and spreads skillPointsAtLevelOne between those three; the rest
   // of the list is what they are untrained at.
-  traitsAtLevelOne: 3,
-  traitPointsAtLevelOne: 6,
-  traitBonusPerPoint: 2, // what one point is worth to an activity
-  traitYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
+  skillsAtLevelOne: 3,
+  skillPointsAtLevelOne: 6,
+  skillBonusPerPoint: 2, // what one point is worth to an activity
+  skillYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
   // party's score for that work adds this much on top of the roll
 
-  // Skill checks. A die, plus the trait, against a DC written on the encounter or the
+  // Skill checks. A die, plus the skill, against a DC written on the encounter or the
   // job. The best in the party rolls it. A natural top always holds and a natural 1
   // never does, so no DC is a wall and none is a formality.
   checkDie: 20,
@@ -62,7 +113,7 @@ export const TUNING = {
   checkFailHurt: 2, // and costs this much on top of the node's own wounds
 
   maxLevel: 10,
-  hpPerLevel: 3, // added to a character's own HP for every level past the first
+  conPerLevel: 3, // added to a character's own constitution for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
 
   dialogueCharsPerSec: 45,
@@ -120,6 +171,45 @@ export const COLORS = {
   menuMapMark: 0x7f9fa8,
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,
+  questSkyDay: 0x2c333c, // what the party is walking under in the middle band
+  questSkyNight: 0x11141d,
+  questNightTint: 0x6a7590, // laid over the landscape after dark
+  questTrailFill: 0x0d0f13, // the strip along the bottom the trail is drawn on
+
+  // The minigame UI kit, drawn into the generated 'ui' atlas at boot. Retint here and
+  // every widget an activity engine draws follows; nothing else reads these.
+  ui: {
+    stage: 0x0b0d10,
+    panel: 0x171a20,
+    inset: 0x101216,
+    edge: 0x6b5a3a,
+    rule: 0x2e3138,
+    text: 0xd9d3c4,
+    muted: 0x8b8578,
+    gold: 0xc9a95f,
+    goldBright: 0xf0d68f,
+    grass: 0x6f8f4a,
+    danger: 0x9c5a46,
+    cool: 0x7f9fa8,
+    warn: 0xc08040,
+    ink: 0x0b0d10,
+  },
+  // A judgment ribbon carries a dark label, so these stay light enough to read it.
+  uiRibbons: {
+    fb_perfect: 0xf0d68f,
+    fb_clean: 0x8fae66,
+    fb_good: 0xc9a95f,
+    fb_wild: 0xd39a55,
+    fb_miss: 0xc07a63,
+  },
+  // what each bar kind is filled with
+  uiBars: {
+    bar_hp: 0x9c5a46,
+    bar_stamina: 0x6f8f4a,
+    bar_atb: 0x7f9fa8,
+    bar_quality: 0xc9a95f,
+    bar_integrity: 0xc08040,
+  },
 
   grass: [0x2f3d2b, 0x263422],
   path: [0x4f4a43, 0x413d37],

@@ -8,7 +8,7 @@ import { BESTIARY, QUESTS } from '../content/codex.js';
 import { PLACES } from '../content/places.js';
 import { SETTINGS } from '../content/settings.js';
 import { PARTY } from '../content/party.js';
-import { TRAITS } from '../content/traits.js';
+import { SKILLS } from '../content/skills.js';
 import { BUILDINGS } from '../content/buildings.js';
 import { MATERIALS } from '../content/materials.js';
 import { QUESTS as JOBS } from '../content/quests.js';
@@ -37,7 +37,7 @@ function entrySlots(e) {
   return slots.concat((e.body || []).map((s, i) => [`paragraph ${i + 1}`, s]));
 }
 
-// party and trait entries name themselves and derive their note, so only the prose
+// party and skill entries name themselves and derive their note, so only the prose
 // in `body` is text somebody has to write
 function proseSlots(e) {
   return (e.body || []).map((s, i) => [`paragraph ${i + 1}`, s]);
@@ -54,7 +54,7 @@ const SOURCES = [
   ['Dialogue', NPCS, (n) => n.name, dialogueSlots],
   ['Scenes', SCENE_ROWS, (s) => s.label, proseSlots],
   ['Party', PARTY, (c) => c.name, proseSlots],
-  ['Traits', TRAITS, (t) => t.name, proseSlots],
+  ['Skills', SKILLS, (t) => t.name, proseSlots],
   ['Buildings', BUILDINGS, (b) => b.name, proseSlots],
   ['Materials', MATERIALS, (m) => m.name, proseSlots],
   ['Jobs', JOBS, (q) => q.label, proseSlots],

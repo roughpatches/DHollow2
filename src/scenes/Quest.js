@@ -1,10 +1,17 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
-import { roster, charOf, bandName, bandOf, scoreLine, traitsOf, traitOf, YOU } from '../party.js';
+import { roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, YOU } from '../party.js';
+import { createWalk } from '../walk.js';
+import { markKey } from '../textures.js';
+import { meterBar } from '../minigames/meters.js';
+import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
-// The crawl. Runs over World, which freezes behind it. A row of pips across the top is
-// the whole run at a glance; everything below is the node you are standing on.
+// The crawl. Runs over World, which freezes behind it. Three bands: the party's
+// constitution across the top, the party walking the landscape in the middle, and the
+// trail they are on along the bottom — what they have walked, what they are standing in,
+// and how many blanks are still in front of them. A node is not a node until it has
+// walked into view, so the card over the landscape only opens when they reach it.
 export default class Quest extends Phaser.Scene {
   constructor() {
     super('Quest');
@@ -21,6 +28,10 @@ export default class Quest extends Phaser.Scene {
     this.row = 0;
 
     this.input.keyboard.on('keydown', this.onKey, this);
+    // an axe swing is a key held and let go, so the release needs its own listener
+    this.input.keyboard.on('keyup', (ev) => {
+      if (this.open_ && this.activity && ev.key === ' ') this.activity.strike();
+    });
     this.game.events.on('quest:board', this.openBoard, this);
     this.game.events.on('quest:start', this.openJob, this);
   }
@@ -55,12 +66,22 @@ export default class Quest extends Phaser.Scene {
   close() {
     this.open_ = false;
     this.layer.setVisible(false);
+    this.activity = null;
+    this.scrim?.destroy();
+    this.scrim = null;
+    this.walk?.destroy();
+    this.walk = null;
     run.clear();
     this.game.events.emit('quest:close');
   }
 
-  update() {
+  update(time, delta) {
     this.swallow = false;
+    this.activity?.update(time);
+    if (!this.walk) return;
+    this.walk.update(delta);
+    const r = run.active();
+    if (r && r.state === 'running' && r.phase === 'fork') this.walk.setMoving(false);
   }
 
   onKey(ev) {
@@ -104,12 +125,20 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + all.length) % all.length;
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % all.length;
       else if (k === ' ') this.toggleWalker(all[this.row].id);
-      else if (k === 'enter' && 1 + this.taking.length >= this.job.party) this.begin(this.when_);
+      else if (k === 'enter' && this.crewed()) this.begin(this.when_);
       this.draw();
       return;
     }
 
     const r = run.active();
+    if (this.activity) {
+      // the engine has the controls: space winds up and releases, left and right pick
+      // the side of the cut. Nothing else is listening.
+      if (k === ' ') this.activity.chargeStart();
+      else if (k === 'arrowleft' || k === 'a') this.activity.setSide('left');
+      else if (k === 'arrowright' || k === 'd') this.activity.setSide('right');
+      return;
+    }
     if (r.state !== 'running') {
       if (k === 'escape' || k === 'enter' || k === 'e' || k === ' ') this.close();
       return;
@@ -122,6 +151,7 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'enter' || k === ' ' || k === 'e') run.choose(this.row);
       else if (k === 'escape') run.abandon();
     } else if (k === 'e' || k === ' ' || k === 'enter') {
+      if (this.approaching) return; // it has not got here yet
       run.step();
       this.row = 0;
     } else if (k === 'escape') {
@@ -139,9 +169,22 @@ export default class Quest extends Phaser.Scene {
     this.when_ = when;
     const must = (this.job.must || []).filter((id) => recruit.asked(id, this.job, when).willing);
     const rest = recruit.willing(this.job, when).filter((id) => !must.includes(id));
+    // after dark a fighter is taken before anybody else, because the job will not go
+    // without one and the default crew should not have to be corrected by hand
+    if (run.needsFighter(when)) rest.sort((a, b) => isCombat(b) - isCombat(a));
     this.taking = [...must, ...rest].slice(0, Math.max(must.length, this.job.party - 1));
     this.mode = 'party';
     this.row = 0;
+  }
+
+  // you are on it whoever else is, so you are counted in both of these
+  crew() {
+    return [YOU, ...this.taking];
+  }
+
+  crewed() {
+    return this.crew().length >= this.job.party
+      && (!run.needsFighter(this.when_) || run.hasFighter(this.crew()));
   }
 
   toggleWalker(id) {
@@ -151,15 +194,40 @@ export default class Quest extends Phaser.Scene {
   }
 
   begin(when) {
-    run.start(this.job.id, when, this.taking);
+    const r = run.start(this.job.id, when, this.taking);
     this.mode = 'run';
     this.row = 0;
+    this.activity = null;
+    this.walk?.destroy();
+    this.walk = createWalk(this, this.bands().walk, r.party, when);
+    this.con = null;
+    this.shownAt = -1;
+    this.approaching = false;
+  }
+
+  // The crawl is three bands inside the panel: the constitution bar across the top, the
+  // party walking in the middle, the trail along the bottom.
+  bands() {
+    const b = this.box;
+    const barY = b.y + TUNING.menuPad + 22;
+    const top = barY + TUNING.questBarHeight + 30; // room under the bar for who is walking
+    const bottom = b.y + b.h - TUNING.questTrailHeight;
+    return {
+      bar: { x: this.left, y: barY, w: this.wide, h: TUNING.questBarHeight },
+      walk: { x: b.x, y: top, w: b.w, h: bottom - top },
+      trail: { x: this.left, y: bottom + 12, w: this.wide, h: TUNING.questTrailHeight - 34 },
+    };
   }
 
   draw() {
     this.layer.removeAll(true);
     const r = run.active();
-    this.panel(this.mode === 'run' && r && r.when === 'night');
+    const night = this.mode === 'run' && r && r.when === 'night';
+    // On the crawl the middle band is the landscape, so the panel paints only the strips
+    // above and below it and leaves the walking party showing through between them.
+    this.walk?.setVisible(this.mode === 'run');
+    if (this.mode === 'run') this.chrome(night);
+    else this.panel(night);
     if (this.mode === 'board') this.board();
     else if (this.mode === 'when') this.when();
     else if (this.mode === 'party') this.party();
@@ -171,6 +239,23 @@ export default class Quest extends Phaser.Scene {
     const g = this.add.graphics();
     g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 0.98);
     g.fillRect(b.x, b.y, b.w, b.h);
+    g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
+    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+    this.layer.add(g);
+  }
+
+  // the strip the bar sits on, the strip the trail sits on, and the frame around both
+  chrome(night) {
+    const b = this.box;
+    const band = this.bands();
+    const g = this.add.graphics();
+    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 1);
+    g.fillRect(b.x, b.y, b.w, band.walk.y - b.y);
+    g.fillStyle(COLORS.questTrailFill, 1);
+    g.fillRect(b.x, band.walk.y + band.walk.h, b.w, b.y + b.h - band.walk.y - band.walk.h);
+    g.lineStyle(1, night ? COLORS.questNightEdge : COLORS.menuRule, 1);
+    g.lineBetween(b.x, band.walk.y, b.x + b.w, band.walk.y);
+    g.lineBetween(b.x, band.walk.y + band.walk.h, b.x + b.w, band.walk.y + band.walk.h);
     g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
     g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
     this.layer.add(g);
@@ -202,8 +287,9 @@ export default class Quest extends Phaser.Scene {
       }
       const size = run.sizeOf(q);
       const when = q.when === 'any' ? 'day or night' : `${q.when} only`;
-      // whether it can be crewed at all is the first thing worth knowing about a job
-      const crewed = run.timesFor(q).some((t) => recruit.enough(q, t));
+      // whether it can be walked at all is the first thing worth knowing about a job,
+      // and after dark that includes whether anybody coming can fight
+      const crewed = run.timesFor(q).some((t) => run.canStart(q.id, t));
       this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes · ${q.party} to walk it · ${when}`,
         TUNING.menuRowSize, on ? COLORS.menuAccent : (crewed ? COLORS.menuRule : COLORS.menuMapFolk)).setOrigin(1, 0);
       this.text(this.left + 4, y, q.label, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
@@ -237,8 +323,8 @@ export default class Quest extends Phaser.Scene {
       y += this.text(this.left + 24, y, run.mixAt(t), TUNING.questBodySize,
         on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 4;
       const cost = t === 'night'
-        ? `Wounds run ${TUNING.questNightHurt}× and pay ${TUNING.questNightXp}× for it.`
-        : 'Wounds and pay as written.';
+        ? `The road takes ${TUNING.questNightCon}× the constitution and pays ${TUNING.questNightXp}× for it. Will not go out without a fighter.`
+        : 'Constitution and pay as written. Nothing out there to fight.';
       y += this.text(this.left + 24, y, cost, TUNING.questHintSize,
         on ? COLORS.menuDim : COLORS.menuRule).height + 14;
     });
@@ -263,11 +349,21 @@ export default class Quest extends Phaser.Scene {
       short > 0 ? `Needs ${this.job.party}. ${coming} — ${short} short.`
         : `Needs ${this.job.party}. ${coming}.`,
       TUNING.questBodySize, short > 0 ? COLORS.menuMapFolk : COLORS.menuText).height + 10;
+    // the night rule is said on the screen where the crew is picked, because that is
+    // the only screen where it can be answered
+    if (run.needsFighter(this.when_)) {
+      const armed = run.hasFighter(this.crew());
+      y += this.text(this.left, y,
+        armed
+          ? 'Something out there will have to be fought. Somebody coming can.'
+          : 'Something out there will have to be fought. Nobody coming can.',
+        TUNING.questBodySize, armed ? COLORS.menuText : COLORS.menuMapFolk, this.wide).height + 10;
+    }
     // the job's own roll is named before the crew is picked, because it is the reason
     // to pick one crew over another
     if (this.job.check) {
       const ch = this.job.check;
-      y += this.text(this.left, y, `The last node asks a ${traitOf(ch.trait).name} roll at DC ${ch.dc}.`,
+      y += this.text(this.left, y, `The last node asks a ${skillOf(ch.skill).name} roll at DC ${ch.dc}.`,
         TUNING.questHintSize, COLORS.menuMapMark).height + 8;
     }
     this.rule(y);
@@ -280,8 +376,11 @@ export default class Quest extends Phaser.Scene {
       const required = (this.job.must || []).includes(c.id);
       const mark = required ? '[!]' : taken ? '[x]' : a.willing ? '[ ]' : ' × ';
       const colour = taken ? COLORS.menuAccent : a.willing ? COLORS.menuText : COLORS.menuRule;
-      // what they are worth is on the row itself: it is half of why you take somebody
-      this.text(this.left + this.wide, y + 2, traitsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   '),
+      // what they are worth is on the row itself: it is half of why you take somebody,
+      // and after dark whether they fight is the other half
+      const worth = skillsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   ')
+        + (isCombat(c.id) ? '   fights' : '');
+      this.text(this.left + this.wide, y + 2, worth,
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
       y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
         TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;
@@ -293,141 +392,252 @@ export default class Quest extends Phaser.Scene {
     });
 
     // you are on it whoever else is, so you are in both readouts
-    const crew = [YOU, ...this.taking];
+    const crew = this.crew();
     this.text(this.left, this.box.y + this.box.h - 74,
       run.partyLine(crew.map((id) => charOf(id))), TUNING.menuRowSize, COLORS.menuText);
     // the crew added up: what this party would be good at if it walked out now
     this.text(this.left, this.box.y + this.box.h - 50, scoreLine(crew),
       TUNING.questHintSize, COLORS.menuDim);
-    this.hint(short > 0
-      ? '[Up/Down] Look    [Space] Take or leave    [Esc] Back'
-      : '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back');
+    this.hint(this.crewed()
+      ? '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back'
+      : '[Up/Down] Look    [Space] Take or leave    [Esc] Back');
   }
 
   crawl() {
     const r = run.active();
-    let y = this.box.y + TUNING.menuPad;
+    const band = this.bands();
 
-    this.text(this.left + this.wide, y + 4, `${r.quest.size} · ${r.when} · ${r.nodes.length} nodes`,
-      TUNING.menuRowSize, r.when === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
-    y += this.text(this.left, y, r.quest.label, TUNING.questTitleSize, COLORS.menuAccent).height + 12;
+    // A node the party has not walked up to yet is not a node they know anything about,
+    // so the approach runs first and the card only opens when it has arrived.
+    if (r.state === 'running' && (r.phase === 'node' || r.phase === 'activity') && this.shownAt !== r.at) {
+      this.shownAt = r.at;
+      this.approaching = true;
+      this.walk.approach(run.kindOf(r.nodes[r.at].kind).nature, () => {
+        this.approaching = false;
+        if (run.active()?.phase === 'activity') this.startActivity();
+        this.draw();
+      });
+    }
+    if (r.state !== 'running' || r.phase === 'fork') {
+      this.approaching = false;
+      this.walk.pass();
+    }
 
-    y = this.pips(r, y) + 14;
-    this.rule(y);
-    y += 16;
+    this.conBar(r, band.bar);
+    this.trail(r, band.trail);
 
-    if (r.state === 'running' && r.phase === 'fork') y = this.fork(r, y);
-    else if (r.state === 'running') y = this.node(r, y);
-    else y = this.ending(r, y);
-
-    this.text(this.left, this.box.y + this.box.h - 52, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
+    if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
+    else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
+    else if (r.state === 'running' && !this.approaching) this.card(band.walk, this.nodeLines(r), this.nodeHead(r));
+    else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r));
 
     if (r.state !== 'running') this.hint('[Enter] Back to town');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
+    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.kindOf(r.nodes[r.at].kind).activity) : 'Walking.');
+    else if (this.approaching) this.hint('[E] Press on    [Esc] Turn back');
     else this.hint('[E] Press on    [Esc] Turn back');
   }
 
-  // the run at a glance: behind you filled, ahead of you hollow, the goal ringed
-  pips(r, y) {
-    const s = TUNING.questPipSize;
-    const gap = TUNING.questPipGap;
+  // The constitution bar, and what the last node did to it under the label. This is the
+  // only readout that matters at a glance: at zero the run is over wherever it stands.
+  conBar(r, rect) {
+    const frac = r.conMax ? r.con / r.conMax : 0;
+    const low = frac <= 0.25;
+    this.text(this.left, rect.y - 22, r.quest.label, TUNING.questTitleSize - 2, COLORS.menuAccent);
+    this.text(this.left + this.wide, rect.y - 18, `${r.quest.size} · ${r.when} · node ${Math.min(r.at + 1, r.nodes.length)} of ${r.nodes.length}`,
+      TUNING.questHintSize, r.when === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
+
+    // the kit's bar, rebuilt with the panel because the panel is cheap and so is it
+    const bar = meterBar(this, rect.x, rect.y + rect.h / 2, rect.w, rect.h, low ? 'bar_hp' : 'bar_stamina');
+    bar.setValue(frac);
+    this.layer.add(bar.track);
+    this.layer.add(bar.fill);
+
+    this.text(rect.x + 10, rect.y + rect.h / 2 - 8, run.conLine(r), TUNING.questBodySize,
+      low ? COLORS.menuMapFolk : COLORS.menuText);
+    // who is walking it and what each of them put into the bar, under the bar rather
+    // than on it, because a number over a moving fill cannot be read
+    this.text(rect.x, rect.y + rect.h + 8, run.partyLine(), TUNING.questHintSize, COLORS.menuDim);
+    this.text(rect.x + rect.w, rect.y + rect.h + 8,
+      low ? 'Nearly spent. At nothing they turn for home with half of it.' : 'What the road has left them.',
+      TUNING.questHintSize, low ? COLORS.menuMapFolk : COLORS.menuDim).setOrigin(1, 0);
+  }
+
+  // The trail along the bottom: what has been walked, what is being walked, and how many
+  // blanks are still in front of them. A fork is a notch, the goal is ringed.
+  trail(r, rect) {
+    const n = r.nodes.length;
+    const gap = 6;
+    const w = Math.max(10, Math.min(38, (rect.w - gap * (n - 1)) / n));
+    const h = rect.h - 20;
     const g = this.add.graphics();
     this.layer.add(g);
-    r.nodes.forEach((n, i) => {
-      const x = this.left + i * (s + gap);
+
+    r.nodes.forEach((node, i) => {
+      const x = rect.x + i * (w + gap);
       const here = i === r.at;
-      if (i < r.at || (here && r.phase === 'node')) {
-        g.fillStyle(here ? COLORS.menuAccent : COLORS.menuMapFolk, 1);
-        g.fillRect(x, y, s, s);
-      } else {
-        g.lineStyle(1, here ? COLORS.menuAccent : COLORS.menuRule, 1);
-        g.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
-      }
-      if (n.goal) {
+      const behind = i < r.at || (here && !this.approaching && r.phase === 'node');
+      g.fillStyle(behind ? COLORS.menuSelectFill : COLORS.questTrailFill, 1);
+      g.fillRect(x, rect.y, w, h);
+      g.lineStyle(here ? 2 : 1, here ? COLORS.menuAccent : COLORS.menuRule, 1);
+      g.strokeRect(x + 0.5, rect.y + 0.5, w - 1, h - 1);
+      if (node.goal) {
         g.lineStyle(1, COLORS.menuMapMark, 1);
-        g.strokeRect(x - 2.5, y - 2.5, s + 4, s + 4);
+        g.strokeRect(x - 2.5, rect.y - 2.5, w + 4, h + 4);
       }
-      if (n.fork) {
+      if (node.fork) {
         g.fillStyle(COLORS.menuMapMark, 1);
-        g.fillRect(x - gap + 2, y + s / 2 - 1, 3, 3);
+        g.fillRect(x - gap + 1, rect.y + h / 2 - 2, 4, 4);
+      }
+      // a walked node is notated with the thing that was standing in it; one still ahead
+      // says nothing, because it is not anything yet
+      if (behind && node.kind) {
+        const mark = this.add.image(x + w / 2, rect.y + h - 4, markKey(run.kindOf(node.kind).nature));
+        // fitted, not stretched: a silhouette squashed to a box stops being a silhouette
+        mark.setOrigin(0.5, 1).setScale(Math.min((w - 8) / mark.width, (h - 8) / mark.height));
+        if (!here) mark.setAlpha(0.65);
+        this.layer.add(mark);
       }
     });
-    return y + s;
+
+    this.text(rect.x + rect.w, rect.y + h + 6,
+      `${Math.max(0, n - r.at - 1)} still in front of you`, TUNING.questHintSize, COLORS.menuDim).setOrigin(1, 0);
   }
 
-  node(r, y) {
+  // Everything that happens at a node is said on one card over the landscape, so the
+  // party and the ground they are standing on stay on the screen while it is read.
+  card(rect, lines, head) {
+    const w = Math.min(660, rect.w - 80);
+    const pad = 18;
+    const g = this.add.graphics();
+    this.layer.add(g);
+    const texts = [];
+    let y = rect.y + pad + 26;
+    for (const [str, size, colour] of lines) {
+      const t = this.text(0, 0, str, size, colour, w - pad * 2);
+      texts.push(t);
+      y += t.height + 8;
+    }
+    const h = y - rect.y - pad + 8;
+    const x = rect.x + (rect.w - w) / 2;
+    const top = rect.y + 10; // the party stays visible on the road under it
+    g.fillStyle(COLORS.menuFill, 0.94);
+    g.fillRect(x, top, w, h);
+    g.lineStyle(1, COLORS.menuEdge, 1);
+    g.strokeRect(x + 0.5, top + 0.5, w - 1, h - 1);
+
+    this.text(x + pad, top + pad - 4, head, TUNING.questBodySize + 4, COLORS.menuText, w - pad * 2);
+    let ty = top + pad + 26;
+    for (const t of texts) {
+      t.setPosition(x + pad, ty);
+      ty += t.height + 8;
+    }
+  }
+
+  // --- activities -------------------------------------------------------------
+  // A node with an engine behind it hands the player the controls where they stand. The
+  // landscape drops below the engine's own drawing so the party stays at the tree.
+
+  startActivity() {
+    const r = run.active();
+    const e = run.kindOf(r.nodes[r.at].kind);
+    if (!hasEngine(e.activity) || this.activity) return;
+    const band = this.bands().walk;
+    // the landscape drops below the engine's own drawing, with a scrim between them so
+    // the readouts are read against something rather than against a hedge
+    this.walk.depth(-200);
+    this.scrim = this.add.graphics().setDepth(-100);
+    this.scrim.fillStyle(COLORS.menuFill, 0.82);
+    this.scrim.fillRect(band.x, band.y, band.w, band.h);
+    this.activity = engineFor(e.activity, this, {
+      x: this.left + 40,
+      top: band.y + 34,
+      barW: Math.min(430, this.wide - 80),
+    });
+    this.activity.start((judgments) => {
+      const failed = this.activity?.failed;
+      this.activity = null;
+      this.scrim?.destroy();
+      this.scrim = null;
+      this.walk.depth(28900);
+      run.settle({ judgments, failed });
+      this.draw();
+    });
+  }
+
+  // just the name of the work over the top of it; the engine draws everything else
+  activityHead(r, rect) {
+    const e = run.kindOf(r.nodes[r.at].kind);
+    this.text(this.left, rect.y + 4, `${r.at + 1}. ${e.name} — ${e.activity}`,
+      TUNING.questBodySize + 2, COLORS.menuText);
+  }
+
+  nodeHead(r) {
     const n = r.nodes[r.at];
     const e = run.kindOf(n.kind);
-
-    y += this.text(this.left, y, `${r.at + 1}. ${e.name}${n.goal ? ' — the goal' : ''}`,
-      TUNING.questBodySize + 4, COLORS.menuText).height + 6;
-    if (e.activity) {
-      y += this.text(this.left, y, `${e.activity} — waiting on that engine. For now the party works it out and moves on.`,
-        TUNING.questHintSize, COLORS.menuDim, this.wide).height + 10;
-    }
-    for (const para of e.body) {
-      y += this.text(this.left, y, para, TUNING.questBodySize, COLORS.menuDim, this.wide).height + 10;
-    }
-
-    // the roll, then what the roll did, then what the work paid — in that order,
-    // because the player is owed the arithmetic before the outcome
-    if (n.check) {
-      y += 4;
-      y += this.text(this.left, y, run.checkLine(n.check), TUNING.questBodySize,
-        n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk, this.wide).height + 4;
-      y += this.text(this.left, y, n.check.pass ? n.check.held : n.check.lost,
-        TUNING.questBodySize, COLORS.menuText, this.wide).height + 6;
-    }
-
-    y += 6;
-    y += this.text(this.left, y, `Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`,
-      TUNING.questBodySize, COLORS.menuAccent).height + 6;
-    const harvest = run.harvestLine(n.harvest);
-    if (harvest) {
-      y += this.text(this.left, y, harvest, TUNING.questHintSize, COLORS.menuDim, this.wide).height + 6;
-    }
-    if (n.hurt > 0) {
-      y += this.text(this.left, y, `${n.hurtWho} takes ${n.hurt}.`, TUNING.questBodySize, COLORS.menuMapFolk).height + 6;
-    }
-    return y;
+    return `${r.at + 1}. ${e.name}${n.goal ? ' — the goal' : ''}`;
   }
 
-  fork(r, y) {
+  nodeLines(r) {
     const n = r.nodes[r.at];
-    y += this.text(this.left, y, 'The way splits.', TUNING.questBodySize + 4, COLORS.menuText).height + 12;
+    const e = run.kindOf(n.kind);
+    const out = [];
+    if (e.activity) {
+      out.push([`${e.activity} — waiting on that engine. For now the party works it out and moves on.`,
+        TUNING.questHintSize, COLORS.menuDim]);
+    }
+    for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
+    if (n.check) {
+      out.push([run.checkLine(n.check), TUNING.questBodySize, n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk]);
+      out.push([n.check.pass ? n.check.held : n.check.lost, TUNING.questBodySize, COLORS.menuText]);
+    }
+    const worked = qualityLine(n);
+    if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
+    out.push([`Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`, TUNING.questBodySize, COLORS.menuAccent]);
+    const harvest = run.harvestLine(n.harvest);
+    if (harvest) out.push([harvest, TUNING.questHintSize, COLORS.menuDim]);
+    const con = run.conLines(n);
+    if (con) out.push([con, TUNING.questBodySize, n.con >= 0 ? COLORS.menuMapMark : COLORS.menuMapFolk]);
+    return out;
+  }
 
-    n.branches.forEach((br, i) => {
+  forkLines(r) {
+    const n = r.nodes[r.at];
+    return n.branches.flatMap((br, i) => {
       const on = i === this.row;
-      const label = `${on ? '>' : ' '} ${br.side}`;
-      y += this.text(this.left, y, label, TUNING.questBodySize, on ? COLORS.menuAccent : COLORS.menuDim).height + 4;
       const said = br.read
         ? `${br.read.who}: ${br.read.line}`
         : 'Nobody in the party can tell you anything about this one.';
-      y += this.text(this.left + 24, y, said, TUNING.questBodySize, on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 14;
+      return [
+        [`${on ? '>' : ' '} ${br.side}`, TUNING.questBodySize, on ? COLORS.menuAccent : COLORS.menuDim],
+        [`    ${said}`, TUNING.questBodySize, on ? COLORS.menuText : COLORS.menuRule],
+      ];
     });
-    return y;
   }
 
-  ending(r, y) {
+  endHead(r) {
+    return { done: 'Done.', spent: 'Nothing left in them.', abandoned: 'Turned back.' }[r.state];
+  }
+
+  endingLines(r) {
     const won = r.state === 'done';
-    const head = { done: 'Done.', failed: 'The party is down.', abandoned: 'Turned back.' }[r.state];
-    y += this.text(this.left, y, head, TUNING.questTitleSize, won ? COLORS.menuAccent : COLORS.menuMapFolk).height + 12;
-
-    if (won) y += this.text(this.left, y, r.quest.goal, TUNING.questBodySize, COLORS.menuText, this.wide).height + 12;
-
-    y += this.text(this.left, y, `Carried out of it: ${run.listOf(r.spoils)}.    ${r.xp} xp each.`,
-      TUNING.questBodySize, COLORS.menuText, this.wide).height + 8;
-
-    if (won) {
-      y += this.text(this.left, y, `Finishing pays again, ${TUNING.questBonusFactor} times over: ${run.listOf(r.bonus.spoils)}, and ${r.bonus.xp} xp each.`,
-        TUNING.questBodySize, COLORS.menuAccent, this.wide).height + 8;
-    } else {
-      y += this.text(this.left, y, 'The bonus for finishing is lost. What was carried out is kept.',
-        TUNING.questBodySize, COLORS.menuDim, this.wide).height + 8;
+    const out = [];
+    if (won) out.push([r.quest.goal, TUNING.questBodySize, COLORS.menuText]);
+    if (r.state === 'spent') {
+      out.push(['The constitution ran out with the job unfinished. They came home from where they stood.',
+        TUNING.questBodySize, COLORS.menuMapFolk]);
     }
-    y += this.text(this.left, y, 'The Sea Hag mends what the road did. The party comes back whole.',
-      TUNING.questHintSize, COLORS.menuDim, this.wide).height + 8;
-    return y;
+    out.push([`Carried out of it: ${run.listOf(r.spoils)}.    ${r.xp} xp each.`, TUNING.questBodySize, COLORS.menuText]);
+    if (r.lost && Object.keys(r.lost).length) {
+      out.push([`Half of it went down on the road: ${run.listOf(r.lost)}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
+    }
+    if (won) {
+      out.push([`Finishing pays again, ${TUNING.questBonusFactor} times over: ${run.listOf(r.bonus.spoils)}, and ${r.bonus.xp} xp each.`,
+        TUNING.questBodySize, COLORS.menuAccent]);
+    } else {
+      out.push(['The bonus for finishing is lost. What was carried out is kept.', TUNING.questBodySize, COLORS.menuDim]);
+    }
+    return out;
   }
 
   // --- bits ------------------------------------------------------------------

@@ -1,6 +1,6 @@
 // Who will walk out with you, and why the rest will not.
 //
-// Every job asks for a bond of recruitBase. Work a character's trait is drawn to asks
+// Every job asks for a bond of recruitBase. Work a character's skill is drawn to asks
 // less of them; work that touches a fear or a scruple asks a great deal more. What is
 // left is a band, and they come if they are at it. The arithmetic is deliberately small
 // enough to show on screen, because a refusal the player cannot account for is a bug
@@ -8,7 +8,7 @@
 
 import { TUNING } from '../tuning.js';
 import { FEARS } from '../content/fears.js';
-import { roster, everyone, charOf, traitsOf, bandOf, bandName } from './party.js';
+import { roster, everyone, charOf, skillsOf, bandOf, bandName } from './party.js';
 
 const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
@@ -30,7 +30,7 @@ export function tagsFor(quest, when) {
 
 export function asked(id, quest, when) {
   const tags = tagsFor(quest, when);
-  const draws = traitsOf(id).filter((t) => (t.draws || []).some((d) => tags.includes(d)));
+  const draws = skillsOf(id).filter((t) => (t.draws || []).some((d) => tags.includes(d)));
   const fears = (charOf(id).fears || []).filter((f) => tags.includes(f)).map((f) => FEAR[f]);
 
   const band = Math.max(0, Math.min(
@@ -42,11 +42,6 @@ export function asked(id, quest, when) {
 
 export function willing(quest, when) {
   return roster().filter((c) => asked(c.id, quest, when).willing).map((c) => c.id);
-}
-
-// you are one of the number a job asks for, and the only one who never has to be asked
-export function enough(quest, when) {
-  return 1 + willing(quest, when).length >= (quest.party || 1);
 }
 
 // --- text ------------------------------------------------------------------
