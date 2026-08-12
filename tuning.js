@@ -8,7 +8,9 @@ export const TUNING = {
   viewHeight: 640,
 
   walkSpeed: 78,
-  walkFrameRate: 7,
+  walkFrameRate: 7, // a placeholder walk is two frames; a drawn one has its own rates
+  artWalkFrameRate: 10,
+  artIdleFrameRate: 5,
 
   interactReach: 12,
   interactRange: 20,
@@ -68,7 +70,9 @@ export const TUNING = {
   dialogueFontSize: 20,
   dialogueNameSize: 18,
 
-  dialoguePortraitSize: 128, // the portrait panel's side in screen pixels; art scales to fit it
+  // The portrait panel's side in screen pixels. Eight of those are border, so a painted
+  // portrait of 128 sits inside it pixel for pixel; a drawn placeholder of 40 trebles.
+  dialoguePortraitSize: 136,
   dialoguePortraitGap: 8, // space between portrait panel and dialogue box
   dialoguePortraitRise: 10, // how far the portrait travels as it pops up
   dialoguePortraitPopMs: 130,

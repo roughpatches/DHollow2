@@ -5,7 +5,8 @@
 //              traits are the three chosen in the hut rather than the three written
 //              here, so the block below leaves them empty.
 //   name     — shown in the menu and on the recruiting screen.
-//   palette  — their sprite and portrait colours, from PALETTES in tuning.js.
+//   palette  — their sprite and portrait colours, from PALETTES in tuning.js, or the id
+//              of a drawn look from content/looks.js if they have real art.
 //   hp       — their own HP at level one. Levels add hpPerLevel on top of it.
 //   traits   — exactly traitsAtLevelOne ids from content/traits.js, against the points
 //              spent on each. The points must add up to traitPointsAtLevelOne;
@@ -41,7 +42,7 @@ export const PARTY = [
   {
     id: 'aldis',
     name: 'Aldis Rooke',
-    palette: 'hunter',
+    palette: 'aldis',
     hp: 11,
     traits: { woodcraft: 3, animalhandling: 2, perception: 1 },
     fears: ['thedead'], // the grave-pin in their pack that they have mentioned to nobody

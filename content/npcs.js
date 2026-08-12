@@ -1,5 +1,6 @@
 // Everyone in the world and everything they say. Plain strings — rewrite any of it.
-// palette names come from PALETTES in tuning.js. x/y are tile coordinates on that map.
+// palette names come from PALETTES in tuning.js, or from content/looks.js for anyone
+// with drawn art instead of a generated placeholder. x/y are tile coordinates on the map.
 // The palette also picks the portrait shown while they speak; add `portrait: 'name'` to
 // give someone a face from a different palette than the one they walk around in.
 // Anywhere a line isn't written yet, put [Placeholder Text] — the Script tab in the
@@ -20,7 +21,7 @@ export const NPCS = [
     x: 31,
     y: 8,
     facing: 'left',
-    palette: 'hunter',
+    palette: 'aldis', // real art; see content/looks.js
     until: 'washedup', // he is only out there while the opening is unplayed
     lines: ['[Placeholder Text]'],
   },
@@ -33,7 +34,7 @@ export const NPCS = [
     x: 5,
     y: 4,
     facing: 'left',
-    palette: 'hunter',
+    palette: 'aldis', // real art; see content/looks.js
     says: [
       {
         needs: 'firstday-offered',

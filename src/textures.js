@@ -1,5 +1,6 @@
-// All placeholder art is generated at boot. There are no image files in this repo.
-// When real sprites land, replace the generators here; nothing else needs to change.
+// Placeholder art, generated at boot for everyone content/looks.js has no drawn art
+// for. A character named there loads their frames from disk under these same key
+// names instead — see src/art.js — so nothing downstream cares which they are.
 
 import { TUNING, COLORS, PALETTES } from '../tuning.js';
 

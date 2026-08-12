@@ -4,7 +4,8 @@
 
 import { TUNING } from '../tuning.js';
 import { NPCS } from '../content/npcs.js';
-import { actorFrame, walkAnim, proneKey } from './textures.js';
+import { walkAnim, proneKey } from './textures.js';
+import { stand } from './art.js';
 import * as story from './story.js';
 
 const TS = TUNING.tileSize;
@@ -54,7 +55,7 @@ function run(scene, step, done) {
     const a = actorFor(scene, step.face);
     if (a) {
       a.facing = step.dir;
-      a.setTexture(actorFrame(a.palette, step.dir, 0));
+      stand(a, a.palette, step.dir);
     }
     done();
   } else if (step.say || step.narrate) {
@@ -106,8 +107,7 @@ function walk(scene, actor, [tx, ty], done) {
     });
   };
   leg(x, actor.y, () => leg(actor.x, y, () => {
-    actor.anims.stop();
-    actor.setTexture(actorFrame(actor.palette, actor.facing, 0));
+    stand(actor, actor.palette, actor.facing);
     done();
   }));
 }
@@ -146,8 +146,12 @@ function traits(scene, done) {
 
 function prone(scene, down) {
   const p = scene.player;
+  if (!down) {
+    stand(p, p.palette, p.facing || 'down');
+    return;
+  }
   p.anims.stop();
-  p.setTexture(down ? proneKey(p.palette) : actorFrame(p.palette, p.facing || 'down', 0));
+  p.setTexture(proneKey(p.palette));
 }
 
 function fade(scene, step, done) {

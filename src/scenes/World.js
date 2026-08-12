@@ -3,6 +3,7 @@ import { MAPS, TILES, LEGEND } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
 import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
+import { preloadArt, buildArt, fitBody } from '../art.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
 import {
@@ -25,8 +26,14 @@ export default class World extends Phaser.Scene {
     this.spawnTile = data.spawn || MAPS[this.mapKey].spawn;
   }
 
+  // the only files the game loads; everyone without art is drawn at boot instead
+  preload() {
+    preloadArt(this);
+  }
+
   create() {
     buildTextures(this);
+    buildArt(this);
     const map = MAPS[this.mapKey];
     const w = map.rows[0].length;
     const h = map.rows.length;
@@ -71,8 +78,9 @@ export default class World extends Phaser.Scene {
       && !(n.after && !hasPlayed(n.after)));
     for (const def of here) {
       const npc = spawnActor(this, def.palette, def.x, def.y, def.facing || 'down');
-      // taller than the player's foot-box so you stop beside someone rather than inside them
-      npc.body.setSize(12, 20).setOffset(2, 8);
+      // reaches further past the feet than the player's box, so you stop beside someone
+      // rather than inside them
+      fitBody(npc, 12, 20, 6);
       npc.body.setImmovable(true);
       npc.def = def;
       this.npcs.push(npc);
