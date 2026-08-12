@@ -1,0 +1,29 @@
+{
+  "group_id": "e6570f54-d6c8-4f24-a790-18301b215b82",
+  "objects": [
+    {
+      "id": "d7c70b5b-f77d-47b5-a217-a248b6a77628",
+      "name": "base",
+      "prompt": "A crooked Victorian dockside tavern of tarred timber and low slate, seen from above and in front, warm lamplight in every window, a painted sign over the door. ",
+      "size": {
+        "width": 136,
+        "height": 136
+      },
+      "directions": 8,
+      "view": "low top-down",
+      "rotations": {
+        "south": "rotations/south.png",
+        "south-east": "rotations/south-east.png",
+        "east": "rotations/east.png",
+        "north-east": "rotations/north-east.png",
+        "north": "rotations/north.png",
+        "north-west": "rotations/north-west.png",
+        "west": "rotations/west.png",
+        "south-west": "rotations/south-west.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.0",
+  "export_date": "2026-08-12T00:18:03.849900"
+}

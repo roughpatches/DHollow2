@@ -54,6 +54,14 @@ export const LOOKS = [
 //            list keeps the last picture.
 export const STRUCTURES = [
   {
+    // One stage: the Sea Hag is the one building in town that never needed repairing.
+    // The export carries eight angles; the town is drawn from the front, so it is south.
+    id: 'tavern',
+    path: 'art/seahag',
+    at: [3.22, 1.13],
+    stages: ['base/rotations/south.png'],
+  },
+  {
     id: 'chapel',
     path: 'art/chapel',
     at: [27, 12.5],
