@@ -129,7 +129,7 @@ export const NPCS = [
     x: 12,
     y: 5,
     facing: 'down',
-    palette: 'barkeep',
+    palette: 'gregorious', // real art; see content/looks.js
     quests: true,
     lines: ['[Placeholder Text]'],
   },

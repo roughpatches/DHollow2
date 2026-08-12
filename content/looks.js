@@ -9,7 +9,8 @@
 //   walk     — folder of the walk cycle, and how many frames each direction has.
 //   idle     — the same for standing still. Frame 0 is what they wear when nothing is
 //              happening to them.
-//   down     — one image, for when they are laid out on the floor.
+//   down     — one image, for when they are laid out on the floor. Leave it out for
+//              anyone the game never puts on the floor; nothing else asks for it.
 //   portrait — the face shown while they speak.
 // The four direction folders are named the way the export names them; src/art.js maps
 // them onto up, down, left and right. Add a character by dropping the export under
@@ -24,6 +25,15 @@ export const LOOKS = [
     walk: { folder: 'Walking/animations/Walking', frames: 6 },
     idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
     down: 'Collapsed_in_a_heap/rotations/south.png',
+    portrait: 'Idle/portrait.png',
+  },
+  {
+    id: 'gregorious',
+    path: 'art/gregorious',
+    size: 60,
+    foot: 46,
+    walk: { folder: 'Walking/animations/Walk', frames: 6 },
+    idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
     portrait: 'Idle/portrait.png',
   },
 ];

@@ -1,0 +1,158 @@
+{
+  "group_id": "cf6c6361-e85b-4fff-a691-f7d790e584c3",
+  "states": [
+    {
+      "character": {
+        "id": "2ac94968-4b88-47f1-8dc1-b56d8ab18ecf",
+        "name": "Idle",
+        "prompt": "Good-natured tavern keeper, broad barrel-chested build, warm genial \nbulk rather than armored solidity. Bald head, thick mutton chop \nsideburns, mustache. Wears a stained apron over shirtsleeves and \nwaistcoat, practical publican attire. Friendly open posture. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, broad rounded frame \ndistinct from armored or angular character shapes.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-01T13:15:53.009513+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {
+          "Breathing_Idle": {
+            "south": [
+              "Idle/animations/Breathing_Idle/south/frame_000.png",
+              "Idle/animations/Breathing_Idle/south/frame_001.png",
+              "Idle/animations/Breathing_Idle/south/frame_002.png",
+              "Idle/animations/Breathing_Idle/south/frame_003.png"
+            ],
+            "north": [
+              "Idle/animations/Breathing_Idle/north/frame_000.png",
+              "Idle/animations/Breathing_Idle/north/frame_001.png",
+              "Idle/animations/Breathing_Idle/north/frame_002.png",
+              "Idle/animations/Breathing_Idle/north/frame_003.png"
+            ],
+            "west": [
+              "Idle/animations/Breathing_Idle/west/frame_000.png",
+              "Idle/animations/Breathing_Idle/west/frame_001.png",
+              "Idle/animations/Breathing_Idle/west/frame_002.png",
+              "Idle/animations/Breathing_Idle/west/frame_003.png"
+            ],
+            "east": [
+              "Idle/animations/Breathing_Idle/east/frame_000.png",
+              "Idle/animations/Breathing_Idle/east/frame_001.png",
+              "Idle/animations/Breathing_Idle/east/frame_002.png",
+              "Idle/animations/Breathing_Idle/east/frame_003.png"
+            ]
+          }
+        }
+      },
+      "portrait": {
+        "path": "Idle/portrait.png",
+        "size": 128,
+        "generated_at": "2026-08-01T13:26:47.115353"
+      },
+      "vocal_animation": {
+        "path": "Idle/vocal/grid.png",
+        "moods": [
+          "neutral",
+          "happy",
+          "angry",
+          "sad",
+          "surprised"
+        ],
+        "visemes": [
+          "rest",
+          "closed",
+          "small_open",
+          "medium_open",
+          "wide_open",
+          "round",
+          "teeth"
+        ],
+        "viseme_count": 7,
+        "width": 896,
+        "height": 640,
+        "generated_at": "2026-08-01T13:59:27.182330",
+        "layout": "grid",
+        "columns": "visemes",
+        "rows": "moods"
+      }
+    },
+    {
+      "character": {
+        "id": "1269110d-bf09-4171-8813-ce09f2078526",
+        "name": "Walking",
+        "prompt": "Good-natured tavern keeper, broad barrel-chested build, warm genial \nbulk rather than armored solidity. Bald head, thick mutton chop \nsideburns, mustache. Wears a stained apron over shirtsleeves and \nwaistcoat, practical publican attire. Friendly open posture. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, broad rounded frame \ndistinct from armored or angular character shapes.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-01T14:00:28.505587+00:00"
+      },
+      "folder": "Walking",
+      "frames": {
+        "rotations": {
+          "south": "Walking/rotations/south.png",
+          "south-east": "Walking/rotations/south-east.png",
+          "east": "Walking/rotations/east.png",
+          "north-east": "Walking/rotations/north-east.png",
+          "north": "Walking/rotations/north.png",
+          "north-west": "Walking/rotations/north-west.png",
+          "west": "Walking/rotations/west.png",
+          "south-west": "Walking/rotations/south-west.png"
+        },
+        "animations": {
+          "Walk": {
+            "east": [
+              "Walking/animations/Walk/east/frame_000.png",
+              "Walking/animations/Walk/east/frame_001.png",
+              "Walking/animations/Walk/east/frame_002.png",
+              "Walking/animations/Walk/east/frame_003.png",
+              "Walking/animations/Walk/east/frame_004.png",
+              "Walking/animations/Walk/east/frame_005.png"
+            ],
+            "north": [
+              "Walking/animations/Walk/north/frame_000.png",
+              "Walking/animations/Walk/north/frame_001.png",
+              "Walking/animations/Walk/north/frame_002.png",
+              "Walking/animations/Walk/north/frame_003.png",
+              "Walking/animations/Walk/north/frame_004.png",
+              "Walking/animations/Walk/north/frame_005.png"
+            ],
+            "south": [
+              "Walking/animations/Walk/south/frame_000.png",
+              "Walking/animations/Walk/south/frame_001.png",
+              "Walking/animations/Walk/south/frame_002.png",
+              "Walking/animations/Walk/south/frame_003.png",
+              "Walking/animations/Walk/south/frame_004.png",
+              "Walking/animations/Walk/south/frame_005.png"
+            ],
+            "west": [
+              "Walking/animations/Walk/west/frame_000.png",
+              "Walking/animations/Walk/west/frame_001.png",
+              "Walking/animations/Walk/west/frame_002.png",
+              "Walking/animations/Walk/west/frame_003.png",
+              "Walking/animations/Walk/west/frame_004.png",
+              "Walking/animations/Walk/west/frame_005.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-12T00:08:15.343255"
+}

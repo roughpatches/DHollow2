@@ -34,7 +34,7 @@ export function preloadArt(scene) {
         }
       }
     }
-    add(proneKey(look.id), look.down);
+    if (look.down) add(proneKey(look.id), look.down); // only somebody who gets laid out needs one
     add(portraitKey(look.id), look.portrait);
   }
 }
