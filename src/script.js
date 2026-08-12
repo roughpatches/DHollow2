@@ -60,8 +60,8 @@ function run(scene, step, done) {
     done();
   } else if (step.say || step.narrate) {
     say(scene, step, done);
-  } else if (step.traits) {
-    traits(scene, done);
+  } else if (step.skills) {
+    skills(scene, done);
   } else if (step.prone !== undefined) {
     prone(scene, step.prone);
     done();
@@ -135,13 +135,13 @@ function say(scene, step, done) {
 }
 
 // the same shape as a line of dialogue: the scene stops until the player has answered
-function traits(scene, done) {
+function skills(scene, done) {
   const once = () => {
-    scene.game.events.off('traits:done', once);
+    scene.game.events.off('skills:done', once);
     done();
   };
-  scene.game.events.on('traits:done', once);
-  scene.game.events.emit('traits:choose');
+  scene.game.events.on('skills:done', once);
+  scene.game.events.emit('skills:choose');
 }
 
 function prone(scene, down) {

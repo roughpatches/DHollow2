@@ -13,7 +13,7 @@ export default class Dialogue extends Phaser.Scene {
     buildTextures(this);
 
     const m = TUNING.dialogueBoxMargin;
-    const ps = TUNING.dialoguePortraitSize;
+    const ps = TUNING.dialoguePorskillSize;
     const h = TUNING.dialogueBoxHeight;
     const top = this.scale.height - h - m;
     this.metrics = { m, ps, h, top };
@@ -63,9 +63,9 @@ export default class Dialogue extends Phaser.Scene {
 
   // With a face beside it the box gives up its left end; without one it takes the whole
   // width back, so a readout with no speaker doesn't leave a panel-shaped hole.
-  layout(withPortrait) {
+  layout(withPorskill) {
     const { m, ps, h, top } = this.metrics;
-    const bx = withPortrait ? m + ps + TUNING.dialoguePortraitGap : m;
+    const bx = withPorskill ? m + ps + TUNING.dialoguePorskillGap : m;
     const w = this.scale.width - bx - m;
 
     this.box.clear();
@@ -94,7 +94,7 @@ export default class Dialogue extends Phaser.Scene {
     this.hint.setVisible(setting('prompt'));
     this.nameText.setText(name);
     this.bodyText.setText('');
-    this.showPortrait(portrait);
+    this.showPorskill(portrait);
   }
 
   // A drawn placeholder is 40 pixels and a painted face is 128, and both have to sit in
@@ -108,7 +108,7 @@ export default class Dialogue extends Phaser.Scene {
 
   // a speaker with no portrait of their own leaves the panel out rather than
   // borrowing someone else's face
-  showPortrait(palette) {
+  showPorskill(palette) {
     const key = palette && portraitKey(palette);
     if (!key || !this.textures.exists(key)) {
       this.portrait.setVisible(false);
@@ -119,12 +119,12 @@ export default class Dialogue extends Phaser.Scene {
     this.face.setTexture(key);
     this.fitFace();
     this.tweens.killTweensOf(this.portrait);
-    this.portrait.setY(this.portraitY + TUNING.dialoguePortraitRise).setAlpha(0);
+    this.portrait.setY(this.portraitY + TUNING.dialoguePorskillRise).setAlpha(0);
     this.tweens.add({
       targets: this.portrait,
       y: this.portraitY,
       alpha: 1,
-      duration: TUNING.dialoguePortraitPopMs,
+      duration: TUNING.dialoguePorskillPopMs,
       ease: 'Quad.Out',
     });
   }

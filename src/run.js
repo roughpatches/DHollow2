@@ -2,16 +2,17 @@
 // every time a quest is accepted, so accepting the same job twice is not the same run.
 //
 // A run is a line with a fork every questForkEvery nodes. At a fork each branch leans
-// toward one kind of encounter; a character whose trait matches that kind can read it
+// toward one kind of encounter; a character whose skill matches that kind can read it
 // off the ground, and taking that branch makes the kind much likelier at the node it
 // leads to. That is the whole of the direction system.
 
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
+import { SKILLS } from '../content/skills.js';
 import {
   roster, charOf, stateOf, damage, heal, award, raiseBond, hpMax,
-  rankOf, scoreOf, check, traitOf, walking, fighters, YOU,
+  rankOf, scoreOf, check, skillOf, walking, fighters, YOU,
 } from './party.js';
 import { give, nameOf } from './town.js';
 import * as story from './story.js';
@@ -28,6 +29,19 @@ function poolAt(when) {
 
 function readableAt(when) {
   return poolAt(when).filter((e) => e.read);
+}
+
+// A table naming a skill the list does not have, usually one left behind by a rewrite of
+// content/skills.js. It rolls the die on its own until it is pointed at something real,
+// so the run still walks; this is where the mistake is said out loud.
+const SKILL_IDS = new Set(SKILLS.map((s) => s.id));
+for (const e of ENCOUNTERS) {
+  for (const named of [e.harvest, e.read && e.read.skill, e.check && e.check.skill]) {
+    if (named && !SKILL_IDS.has(named)) console.warn(`${e.name}: no such skill — ${named}`);
+  }
+}
+for (const q of QUESTS) {
+  if (q.check && !SKILL_IDS.has(q.check.skill)) console.warn(`${q.label}: no such skill — ${q.check.skill}`);
 }
 
 // The first job — the only one the story offers with nothing raised yet — is day work
@@ -144,7 +158,7 @@ export function start(id, when, party) {
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
   // The player and the recruited walk it: they take the wounds, earn the experience,
   // and are the only ones who can read anything at a fork. The player is on it whoever
-  // else is, so their three traits are the three the party always has.
+  // else is, so their three skills are the three the party always has.
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
     .filter((id, i, all) => all.indexOf(id) === i);
   const count = roll(sizeOf(quest));
@@ -216,11 +230,11 @@ export function walkers() {
 }
 
 // who on the run can see this coming, and what they say about it. The one with the most
-// points in the trait speaks: a party carrying two who could tell you hears the better.
+// points in the skill speaks: a party carrying two who could tell you hears the better.
 function readOf(kind) {
-  const seen = walkers().filter((c) => rankOf(c.id, kind.read.trait) > 0);
+  const seen = walkers().filter((c) => rankOf(c.id, kind.read.skill) > 0);
   if (!seen.length) return null;
-  const c = seen.reduce((a, b) => (rankOf(b.id, kind.read.trait) > rankOf(a.id, kind.read.trait) ? b : a));
+  const c = seen.reduce((a, b) => (rankOf(b.id, kind.read.skill) > rankOf(a.id, kind.read.skill) ? b : a));
   return { who: c.name, line: kind.read.line };
 }
 
@@ -243,13 +257,13 @@ function weighted(bias, from = poolAt(run.when)) {
   return from[from.length - 1];
 }
 
-// What the party's points are worth here: everyone's points in the trait this work is
-// done with, added up, each one adding traitYieldPerPoint to what comes out of it. Who
+// What the party's points are worth here: everyone's points in the skill this work is
+// done with, added up, each one adding skillYieldPerPoint to what comes out of it. Who
 // you take on a job is the loudest thing you say about what you want off it.
 function harvestOf(node, e) {
   if (!e.harvest) return null;
   const score = scoreOf(run.party, e.harvest);
-  return { trait: traitOf(e.harvest), score, more: score * TUNING.traitYieldPerPoint };
+  return { skill: skillOf(e.harvest), score, more: score * TUNING.skillYieldPerPoint };
 }
 
 // The job's own test stands in front of the goal; anything else the road throws up
@@ -257,7 +271,7 @@ function harvestOf(node, e) {
 function checkOf(node, e) {
   const spec = (node.goal && run.quest.check) || e.check;
   if (!spec) return null;
-  return { ...check(run.party, spec.trait, spec.dc), held: spec.held, lost: spec.lost };
+  return { ...check(run.party, spec.skill, spec.dc), held: spec.held, lost: spec.lost };
 }
 
 function resolve(node) {
@@ -346,15 +360,15 @@ export function placeLines(id) {
   return [head, q.goal, 'Ready. [Enter] to set out.'];
 }
 
-// a roll, said the way a table says it: die, what the trait added, and what it came to
+// a roll, said the way a table says it: die, what the skill added, and what it came to
 export function checkLine(c) {
-  return `${c.trait.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
+  return `${c.skill.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
     + ` = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
 }
 
 export function harvestLine(h) {
   if (!h || !h.score) return null;
-  return `${h.trait.name} ${h.score} between you — ${Math.round(h.more * 100)}% more out of it.`;
+  return `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more out of it.`;
 }
 
 export function partyLine(who = walkers()) {

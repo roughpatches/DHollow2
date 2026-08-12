@@ -1,7 +1,7 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
-import { roster, charOf, bandName, bandOf, scoreLine, traitsOf, traitOf, isCombat, YOU } from '../party.js';
+import { roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, YOU } from '../party.js';
 
 // The crawl. Runs over World, which freezes behind it. A row of pips across the top is
 // the whole run at a glance; everything below is the node you are standing on.
@@ -291,7 +291,7 @@ export default class Quest extends Phaser.Scene {
     // to pick one crew over another
     if (this.job.check) {
       const ch = this.job.check;
-      y += this.text(this.left, y, `The last node asks a ${traitOf(ch.trait).name} roll at DC ${ch.dc}.`,
+      y += this.text(this.left, y, `The last node asks a ${skillOf(ch.skill).name} roll at DC ${ch.dc}.`,
         TUNING.questHintSize, COLORS.menuMapMark).height + 8;
     }
     this.rule(y);
@@ -306,7 +306,7 @@ export default class Quest extends Phaser.Scene {
       const colour = taken ? COLORS.menuAccent : a.willing ? COLORS.menuText : COLORS.menuRule;
       // what they are worth is on the row itself: it is half of why you take somebody,
       // and after dark whether they fight is the other half
-      const worth = traitsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   ')
+      const worth = skillsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   ')
         + (isCombat(c.id) ? '   fights' : '');
       this.text(this.left + this.wide, y + 2, worth,
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);

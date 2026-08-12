@@ -41,19 +41,19 @@ export const TUNING = {
   bondNames: ['Stranger', 'Acquainted', 'Trusted', 'Sworn'],
   bondPerRun: 1, // points added to everyone who walked a run to the end
   recruitBase: 1, // the band an ordinary job asks for
-  recruitDraw: 1, // each trait drawn to the work asks one band less
+  recruitDraw: 1, // each skill drawn to the work asks one band less
   recruitFear: 2, // each fear or scruple the work touches asks two bands more
 
-  // Traits are points, not badges. A character picks traitsAtLevelOne of them from
-  // content/traits.js and spreads traitPointsAtLevelOne between those three; the rest
+  // Skills are points, not badges. A character picks skillsAtLevelOne of them from
+  // content/skills.js and spreads skillPointsAtLevelOne between those three; the rest
   // of the list is what they are untrained at.
-  traitsAtLevelOne: 3,
-  traitPointsAtLevelOne: 6,
-  traitBonusPerPoint: 2, // what one point is worth to an activity
-  traitYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
+  skillsAtLevelOne: 3,
+  skillPointsAtLevelOne: 6,
+  skillBonusPerPoint: 2, // what one point is worth to an activity
+  skillYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
   // party's score for that work adds this much on top of the roll
 
-  // Skill checks. A die, plus the trait, against a DC written on the encounter or the
+  // Skill checks. A die, plus the skill, against a DC written on the encounter or the
   // job. The best in the party rolls it. A natural top always holds and a natural 1
   // never does, so no DC is a wall and none is a formality.
   checkDie: 20,
@@ -73,10 +73,10 @@ export const TUNING = {
 
   // The portrait panel's side in screen pixels. Eight of those are border, so a painted
   // portrait of 128 sits inside it pixel for pixel; a drawn placeholder of 40 trebles.
-  dialoguePortraitSize: 136,
-  dialoguePortraitGap: 8, // space between portrait panel and dialogue box
-  dialoguePortraitRise: 10, // how far the portrait travels as it pops up
-  dialoguePortraitPopMs: 130,
+  dialoguePorskillSize: 136,
+  dialoguePorskillGap: 8, // space between portrait panel and dialogue box
+  dialoguePorskillRise: 10, // how far the portrait travels as it pops up
+  dialoguePorskillPopMs: 130,
 
   menuMargin: 26,
   menuPad: 20,

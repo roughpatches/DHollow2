@@ -7,7 +7,7 @@ import { TUNING, COLORS, PALETTES } from '../tuning.js';
 const TS = TUNING.tileSize;
 const AW = 16; // actor frame width
 const AH = 22; // actor frame height
-export const PORTRAIT_PX = 40; // portrait art is square and drawn once per palette
+export const PORSKILL_PX = 40; // portrait art is square and drawn once per palette
 
 // Tile index in the generated strip == position in this list.
 export const TILE_NAMES = [
@@ -209,8 +209,8 @@ function drawActor(g, p, dir, frame) {
 
 // Head-and-shoulders bust for the dialogue panel, front-on, built from the same four
 // palette colours as the walking sprite so a face and its body always match.
-function drawPortrait(g, p) {
-  const P = PORTRAIT_PX;
+function drawPorskill(g, p) {
+  const P = PORSKILL_PX;
   fill(g, COLORS.portraitBack, 0, 0, P, P);
 
   fill(g, p.body, 1, 30, 38, 10); // shoulders, run out to the frame so the bust doesn't float
@@ -274,8 +274,8 @@ export function buildTextures(scene) {
 
   for (const name of Object.keys(PALETTES)) {
     const pg = scene.make.graphics({ x: 0, y: 0 }, false);
-    drawPortrait(pg, PALETTES[name]);
-    pg.generateTexture(portraitKey(name), PORTRAIT_PX, PORTRAIT_PX);
+    drawPorskill(pg, PALETTES[name]);
+    pg.generateTexture(portraitKey(name), PORSKILL_PX, PORSKILL_PX);
     pg.destroy();
 
     const lg = scene.make.graphics({ x: 0, y: 0 }, false);

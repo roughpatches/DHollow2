@@ -10,7 +10,7 @@
 //           marked `combat` in content/party.js on it.
 //   party — how many walk it, you included. You are on every job and are the one who
 //           puts the crew together, so a job of 3 wants two others to agree to come.
-//   tags  — what the job involves. Matched against traits' `draws` to find who is keen
+//   tags  — what the job involves. Matched against skills' `draws` to find who is keen
 //           and against characters' `fears` to find who will refuse. A night run is
 //           tagged 'dark' on top of these.
 //   giver — the NPC id who hands it out.
@@ -20,7 +20,7 @@
 //   sets  — a flag raised the first time it is walked to the end.
 //   must  — character ids who have to be on it. Somebody the job will not go without.
 //   at    — the Map tab entry it is set out from, instead of Gregorious's board.
-//   check — the roll the last node asks for, in the same shape encounters use: a trait,
+//   check — the roll the last node asks for, in the same shape encounters use: a skill,
 //           a DC, and the line said whether it is held or lost. The job's own test,
 //           standing in front of the goal, rather than whatever the road threw up.
 //   goal  — what the last node is, in one line.
@@ -42,7 +42,7 @@ export const QUESTS = [
     tags: ['forest', 'timber', 'wild', 'leavingtown'],
     giver: 'gregorious',
     check: {
-      trait: 'woodcraft',
+      skill: 'woodcraft',
       dc: 12,
       held: 'Aldis picks the stand, and the stand gives up what the inn needs.',
       lost: 'You cut what was nearest instead of what was best, and half of it is green.',
@@ -60,7 +60,7 @@ export const QUESTS = [
     tags: ['fen', 'water', 'thedead', 'leavingtown'],
     giver: 'gregorious',
     check: {
-      trait: 'perception',
+      skill: 'perception',
       dc: 13,
       held: 'Somebody counts the black water twice and gets a different number the second time — and can say where.',
       lost: 'You walk it end to end and come back able to say only that it is wet.',
@@ -78,7 +78,7 @@ export const QUESTS = [
     tags: ['coast', 'water', 'leavingtown'],
     giver: 'gregorious',
     check: {
-      trait: 'sailing',
+      skill: 'sailing',
       dc: 14,
       held: 'Somebody reads the tide off her list and calls how long you have on board.',
       lost: 'The water is around your knees before anybody thinks to look at it.',
@@ -96,7 +96,7 @@ export const QUESTS = [
     tags: ['road', 'forest', 'thenorthroad', 'thedead', 'leavingtown'],
     giver: 'gregorious',
     check: {
-      trait: 'perception',
+      skill: 'perception',
       dc: 15,
       held: 'The carts are where they stopped, and so is the reason, and somebody sees the second one.',
       lost: 'You find the carts. Nobody finds the rest of it, and the dark is not lending anybody a lamp.',

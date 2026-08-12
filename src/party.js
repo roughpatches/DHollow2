@@ -1,35 +1,35 @@
 // What a playable character is right now: level, XP, the HP they have left, and what
-// their traits are worth. content/party.js says what they start as; this says where
+// their skills are worth. content/party.js says what they start as; this says where
 // they have got to. Every number it works from is in tuning.js.
 
 import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
-import { TRAITS } from '../content/traits.js';
+import { SKILLS } from '../content/skills.js';
 import { FEARS } from '../content/fears.js';
 import * as story from './story.js';
 
-const TRAIT = Object.fromEntries(TRAITS.map((t) => [t.id, t]));
+const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
 const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
-// Traits live here rather than in content/party.js because the player's are chosen in
+// Skills live here rather than in content/party.js because the player's are chosen in
 // the hut and everyone's could move later; content says what they start as.
 const state = new Map(PARTY.map((c) => [c.id, {
-  level: 1, xp: 0, hp: c.hp, bond: c.bond || 0, traits: { ...c.traits },
+  level: 1, xp: 0, hp: c.hp, bond: c.bond || 0, skills: { ...c.skills },
 }]));
 
-// a misspent or misspelt trait list is a content mistake, and content mistakes are
+// a misspent or misspelt skill list is a content mistake, and content mistakes are
 // said out loud at boot rather than found later in a wrong bonus. The player's three
 // are not written down anywhere to be wrong yet.
 for (const c of PARTY.filter((x) => !x.you)) {
-  const spent = Object.entries(c.traits);
-  const bad = spent.filter(([t]) => !TRAIT[t]).map(([t]) => t);
-  if (bad.length) console.warn(`${c.name}: no such trait — ${bad.join(', ')}`);
-  if (spent.length !== TUNING.traitsAtLevelOne) {
-    console.warn(`${c.name}: ${spent.length} traits, expected ${TUNING.traitsAtLevelOne}`);
+  const spent = Object.entries(c.skills);
+  const bad = spent.filter(([t]) => !SKILL[t]).map(([t]) => t);
+  if (bad.length) console.warn(`${c.name}: no such skill — ${bad.join(', ')}`);
+  if (spent.length !== TUNING.skillsAtLevelOne) {
+    console.warn(`${c.name}: ${spent.length} skills, expected ${TUNING.skillsAtLevelOne}`);
   }
   const points = spent.reduce((n, [, r]) => n + r, 0);
-  if (points !== TUNING.traitPointsAtLevelOne) {
-    console.warn(`${c.name}: ${points} trait points, expected ${TUNING.traitPointsAtLevelOne}`);
+  if (points !== TUNING.skillPointsAtLevelOne) {
+    console.warn(`${c.name}: ${points} skill points, expected ${TUNING.skillPointsAtLevelOne}`);
   }
 }
 
@@ -58,9 +58,9 @@ export function fighters(ids) {
 // character they are.
 export const YOU = PARTY.find((c) => c.you).id;
 
-// what the hut scene hands back: three traits against the points put on each
-export function setTraits(id, traits) {
-  stateOf(id).traits = { ...traits };
+// what the hut scene hands back: three skills against the points put on each
+export function setSkills(id, skills) {
+  stateOf(id).skills = { ...skills };
 }
 
 export function charOf(id) {
@@ -129,39 +129,44 @@ export function raiseBond(id, n = TUNING.bondPerRun) {
   return s.bond;
 }
 
-// --- traits ---------------------------------------------------------------
-// A trait is the points spent on it. Everything below is that number, read a different
+// --- skills ---------------------------------------------------------------
+// A skill is the points spent on it. Everything below is that number, read a different
 // way: added to an activity, added to a die, or added up across a party.
 
-export function traitOf(traitId) {
-  return TRAIT[traitId];
+// Content naming a skill that is not on the list is a mistake, but it is not worth a
+// crash mid-run while the list is being rewritten: it rolls the die on its own and says
+// so. The warning at boot is where the mistake gets fixed.
+const UNTRAINED = { id: null, name: 'Untrained', activities: [], draws: [], unlocks: [], body: [] };
+
+export function skillOf(skillId) {
+  return SKILL[skillId] || UNTRAINED;
 }
 
-export function rankOf(id, traitId) {
-  return stateOf(id).traits[traitId] || 0;
+export function rankOf(id, skillId) {
+  return stateOf(id).skills[skillId] || 0;
 }
 
 // what one point is worth to an activity, and so what a rank is worth
 export function worthOf(rank) {
-  return rank * TUNING.traitBonusPerPoint;
+  return rank * TUNING.skillBonusPerPoint;
 }
 
 // best first, because a sheet is read for what somebody is good at
-export function traitsOf(id) {
-  return Object.entries(stateOf(id).traits)
-    .filter(([t]) => TRAIT[t])
-    .map(([t, rank]) => ({ ...TRAIT[t], rank }))
+export function skillsOf(id) {
+  return Object.entries(stateOf(id).skills)
+    .filter(([t]) => SKILL[t])
+    .map(([t, rank]) => ({ ...SKILL[t], rank }))
     .sort((a, b) => b.rank - a.rank);
 }
 
-export function has(id, traitId) {
-  return rankOf(id, traitId) > 0;
+export function has(id, skillId) {
+  return rankOf(id, skillId) > 0;
 }
 
 // What an activity asks: how much is this character worth at it, and what extra can
-// they do that somebody without the trait cannot. Two functions is the whole contract.
+// they do that somebody without the skill cannot. Two functions is the whole contract.
 export function bonusFor(id, activity) {
-  return traitsOf(id)
+  return skillsOf(id)
     .filter((t) => t.activities.includes(activity))
     .reduce((n, t) => n + worthOf(t.rank), 0);
 }
@@ -170,26 +175,26 @@ export function bonusFor(id, activity) {
 
 // Who in a party is best at something, and how good the party is at it as a body. The
 // first decides who makes a roll; the second decides what work of that kind pays.
-export function bestAt(ids, traitId) {
-  return ids.reduce((a, b) => (rankOf(b, traitId) > rankOf(a, traitId) ? b : a), ids[0]) || null;
+export function bestAt(ids, skillId) {
+  return ids.reduce((a, b) => (rankOf(b, skillId) > rankOf(a, skillId) ? b : a), ids[0]) || null;
 }
 
-export function scoreOf(ids, traitId) {
-  return ids.reduce((n, id) => n + rankOf(id, traitId), 0);
+export function scoreOf(ids, skillId) {
+  return ids.reduce((n, id) => n + rankOf(id, skillId), 0);
 }
 
-// A check against a DC: a die, plus what the trait is worth, rolled by the party's best
+// A check against a DC: a die, plus what the skill is worth, rolled by the party's best
 // at it. A natural top holds whatever the DC, and a natural 1 never does, so a hard
 // check is never impossible and an easy one is never free.
-export function check(ids, traitId, dc) {
-  const who = bestAt(ids, traitId);
-  const rank = who ? rankOf(who, traitId) : 0;
+export function check(ids, skillId, dc) {
+  const who = bestAt(ids, skillId);
+  const rank = who ? rankOf(who, skillId) : 0;
   const die = 1 + Math.floor(Math.random() * TUNING.checkDie);
   const total = die + rank;
   return {
     name: who ? charOf(who).name : 'Nobody',
     you: who === YOU, // 'You roll', not 'You rolls'
-    trait: TRAIT[traitId],
+    skill: skillOf(skillId),
     rank,
     die,
     total,
@@ -199,7 +204,7 @@ export function check(ids, traitId, dc) {
 }
 
 export function unlocksFor(id, activity) {
-  return traitsOf(id)
+  return skillsOf(id)
     .filter((t) => !activity || t.activities.includes(activity))
     .flatMap((t) => t.unlocks);
 }
@@ -207,7 +212,7 @@ export function unlocksFor(id, activity) {
 // what a given set of people are worth as a body, best first — the readout behind
 // deciding who to take
 export function scoreLine(ids) {
-  const scores = TRAITS.map((t) => [t.name, scoreOf(ids, t.id)])
+  const scores = SKILLS.map((t) => [t.name, scoreOf(ids, t.id)])
     .filter(([, n]) => n > 0)
     .sort((a, b) => b[1] - a[1]);
   return scores.length ? scores.map(([n, v]) => `${n} ${v}`).join('   ') : 'Nothing between them.';
@@ -225,7 +230,7 @@ export function partyRows() {
   return walking().map((c) => {
     const s = stateOf(c.id);
     const next = xpToNext(s.level);
-    const traits = traitsOf(c.id);
+    const skills = skillsOf(c.id);
     const fears = (c.fears || []).map((f) => FEAR[f]).filter(Boolean);
     return {
       label: c.name,
@@ -236,8 +241,8 @@ export function partyRows() {
         c.you
           ? 'On every run. Nobody has to be asked to bring you.'
           : `Bond: ${bandName(bandOf(c.id))} (${s.bond} points).`,
-        traits.length
-          ? traits.map((t) => `${t.name} ${t.rank} — +${worthOf(t.rank)} to ${t.activities.join(', ')}`).join('\n')
+        skills.length
+          ? skills.map((t) => `${t.name} ${t.rank} — +${worthOf(t.rank)} to ${t.activities.join(', ')}`).join('\n')
           : 'Nothing settled yet. Every roll is the die on its own.',
         fears.length
           ? fears.map((f) => `${f.name} — ${f.kind === 'scruple' ? 'will not do it' : 'will not face it'}`).join('\n')
@@ -248,10 +253,10 @@ export function partyRows() {
   });
 }
 
-// Who has the points is the thing worth knowing about a trait, so the tab is rebuilt
-// on every draw and says it out loud rather than describing the trait in the abstract.
-export function traitRows() {
-  return TRAITS.map((t) => {
+// Who has the points is the thing worth knowing about a skill, so the tab is rebuilt
+// on every draw and says it out loud rather than describing the skill in the abstract.
+export function skillRows() {
+  return SKILLS.map((t) => {
     const held = walking()
       .filter((c) => has(c.id, t.id))
       .sort((a, b) => rankOf(b.id, t.id) - rankOf(a.id, t.id));
@@ -260,8 +265,8 @@ export function traitRows() {
       label: t.name,
       note: `${score} in town`,
       body: [
-        `A point adds ${TUNING.traitBonusPerPoint} to ${t.activities.join(', ')}, one to any ${t.name} roll, `
-          + `and ${Math.round(TUNING.traitYieldPerPoint * 100)}% to what work of that kind pays the party.`,
+        `A point adds ${TUNING.skillBonusPerPoint} to ${t.activities.join(', ')}, one to any ${t.name} roll, `
+          + `and ${Math.round(TUNING.skillYieldPerPoint * 100)}% to what work of that kind pays the party.`,
         held.length
           ? held.map((c) => `${c.name} ${rankOf(c.id, t.id)}`).join('\n')
           : 'Nobody in Dreadhollow has spent a point on this.',

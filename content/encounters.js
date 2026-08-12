@@ -11,14 +11,14 @@
 //              weights. Nothing is ever zero: a night run still has timber in it. A
 //              combat kind's day weight is never read, because nothing is fought by
 //              daylight; leave it written for the day it is wanted.
-//   read     — the trait that can spot this kind coming at a fork, and what they say.
+//   read     — the skill that can spot this kind coming at a fork, and what they say.
 //              A kind with no read is one nobody can see coming. Whoever has the most
 //              points in it is the one who speaks.
-//   harvest  — the trait this work is done with. Every point the walking party has in
-//              it adds traitYieldPerPoint to the spoils, so who you take decides what
+//   harvest  — the skill this work is done with. Every point the walking party has in
+//              it adds skillYieldPerPoint to the spoils, so who you take decides what
 //              you carry home. A kind with no harvest pays the same to anybody.
 //   check    — a roll against a difficulty, in the manner of the table: the party's
-//              best at the trait rolls a die and adds their points, and needs the DC.
+//              best at the skill rolls a die and adds their points, and needs the DC.
 //              `held` and `lost` are the line said either way. What holding and losing
 //              are worth is in tuning.js, not here.
 //   spoils   — materials taken, [least, most] each. Rolled per node.
@@ -33,10 +33,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Felling',
     weight: { day: 5, night: 1 },
-    read: { trait: 'woodcraft', line: 'Old cut stumps. Somebody worked this side, and there is more of it standing.' },
+    read: { skill: 'woodcraft', line: 'Old cut stumps. Somebody worked this side, and there is more of it standing.' },
     harvest: 'woodcraft',
     check: {
-      trait: 'woodcraft',
+      skill: 'woodcraft',
       dc: 12,
       held: 'It comes down where it was told to.',
       lost: 'It goes over the wrong way, takes a second tree with it, and most of the good wood is under both.',
@@ -55,7 +55,7 @@ export const ENCOUNTERS = [
     read: null,
     harvest: 'smithing',
     check: {
-      trait: 'smithing',
+      skill: 'smithing',
       dc: 12,
       held: 'The face splits where it was struck and the blocks come away square.',
       lost: 'The face shatters. What is left is rubble, and one of you was standing under it.',
@@ -71,10 +71,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Calming',
     weight: { day: 4, night: 3 },
-    read: { trait: 'animalhandling', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
+    read: { skill: 'animalhandling', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
     harvest: 'animalhandling',
     check: {
-      trait: 'animalhandling',
+      skill: 'animalhandling',
       dc: 13,
       held: 'It stands still long enough to be worth the standing still.',
       lost: 'It bolts, and it does not bolt away from you first.',
@@ -91,10 +91,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Rigging',
     weight: { day: 3, night: 2 },
-    read: { trait: 'sailing', line: 'The water runs wrong ahead. Something is aground on that side.' },
+    read: { skill: 'sailing', line: 'The water runs wrong ahead. Something is aground on that side.' },
     harvest: 'sailing',
     check: {
-      trait: 'sailing',
+      skill: 'sailing',
       dc: 13,
       held: 'She holds while you strip her.',
       lost: 'She shifts on the tide with the party still aboard her.',
@@ -110,10 +110,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Casting',
     weight: { day: 4, night: 2 },
-    read: { trait: 'fishing', line: 'Rings on the surface, and they are not the rain. There is a lane feeding that way.' },
+    read: { skill: 'fishing', line: 'Rings on the surface, and they are not the rain. There is a lane feeding that way.' },
     harvest: 'fishing',
     check: {
-      trait: 'fishing',
+      skill: 'fishing',
       dc: 11,
       held: 'The lane is where somebody said it was.',
       lost: 'An hour of wet standing for nothing, and the light going while you do it.',
@@ -129,10 +129,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Searching',
     weight: { day: 3, night: 2 },
-    read: { trait: 'perception', line: 'Something is stacked too neatly on that side to have got there by weather.' },
+    read: { skill: 'perception', line: 'Something is stacked too neatly on that side to have got there by weather.' },
     harvest: 'perception',
     check: {
-      trait: 'perception',
+      skill: 'perception',
       dc: 10,
       held: 'The rest of it is under the sacking, where anybody would have put it.',
       lost: 'You take what is on top and walk past the rest without ever knowing it was there.',
@@ -148,10 +148,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Salvage',
     weight: { day: 3, night: 2 },
-    read: { trait: 'smithing', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
+    read: { skill: 'smithing', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
     harvest: 'smithing',
     check: {
-      trait: 'smithing',
+      skill: 'smithing',
       dc: 12,
       held: 'Half of it is sound under the scale, and the sound half comes free.',
       lost: 'It is rust holding hands with rust. It comes apart in the lifting.',
@@ -167,7 +167,7 @@ export const ENCOUNTERS = [
     nature: 'talk',
     activity: 'Haggling',
     weight: { day: 5, night: 1 },
-    read: { trait: 'charisma', line: 'Somebody has walked this recently and stopped to talk while they did.' },
+    read: { skill: 'charisma', line: 'Somebody has walked this recently and stopped to talk while they did.' },
     harvest: 'charisma',
     check: null,
     spoils: { nails: [2, 4] },
@@ -181,10 +181,10 @@ export const ENCOUNTERS = [
     nature: 'talk',
     activity: 'Persuasion',
     weight: { day: 2, night: 4 },
-    read: { trait: 'charisma', line: 'Somebody stood here a while and did not want to be seen doing it.' },
+    read: { skill: 'charisma', line: 'Somebody stood here a while and did not want to be seen doing it.' },
     harvest: 'charisma',
     check: {
-      trait: 'charisma',
+      skill: 'charisma',
       dc: 14,
       held: 'They decide, out loud, that you are nobody worth the trouble.',
       lost: 'They decide the other thing, and they decide it first.',
@@ -203,7 +203,7 @@ export const ENCOUNTERS = [
     read: null,
     harvest: null,
     check: {
-      trait: 'perception',
+      skill: 'perception',
       dc: 12,
       held: 'Somebody calls the halt a pace before it matters.',
       lost: 'Nobody calls anything, and the ground takes the first one across it.',
@@ -219,10 +219,10 @@ export const ENCOUNTERS = [
     nature: 'combat',
     activity: 'Fighting',
     weight: { day: 1, night: 5 },
-    read: { trait: 'animalhandling', line: 'Everything that should be making noise on that side has stopped.' },
+    read: { skill: 'animalhandling', line: 'Everything that should be making noise on that side has stopped.' },
     harvest: null,
     check: {
-      trait: 'perception',
+      skill: 'perception',
       dc: 14,
       held: 'You see it before it means you to, and it goes back to being weather in the trees.',
       lost: 'The first anybody knows of it is the weight of it.',
@@ -241,7 +241,7 @@ export const ENCOUNTERS = [
     read: null,
     harvest: null,
     check: {
-      trait: 'perception',
+      skill: 'perception',
       dc: 15,
       held: 'The turned earth is noticed while it is still only turned earth.',
       lost: 'It is noticed afterwards, from the far side of it.',

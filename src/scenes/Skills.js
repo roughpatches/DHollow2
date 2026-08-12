@@ -1,13 +1,13 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
-import { TRAITS } from '../../content/traits.js';
-import { setTraits, worthOf, YOU } from '../party.js';
+import { SKILLS } from '../../content/skills.js';
+import { setSkills, worthOf, YOU } from '../party.js';
 
 // Choosing what your hands still know. Opens over the hut scene, which waits on it:
-// take three traits, spread the points across them, and that is the character sheet.
+// take three skills, spread the points across them, and that is the character sheet.
 // The same arithmetic everyone else's sheet was written with, done in front of you.
-export default class Traits extends Phaser.Scene {
+export default class Skills extends Phaser.Scene {
   constructor() {
-    super('Traits');
+    super('Skills');
   }
 
   create() {
@@ -20,13 +20,13 @@ export default class Traits extends Phaser.Scene {
     this.open_ = false;
 
     this.input.keyboard.on('keydown', this.onKey, this);
-    this.game.events.on('traits:choose', this.open, this);
+    this.game.events.on('skills:choose', this.open, this);
   }
 
   open() {
     if (this.open_) return;
     this.row = 0;
-    this.taken = {}; // trait id against the points on it
+    this.taken = {}; // skill id against the points on it
     this.open_ = true;
     this.swallow = true; // the keypress that closed the last line must not also pick
     this.layer.setVisible(true);
@@ -39,7 +39,7 @@ export default class Traits extends Phaser.Scene {
 
   // what is left to spend, and whether the sheet is finished
   left_() {
-    return TUNING.traitPointsAtLevelOne
+    return TUNING.skillPointsAtLevelOne
       - Object.values(this.taken).reduce((n, v) => n + v, 0);
   }
 
@@ -48,37 +48,37 @@ export default class Traits extends Phaser.Scene {
   }
 
   done_() {
-    return this.count() === TUNING.traitsAtLevelOne && this.left_() === 0;
+    return this.count() === TUNING.skillsAtLevelOne && this.left_() === 0;
   }
 
   onKey(ev) {
     if (!this.open_ || this.swallow) return;
     const k = ev.key.toLowerCase();
-    const t = TRAITS[this.row];
+    const t = SKILLS[this.row];
 
-    if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + TRAITS.length) % TRAITS.length;
-    else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % TRAITS.length;
+    if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + SKILLS.length) % SKILLS.length;
+    else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % SKILLS.length;
     else if (k === ' ') this.toggle(t.id);
     else if (k === 'arrowright' || k === 'd' || k === '=' || k === '+') this.spend(t.id, 1);
     else if (k === 'arrowleft' || k === 'a' || k === '-') this.spend(t.id, -1);
     else if ((k === 'enter' || k === 'e') && this.done_()) {
-      setTraits(YOU, this.taken);
+      setSkills(YOU, this.taken);
       this.open_ = false;
       this.layer.setVisible(false);
-      this.game.events.emit('traits:done');
+      this.game.events.emit('skills:done');
       return;
     }
     this.draw();
   }
 
-  // taking a trait puts the first point on it; dropping it takes them all back
+  // taking a skill puts the first point on it; dropping it takes them all back
   toggle(id) {
     if (this.taken[id] !== undefined) delete this.taken[id];
-    else if (this.count() < TUNING.traitsAtLevelOne && this.left_() > 0) this.taken[id] = 1;
+    else if (this.count() < TUNING.skillsAtLevelOne && this.left_() > 0) this.taken[id] = 1;
     this.draw();
   }
 
-  // a taken trait never goes below the point that took it
+  // a taken skill never goes below the point that took it
   spend(id, n) {
     if (this.taken[id] === undefined) return;
     if (n > 0 && this.left_() <= 0) return;
@@ -93,19 +93,19 @@ export default class Traits extends Phaser.Scene {
     let y = this.box.y + TUNING.menuPad;
     y += this.text(this.left, y, 'What your hands still know', TUNING.questTitleSize, COLORS.menuAccent).height + 6;
     y += this.text(this.left, y,
-      `Take ${TUNING.traitsAtLevelOne}. Spread ${TUNING.traitPointsAtLevelOne} points between them.`,
+      `Take ${TUNING.skillsAtLevelOne}. Spread ${TUNING.skillPointsAtLevelOne} points between them.`,
       TUNING.questBodySize, COLORS.menuText).height + 4;
 
-    const short = this.count() < TUNING.traitsAtLevelOne;
+    const short = this.count() < TUNING.skillsAtLevelOne;
     y += this.text(this.left, y,
       short
-        ? `${TUNING.traitsAtLevelOne - this.count()} still to take, ${this.left_()} points unspent.`
+        ? `${TUNING.skillsAtLevelOne - this.count()} still to take, ${this.left_()} points unspent.`
         : (this.left_() ? `${this.left_()} points unspent.` : 'Settled.'),
       TUNING.questBodySize, this.done_() ? COLORS.menuAccent : COLORS.menuMapFolk).height + 10;
     this.rule(y);
     y += 14;
 
-    TRAITS.forEach((t, i) => {
+    SKILLS.forEach((t, i) => {
       const on = i === this.row;
       const rank = this.taken[t.id];
       const has = rank !== undefined;
@@ -118,11 +118,11 @@ export default class Traits extends Phaser.Scene {
         TUNING.questBodySize, on ? colour : (has ? COLORS.menuAccent : COLORS.menuDim)).height + 6;
     });
 
-    // what the trait under the cursor would let you do, so the choice is made on something
+    // what the skill under the cursor would let you do, so the choice is made on something
     y += 10;
     this.rule(y);
     y += 14;
-    for (const u of TRAITS[this.row].unlocks) {
+    for (const u of SKILLS[this.row].unlocks) {
       y += this.text(this.left, y, `— ${u}`, TUNING.questBodySize, COLORS.menuText, this.wide).height + 6;
     }
 
