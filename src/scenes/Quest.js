@@ -1,7 +1,7 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
-import { roster, charOf, bandName, bandOf, scoreLine, traitsOf, traitOf, YOU } from '../party.js';
+import { roster, charOf, bandName, bandOf, scoreLine, traitsOf, traitOf, isCombat, YOU } from '../party.js';
 
 // The crawl. Runs over World, which freezes behind it. A row of pips across the top is
 // the whole run at a glance; everything below is the node you are standing on.
@@ -104,7 +104,7 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + all.length) % all.length;
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % all.length;
       else if (k === ' ') this.toggleWalker(all[this.row].id);
-      else if (k === 'enter' && 1 + this.taking.length >= this.job.party) this.begin(this.when_);
+      else if (k === 'enter' && this.crewed()) this.begin(this.when_);
       this.draw();
       return;
     }
@@ -139,9 +139,22 @@ export default class Quest extends Phaser.Scene {
     this.when_ = when;
     const must = (this.job.must || []).filter((id) => recruit.asked(id, this.job, when).willing);
     const rest = recruit.willing(this.job, when).filter((id) => !must.includes(id));
+    // after dark a fighter is taken before anybody else, because the job will not go
+    // without one and the default crew should not have to be corrected by hand
+    if (run.needsFighter(when)) rest.sort((a, b) => isCombat(b) - isCombat(a));
     this.taking = [...must, ...rest].slice(0, Math.max(must.length, this.job.party - 1));
     this.mode = 'party';
     this.row = 0;
+  }
+
+  // you are on it whoever else is, so you are counted in both of these
+  crew() {
+    return [YOU, ...this.taking];
+  }
+
+  crewed() {
+    return this.crew().length >= this.job.party
+      && (!run.needsFighter(this.when_) || run.hasFighter(this.crew()));
   }
 
   toggleWalker(id) {
@@ -202,8 +215,9 @@ export default class Quest extends Phaser.Scene {
       }
       const size = run.sizeOf(q);
       const when = q.when === 'any' ? 'day or night' : `${q.when} only`;
-      // whether it can be crewed at all is the first thing worth knowing about a job
-      const crewed = run.timesFor(q).some((t) => recruit.enough(q, t));
+      // whether it can be walked at all is the first thing worth knowing about a job,
+      // and after dark that includes whether anybody coming can fight
+      const crewed = run.timesFor(q).some((t) => run.canStart(q.id, t));
       this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes · ${q.party} to walk it · ${when}`,
         TUNING.menuRowSize, on ? COLORS.menuAccent : (crewed ? COLORS.menuRule : COLORS.menuMapFolk)).setOrigin(1, 0);
       this.text(this.left + 4, y, q.label, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
@@ -237,8 +251,8 @@ export default class Quest extends Phaser.Scene {
       y += this.text(this.left + 24, y, run.mixAt(t), TUNING.questBodySize,
         on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 4;
       const cost = t === 'night'
-        ? `Wounds run ${TUNING.questNightHurt}× and pay ${TUNING.questNightXp}× for it.`
-        : 'Wounds and pay as written.';
+        ? `Wounds run ${TUNING.questNightHurt}× and pay ${TUNING.questNightXp}× for it. Will not go out without a fighter.`
+        : 'Wounds and pay as written. Nothing out there to fight.';
       y += this.text(this.left + 24, y, cost, TUNING.questHintSize,
         on ? COLORS.menuDim : COLORS.menuRule).height + 14;
     });
@@ -263,6 +277,16 @@ export default class Quest extends Phaser.Scene {
       short > 0 ? `Needs ${this.job.party}. ${coming} — ${short} short.`
         : `Needs ${this.job.party}. ${coming}.`,
       TUNING.questBodySize, short > 0 ? COLORS.menuMapFolk : COLORS.menuText).height + 10;
+    // the night rule is said on the screen where the crew is picked, because that is
+    // the only screen where it can be answered
+    if (run.needsFighter(this.when_)) {
+      const armed = run.hasFighter(this.crew());
+      y += this.text(this.left, y,
+        armed
+          ? 'Something out there will have to be fought. Somebody coming can.'
+          : 'Something out there will have to be fought. Nobody coming can.',
+        TUNING.questBodySize, armed ? COLORS.menuText : COLORS.menuMapFolk, this.wide).height + 10;
+    }
     // the job's own roll is named before the crew is picked, because it is the reason
     // to pick one crew over another
     if (this.job.check) {
@@ -280,8 +304,11 @@ export default class Quest extends Phaser.Scene {
       const required = (this.job.must || []).includes(c.id);
       const mark = required ? '[!]' : taken ? '[x]' : a.willing ? '[ ]' : ' × ';
       const colour = taken ? COLORS.menuAccent : a.willing ? COLORS.menuText : COLORS.menuRule;
-      // what they are worth is on the row itself: it is half of why you take somebody
-      this.text(this.left + this.wide, y + 2, traitsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   '),
+      // what they are worth is on the row itself: it is half of why you take somebody,
+      // and after dark whether they fight is the other half
+      const worth = traitsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   ')
+        + (isCombat(c.id) ? '   fights' : '');
+      this.text(this.left + this.wide, y + 2, worth,
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
       y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
         TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;
@@ -293,15 +320,15 @@ export default class Quest extends Phaser.Scene {
     });
 
     // you are on it whoever else is, so you are in both readouts
-    const crew = [YOU, ...this.taking];
+    const crew = this.crew();
     this.text(this.left, this.box.y + this.box.h - 74,
       run.partyLine(crew.map((id) => charOf(id))), TUNING.menuRowSize, COLORS.menuText);
     // the crew added up: what this party would be good at if it walked out now
     this.text(this.left, this.box.y + this.box.h - 50, scoreLine(crew),
       TUNING.questHintSize, COLORS.menuDim);
-    this.hint(short > 0
-      ? '[Up/Down] Look    [Space] Take or leave    [Esc] Back'
-      : '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back');
+    this.hint(this.crewed()
+      ? '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back'
+      : '[Up/Down] Look    [Space] Take or leave    [Esc] Back');
   }
 
   crawl() {

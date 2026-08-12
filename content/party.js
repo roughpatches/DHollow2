@@ -15,6 +15,10 @@
 //              those on the die alone.
 //   fears    — ids from content/fears.js. A quest carrying one of these as a tag needs
 //              a deeper bond before they will walk out on it.
+//   combat   — true if they can fight. Every night job needs one of them on it, because
+//              after dark the road puts up things that have to be fought rather than
+//              worked around. Nothing else marks a fighter: no trait, no HP, this line.
+//              Nobody below carries it yet, so night work is blocked until somebody does.
 //   needs    — a story flag they are not recruitable before. See src/story.js.
 //   bond     — how well they know you at the start, in points. A band is bondPerBand
 //              points, so 0 is a stranger and 9 is sworn. See tuning.js.
@@ -46,6 +50,8 @@ export const PARTY = [
     hp: 11,
     traits: { woodcraft: 3, animalhandling: 2, perception: 1 },
     fears: ['thedead'], // the grave-pin in their pack that they have mentioned to nobody
+    // no combat: he knows the Greywood, he does not fight it. The first job is day work
+    // for that reason.
     bond: 9,
     body: ['[Placeholder Text]'],
   },

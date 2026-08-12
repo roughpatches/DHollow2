@@ -11,14 +11,32 @@ import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import {
   roster, charOf, stateOf, damage, heal, award, raiseBond, hpMax,
-  rankOf, scoreOf, check, traitOf, walking, YOU,
+  rankOf, scoreOf, check, traitOf, walking, fighters, YOU,
 } from './party.js';
 import { give, nameOf } from './town.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
 
 const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
-const READABLE = ENCOUNTERS.filter((e) => e.read);
+
+// Nothing is fought by daylight. What comes out of the ground and what follows a party
+// home only does either after dark, so a day run draws from the table with the combat
+// kinds taken out of it and a night run draws from the whole of it.
+function poolAt(when) {
+  return when === 'night' ? ENCOUNTERS : ENCOUNTERS.filter((e) => e.nature !== 'combat');
+}
+
+function readableAt(when) {
+  return poolAt(when).filter((e) => e.read);
+}
+
+// The first job — the only one the story offers with nothing raised yet — is day work
+// with Aldis on it. He does not fight, and a night run needs somebody who does, so the
+// game cannot open on one. Said at boot rather than found later in an unwalkable board.
+for (const q of QUESTS.filter((x) => !x.needs)) {
+  if (q.when !== 'day') console.warn(`${q.label}: the first job must be day work.`);
+  if (!(q.must || []).includes('aldis')) console.warn(`${q.label}: the first job must have Aldis on it.`);
+}
 
 // how many times each job has been walked to the end. Gregorious keeps a standing
 // board rather than a story: the same job can be taken again, which is what lets a
@@ -73,10 +91,23 @@ export function blockers(id, when) {
     else if (!roster().includes(c)) out.push(`${c.name} is not available.`);
     else if (!asked(cid, q, at).willing) out.push(`${c.name} will not come on this.`);
   }
-  const crew = 1 + roster().filter((c) => asked(c.id, q, at).willing).length; // you, and them
-  if (crew < q.party) out.push(`Needs ${q.party}; counting you, ${crew} will walk it.`);
+  const willing = [YOU, ...roster().filter((c) => asked(c.id, q, at).willing).map((c) => c.id)];
+  if (willing.length < q.party) out.push(`Needs ${q.party}; counting you, ${willing.length} will walk it.`);
+  if (needsFighter(at) && !fighters(willing).length) out.push(fighterLine);
   return out;
 }
+
+// A run after dark has things on it that have to be fought, so one of the party has to
+// be somebody who fights. By day there is nothing to fight and anybody can walk it.
+export function needsFighter(when) {
+  return when === 'night';
+}
+
+export function hasFighter(ids) {
+  return fighters(ids).length > 0;
+}
+
+export const fighterLine = 'Needs somebody who can fight; nobody who will come after dark can.';
 
 export function canStart(id, when) {
   return blockers(id, when).length === 0;
@@ -98,7 +129,7 @@ export function timesFor(q) {
 // what a run at this hour is mostly made of, so the choice is made on something
 export function mixAt(when) {
   const by = {};
-  for (const e of ENCOUNTERS) by[e.nature] = (by[e.nature] || 0) + e.weight[when];
+  for (const e of poolAt(when)) by[e.nature] = (by[e.nature] || 0) + e.weight[when];
   const total = Object.values(by).reduce((a, b) => a + b, 0);
   return Object.entries(by)
     .sort((a, b) => b[1] - a[1])
@@ -169,9 +200,10 @@ export function step() {
 // two ways on, each leaning toward something, and whatever the party can read about them.
 // The two on offer are drawn against the hour, so a night fork offers night things.
 function branches() {
-  const a = weighted(null, READABLE);
-  let b = weighted(null, READABLE);
-  for (let i = 0; b === a && READABLE.length > 1 && i < 8; i++) b = weighted(null, READABLE);
+  const readable = readableAt(run.when);
+  const a = weighted(null, readable);
+  let b = weighted(null, readable);
+  for (let i = 0; b === a && readable.length > 1 && i < 8; i++) b = weighted(null, readable);
   return [a, b].map((kind, i) => ({
     kind: kind.id,
     side: i === 0 ? 'Left' : 'Right',
@@ -201,7 +233,7 @@ export function choose(i) {
   return run;
 }
 
-function weighted(bias, from = ENCOUNTERS) {
+function weighted(bias, from = poolAt(run.when)) {
   const of = (e) => e.weight[run.when] * (e.id === bias ? TUNING.questBiasWeight : 1);
   let r = Math.random() * from.reduce((n, e) => n + of(e), 0);
   for (const e of from) {
@@ -345,7 +377,8 @@ export function questRows() {
       body: [
         `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it, you included.`
           + (q.must ? `  ${q.must.map((m) => charOf(m).name).join(' and ')} must be on it.` : '')
-          + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`),
+          + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`)
+          + (q.when === 'day' ? '  Nothing to fight by daylight.' : '  After dark wants a fighter along.'),
         q.goal,
         ...q.body,
       ],

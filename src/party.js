@@ -43,6 +43,16 @@ export function roster() {
   return everyone().filter((c) => story.ok(c));
 }
 
+// Who can fight. Night work will not go out without one of them; see content/party.js.
+export function isCombat(id) {
+  const c = charOf(id);
+  return !!(c && c.combat);
+}
+
+export function fighters(ids) {
+  return ids.filter((id) => isCombat(id));
+}
+
 // The player is nobody's recruit: they are on every run without being asked, and are
 // left out of every list of who might come. This is the only place that knows which
 // character they are.

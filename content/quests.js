@@ -5,7 +5,9 @@
 //   label — shown on the board and in the Quest Log.
 //   size  — short, medium, or long. The node count for each is in tuning.js.
 //   when  — day, night, or any. A job fixed to one time can only be walked at that
-//           time; 'any' lets the party choose when they set out.
+//           time; 'any' lets the party choose when they set out. A day run has nothing
+//           in it to fight; a night run does, and will not go out without somebody
+//           marked `combat` in content/party.js on it.
 //   party — how many walk it, you included. You are on every job and are the one who
 //           puts the crew together, so a job of 3 wants two others to agree to come.
 //   tags  — what the job involves. Matched against traits' `draws` to find who is keen

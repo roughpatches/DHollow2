@@ -2,13 +2,15 @@
 // puts it into every quest without touching anything else.
 //   id       — how src/run.js refers to it.
 //   name     — shown at the top of the node.
-//   nature   — gather, talk, combat, or hazard. Only used to say what a run is likely
-//              to be made of before you set out.
+//   nature   — gather, talk, combat, or hazard. Says what a run is likely to be made of
+//              before you set out, and does one thing besides: a combat kind is drawn
+//              only after dark, so a day run never puts one up whatever its weight says.
 //   activity — the activity this node will become once that engine is imported. Until
 //              then the node names it, pays out, and moves on.
 //   weight   — how often it comes up by day and by night, relative to the other
-//              weights. Nothing is ever zero: a night run still has timber in it and a
-//              day run can still be followed home.
+//              weights. Nothing is ever zero: a night run still has timber in it. A
+//              combat kind's day weight is never read, because nothing is fought by
+//              daylight; leave it written for the day it is wanted.
 //   read     — the trait that can spot this kind coming at a fork, and what they say.
 //              A kind with no read is one nobody can see coming. Whoever has the most
 //              points in it is the one who speaks.
