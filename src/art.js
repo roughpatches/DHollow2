@@ -3,8 +3,9 @@
 // Both end up under the same texture keys, so nothing downstream knows the difference.
 
 import { TUNING } from '../tuning.js';
-import { LOOKS } from '../content/looks.js';
-import { actorFrame, walkAnim, proneKey, portraitKey } from './textures.js';
+import { LOOKS, STRUCTURES } from '../content/looks.js';
+import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX } from './textures.js';
+import { buildingOf, levelOf } from './town.js';
 
 // the game says up, down, left, right; the export says north, south, west, east
 const DIRS = { down: 'south', up: 'north', left: 'west', right: 'east' };
@@ -36,6 +37,12 @@ export function preloadArt(scene) {
     }
     if (look.down) add(proneKey(look.id), look.down); // only somebody who gets laid out needs one
     add(portraitKey(look.id), look.portrait);
+  }
+  for (const s of STRUCTURES) {
+    s.stages.forEach((path, i) => {
+      const k = stageKey(s, i);
+      if (!scene.textures.exists(k)) scene.load.image(k, `${s.path}/${path}`);
+    });
   }
 }
 
@@ -88,4 +95,52 @@ export function fitBody(sprite, w, h, below = 0) {
 export function footOf(palette) {
   const look = LOOK[palette];
   return look ? look.foot / look.size : 1;
+}
+
+// --- buildings -------------------------------------------------------------
+// A building is one picture per stage of repair, hung over the tiles the map already
+// has. Nothing about walking into it changes: the tiles are still what stops you. It
+// sorts by the bottom of its picture, like anyone else, so you pass behind its roof.
+
+function stageKey(s, i) {
+  return `built_${s.id}_${i}`;
+}
+
+export function raiseStructures(scene, mapKey) {
+  const out = {};
+  for (const s of STRUCTURES) {
+    const b = buildingOf(s.id);
+    if (!b || b.map !== mapKey) continue;
+    const img = scene.add.image(s.at[0] * TUNING.tileSize, s.at[1] * TUNING.tileSize, stageKey(s, 0));
+    img.setOrigin(0, 0).setDepth(img.y + img.height);
+    out[s.id] = { spec: s, img };
+    restate(out, s.id);
+    clearUnder(scene, s, img);
+  }
+  return out;
+}
+
+// The tiles the picture stands on give up their own drawing and keep their collision:
+// the walls are still what stops you, but nothing of the placeholder building shows
+// past the edges of the art.
+function clearUnder(scene, spec, img) {
+  const TS = TUNING.tileSize;
+  const x0 = Math.floor(img.x / TS);
+  const y0 = Math.floor(img.y / TS);
+  for (let y = y0; y < Math.ceil((img.y + img.height) / TS); y++) {
+    for (let x = x0; x < Math.ceil((img.x + img.width) / TS); x++) {
+      const tile = scene.ground.getTileAt(x, y);
+      if (!tile) continue;
+      const solid = tile.collides;
+      scene.ground.putTileAt(TILE_INDEX[spec.under || 'grass'], x, y).setCollision(solid);
+    }
+  }
+}
+
+// the picture for whatever stage the building has got to; repairing it changes what is
+// standing there without rebuilding the map
+export function restate(built, id) {
+  const e = built[id];
+  if (!e) return;
+  e.img.setTexture(stageKey(e.spec, Math.min(levelOf(id), e.spec.stages.length - 1)));
 }

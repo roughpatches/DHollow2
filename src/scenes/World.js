@@ -1,9 +1,9 @@
 import { TUNING } from '../../tuning.js';
 import { MAPS, TILES, LEGEND } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
-import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
+import { buildTextures, TILE_INDEX } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
-import { preloadArt, buildArt, fitBody } from '../art.js';
+import { preloadArt, buildArt, fitBody, stand, raiseStructures, restate } from '../art.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
 import {
@@ -69,6 +69,9 @@ export default class World extends Phaser.Scene {
 
     this.player = createPlayer(this, this.spawnTile[0], this.spawnTile[1]);
     this.physics.add.collider(this.player, this.ground);
+
+    // buildings with art stand over their tiles before anyone walks in front of them
+    this.built = raiseStructures(this, this.mapKey);
 
     this.npcs = [];
     // `until` and `after` name a scene: someone can be on the strand only until the
@@ -164,7 +167,7 @@ export default class World extends Phaser.Scene {
     const npc = findTarget(this.player, this.npcs);
     if (npc) {
       npc.facing = faceToward(npc, this.player);
-      npc.setTexture(actorFrame(npc.palette, npc.facing, 0));
+      stand(npc, npc.palette, npc.facing);
       // the quest giver's board opens as soon as he has finished speaking
       this.pendingBoard = !!npc.def.quests;
       // somebody with `says` has more than one answer; the first that fits is the one
@@ -202,7 +205,10 @@ export default class World extends Phaser.Scene {
     }
     const before = levelOf(b.id);
     const result = contribute(b.id);
-    if (result.levelled) this.applyPatch(patchOf(b.id, before + 1));
+    if (result.levelled) {
+      this.applyPatch(patchOf(b.id, before + 1));
+      restate(this.built, b.id); // and the building itself changes where it stands
+    }
     this.say(b.name, contributeLines(b.id, result), null);
   }
 
