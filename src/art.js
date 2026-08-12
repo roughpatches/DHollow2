@@ -3,8 +3,8 @@
 // Both end up under the same texture keys, so nothing downstream knows the difference.
 
 import { TUNING } from '../tuning.js';
-import { LOOKS, STRUCTURES } from '../content/looks.js';
-import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX } from './textures.js';
+import { LOOKS, STRUCTURES, GROUND } from '../content/looks.js';
+import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX, TILE_NAMES } from './textures.js';
 import { buildingOf, levelOf } from './town.js';
 
 // the game says up, down, left, right; the export says north, south, west, east
@@ -43,6 +43,9 @@ export function preloadArt(scene) {
       const k = stageKey(s, i);
       if (!scene.textures.exists(k)) scene.load.image(k, `${s.path}/${path}`);
     });
+  }
+  for (const g of GROUND) {
+    if (!scene.textures.exists(g.sheet)) scene.load.image(g.sheet, g.sheet);
   }
 }
 
@@ -97,6 +100,45 @@ export function footOf(palette) {
   return look ? look.foot / look.size : 1;
 }
 
+// --- ground ----------------------------------------------------------------
+// One strip of tiles for the map to draw from, at tilePx a tile: the generated ones
+// blown up to that size, and painted ground cut in over the top of them. A painted tile
+// gets four patches rather than one, laid two by two across the map, so a field does
+// not repeat every step.
+
+const SLOT = {};
+
+export function bakeTiles(scene) {
+  if (scene.textures.exists('tiles')) return;
+  const P = TUNING.tilePx;
+  const extra = GROUND.reduce((n, g) => n + g.cells.length - 1, 0);
+  const tex = scene.textures.createCanvas('tiles', (TILE_NAMES.length + extra) * P, P);
+  const ctx = tex.getContext();
+  ctx.imageSmoothingEnabled = false;
+
+  const drawn = scene.textures.get('tiles16').getSourceImage();
+  const TS = TUNING.tileSize;
+  TILE_NAMES.forEach((name, i) => ctx.drawImage(drawn, i * TS, 0, TS, TS, i * P, 0, P, P));
+
+  let next = TILE_NAMES.length;
+  for (const g of GROUND) {
+    const sheet = scene.textures.get(g.sheet).getSourceImage();
+    SLOT[g.tile] = g.cells.map(([sx, sy], i) => {
+      const slot = i === 0 ? TILE_INDEX[g.tile] : next++;
+      ctx.drawImage(sheet, sx, sy, P, P, slot * P, 0, P, P);
+      return slot;
+    });
+  }
+  tex.refresh();
+}
+
+// which patch of a tile belongs at this square
+export function slotFor(name, x, y) {
+  const slots = SLOT[name];
+  if (!slots) return TILE_INDEX[name];
+  return slots[((x % 2) + (y % 2) * 2) % slots.length];
+}
+
 // --- buildings -------------------------------------------------------------
 // A building is one picture per stage of repair, hung over the tiles the map already
 // has. Nothing about walking into it changes: the tiles are still what stops you. It
@@ -132,7 +174,7 @@ function clearUnder(scene, spec, img) {
       const tile = scene.ground.getTileAt(x, y);
       if (!tile) continue;
       const solid = tile.collides;
-      scene.ground.putTileAt(TILE_INDEX[spec.under || 'grass'], x, y).setCollision(solid);
+      scene.ground.putTileAt(slotFor(spec.under || 'grass', x, y), x, y).setCollision(solid);
     }
   }
 }

@@ -1,9 +1,11 @@
 import { TUNING } from '../../tuning.js';
 import { MAPS, TILES, LEGEND } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
-import { buildTextures, TILE_INDEX } from '../textures.js';
+import { buildTextures } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
-import { preloadArt, buildArt, fitBody, stand, raiseStructures, restate } from '../art.js';
+import {
+  preloadArt, buildArt, bakeTiles, slotFor, fitBody, stand, raiseStructures, restate,
+} from '../art.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
 import {
@@ -34,6 +36,7 @@ export default class World extends Phaser.Scene {
   create() {
     buildTextures(this);
     buildArt(this);
+    bakeTiles(this);
     const map = MAPS[this.mapKey];
     const w = map.rows[0].length;
     const h = map.rows.length;
@@ -51,8 +54,8 @@ export default class World extends Phaser.Scene {
       above.push([]);
       for (let x = 0; x < w; x++) {
         const name = names[y][x];
-        ground[y].push(TILE_INDEX[name]);
-        above[y].push(TILES[name].above ? TILE_INDEX[TILES[name].above] : -1);
+        ground[y].push(slotFor(name, x, y));
+        above[y].push(TILES[name].above ? slotFor(TILES[name].above, x, y) : -1);
       }
     }
 
@@ -144,10 +147,13 @@ export default class World extends Phaser.Scene {
     });
   }
 
+  // The ground is drawn from tilePx-sized art and scaled down to a tile, so it is
+  // sampled at the size it was painted rather than at the size it occupies.
   buildLayer(data, depth) {
-    const map = this.make.tilemap({ data, tileWidth: TS, tileHeight: TS });
-    const tiles = map.addTilesetImage('tiles', 'tiles', TS, TS, 0, 0);
-    return map.createLayer(0, tiles, 0, 0).setDepth(depth);
+    const P = TUNING.tilePx;
+    const map = this.make.tilemap({ data, tileWidth: P, tileHeight: P });
+    const tiles = map.addTilesetImage('tiles', 'tiles', P, P, 0, 0);
+    return map.createLayer(0, tiles, 0, 0).setScale(TS / P).setDepth(depth);
   }
 
   update() {
@@ -216,8 +222,8 @@ export default class World extends Phaser.Scene {
   applyPatch(patch) {
     for (const [x, y, ch] of patch) {
       const name = LEGEND[ch];
-      this.ground.putTileAt(TILE_INDEX[name], x, y).setCollision(!!TILES[name].solid);
-      this.above.putTileAt(TILES[name].above ? TILE_INDEX[TILES[name].above] : -1, x, y);
+      this.ground.putTileAt(slotFor(name, x, y), x, y).setCollision(!!TILES[name].solid);
+      this.above.putTileAt(TILES[name].above ? slotFor(TILES[name].above, x, y) : -1, x, y);
     }
   }
 

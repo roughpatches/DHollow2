@@ -263,11 +263,13 @@ export function walkAnim(palette, dir) {
 }
 
 export function buildTextures(scene) {
-  if (scene.textures.exists('tiles')) return;
+  if (scene.textures.exists('tiles16')) return;
 
+  // the generated strip, at the size it is drawn at. src/art.js blows it up to tilePx
+  // and paints real ground over whichever tiles have any.
   const g = scene.make.graphics({ x: 0, y: 0 }, false);
   TILE_NAMES.forEach((name, i) => TILE_DRAW[name](g, i * TS));
-  g.generateTexture('tiles', TILE_NAMES.length * TS, TS);
+  g.generateTexture('tiles16', TILE_NAMES.length * TS, TS);
   g.destroy();
 
   for (const name of Object.keys(PALETTES)) {

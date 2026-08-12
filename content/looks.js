@@ -52,6 +52,33 @@ export const LOOKS = [
 //            still stop you, they just stop drawing themselves.
 //   stages — one image per stage of repair, lowest first. A stage past the end of the
 //            list keeps the last picture.
+// Ground drawn from a painted sheet instead of the tile generator in src/textures.js.
+// The sheets are painted at tilePx (see tuning.js) to a tile — four times the size of a
+// tile in the world — and the ground is drawn at that resolution and scaled down, so
+// the grass keeps its blades instead of turning to soup.
+//   tile  — the tile name from the LEGEND in content/maps.js.
+//   sheet — the painted sheet under art/.
+//   cells — [x, y] of each patch to cut, in sheet pixels. Four of them, laid out two by
+//           two across the map, so a field of grass does not repeat every tile. Cut
+//           from parts of the sheet that are all one material.
+export const GROUND = [
+  {
+    tile: 'grass',
+    sheet: 'art/ground/grass-and-granite.png',
+    cells: [[112, 328], [112, 448], [0, 328], [96, 0]],
+  },
+  {
+    tile: 'path', // the town street: small grey granite, worn
+    sheet: 'art/ground/grass-and-granite.png',
+    cells: [[512, 0], [960, 0], [704, 64], [768, 64]],
+  },
+  {
+    tile: 'dirt', // packed damp earth, off the street
+    sheet: 'art/ground/grass-and-dirt.png',
+    cells: [[296, 168], [552, 40], [936, 32], [1320, 424]],
+  },
+];
+
 export const STRUCTURES = [
   {
     // One stage: the Sea Hag is the one building in town that never needed repairing.

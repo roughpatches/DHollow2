@@ -2,7 +2,8 @@
 // Edit freely; no code change is required to retune or retint anything here.
 
 export const TUNING = {
-  tileSize: 16,
+  tileSize: 16, // a tile's size in the world: what a step, a wall and a map are measured in
+  tilePx: 64, // and the size it is drawn from, so painted ground keeps its detail
   zoom: 3,
   viewWidth: 960,
   viewHeight: 640,
