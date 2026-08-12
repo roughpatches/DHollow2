@@ -1,8 +1,11 @@
 import { TUNING } from '../../tuning.js';
 import { MAPS, TILES, LEGEND } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
-import { buildTextures, TILE_INDEX, actorFrame } from '../textures.js';
+import { buildTextures } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
+import {
+  preloadArt, buildArt, bakeTiles, slotFor, fitBody, stand, raiseStructures, restate,
+} from '../art.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
 import {
@@ -25,8 +28,15 @@ export default class World extends Phaser.Scene {
     this.spawnTile = data.spawn || MAPS[this.mapKey].spawn;
   }
 
+  // the only files the game loads; everyone without art is drawn at boot instead
+  preload() {
+    preloadArt(this);
+  }
+
   create() {
     buildTextures(this);
+    buildArt(this);
+    bakeTiles(this);
     const map = MAPS[this.mapKey];
     const w = map.rows[0].length;
     const h = map.rows.length;
@@ -44,8 +54,8 @@ export default class World extends Phaser.Scene {
       above.push([]);
       for (let x = 0; x < w; x++) {
         const name = names[y][x];
-        ground[y].push(TILE_INDEX[name]);
-        above[y].push(TILES[name].above ? TILE_INDEX[TILES[name].above] : -1);
+        ground[y].push(slotFor(name, x, y));
+        above[y].push(TILES[name].above ? slotFor(TILES[name].above, x, y) : -1);
       }
     }
 
@@ -63,6 +73,9 @@ export default class World extends Phaser.Scene {
     this.player = createPlayer(this, this.spawnTile[0], this.spawnTile[1]);
     this.physics.add.collider(this.player, this.ground);
 
+    // buildings with art stand over their tiles before anyone walks in front of them
+    this.built = raiseStructures(this, this.mapKey);
+
     this.npcs = [];
     // `until` and `after` name a scene: someone can be on the strand only until the
     // opening has played, and in the house only once it has
@@ -71,8 +84,9 @@ export default class World extends Phaser.Scene {
       && !(n.after && !hasPlayed(n.after)));
     for (const def of here) {
       const npc = spawnActor(this, def.palette, def.x, def.y, def.facing || 'down');
-      // taller than the player's foot-box so you stop beside someone rather than inside them
-      npc.body.setSize(12, 20).setOffset(2, 8);
+      // reaches further past the feet than the player's box, so you stop beside someone
+      // rather than inside them
+      fitBody(npc, 12, 20, 6);
       npc.body.setImmovable(true);
       npc.def = def;
       this.npcs.push(npc);
@@ -92,6 +106,7 @@ export default class World extends Phaser.Scene {
     if (!this.scene.isActive('Dialogue')) this.scene.launch('Dialogue');
     if (!this.scene.isActive('Menu')) this.scene.launch('Menu');
     if (!this.scene.isActive('Quest')) this.scene.launch('Quest');
+    if (!this.scene.isActive('Traits')) this.scene.launch('Traits');
 
     this.frozen = false;
     this.doorLocked = true; // cleared once the player steps off the tile they spawned on
@@ -132,10 +147,13 @@ export default class World extends Phaser.Scene {
     });
   }
 
+  // The ground is drawn from tilePx-sized art and scaled down to a tile, so it is
+  // sampled at the size it was painted rather than at the size it occupies.
   buildLayer(data, depth) {
-    const map = this.make.tilemap({ data, tileWidth: TS, tileHeight: TS });
-    const tiles = map.addTilesetImage('tiles', 'tiles', TS, TS, 0, 0);
-    return map.createLayer(0, tiles, 0, 0).setDepth(depth);
+    const P = TUNING.tilePx;
+    const map = this.make.tilemap({ data, tileWidth: P, tileHeight: P });
+    const tiles = map.addTilesetImage('tiles', 'tiles', P, P, 0, 0);
+    return map.createLayer(0, tiles, 0, 0).setScale(TS / P).setDepth(depth);
   }
 
   update() {
@@ -155,7 +173,7 @@ export default class World extends Phaser.Scene {
     const npc = findTarget(this.player, this.npcs);
     if (npc) {
       npc.facing = faceToward(npc, this.player);
-      npc.setTexture(actorFrame(npc.palette, npc.facing, 0));
+      stand(npc, npc.palette, npc.facing);
       // the quest giver's board opens as soon as he has finished speaking
       this.pendingBoard = !!npc.def.quests;
       // somebody with `says` has more than one answer; the first that fits is the one
@@ -193,7 +211,10 @@ export default class World extends Phaser.Scene {
     }
     const before = levelOf(b.id);
     const result = contribute(b.id);
-    if (result.levelled) this.applyPatch(patchOf(b.id, before + 1));
+    if (result.levelled) {
+      this.applyPatch(patchOf(b.id, before + 1));
+      restate(this.built, b.id); // and the building itself changes where it stands
+    }
     this.say(b.name, contributeLines(b.id, result), null);
   }
 
@@ -201,8 +222,8 @@ export default class World extends Phaser.Scene {
   applyPatch(patch) {
     for (const [x, y, ch] of patch) {
       const name = LEGEND[ch];
-      this.ground.putTileAt(TILE_INDEX[name], x, y).setCollision(!!TILES[name].solid);
-      this.above.putTileAt(TILES[name].above ? TILE_INDEX[TILES[name].above] : -1, x, y);
+      this.ground.putTileAt(slotFor(name, x, y), x, y).setCollision(!!TILES[name].solid);
+      this.above.putTileAt(TILES[name].above ? slotFor(TILES[name].above, x, y) : -1, x, y);
     }
   }
 

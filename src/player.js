@@ -1,14 +1,16 @@
 import { TUNING } from '../tuning.js';
 import { actorFrame, walkAnim } from './textures.js';
+import { fitBody, footOf, stand } from './art.js';
 
 const TS = TUNING.tileSize;
 
 export function spawnActor(scene, palette, tx, ty, facing = 'down') {
   const s = scene.physics.add.sprite(tx * TS + TS / 2, ty * TS + TS, actorFrame(palette, facing, 0));
-  s.setOrigin(0.5, 1);
-  s.body.setSize(10, 8).setOffset(3, 14);
+  s.setOrigin(0.5, footOf(palette));
+  fitBody(s, 10, 8);
   s.palette = palette;
   s.facing = facing;
+  stand(s, palette, facing);
   return s;
 }
 
@@ -45,11 +47,10 @@ export function updatePlayer(player, keys) {
   else if (vy < 0) player.facing = 'up';
   else player.facing = 'down';
 
-  player.anims.play(walkAnim('player', player.facing), true);
+  player.anims.play(walkAnim(player.palette, player.facing), true);
 }
 
 export function haltPlayer(player) {
   player.body.setVelocity(0, 0);
-  player.anims.stop();
-  player.setTexture(actorFrame('player', player.facing, 0));
+  stand(player, player.palette, player.facing);
 }

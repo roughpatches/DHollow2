@@ -1,0 +1,450 @@
+{
+  "group_id": "8e9c38cd-ccae-499e-a5ec-281e2d63ff6b",
+  "states": [
+    {
+      "character": {
+        "id": "1f7790ae-17fb-4d5f-a192-b6d37a8c742c",
+        "name": "Idle",
+        "prompt": "Androgynous nomad treasure hunter, lean practical build, top-heavy \nsilhouette dominated by a wide-brimmed hat. Layered weathered travel \nclothing \u2014 wraps, straps, a satchel or coiled rope at the hip \u2014 \nbuilt for movement, not uniform or profession-coded. No gendered \ncostume cues. Reads as an outsider passing through, not a town resident. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, top-heavy wide-brim \nshape distinct from blocky, angular, narrow, or broad-rounded \ncharacter frames.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-01T15:05:57.853880+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {
+          "Breathing_Idle": {
+            "south": [
+              "Idle/animations/Breathing_Idle/south/frame_000.png",
+              "Idle/animations/Breathing_Idle/south/frame_001.png",
+              "Idle/animations/Breathing_Idle/south/frame_002.png",
+              "Idle/animations/Breathing_Idle/south/frame_003.png"
+            ],
+            "east": [
+              "Idle/animations/Breathing_Idle/east/frame_000.png",
+              "Idle/animations/Breathing_Idle/east/frame_001.png",
+              "Idle/animations/Breathing_Idle/east/frame_002.png",
+              "Idle/animations/Breathing_Idle/east/frame_003.png"
+            ],
+            "north": [
+              "Idle/animations/Breathing_Idle/north/frame_000.png",
+              "Idle/animations/Breathing_Idle/north/frame_001.png",
+              "Idle/animations/Breathing_Idle/north/frame_002.png",
+              "Idle/animations/Breathing_Idle/north/frame_003.png"
+            ],
+            "west": [
+              "Idle/animations/Breathing_Idle/west/frame_000.png",
+              "Idle/animations/Breathing_Idle/west/frame_001.png",
+              "Idle/animations/Breathing_Idle/west/frame_002.png",
+              "Idle/animations/Breathing_Idle/west/frame_003.png"
+            ]
+          }
+        }
+      },
+      "portrait": {
+        "path": "Idle/portrait.png",
+        "size": 128,
+        "generated_at": "2026-08-01T15:19:58.668078"
+      },
+      "vocal_animation": {
+        "path": "Idle/vocal/grid.png",
+        "moods": [
+          "neutral",
+          "happy",
+          "angry",
+          "sad",
+          "surprised"
+        ],
+        "visemes": [
+          "rest",
+          "closed",
+          "small_open",
+          "medium_open",
+          "wide_open",
+          "round",
+          "teeth"
+        ],
+        "viseme_count": 7,
+        "width": 896,
+        "height": 640,
+        "generated_at": "2026-08-01T16:03:39.528650",
+        "layout": "grid",
+        "columns": "visemes",
+        "rows": "moods"
+      }
+    },
+    {
+      "character": {
+        "id": "23a7748c-5a29-4ca3-acf4-dddcb4b04112",
+        "name": "Walking",
+        "prompt": "Androgynous nomad treasure hunter, lean practical build, top-heavy \nsilhouette dominated by a wide-brimmed hat. Layered weathered travel \nclothing \u2014 wraps, straps, a satchel or coiled rope at the hip \u2014 \nbuilt for movement, not uniform or profession-coded. No gendered \ncostume cues. Reads as an outsider passing through, not a town resident. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, top-heavy wide-brim \nshape distinct from blocky, angular, narrow, or broad-rounded \ncharacter frames.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-01T16:27:49.427788+00:00"
+      },
+      "folder": "Walking",
+      "frames": {
+        "rotations": {
+          "south": "Walking/rotations/south.png",
+          "south-east": "Walking/rotations/south-east.png",
+          "east": "Walking/rotations/east.png",
+          "north-east": "Walking/rotations/north-east.png",
+          "north": "Walking/rotations/north.png",
+          "north-west": "Walking/rotations/north-west.png",
+          "west": "Walking/rotations/west.png",
+          "south-west": "Walking/rotations/south-west.png"
+        },
+        "animations": {
+          "Walking": {
+            "north": [
+              "Walking/animations/Walking/north/frame_000.png",
+              "Walking/animations/Walking/north/frame_001.png",
+              "Walking/animations/Walking/north/frame_002.png",
+              "Walking/animations/Walking/north/frame_003.png",
+              "Walking/animations/Walking/north/frame_004.png",
+              "Walking/animations/Walking/north/frame_005.png"
+            ],
+            "south": [
+              "Walking/animations/Walking/south/frame_000.png",
+              "Walking/animations/Walking/south/frame_001.png",
+              "Walking/animations/Walking/south/frame_002.png",
+              "Walking/animations/Walking/south/frame_003.png",
+              "Walking/animations/Walking/south/frame_004.png",
+              "Walking/animations/Walking/south/frame_005.png"
+            ],
+            "west": [
+              "Walking/animations/Walking/west/frame_000.png",
+              "Walking/animations/Walking/west/frame_001.png",
+              "Walking/animations/Walking/west/frame_002.png",
+              "Walking/animations/Walking/west/frame_003.png",
+              "Walking/animations/Walking/west/frame_004.png",
+              "Walking/animations/Walking/west/frame_005.png"
+            ],
+            "east": [
+              "Walking/animations/Walking/east/frame_000.png",
+              "Walking/animations/Walking/east/frame_001.png",
+              "Walking/animations/Walking/east/frame_002.png",
+              "Walking/animations/Walking/east/frame_003.png",
+              "Walking/animations/Walking/east/frame_004.png",
+              "Walking/animations/Walking/east/frame_005.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "a36384cd-d205-4680-a9db-3b2500d58e92",
+        "name": "Fighting Stance",
+        "prompt": "Androgynous nomad treasure hunter, lean practical build, top-heavy \nsilhouette dominated by a wide-brimmed hat. Layered weathered travel \nclothing \u2014 wraps, straps, a satchel or coiled rope at the hip \u2014 \nbuilt for movement, not uniform or profession-coded. No gendered \ncostume cues. Reads as an outsider passing through, not a town resident. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, top-heavy wide-brim \nshape distinct from blocky, angular, narrow, or broad-rounded \ncharacter frames.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-01T21:57:28.256143+00:00"
+      },
+      "folder": "Fighting_Stance",
+      "frames": {
+        "rotations": {
+          "south": "Fighting_Stance/rotations/south.png",
+          "south-east": "Fighting_Stance/rotations/south-east.png",
+          "east": "Fighting_Stance/rotations/east.png",
+          "north-east": "Fighting_Stance/rotations/north-east.png",
+          "north": "Fighting_Stance/rotations/north.png",
+          "north-west": "Fighting_Stance/rotations/north-west.png",
+          "west": "Fighting_Stance/rotations/west.png",
+          "south-west": "Fighting_Stance/rotations/south-west.png"
+        },
+        "animations": {
+          "Fight_Stance_Idle": {
+            "north": [
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_000.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_001.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_002.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_003.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_004.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_005.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_006.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/north/frame_007.png"
+            ],
+            "west": [
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_000.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_001.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_002.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_003.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_004.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_005.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_006.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/west/frame_007.png"
+            ],
+            "south": [
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_000.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_001.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_002.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_003.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_004.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_005.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_006.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/south/frame_007.png"
+            ],
+            "east": [
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_000.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_001.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_002.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_003.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_004.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_005.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_006.png",
+              "Fighting_Stance/animations/Fight_Stance_Idle/east/frame_007.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "688fee54-7d05-44e1-a17c-52460bb06b29",
+        "name": "Collapsed in a heap",
+        "prompt": "Androgynous nomad treasure hunter, lean practical build, top-heavy \nsilhouette dominated by a wide-brimmed hat. Layered weathered travel \nclothing \u2014 wraps, straps, a satchel or coiled rope at the hip \u2014 \nbuilt for movement, not uniform or profession-coded. No gendered \ncostume cues. Reads as an outsider passing through, not a town resident. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, top-heavy wide-brim \nshape distinct from blocky, angular, narrow, or broad-rounded \ncharacter frames.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-01T22:07:31.193095+00:00"
+      },
+      "folder": "Collapsed_in_a_heap",
+      "frames": {
+        "rotations": {
+          "south": "Collapsed_in_a_heap/rotations/south.png",
+          "south-east": "Collapsed_in_a_heap/rotations/south-east.png",
+          "east": "Collapsed_in_a_heap/rotations/east.png",
+          "north-east": "Collapsed_in_a_heap/rotations/north-east.png",
+          "north": "Collapsed_in_a_heap/rotations/north.png",
+          "north-west": "Collapsed_in_a_heap/rotations/north-west.png",
+          "west": "Collapsed_in_a_heap/rotations/west.png",
+          "south-west": "Collapsed_in_a_heap/rotations/south-west.png"
+        },
+        "animations": {
+          "Falling_Back_Death": {
+            "north": [
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/north/frame_000.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/north/frame_001.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/north/frame_002.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/north/frame_003.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/north/frame_004.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/north/frame_005.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/north/frame_006.png"
+            ],
+            "east": [
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/east/frame_000.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/east/frame_001.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/east/frame_002.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/east/frame_003.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/east/frame_004.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/east/frame_005.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/east/frame_006.png"
+            ],
+            "south": [
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/south/frame_000.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/south/frame_001.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/south/frame_002.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/south/frame_003.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/south/frame_004.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/south/frame_005.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/south/frame_006.png"
+            ],
+            "west": [
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/west/frame_000.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/west/frame_001.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/west/frame_002.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/west/frame_003.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/west/frame_004.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/west/frame_005.png",
+              "Collapsed_in_a_heap/animations/Falling_Back_Death/west/frame_006.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "46c18f83-bfab-489d-9d18-f591bdc800c8",
+        "name": "Lassoing",
+        "prompt": "Androgynous nomad treasure hunter, lean practical build, top-heavy \nsilhouette dominated by a wide-brimmed hat. Layered weathered travel \nclothing \u2014 wraps, straps, a satchel or coiled rope at the hip \u2014 \nbuilt for movement, not uniform or profession-coded. No gendered \ncostume cues. Reads as an outsider passing through, not a town resident. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, top-heavy wide-brim \nshape distinct from blocky, angular, narrow, or broad-rounded \ncharacter frames.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-01T22:27:20.252500+00:00"
+      },
+      "folder": "Lassoing",
+      "frames": {
+        "rotations": {
+          "south": "Lassoing/rotations/south.png",
+          "south-east": "Lassoing/rotations/south-east.png",
+          "east": "Lassoing/rotations/east.png",
+          "north-east": "Lassoing/rotations/north-east.png",
+          "north": "Lassoing/rotations/north.png",
+          "north-west": "Lassoing/rotations/north-west.png",
+          "west": "Lassoing/rotations/west.png",
+          "south-west": "Lassoing/rotations/south-west.png"
+        },
+        "animations": {
+          "The_cowboy_begins_by_swinging_the_loop_of_the_lass": {
+            "north": [
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_000.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_001.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_002.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_003.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_004.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_005.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_006.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_007.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/north/frame_008.png"
+            ],
+            "south": [
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_000.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_001.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_002.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_003.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_004.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_005.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_006.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_007.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/south/frame_008.png"
+            ],
+            "east": [
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_000.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_001.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_002.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_003.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_004.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_005.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_006.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_007.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/east/frame_008.png"
+            ],
+            "west": [
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_000.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_001.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_002.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_003.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_004.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_005.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_006.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_007.png",
+              "Lassoing/animations/The_cowboy_begins_by_swinging_the_loop_of_the_lass/west/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "153bd60a-25f1-4b9d-8aa8-ec9c394d8c24",
+        "name": "Recoiling",
+        "prompt": "Androgynous nomad treasure hunter, lean practical build, top-heavy \nsilhouette dominated by a wide-brimmed hat. Layered weathered travel \nclothing \u2014 wraps, straps, a satchel or coiled rope at the hip \u2014 \nbuilt for movement, not uniform or profession-coded. No gendered \ncostume cues. Reads as an outsider passing through, not a town resident. \n\nStyle: pixel art, top-down/isometric RPG sprite, thin minimal outlines, \navoid heavy black contour lines, soft anti-aliased edges rather than \nhard dark borders, clean readable silhouette, top-heavy wide-brim \nshape distinct from blocky, angular, narrow, or broad-rounded \ncharacter frames.",
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-03T17:15:02.736185+00:00"
+      },
+      "folder": "Recoiling",
+      "frames": {
+        "rotations": {
+          "south": "Recoiling/rotations/south.png",
+          "south-east": "Recoiling/rotations/south-east.png",
+          "east": "Recoiling/rotations/east.png",
+          "north-east": "Recoiling/rotations/north-east.png",
+          "north": "Recoiling/rotations/north.png",
+          "north-west": "Recoiling/rotations/north-west.png",
+          "west": "Recoiling/rotations/west.png",
+          "south-west": "Recoiling/rotations/south-west.png"
+        },
+        "animations": {
+          "The_character_recoils_sharply_jolting_backward_as": {
+            "east": [
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_000.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_001.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_002.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_003.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_004.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_005.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_006.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_007.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/east/frame_008.png"
+            ],
+            "west": [
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_000.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_001.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_002.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_003.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_004.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_005.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_006.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_007.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/west/frame_008.png"
+            ],
+            "north": [
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_000.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_001.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_002.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_003.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_004.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_005.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_006.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_007.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/north/frame_008.png"
+            ],
+            "south": [
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_000.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_001.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_002.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_003.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_004.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_005.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_006.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_007.png",
+              "Recoiling/animations/The_character_recoils_sharply_jolting_backward_as/south/frame_008.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-11T23:56:38.364699"
+}

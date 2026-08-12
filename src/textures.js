@@ -1,5 +1,6 @@
-// All placeholder art is generated at boot. There are no image files in this repo.
-// When real sprites land, replace the generators here; nothing else needs to change.
+// Placeholder art, generated at boot for everyone content/looks.js has no drawn art
+// for. A character named there loads their frames from disk under these same key
+// names instead — see src/art.js — so nothing downstream cares which they are.
 
 import { TUNING, COLORS, PALETTES } from '../tuning.js';
 
@@ -262,11 +263,13 @@ export function walkAnim(palette, dir) {
 }
 
 export function buildTextures(scene) {
-  if (scene.textures.exists('tiles')) return;
+  if (scene.textures.exists('tiles16')) return;
 
+  // the generated strip, at the size it is drawn at. src/art.js blows it up to tilePx
+  // and paints real ground over whichever tiles have any.
   const g = scene.make.graphics({ x: 0, y: 0 }, false);
   TILE_NAMES.forEach((name, i) => TILE_DRAW[name](g, i * TS));
-  g.generateTexture('tiles', TILE_NAMES.length * TS, TS);
+  g.generateTexture('tiles16', TILE_NAMES.length * TS, TS);
   g.destroy();
 
   for (const name of Object.keys(PALETTES)) {

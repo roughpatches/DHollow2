@@ -7,7 +7,7 @@ import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
-import { partyRows, TRAIT_ROWS } from '../party.js';
+import { partyRows, traitRows } from '../party.js';
 import { statusLines } from '../town.js';
 import { questRows, placeLines, canStart } from '../run.js';
 
@@ -27,7 +27,7 @@ const TABS = [
   ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
   ['Party', partyRows],
-  ['Traits', TRAIT_ROWS],
+  ['Traits', traitRows],
   ['Companions', COMPANIONS],
   ['Inventory', INVENTORY],
   ['Bestiary', BESTIARY],

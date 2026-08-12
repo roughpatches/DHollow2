@@ -2,13 +2,16 @@
 // Edit freely; no code change is required to retune or retint anything here.
 
 export const TUNING = {
-  tileSize: 16,
+  tileSize: 16, // a tile's size in the world: what a step, a wall and a map are measured in
+  tilePx: 64, // and the size it is drawn from, so painted ground keeps its detail
   zoom: 3,
   viewWidth: 960,
   viewHeight: 640,
 
   walkSpeed: 78,
-  walkFrameRate: 7,
+  walkFrameRate: 7, // a placeholder walk is two frames; a drawn one has its own rates
+  artWalkFrameRate: 10,
+  artIdleFrameRate: 5,
 
   interactReach: 12,
   interactRange: 20,
@@ -41,7 +44,23 @@ export const TUNING = {
   recruitDraw: 1, // each trait drawn to the work asks one band less
   recruitFear: 2, // each fear or scruple the work touches asks two bands more
 
-  traitsAtLevelOne: 3, // how many traits a character picks at level one
+  // Traits are points, not badges. A character picks traitsAtLevelOne of them from
+  // content/traits.js and spreads traitPointsAtLevelOne between those three; the rest
+  // of the list is what they are untrained at.
+  traitsAtLevelOne: 3,
+  traitPointsAtLevelOne: 6,
+  traitBonusPerPoint: 2, // what one point is worth to an activity
+  traitYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
+  // party's score for that work adds this much on top of the roll
+
+  // Skill checks. A die, plus the trait, against a DC written on the encounter or the
+  // job. The best in the party rolls it. A natural top always holds and a natural 1
+  // never does, so no DC is a wall and none is a formality.
+  checkDie: 20,
+  checkPassXp: 1.25, // a check held pays this much more
+  checkFailKeep: 0.5, // a check lost keeps this much of what was there to take
+  checkFailHurt: 2, // and costs this much on top of the node's own wounds
+
   maxLevel: 10,
   hpPerLevel: 3, // added to a character's own HP for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
@@ -52,7 +71,9 @@ export const TUNING = {
   dialogueFontSize: 20,
   dialogueNameSize: 18,
 
-  dialoguePortraitSize: 128, // the portrait panel's side in screen pixels; art scales to fit it
+  // The portrait panel's side in screen pixels. Eight of those are border, so a painted
+  // portrait of 128 sits inside it pixel for pixel; a drawn placeholder of 40 trebles.
+  dialoguePortraitSize: 136,
   dialoguePortraitGap: 8, // space between portrait panel and dialogue box
   dialoguePortraitRise: 10, // how far the portrait travels as it pops up
   dialoguePortraitPopMs: 130,

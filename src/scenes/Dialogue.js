@@ -1,6 +1,6 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { setting } from '../settings.js';
-import { buildTextures, portraitKey, PORTRAIT_PX } from '../textures.js';
+import { buildTextures, portraitKey } from '../textures.js';
 
 // Runs alongside World. A line array, a box that reads it, and the speaker's face
 // beside it — nothing else.
@@ -47,9 +47,8 @@ export default class Dialogue extends Phaser.Scene {
     frame.fillRect(0, 0, ps, ps);
     frame.lineStyle(2, COLORS.dialogueEdge, 1);
     frame.strokeRect(1, 1, ps - 2, ps - 2);
-    // whole multiples only: a portrait scaled 2.7x is a blurred portrait
-    const scale = Math.max(1, Math.floor((ps - 8) / PORTRAIT_PX));
-    this.face = this.add.image(ps / 2, ps / 2, portraitKey('player')).setScale(scale);
+    this.face = this.add.image(ps / 2, ps / 2, portraitKey('player'));
+    this.fitFace();
     this.portrait.add([frame, this.face]);
 
     this.group = [this.box, this.nameText, this.bodyText, this.hint, this.portrait];
@@ -98,6 +97,15 @@ export default class Dialogue extends Phaser.Scene {
     this.showPortrait(portrait);
   }
 
+  // A drawn placeholder is 40 pixels and a painted face is 128, and both have to sit in
+  // the same panel. Whole multiples only on the way up — a portrait scaled 2.7× is a
+  // blurred portrait — and down to fit if the art is bigger than the panel.
+  fitFace() {
+    const room = this.metrics.ps - 8;
+    const px = this.face.frame.width;
+    this.face.setScale(px > room ? room / px : Math.max(1, Math.floor(room / px)));
+  }
+
   // a speaker with no portrait of their own leaves the panel out rather than
   // borrowing someone else's face
   showPortrait(palette) {
@@ -109,6 +117,7 @@ export default class Dialogue extends Phaser.Scene {
     }
     this.layout(true);
     this.face.setTexture(key);
+    this.fitFace();
     this.tweens.killTweensOf(this.portrait);
     this.portrait.setY(this.portraitY + TUNING.dialoguePortraitRise).setAlpha(0);
     this.tweens.add({

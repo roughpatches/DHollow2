@@ -9,7 +9,10 @@
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
-import { roster, charOf, stateOf, damage, heal, award, raiseBond, traitsOf, hpMax } from './party.js';
+import {
+  roster, charOf, stateOf, damage, heal, award, raiseBond, hpMax,
+  rankOf, scoreOf, check, traitOf, walking, YOU,
+} from './party.js';
 import { give, nameOf } from './town.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
@@ -70,8 +73,8 @@ export function blockers(id, when) {
     else if (!roster().includes(c)) out.push(`${c.name} is not available.`);
     else if (!asked(cid, q, at).willing) out.push(`${c.name} will not come on this.`);
   }
-  const crew = roster().filter((c) => asked(c.id, q, at).willing).length;
-  if (crew < q.party) out.push(`Needs ${q.party}; ${crew} will come.`);
+  const crew = 1 + roster().filter((c) => asked(c.id, q, at).willing).length; // you, and them
+  if (crew < q.party) out.push(`Needs ${q.party}; counting you, ${crew} will walk it.`);
   return out;
 }
 
@@ -108,9 +111,11 @@ export function mixAt(when) {
 export function start(id, when, party) {
   const quest = questOf(id);
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
-  // only the recruited walk it: they take the wounds, earn the experience, and are the
-  // only ones who can read anything at a fork
-  const who = (party && party.length ? party : roster().map((c) => c.id));
+  // The player and the recruited walk it: they take the wounds, earn the experience,
+  // and are the only ones who can read anything at a fork. The player is on it whoever
+  // else is, so their three traits are the three the party always has.
+  const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
+    .filter((id, i, all) => all.indexOf(id) === i);
   const count = roll(sizeOf(quest));
   const nodes = [];
   for (let i = 0; i < count; i++) {
@@ -136,7 +141,7 @@ export function abandon() {
 // question a run asks is whether the party survives this one, not whether they have
 // been worn down since the first. Move this the day beds and food cost something.
 export function recover() {
-  for (const c of roster()) heal(c.id, hpMax(c.id));
+  for (const c of walking()) heal(c.id, hpMax(c.id));
 }
 
 export function clear() {
@@ -175,17 +180,16 @@ function branches() {
 }
 
 export function walkers() {
-  return run ? run.party.map((id) => charOf(id)) : roster();
+  return run ? run.party.map((id) => charOf(id)) : walking();
 }
 
-// who on the run can see this coming, and what they say about it
+// who on the run can see this coming, and what they say about it. The one with the most
+// points in the trait speaks: a party carrying two who could tell you hears the better.
 function readOf(kind) {
-  for (const c of walkers()) {
-    if (traitsOf(c.id).some((t) => t.id === kind.read.trait)) {
-      return { who: c.name, line: kind.read.line };
-    }
-  }
-  return null;
+  const seen = walkers().filter((c) => rankOf(c.id, kind.read.trait) > 0);
+  if (!seen.length) return null;
+  const c = seen.reduce((a, b) => (rankOf(b.id, kind.read.trait) > rankOf(a.id, kind.read.trait) ? b : a));
+  return { who: c.name, line: kind.read.line };
 }
 
 export function choose(i) {
@@ -207,6 +211,23 @@ function weighted(bias, from = ENCOUNTERS) {
   return from[from.length - 1];
 }
 
+// What the party's points are worth here: everyone's points in the trait this work is
+// done with, added up, each one adding traitYieldPerPoint to what comes out of it. Who
+// you take on a job is the loudest thing you say about what you want off it.
+function harvestOf(node, e) {
+  if (!e.harvest) return null;
+  const score = scoreOf(run.party, e.harvest);
+  return { trait: traitOf(e.harvest), score, more: score * TUNING.traitYieldPerPoint };
+}
+
+// The job's own test stands in front of the goal; anything else the road throws up
+// brings its own. A node asks for at most one roll.
+function checkOf(node, e) {
+  const spec = (node.goal && run.quest.check) || e.check;
+  if (!spec) return null;
+  return { ...check(run.party, spec.trait, spec.dc), held: spec.held, lost: spec.lost };
+}
+
 function resolve(node) {
   const e = weighted(run.bias);
   const night = run.when === 'night';
@@ -214,20 +235,29 @@ function resolve(node) {
   run.phase = 'node';
 
   node.kind = e.id;
+  node.harvest = harvestOf(node, e);
+  node.check = checkOf(node, e);
+  const failed = node.check && !node.check.pass;
+  // points in the work swell what it pays; a check lost costs part of it
+  const take = (1 + (node.harvest ? node.harvest.more : 0)) * (failed ? TUNING.checkFailKeep : 1);
+
   node.spoils = {};
   for (const [m, range] of Object.entries(e.spoils)) {
-    const n = roll(range);
+    const n = Math.round(roll(range) * take);
     if (n > 0) {
       node.spoils[m] = n;
       run.spoils[m] = (run.spoils[m] || 0) + n;
       give(m, n);
     }
   }
-  node.xp = Math.round(roll(e.xp) * (night ? TUNING.questNightXp : 1));
+  node.xp = Math.round(roll(e.xp)
+    * (night ? TUNING.questNightXp : 1)
+    * (node.check && node.check.pass ? TUNING.checkPassXp : 1));
   run.xp += node.xp;
   for (const c of walkers()) award(c.id, node.xp);
 
-  node.hurt = Math.round(roll(e.hurt) * (night ? TUNING.questNightHurt : 1));
+  node.hurt = Math.round(roll(e.hurt) * (night ? TUNING.questNightHurt : 1))
+    + (failed ? TUNING.checkFailHurt : 0);
   if (node.hurt > 0) node.hurtWho = takeHit(node.hurt);
   if (partyDown()) run.state = 'failed';
 }
@@ -284,6 +314,17 @@ export function placeLines(id) {
   return [head, q.goal, 'Ready. [Enter] to set out.'];
 }
 
+// a roll, said the way a table says it: die, what the trait added, and what it came to
+export function checkLine(c) {
+  return `${c.trait.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
+    + ` = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
+}
+
+export function harvestLine(h) {
+  if (!h || !h.score) return null;
+  return `${h.trait.name} ${h.score} between you — ${Math.round(h.more * 100)}% more out of it.`;
+}
+
 export function partyLine(who = walkers()) {
   return who.map((c) => `${c.name} ${stateOf(c.id).hp}/${hpMax(c.id)}`).join('    ');
 }
@@ -302,7 +343,7 @@ export function questRows() {
       label: q.label,
       note,
       body: [
-        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it.`
+        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it, you included.`
           + (q.must ? `  ${q.must.map((m) => charOf(m).name).join(' and ')} must be on it.` : '')
           + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`),
         q.goal,

@@ -1,7 +1,7 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
-import { roster, charOf, bandName, bandOf } from '../party.js';
+import { roster, charOf, bandName, bandOf, scoreLine, traitsOf, traitOf, YOU } from '../party.js';
 
 // The crawl. Runs over World, which freezes behind it. A row of pips across the top is
 // the whole run at a glance; everything below is the node you are standing on.
@@ -104,7 +104,7 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + all.length) % all.length;
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % all.length;
       else if (k === ' ') this.toggleWalker(all[this.row].id);
-      else if (k === 'enter' && this.taking.length >= this.job.party) this.begin(this.when_);
+      else if (k === 'enter' && 1 + this.taking.length >= this.job.party) this.begin(this.when_);
       this.draw();
       return;
     }
@@ -132,12 +132,14 @@ export default class Quest extends Phaser.Scene {
 
   // --- drawing --------------------------------------------------------------
 
-  // everyone who will come is taken by default; the player pares that back
+  // Everyone who will come is taken by default; the player pares that back. You are one
+  // of the number the job asks for, so it wants job.party - 1 others — unless it names
+  // more than that as people it will not go without.
   toRecruiting(when) {
     this.when_ = when;
     const must = (this.job.must || []).filter((id) => recruit.asked(id, this.job, when).willing);
     const rest = recruit.willing(this.job, when).filter((id) => !must.includes(id));
-    this.taking = [...must, ...rest].slice(0, this.job.party);
+    this.taking = [...must, ...rest].slice(0, Math.max(must.length, this.job.party - 1));
     this.mode = 'party';
     this.row = 0;
   }
@@ -249,16 +251,25 @@ export default class Quest extends Phaser.Scene {
   // cannot account for reads as unfairness, so the whole sum is on the page.
   party() {
     const all = roster();
-    const short = this.job.party - this.taking.length;
+    const short = this.job.party - (1 + this.taking.length); // you are already on it
     let y = this.box.y + TUNING.menuPad;
 
     this.text(this.left + this.wide, y + 4, `${this.when_ === 'night' ? 'after dark' : 'by day'}`,
       TUNING.menuRowSize, this.when_ === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
+    const others = this.taking.length === 1 ? 'one other' : `${this.taking.length} others`;
+    const coming = this.taking.length ? `You and ${others} coming` : 'You, and nobody else';
     y += this.text(this.left, y,
-      short > 0 ? `Needs ${this.job.party}. ${this.taking.length} coming — ${short} short.`
-        : `Needs ${this.job.party}. ${this.taking.length} coming.`,
+      short > 0 ? `Needs ${this.job.party}. ${coming} — ${short} short.`
+        : `Needs ${this.job.party}. ${coming}.`,
       TUNING.questBodySize, short > 0 ? COLORS.menuMapFolk : COLORS.menuText).height + 10;
+    // the job's own roll is named before the crew is picked, because it is the reason
+    // to pick one crew over another
+    if (this.job.check) {
+      const ch = this.job.check;
+      y += this.text(this.left, y, `The last node asks a ${traitOf(ch.trait).name} roll at DC ${ch.dc}.`,
+        TUNING.questHintSize, COLORS.menuMapMark).height + 8;
+    }
     this.rule(y);
     y += 14;
 
@@ -269,6 +280,9 @@ export default class Quest extends Phaser.Scene {
       const required = (this.job.must || []).includes(c.id);
       const mark = required ? '[!]' : taken ? '[x]' : a.willing ? '[ ]' : ' × ';
       const colour = taken ? COLORS.menuAccent : a.willing ? COLORS.menuText : COLORS.menuRule;
+      // what they are worth is on the row itself: it is half of why you take somebody
+      this.text(this.left + this.wide, y + 2, traitsOf(c.id).map((t) => `${t.name} ${t.rank}`).join('   '),
+        TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
       y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
         TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;
       const why = required
@@ -278,9 +292,13 @@ export default class Quest extends Phaser.Scene {
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule, this.wide - 40).height + 10;
     });
 
-    this.text(this.left, this.box.y + this.box.h - 52,
-      this.taking.length ? run.partyLine(this.taking.map((id) => charOf(id))) : 'Nobody is coming.',
-      TUNING.menuRowSize, COLORS.menuText);
+    // you are on it whoever else is, so you are in both readouts
+    const crew = [YOU, ...this.taking];
+    this.text(this.left, this.box.y + this.box.h - 74,
+      run.partyLine(crew.map((id) => charOf(id))), TUNING.menuRowSize, COLORS.menuText);
+    // the crew added up: what this party would be good at if it walked out now
+    this.text(this.left, this.box.y + this.box.h - 50, scoreLine(crew),
+      TUNING.questHintSize, COLORS.menuDim);
     this.hint(short > 0
       ? '[Up/Down] Look    [Space] Take or leave    [Esc] Back'
       : '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back');
@@ -351,9 +369,23 @@ export default class Quest extends Phaser.Scene {
       y += this.text(this.left, y, para, TUNING.questBodySize, COLORS.menuDim, this.wide).height + 10;
     }
 
+    // the roll, then what the roll did, then what the work paid — in that order,
+    // because the player is owed the arithmetic before the outcome
+    if (n.check) {
+      y += 4;
+      y += this.text(this.left, y, run.checkLine(n.check), TUNING.questBodySize,
+        n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk, this.wide).height + 4;
+      y += this.text(this.left, y, n.check.pass ? n.check.held : n.check.lost,
+        TUNING.questBodySize, COLORS.menuText, this.wide).height + 6;
+    }
+
     y += 6;
     y += this.text(this.left, y, `Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`,
       TUNING.questBodySize, COLORS.menuAccent).height + 6;
+    const harvest = run.harvestLine(n.harvest);
+    if (harvest) {
+      y += this.text(this.left, y, harvest, TUNING.questHintSize, COLORS.menuDim, this.wide).height + 6;
+    }
     if (n.hurt > 0) {
       y += this.text(this.left, y, `${n.hurtWho} takes ${n.hurt}.`, TUNING.questBodySize, COLORS.menuMapFolk).height + 6;
     }

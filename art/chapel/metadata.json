@@ -1,0 +1,52 @@
+{
+  "group_id": "f1940e15-4ed8-4492-a078-67ebc9fa1e3b",
+  "objects": [
+    {
+      "id": "6895311e-e589-4b0f-ae00-8267e2198b39",
+      "name": "base",
+      "prompt": "A single ruined Victorian chapel seen from directly above: a collapsed slate roof with broken\nrafters open over the nave, soot-blackened stone walls, a boarded door on the south side and\nboarded windows. One building only, filling the frame. Dark soot-black and wet grey stone,\nnever orange-brown. No ground, no rubble, no plinth, no shadow \u2014 the chapel alone on empty\nbackground. Make the roof the largest thing in the picture.",
+      "size": {
+        "width": 128,
+        "height": 128
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/unknown.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "f5032c27-df30-415e-a927-6a61d75f3566",
+      "name": "wrapped in timber sc",
+      "prompt": "A single ruined Victorian chapel seen from directly above: a collapsed slate roof with broken\nrafters open over the nave, soot-blackened stone walls, a boarded door on the south side and\nboarded windows. One building only, filling the frame. Dark soot-black and wet grey stone,\nnever orange-brown. No ground, no rubble, no plinth, no shadow \u2014 the chapel alone on empty\nbackground. Make the roof the largest thing in the picture.",
+      "size": {
+        "width": 128,
+        "height": 128
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/unknown.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "9b6b9aa7-a933-4834-9f6d-526ffdeb008b",
+      "name": "roof rebuilt and sla",
+      "prompt": "A single ruined Victorian chapel seen from directly above: a collapsed slate roof with broken\nrafters open over the nave, soot-blackened stone walls, a boarded door on the south side and\nboarded windows. One building only, filling the frame. Dark soot-black and wet grey stone,\nnever orange-brown. No ground, no rubble, no plinth, no shadow \u2014 the chapel alone on empty\nbackground. Make the roof the largest thing in the picture.",
+      "size": {
+        "width": 128,
+        "height": 128
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/unknown.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.0",
+  "export_date": "2026-08-12T00:11:02.345152"
+}
