@@ -73,10 +73,10 @@ export const TUNING = {
 
   // The portrait panel's side in screen pixels. Eight of those are border, so a painted
   // portrait of 128 sits inside it pixel for pixel; a drawn placeholder of 40 trebles.
-  dialoguePorskillSize: 136,
-  dialoguePorskillGap: 8, // space between portrait panel and dialogue box
-  dialoguePorskillRise: 10, // how far the portrait travels as it pops up
-  dialoguePorskillPopMs: 130,
+  dialoguePortraitSize: 136,
+  dialoguePortraitGap: 8, // space between portrait panel and dialogue box
+  dialoguePortraitRise: 10, // how far the portrait travels as it pops up
+  dialoguePortraitPopMs: 130,
 
   menuMargin: 26,
   menuPad: 20,
