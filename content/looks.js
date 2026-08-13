@@ -88,14 +88,4 @@ export const STRUCTURES = [
     at: [3.22, 1.13],
     stages: ['base/rotations/south.png'],
   },
-  {
-    id: 'chapel',
-    path: 'art/chapel',
-    at: [27, 12.5],
-    stages: [
-      'base/rotations/unknown.png', // boarded: the roof is in the nave
-      'wrapped_in_timber_sc/rotations/unknown.png', // shored: scaffolding and sheeting
-      'roof_rebuilt_and_sla/rotations/unknown.png', // working: slated, and the lamps lit
-    ],
-  },
 ];

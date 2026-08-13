@@ -281,7 +281,7 @@ export const ENCOUNTERS = [
     activity: 'Casting',
     only: true,
     weight: { day: 0, night: 0 },
-    read: { skill: 'fishing', line: '[Placeholder Text]' },
+    read: null, // never a fork, so nothing is ever said about it on the way in
     harvest: 'fishing',
     check: null, // the rod is the test here, not a roll
     spoils: { provisions: [3, 5] },
@@ -624,7 +624,7 @@ export const ENCOUNTERS = [
     activity: 'Felling',
     only: true,
     weight: { day: 0, night: 0 },
-    read: { skill: 'woodcutting', line: 'The same again, and the light going.' },
+    read: null, // never a fork, so nothing is ever said about it on the way in
     harvest: 'woodcutting',
     check: null,
     spoils: { timber: [3, 5] },

@@ -228,48 +228,6 @@ export const INVENTORY = [
   },
 ];
 
-export const COMPANIONS = [
-  {
-    label: 'Tally Ruin',
-    note: 'Wary',
-    body: [
-      'The third carter. The one that came back, and the only person in Dreadhollow who says so out loud.',
-      'Drinks at the Bell from opening. Will not walk the north road for any money and has never once said he would not — he simply is not there when it is time to go.',
-      'Would come with you. Would need to be asked at the right hour, and the right hour is early, and he is not easy to find early.',
-    ],
-  },
-  {
-    label: 'Pim',
-    note: 'Eager — refuse',
-    body: [
-      'Nine years old, counts crows, misses nothing, and has decided you are leaving and wants to see the gate when you do.',
-      'Follows you as far as the well and then stops, because the well is where Mam\'s rule is.',
-      'Taking this child anywhere is a decision the village would not forgive, and Pim knows more about the treeline than any adult here will admit to knowing.',
-    ],
-  },
-  {
-    label: 'Sexton Grast',
-    note: 'Conditional',
-    body: [
-      'Knows the ground better than anyone alive and carries a shovel he has used for forty-one graves and at least one other purpose.',
-      'Will walk out with you at first light and not after dark, and he will not explain the difference in terms you find satisfying.',
-      'His condition is that you come back by dusk. He does not say what happens if you do not; he says he will not be the one coming to look.',
-    ],
-  },
-  {
-    label: 'Warden Ilse Marrow',
-    note: 'Refused',
-    body: [
-      'Will not leave the gate. That is not stubbornness, it is the entire job, and she has carried back enough to have stopped debating it.',
-      'She has offered a different thing instead: if the bell rings and nobody is pulling the rope, she will come to you. That is a promise from a woman who does not make them.',
-    ],
-  },
-  {
-    label: 'Bertran Krael',
-    note: 'Unasked',
-    body: [
-      'The smith. Arms like the anvil and no interest whatsoever in leaving the smithy while there is iron in it.',
-      'You have not asked. He has made it fairly clear across two conversations that he expects you will, eventually, and that the answer will depend entirely on what you are going out there to do.',
-    ],
-  },
-];
+// Who would walk out with you, and who would not. Empty while the cast is written: a
+// name here is a person the player has already met and formed a view about.
+export const COMPANIONS = [];
