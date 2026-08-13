@@ -47,6 +47,19 @@ export function stock() {
   return MATERIALS.map((m) => [m.id, held.get(m.id)]);
 }
 
+// What the Inventory tab shows above the kit the character set out with, in the same
+// {label, note, body} shape every tab uses. A material at none is not carried and does
+// not take a square; it appears the moment a run brings some home. The icon is the
+// material's own id — see src/icons.js.
+export function carriedRows() {
+  return MATERIALS.filter((m) => held.get(m.id) > 0).map((m) => ({
+    label: m.name,
+    note: `x${held.get(m.id)}`,
+    icon: m.id,
+    body: m.body,
+  }));
+}
+
 export function give(mid, n) {
   held.set(mid, (held.get(mid) || 0) + n);
   return held.get(mid);

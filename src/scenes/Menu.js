@@ -8,12 +8,17 @@ import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
 import { partyRows, skillRows, fill } from '../party.js';
-import { statusLines } from '../town.js';
+import { statusLines, carriedRows } from '../town.js';
+import { buildIcons, iconKeyFor } from '../icons.js';
 import { questRows, placeLines, canStart } from '../run.js';
 
 // Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
 // above the log of everything else the village has told you it wants.
 const questLog = () => [...questRows(), ...QUESTS];
+
+// What the party is carrying comes off town.js as it changes, and sits above the kit
+// the character started the game with. One list, two sources.
+const inventory = () => [...carriedRows(), ...INVENTORY];
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
@@ -23,13 +28,15 @@ const questLog = () => [...questRows(), ...QUESTS];
 // scanned out of the others rather than written, and lists every line still unwritten.
 // A tab's rows are an array, or a function returning one when the rows change while
 // the game runs — Party's level and HP move, so it is rebuilt on every draw.
+// A tab marked 'grid' draws its rows as squares of icons instead of a column of names;
+// everything else about it — cursor, scrolling, detail pane — is the same.
 const TABS = [
   ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
   ['Party', partyRows],
   ['Skills', skillRows],
   ['Companions', COMPANIONS],
-  ['Inventory', INVENTORY],
+  ['Inventory', inventory, 'grid'],
   ['Bestiary', BESTIARY],
   // one word each: at eleven tabs the spacing is tighter than a space inside a name,
   // and 'Quest Log' read as two tabs
@@ -68,6 +75,7 @@ export default class Menu extends Phaser.Scene {
 
     this.layer = this.add.container().setDepth(30000).setVisible(false);
     this.open_ = false;
+    buildIcons(this); // the Inventory grid draws these; World never asks for them
 
     this.input.keyboard.on('keydown', this.onKey, this);
   }
@@ -146,7 +154,8 @@ export default class Menu extends Phaser.Scene {
     this.layer.removeAll(true);
     this.panel();
     this.tabStrip();
-    this.list();
+    if (TABS[this.tab][2] === 'grid') this.grid();
+    else this.list();
     this.detail();
     this.hint();
   }
@@ -249,6 +258,56 @@ export default class Menu extends Phaser.Scene {
         TUNING.menuHintSize,
         COLORS.menuDim,
       );
+    }
+  }
+
+  // The same rows and the same cursor as a list tab, laid out as squares. Up and down
+  // step one square in reading order rather than a whole line, because left and right
+  // belong to the tab strip and a grid has no third axis to give them.
+  grid() {
+    const rows = this.rows();
+    const sel = this.row[this.tab];
+    const cell = TUNING.menuIconCell;
+    const x0 = this.listX - 8;
+    const y0 = this.bodyY - 10;
+
+    const cols = Math.max(1, Math.floor(TUNING.menuListWidth / cell));
+    // 20 leaves the count of squares its line under the last row
+    const lines = Math.max(1, Math.floor((this.box.y + this.box.h - 54 - y0) / cell));
+    const visible = cols * lines;
+
+    // scroll a whole line at a time, and only far enough to bring the cursor back
+    let top = this.top[this.tab];
+    if (sel < top) top = sel - (sel % cols);
+    if (sel >= top + visible) top = sel - (sel % cols) - visible + cols;
+    top = Math.max(0, Math.min(top, Math.max(0, (Math.ceil(rows.length / cols) - lines) * cols)));
+    this.top[this.tab] = top;
+
+    for (let i = top; i < Math.min(rows.length, top + visible); i++) {
+      const x = x0 + ((i - top) % cols) * cell;
+      const y = y0 + Math.floor((i - top) / cols) * cell;
+      const on = i === sel;
+
+      const g = this.add.graphics();
+      g.fillStyle(on ? COLORS.menuSelectFill : COLORS.menuFill, 1);
+      g.fillRect(x + 2, y + 2, cell - 4, cell - 4);
+      g.lineStyle(1, on ? COLORS.menuAccent : COLORS.menuRule, 1);
+      g.strokeRect(x + 2, y + 2, cell - 4, cell - 4);
+      this.layer.add(g);
+
+      const px = TUNING.menuIconPx;
+      const icon = this.add.image(x + cell / 2, y + 8 + px / 2, iconKeyFor(rows[i].icon));
+      icon.setDisplaySize(px, px);
+      this.layer.add(icon);
+
+      // the count sits in the corner of the square; the name is the detail pane's job
+      this.text(x + cell - 8, y + cell - 22, noteOf(rows[i]), TUNING.menuHintSize,
+        on ? COLORS.menuAccent : COLORS.menuDim).setOrigin(1, 0);
+    }
+
+    if (rows.length > visible) {
+      this.text(x0 + 12, y0 + lines * cell + 4, `${sel + 1} / ${rows.length}`,
+        TUNING.menuHintSize, COLORS.menuDim);
     }
   }
 
