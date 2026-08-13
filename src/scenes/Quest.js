@@ -432,7 +432,6 @@ export default class Quest extends Phaser.Scene {
       this.approaching = true;
       this.walk.approach(run.kindOf(r.nodes[r.at].kind).nature, () => {
         this.approaching = false;
-        if (run.active()?.phase === 'activity') this.startActivity();
         this.draw();
       });
     }
@@ -440,6 +439,10 @@ export default class Quest extends Phaser.Scene {
       this.approaching = false;
       this.walk.pass();
     }
+
+    // the controls are handed over wherever the activity phase came from: straight off
+    // the node, or off the last beat of the walk up to it
+    if (r.state === 'running' && r.phase === 'activity' && !this.approaching) this.startActivity();
 
     this.conBar(r, band.bar);
     this.trail(r, band.trail);

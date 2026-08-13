@@ -340,7 +340,7 @@ function toBeat(node, id) {
   const b = KIND[node.kind].beats.find((x) => x.id === id);
   node.beat = b;
   if (!b) {
-    settle(null); // a `then` pointing at nothing is the end of the encounter
+    outOfBeats(node); // a `then` pointing at nothing is the end of them
     return;
   }
   story.set(b.flag);
@@ -358,9 +358,20 @@ export function advance() {
   const next = b.result
     ? (node.check && node.check.pass ? b.result.hit : b.result.miss)
     : (b.toss ? pick(b.toss) : b.then);
-  if (!next) settle(null);
+  if (!next) outOfBeats(node);
   else toBeat(node, next);
   return run;
+}
+
+// The end of the beats is the end of the node — unless the encounter also names an
+// activity, in which case the beats were the walk up to it and the player takes the
+// controls now. That is how a node gets words in front of its minigame.
+function outOfBeats(node) {
+  if (hasEngine(KIND[node.kind].activity)) {
+    run.phase = 'activity';
+    return;
+  }
+  settle(null);
 }
 
 // An option that names a skill is rolled as it is taken, by whoever in the party is

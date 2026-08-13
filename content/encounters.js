@@ -31,7 +31,9 @@
 //   beats    — an encounter written out card by card instead of settled in one roll:
 //              paragraphs, the choices the party gets, and the ways through. The shape
 //              is documented on the one that has them. A kind without beats is a kind
-//              the table resolves on its own, which is most of them.
+//              the table resolves on its own, which is most of them. A kind with beats
+//              AND an activity plays the beats first and hands over the controls when
+//              they run out — words in front of a minigame.
 //   body     — what the encounter is, in the world's voice. Yours to write.
 
 export const ENCOUNTERS = [
@@ -269,8 +271,12 @@ export const ENCOUNTERS = [
     // The first node of the first job: water before timber. `Casting` is the three-phase
     // fishing act imported from StarScape — cast, hook, reel — and the rod is the test
     // here rather than a roll. See src/minigames/FishEngine.js.
+    //
+    // Its beats are the walk up to the water. A node with both beats and an activity
+    // plays the beats first and hands over the controls when they run out, so the stream
+    // is read before anybody casts into it.
     id: 'firstcast',
-    name: '[Placeholder — the fishing node]',
+    name: 'The stream',
     nature: 'gather',
     activity: 'Casting',
     only: true,
@@ -282,6 +288,17 @@ export const ENCOUNTERS = [
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'water',
+        text: [
+          'The trees give out onto water. A stream, wide and shallow and peat-brown.',
+          "It's slow enough that you have to watch a leaf a while to be sure which way it's going.",
+          'Skaters and flies ripple on the surface. Cast a line?',
+        ],
+      },
+    ],
   },
   {
     // The Woodcraft way through the fork. Written out beat by beat rather than settled
