@@ -87,6 +87,60 @@ const SHAPES = {
     fill(g, b, 9, 7, 4, 2);
     fill(g, b, 3, 9, 4, 2);
   },
+  fish: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillEllipse(9, 8, 12, 7);
+    g.fillTriangle(1, 4, 1, 12, 6, 8);
+    fill(g, b, 6, 7, 6, 1);
+    fill(g, b, 12, 6, 1, 1);
+  },
+  branch: (g, [a, b]) => {
+    for (let i = 0; i < 6; i++) fill(g, a, 2 + i * 2, 12 - i * 2, 3, 3);
+    fill(g, b, 6, 6, 2, 3);
+    fill(g, b, 10, 9, 3, 2);
+  },
+  log: (g, [a, b]) => {
+    fill(g, a, 3, 5, 11, 7);
+    g.fillStyle(b, 1);
+    g.fillEllipse(4, 8, 5, 7);
+  },
+  grain: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillEllipse(8, 8, 14, 14);
+    g.fillStyle(b, 1);
+    g.fillEllipse(8, 8, 9, 9);
+    g.fillStyle(a, 1);
+    g.fillEllipse(8, 8, 4, 4);
+  },
+  trumpet: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillTriangle(3, 4, 13, 4, 8, 15);
+    fill(g, b, 3, 3, 10, 2);
+  },
+  cap: (g, [a, b]) => {
+    fill(g, b, 7, 8, 3, 6);
+    g.fillStyle(a, 1);
+    g.fillEllipse(8, 7, 13, 8);
+  },
+  feather: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillEllipse(8, 7, 8, 12);
+    fill(g, b, 8, 2, 1, 13);
+  },
+  shell: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillEllipse(8, 10, 13, 11);
+    fill(g, b, 2, 9, 12, 1); // broken open, and open from the outside
+    fill(g, b, 6, 11, 2, 2);
+  },
+  arrows: (g, [a, b]) => {
+    for (const x of [4, 10]) {
+      fill(g, a, x, 3, 2, 12);
+      g.fillStyle(b, 1);
+      g.fillTriangle(x - 2, 4, x + 4, 4, x + 1, 0);
+      fill(g, b, x - 1, 11, 4, 1);
+    }
+  },
 };
 
 // [shape, ink]. Ink names a pair in COLORS.icon, so retinting every wooden thing at
@@ -98,6 +152,17 @@ const ICONS = {
   pitch: ['pot', 'pitch'],
   canvas: ['sheet', 'cloth'],
   provisions: ['sack', 'food'],
+  brooktrout: ['fish', 'trout'],
+  perch: ['fish', 'perch'],
+  bluegill: ['fish', 'bluegill'],
+  oakbranch: ['branch', 'wood'],
+  oaklog: ['log', 'wood'],
+  heartwood: ['grain', 'heart'],
+  blacktrumpet: ['trumpet', 'soot'],
+  oystermushroom: ['cap', 'bone'],
+  heronfeather: ['feather', 'ash'],
+  eggshell: ['shell', 'shell'],
+  greyarrow: ['arrows', 'ash'],
   bread: ['loaf', 'food'],
   candle: ['taper', 'bone'],
   flint: ['shard', 'stone'],

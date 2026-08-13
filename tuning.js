@@ -240,6 +240,13 @@ export const COLORS = {
     herb: [0x5d7a4a, 0x86a466],
     glass: [0x7f9fa8, 0xbcd4d9],
     bone: [0xa8a292, 0xd9d3c4],
+    trout: [0x6d6a4a, 0xb4553f],
+    perch: [0xb08a34, 0x5c4a22],
+    bluegill: [0x4c6f7a, 0x2c3b46],
+    heart: [0x4a3520, 0x7a5a30],
+    soot: [0x33302f, 0x57514c],
+    ash: [0x8f9298, 0xc2c5cb],
+    shell: [0xa8bfa2, 0x6d8069],
   },
 
   // The minigame UI kit, drawn into the generated 'ui' atlas at boot. Retint here and

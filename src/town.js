@@ -7,6 +7,11 @@ import { MATERIALS } from '../content/materials.js';
 
 const MATERIAL = Object.fromEntries(MATERIALS.map((m) => [m.id, m]));
 
+// Everything any building anywhere asks for, derived rather than written down, so a
+// material stops being a building material by leaving the last cost that names it. A
+// pack of trout is not an answer to what the chapel wants, and the panel below says so.
+const BUILDABLE = new Set(BUILDINGS.flatMap((b) => b.stages.flatMap((s) => Object.keys(s.cost || {}))));
+
 const held = new Map(MATERIALS.map((m) => [m.id, m.start]));
 const level = new Map(BUILDINGS.map((b) => [b.id, b.level]));
 // part-paid stages persist: you can bring four timber now and the rest tomorrow
@@ -139,7 +144,8 @@ export function statusLines(id) {
     lines.push('Nothing more is wanted here.');
   } else {
     lines.push(`Still wanted: ${list(Object.entries(rem))}.`);
-    lines.push(`You are carrying: ${list(stock().filter(([, n]) => n > 0)) || 'nothing useful'}.`);
+    const useful = stock().filter(([m, n]) => n > 0 && BUILDABLE.has(m));
+    lines.push(`You are carrying: ${list(useful) || 'nothing useful'}.`);
   }
   return lines;
 }
