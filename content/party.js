@@ -54,7 +54,7 @@ export const PARTY = [
     // His two Animal Handling points came onto Woodcraft in the merge. Perception stays
     // where it was; the spare point went to Woodcutting because he is the one who picks
     // the stand, and nobody else in town has a point of it.
-    skills: { woodcraft: 4, perception: 1, woodcutting: 1 },
+    skills: { woodcraft: 3, perception: 2, woodcutting: 1 },
     fears: ['thedead'], // the grave-pin in their pack that they have mentioned to nobody
     // no combat: he knows the Greywood, he does not fight it. The first job is day work
     // for that reason.
