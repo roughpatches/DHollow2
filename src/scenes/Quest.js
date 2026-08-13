@@ -164,7 +164,8 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowdown' || k === 's') this.row = 1;
       else if (k === 'arrowleft' || k === 'a') this.row = 0;
       else if (k === 'arrowright' || k === 'd') this.row = 1;
-      else if (k === 'enter' || k === ' ' || k === 'e') run.choose(this.row);
+      // the cursor belongs to the card it is on: whatever is drawn next starts at its top
+      else if (k === 'enter' || k === ' ' || k === 'e') { run.choose(this.row); this.row = 0; }
       else if (k === 'escape') run.abandon();
     } else if (k === 'e' || k === ' ' || k === 'enter') {
       if (this.approaching) return; // it has not got here yet

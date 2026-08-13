@@ -475,24 +475,125 @@ export const ENCOUNTERS = [
     ],
   },
   {
-    id: 'fenherbs',
-    name: '[Placeholder — the Alchemy way]',
+    // The other way through the fork, written out the same way. Both ways can turn up
+    // the same poacher: grey feathers under the bank here, a shot bird in the reeds
+    // there, and the one flag either of them raises.
+    id: 'mushrooms',
+    name: 'The mushroom copse',
     nature: 'gather',
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
     read: { skill: 'alchemy', line: '[Placeholder Text]' },
     harvest: 'alchemy',
-    check: {
-      skill: 'alchemy',
-      dc: 12,
-      held: '[Placeholder Text]',
-      lost: '[Placeholder Text]',
-    },
-    spoils: { pitch: [1, 2] },
+    check: null, // the beats carry their own rolls, one per way in
+    spoils: {}, // and their own spoils: the hollow gives up nothing to walking past it
     xp: [10, 16],
-    con: [-1, 0],
+    con: [0, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'hollow',
+        text: [
+          'The path drops into a hollow where the light goes green and stops moving.',
+          'A fallen oak lies across it, half sunk into the leaf mould, and the whole length of it is furred with mushrooms.',
+        ],
+        then: 'crowded',
+      },
+      {
+        id: 'crowded',
+        text: [
+          "Hundreds. Pale caps the size of a fist, crowded so close along the trunk that there's no bark left showing.",
+          '[Placeholder Text]', // companion bark — recognition, or appetite
+        ],
+        then: 'ways',
+      },
+      {
+        id: 'ways',
+        choose: [
+          {
+            text: '[Sort the good from the bad.]',
+            skill: 'alchemy',
+            dc: 15,
+            then: 'cutting',
+          },
+          {
+            text: '[Read the ground around the hollow.]',
+            skill: 'woodcraft',
+            dc: 10,
+            then: 'rim',
+          },
+          {
+            text: '[Leave them where they are.]',
+            then: 'past',
+          },
+        ],
+      },
+
+      // the Alchemy way
+      {
+        id: 'cutting',
+        text: [
+          '{skillActor} kneels into the mould and starts cutting stems.',
+          'Every cut gets turned to the light and watched.',
+        ],
+        result: { hit: 'sorted', miss: 'blistered' },
+      },
+      {
+        id: 'sorted',
+        text: [
+          'The cut flesh bruises blue on some of them.',
+          '{skillActor} takes the ones that stay white, and buries the rest deep enough that nothing else finds them.',
+        ],
+        spoils: { pitch: [2, 3] },
+      },
+      {
+        id: 'blistered',
+        text: [
+          "{skillActor} cuts, and watches, and can't see it. The light down here is green and everything already looks dark.",
+          'They throw the mushroom away, just to be certain.',
+          "As you proceed back down the path, it does not take long before {skillActor}'s hands are covered in ugly purple bumps.",
+        ],
+        con: -3, // what it costs. Flat, like every other number in this table.
+      },
+
+      // the Woodcraft way
+      {
+        id: 'rim',
+        text: ['{skillActor} leaves the trunk alone and walks the rim of the hollow instead.'],
+        result: { hit: 'snare', miss: 'wire' },
+      },
+      {
+        id: 'snare',
+        text: [
+          'The mould has been walked on. Not by deer.',
+          'Twenty feet in, a snare line strung between two saplings at knee height. It has been there long enough to rust.',
+          "There's a cold fire under the bank, and beside it a bundle of feathers, trimmed at the quill and tied off.",
+          'Grey, most of them.',
+          '[Placeholder Text]', // companion bark — the realisation
+        ],
+        spoils: { nails: [2, 4] },
+        flag: 'poacher-clue', // the same clue the heron's second bird raises
+      },
+      {
+        id: 'wire',
+        text: [
+          '{skillActor} walks the rim and comes back with a coil of wire and a broken arrow.',
+          "A broken arrow tells you somebody stood here. It doesn't tell you when, or how many, or what for.",
+        ],
+        spoils: { nails: [1, 2] }, // salvage, and nothing to make of it
+      },
+
+      // and the way past
+      {
+        id: 'past',
+        text: [
+          'You keep to the path and leave the hollow to itself.',
+          'The light stays green until the ground comes back up.',
+        ],
+      },
+    ],
   },
   {
     id: 'secondcut',

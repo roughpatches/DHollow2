@@ -49,7 +49,7 @@ export const QUESTS = [
     // through the wood, fell another, and then whatever Aldis has been walking toward.
     line: [
       'firstcut',
-      ['heron', 'fenherbs'],
+      ['heron', 'mushrooms'],
       'secondcut',
       'aldiswood',
     ],
