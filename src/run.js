@@ -169,6 +169,12 @@ export function terrainOf(q) {
   return (zone && zone.terrain) || null;
 }
 
+// the painted landscape a job is walked against, if its zone has one
+export function backdropOf(q) {
+  const zone = q && q.at && ZONE[q.at];
+  return (zone && zone.backdrop) || null;
+}
+
 // which skills read a given ground
 export function readsGround(terrain) {
   return terrain ? SKILLS.filter((t) => t.terrain === terrain) : [];

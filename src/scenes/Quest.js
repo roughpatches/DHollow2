@@ -216,7 +216,7 @@ export default class Quest extends Phaser.Scene {
     this.row = 0;
     this.activity = null;
     this.walk?.destroy();
-    this.walk = createWalk(this, this.bands().walk, r.party, when);
+    this.walk = createWalk(this, this.bands().walk, r.party, when, run.backdropOf(this.job));
     this.con = null;
     this.shownAt = -1;
     this.approaching = false;
