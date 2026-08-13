@@ -14,14 +14,31 @@
 //   read     — the skill that can spot this kind coming at a fork, and what they say.
 //              A kind with no read is one nobody can see coming. Whoever has the most
 //              points in it is the one who speaks.
-//   harvest  — the skill this work is done with. Every point the walking party has in
-//              it adds skillYieldPerPoint to the spoils, so who you take decides what
-//              you carry home. A kind with no harvest pays the same to anybody.
+//   harvest  — the skill this work is done with, and the gate on it. A party with no
+//              points in it at all cannot work the node: they walk past, and it is not
+//              rolled, played or paid. With a point or more, every one of them adds
+//              skillYieldPerPoint to what comes off it, so who you take decides both
+//              whether you can do the work and what you carry home from it. A kind with
+//              no harvest is open to anybody and pays them all the same.
+//              A kind whose beats hand the party a choice is exempt: that is a scene
+//              rather than a job, so it plays, and the ways through it that name a
+//              skill nobody has are what close instead. Write one way needing nothing
+//              and there is always a way out of a scene.
 //   check    — a roll against a difficulty, in the manner of the table: the party's
 //              best at the skill rolls a die and adds their points, and needs the DC.
 //              `held` and `lost` are the line said either way. What holding and losing
 //              are worth is in tuning.js, not here.
-//   spoils   — materials taken, [least, most] each. Rolled per node.
+//   spoils   — materials taken, [least, most] each. Rolled per node. A node that always
+//              hands over the same things names them here.
+//   draw     — a yield drawn rather than listed, for a node where what you get is a
+//              question of luck: `count` things come off it, [least, most], and each one
+//              of them is drawn against `odds`. Odds are drop rates written the way a
+//              designer says them — 50, 30, 20 — and are read against each other, so
+//              they need not add up to a hundred. What is written here is the base rate,
+//              which is what a party who knows nothing about the work would see. Points
+//              in `harvest` do two things to it: more draws, and a table bent toward its
+//              scarce end. The bend never reorders a table — the common row stays the
+//              common one — and an even table is left even. See tuning.js.
 //   xp       — experience, [least, most].
 //   con      — what it does to the party's constitution, [least, most]. Negative takes
 //              and positive gives, so a spring or a dry barn can be written as a kind
@@ -284,7 +301,12 @@ export const ENCOUNTERS = [
     read: null, // never a fork, so nothing is ever said about it on the way in
     harvest: 'fishing',
     check: null, // the rod is the test here, not a roll
-    spoils: { provisions: [3, 5] },
+    spoils: {},
+    // The Greywood's water, at the base rates. One fish is what a cast is worth to
+    // somebody with a single point of Fishing on it; everything above that is what the
+    // party knows and how the rod was worked, both of them in `take` in src/run.js. A
+    // cast worked badly usually comes home with nothing, and a botched one nearly always.
+    draw: { count: [1, 1], odds: { bluegill: 50, perch: 30, brooktrout: 20 } },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
@@ -321,7 +343,9 @@ export const ENCOUNTERS = [
     // noise the bird makes. `then` is the next beat, `toss` is two of them and a coin,
     // `result` reads back the roll made on the way in, and `choose` hands it to the
     // player. `spoils`, `con` and `flag` are what walking through this beat did. A beat
-    // with no way on is the end of the encounter.
+    // with no way on is the end of the encounter. A beat can carry a `draw` table as
+    // well, for a way through whose yield is luck rather than a settled thing; the nest
+    // below has none, because what it gives up is decided by which way you came at it.
     beats: [
       {
         id: 'alders',
@@ -402,7 +426,8 @@ export const ENCOUNTERS = [
         text: [
           "Past the trunk, back in the reeds, is the second bird. Three arrows in it, set low on the body, where they wouldn't spoil the plumage.",
         ],
-        spoils: { canvas: [1, 2] },
+        // the plumage the poacher was shooting for, and the arrows they left in it
+        spoils: { heronfeather: [2, 4], greyarrow: [1, 3] },
         flag: 'poacher-clue', // somebody is shooting the Greywood for feathers
         then: 'notfollowed',
       },
@@ -437,6 +462,7 @@ export const ENCOUNTERS = [
           'Pale green, thick as a thumbnail, scattered across the ground. Empty.',
           'You count four before you stop counting.',
         ],
+        spoils: { eggshell: [2, 4] }, // as many as anybody stayed long enough to pick up
         then: 'realising',
       },
       {
@@ -566,7 +592,9 @@ export const ENCOUNTERS = [
           'The cut flesh bruises blue on some of them.',
           '{skillActor} takes the ones that stay white, and buries the rest deep enough that nothing else finds them.',
         ],
-        spoils: { pitch: [2, 3] },
+        // the pale caps off the trunk, and the black ones nobody sees who isn't looking:
+        // an even split, so a good cut is as likely to be one as the other
+        draw: { count: [3, 5], odds: { oystermushroom: 50, blacktrumpet: 50 } },
       },
       {
         id: 'blistered',
@@ -627,7 +655,11 @@ export const ENCOUNTERS = [
     read: null, // never a fork, so nothing is ever said about it on the way in
     harvest: 'woodcutting',
     check: null,
-    spoils: { timber: [3, 5] },
+    spoils: {},
+    // The tree, broken up, at the Greywood's base rates: mostly limb wood off the
+    // storm-torn shoulder, sometimes trunk wood, and now and then the sound dark core
+    // the beat below is looking at when it says so.
+    draw: { count: [3, 5], odds: { oakbranch: 50, oaklog: 30, heartwood: 20 } },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
