@@ -284,11 +284,9 @@ export const ENCOUNTERS = [
     read: { skill: 'fishing', line: '[Placeholder Text]' },
     harvest: 'fishing',
     check: null, // the rod is the test here, not a roll
-    // what comes out of the water, by name. The rod decides how much of it: see `take`
-    // in src/run.js, which the three fish are multiplied by the same as anything else.
-    spoils: {
-      provisions: [3, 5], brooktrout: [1, 3], perch: [0, 2], bluegill: [0, 2],
-    },
+    // what comes out of the water, by name and by nothing else. The rod decides how much
+    // of it: see `take` in src/run.js. A cast botched badly enough catches nothing.
+    spoils: { brooktrout: [1, 3], perch: [0, 2], bluegill: [0, 2] },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
@@ -407,7 +405,7 @@ export const ENCOUNTERS = [
           "Past the trunk, back in the reeds, is the second bird. Three arrows in it, set low on the body, where they wouldn't spoil the plumage.",
         ],
         // the plumage the poacher was shooting for, and the arrows they left in it
-        spoils: { canvas: [1, 2], heronfeather: [2, 4], greyarrow: [1, 3] },
+        spoils: { heronfeather: [2, 4], greyarrow: [1, 3] },
         flag: 'poacher-clue', // somebody is shooting the Greywood for feathers
         then: 'notfollowed',
       },
@@ -573,7 +571,7 @@ export const ENCOUNTERS = [
           '{skillActor} takes the ones that stay white, and buries the rest deep enough that nothing else finds them.',
         ],
         // the pale caps off the trunk, and the black ones nobody sees who isn't looking
-        spoils: { pitch: [2, 3], oystermushroom: [2, 4], blacktrumpet: [1, 3] },
+        spoils: { oystermushroom: [2, 4], blacktrumpet: [1, 3] },
       },
       {
         id: 'blistered',
@@ -636,9 +634,7 @@ export const ENCOUNTERS = [
     check: null,
     // the tree, broken up: limb wood off the storm-torn shoulder, trunk wood out of the
     // fell, and the sound dark core the beat below is looking at when it says so
-    spoils: {
-      timber: [3, 5], oakbranch: [1, 3], oaklog: [1, 2], heartwood: [0, 1],
-    },
+    spoils: { oakbranch: [1, 3], oaklog: [1, 2], heartwood: [0, 1] },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],

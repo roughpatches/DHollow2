@@ -151,7 +151,6 @@ const ICONS = {
   nails: ['spikes', 'iron'],
   pitch: ['pot', 'pitch'],
   canvas: ['sheet', 'cloth'],
-  provisions: ['sack', 'food'],
   brooktrout: ['fish', 'trout'],
   perch: ['fish', 'perch'],
   bluegill: ['fish', 'bluegill'],

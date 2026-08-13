@@ -15,9 +15,8 @@ export const MATERIALS = [
   { id: 'nails', name: 'Nails', start: 12, body: ['[Placeholder Text]'] },
   { id: 'pitch', name: 'Pitch', start: 0, body: ['[Placeholder Text]'] },
   { id: 'canvas', name: 'Canvas', start: 0, body: ['[Placeholder Text]'] },
-  // what the first job's fishing node carries home. Gregorious asked for timber and
-  // provisions; nothing is repaired with these yet.
-  { id: 'provisions', name: 'Provisions', start: 0, body: ['[Placeholder Text]'] },
+  // Everything above is what a building is repaired with, and comes off the road's own
+  // encounters. Everything below is what a node of the first job hands over by name.
 
   // --- the stream -----------------------------------------------------------
   {
