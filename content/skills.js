@@ -8,6 +8,10 @@
 //                activity, so a new skill needs no change anywhere else.
 //   draws      — quest tags this skill is drawn to. A character with any points in it
 //                is keener to come on work tagged this way, and needs less of a bond.
+//   terrain    — the ground this skill reads, matched against a zone's terrain in
+//                content/places.js. Every point somebody has in it is worth
+//                conPerTerrainPoint constitution to a party setting out on that ground.
+//                A skill with no terrain is worth the same everywhere.
 //   unlocks    — extra options the skill puts in front of the player, one line each.
 //   body       — what the skill is, in the world's voice. Yours to write.
 // What a point is worth is one number in tuning.js, the same for every skill: it adds
@@ -37,6 +41,7 @@ export const SKILLS = [
     name: 'Woodcraft',
     activities: ['Shaping', 'Joinery', 'Carving', 'Calming'],
     draws: ['forest', 'ruin'],
+    terrain: 'forest',
     unlocks: [
       'Read a tree\'s lean before the first cut.',
       'Salvage a botched cut instead of losing the stock.',
@@ -66,6 +71,7 @@ export const SKILLS = [
     name: 'Sailing',
     activities: ['Rowing', 'Rigging', 'Navigation'],
     draws: ['water', 'coast'],
+    terrain: 'water',
     unlocks: [
       'Hold a course in weather that would beach a landsman.',
       'Judge a hull\'s soundness before boarding it.',

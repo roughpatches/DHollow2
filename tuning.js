@@ -150,6 +150,11 @@ export const TUNING = {
   checkFailKeep: 0.5, // a check lost keeps this much of what was there to take
   checkFailHurt: 2, // and costs this much on top of the node's own wounds
 
+  // What knowing the ground is worth. Every point the party has in a skill whose
+  // `terrain` matches the zone's is this much constitution before they set out — the
+  // reason to take the woodsman into the wood. Zero turns the whole thing off.
+  conPerTerrainPoint: 1,
+
   maxLevel: 10,
   conPerLevel: 3, // added to a character's own constitution for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate

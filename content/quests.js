@@ -19,7 +19,8 @@
 //   ready — a second flag, for a job that is known about but not yet agreed to.
 //   sets  — a flag raised the first time it is walked to the end.
 //   must  — character ids who have to be on it. Somebody the job will not go without.
-//   at    — the Map tab entry it is set out from, instead of Gregorious's board.
+//   at    — the id of the place it is set out from, instead of Gregorious's board.
+//           That place's terrain is the ground the job is walked on. See content/places.js.
 //   check — the roll the last node asks for, in the same shape encounters use: a skill,
 //           a DC, and the line said whether it is held or lost. The job's own test,
 //           standing in front of the goal, rather than whatever the road threw up.

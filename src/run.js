@@ -8,6 +8,7 @@
 
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
+import { PLACES } from '../content/places.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
 import {
@@ -21,6 +22,8 @@ import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
 
 const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
+// The zones a job can be walked in. Only a place a job sets out from needs an id.
+const ZONE = Object.fromEntries(PLACES.filter((p) => p.id).map((p) => [p.id, p]));
 
 // Nothing is fought by daylight. What comes out of the ground and what follows a party
 // home only does either after dark, so a day run draws from the table with the combat
@@ -155,6 +158,28 @@ export function mixAt(when) {
     .join('   ');
 }
 
+// --- ground ----------------------------------------------------------------
+// A job is walked somewhere, and somewhere is made of something. A party carrying the
+// skill that reads that ground sets out with more in them than one that does not — which
+// is the whole of why you take the woodsman into the wood. A job handed out over a bar
+// rather than set out for from a place has no ground yet and this is worth nothing to it.
+
+export function terrainOf(q) {
+  const zone = q && q.at && ZONE[q.at];
+  return (zone && zone.terrain) || null;
+}
+
+// which skills read a given ground
+export function readsGround(terrain) {
+  return terrain ? SKILLS.filter((t) => t.terrain === terrain) : [];
+}
+
+// and what a set of people are worth on it, in constitution
+export function groundCon(ids, terrain) {
+  return readsGround(terrain).reduce((n, t) => n + scoreOf(ids, t.id), 0)
+    * TUNING.conPerTerrainPoint;
+}
+
 // --- starting --------------------------------------------------------------
 
 export function start(id, when, party) {
@@ -166,7 +191,8 @@ export function start(id, when, party) {
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
     .filter((id, i, all) => all.indexOf(id) === i);
   const nodes = quest.line ? authored(quest.line) : drawn(quest);
-  const con = conTotal(who);
+  // everyone's own constitution, and what knowing this ground adds to it
+  const con = conTotal(who) + groundCon(who, terrainOf(quest));
   run = {
     quest, when: at, party: who, nodes, at: -1, state: 'running', bias: null,
     spoils: {}, xp: 0, con, conMax: con,
@@ -504,14 +530,30 @@ export function placeLines(id) {
   if (!story.ok(q)) return ['Nothing here yet.'];
   const stop = blockers(id);
   const head = `${q.label} — ${q.size} work, ${q.when === 'any' ? 'day or night' : q.when + ' only'}.`;
-  if (stop.length) return [head, q.goal, ...stop];
-  return [head, q.goal, 'Ready. [Enter] to set out.'];
+  const ground = groundLine(q, walking().map((c) => c.id));
+  if (stop.length) return [head, q.goal, ...(ground ? [ground] : []), ...stop];
+  return [head, q.goal, ...(ground ? [ground] : []), 'Ready. [Enter] to set out.'];
 }
 
 // a roll, said the way a table says it: die, what the skill added, and what it came to
 export function checkLine(c) {
   return `${c.skill.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
     + ` = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
+}
+
+// What the ground is worth to a given crew, said where the crew is picked. Null when the
+// job has no ground, so nothing is said about nothing.
+export function groundLine(q, ids) {
+  const terrain = terrainOf(q);
+  if (!terrain) return null;
+  const skills = readsGround(terrain);
+  if (!skills.length) return `${terrain} ground. Nothing anybody knows reads it.`;
+  const score = skills.reduce((n, t) => n + scoreOf(ids, t.id), 0);
+  const named = skills.map((t) => t.name).join(' and ');
+  const ground = `${terrain[0].toUpperCase()}${terrain.slice(1)} ground`;
+  return score
+    ? `${ground} — ${named} ${score} between you, and ${groundCon(ids, terrain)} constitution for it.`
+    : `${ground} — nobody coming has a point of ${named}, and it is worth ${TUNING.conPerTerrainPoint} apiece out there.`;
 }
 
 export function harvestLine(h) {

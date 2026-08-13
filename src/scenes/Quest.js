@@ -376,6 +376,11 @@ export default class Quest extends Phaser.Scene {
           : 'Something out there will have to be fought. Nobody coming can.',
         TUNING.questBodySize, armed ? COLORS.menuText : COLORS.menuMapFolk, this.wide).height + 10;
     }
+    // the ground, and what this crew is worth on it — half the reason to take somebody
+    const ground = run.groundLine(this.job, this.crew());
+    if (ground) {
+      y += this.text(this.left, y, ground, TUNING.questBodySize, COLORS.menuMapMark, this.wide).height + 10;
+    }
     // the job's own roll is named before the crew is picked, because it is the reason
     // to pick one crew over another
     if (this.job.check) {
