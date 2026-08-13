@@ -1,9 +1,12 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
+import { SKILLS } from '../../content/skills.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
 import {
-  roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, nameOf, fill, YOU,
+  roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf, isCombat,
+  nameOf, fill, YOU,
 } from '../party.js';
+import { buildIcons, iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf } from '../frames.js';
 import { markKey } from '../textures.js';
@@ -24,6 +27,7 @@ export default class Quest extends Phaser.Scene {
 
   create() {
     this.sizeTo(null);
+    buildIcons(this); // the column down the side of the road draws these
 
     this.layer = this.add.container().setDepth(29000).setVisible(false);
     this.open_ = false;
@@ -251,7 +255,8 @@ export default class Quest extends Phaser.Scene {
   }
 
   // The crawl is three bands inside the panel: the constitution bar across the top, the
-  // party walking in the middle, the trail along the bottom.
+  // party walking in the middle, the trail along the bottom. The middle band gives up a
+  // column at its left edge to the skills, and the road starts where that stops.
   bands() {
     const b = this.box;
     const pad = padOf('band');
@@ -259,9 +264,11 @@ export default class Quest extends Phaser.Scene {
     const top = barY + TUNING.questBarHeight + 54; // room under the bar for who is walking
     const bottom = b.y + b.h - TUNING.questTrailHeight;
     const trailTop = bottom + pad.t + 4; // the ring around the goal reaches above its box
+    const col = TUNING.questSkillWidth;
     return {
       bar: { x: this.left, y: barY, w: this.wide, h: TUNING.questBarHeight },
-      walk: { x: b.x, y: top, w: b.w, h: bottom - top },
+      skills: { x: b.x, y: top, w: col, h: bottom - top },
+      walk: { x: b.x + col, y: top, w: b.w - col, h: bottom - top },
       // the last line of the band belongs to the controls, so the trail stops above it
       trail: { x: this.left, y: trailTop, w: this.wide, h: this.foot - 22 - trailTop },
     };
@@ -473,6 +480,7 @@ export default class Quest extends Phaser.Scene {
     if (r.state === 'running' && r.phase === 'activity' && !this.approaching) this.startActivity();
 
     this.conBar(r, band.bar);
+    this.skills(r, band.skills);
     this.trail(r, band.trail);
 
     if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
@@ -518,6 +526,36 @@ export default class Quest extends Phaser.Scene {
     this.text(rect.x + rect.w, rect.y + rect.h + 8,
       low ? 'Nearly spent. At nothing they turn for home with half of it.' : 'What the road has left them.',
       TUNING.questHintSize, low ? COLORS.menuMapFolk : COLORS.menuDim).setOrigin(1, 0);
+  }
+
+  // Down the side of the road: what the party is worth at each thing the road might ask
+  // of it, one number per skill, added up across everybody walking. It is the sum the
+  // crew screen ends on, kept in front of the player for the whole run instead of being
+  // read once and set out on. A skill nobody has is still on the list, because what the
+  // party cannot do is worth knowing before the node that asks for it.
+  skills(r, rect) {
+    const night = r.when === 'night';
+    const g = this.add.graphics();
+    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 1);
+    g.fillRect(rect.x, rect.y, rect.w, rect.h);
+    g.lineStyle(1, night ? COLORS.questNightEdge : COLORS.menuRule, 1);
+    g.lineBetween(rect.x + rect.w - 0.5, rect.y, rect.x + rect.w - 0.5, rect.y + rect.h);
+    this.layer.add(g);
+
+    // spread down the column, however many skills there turn out to be
+    const step = Math.min(TUNING.questSkillStep, rect.h / SKILLS.length);
+    let y = rect.y + (rect.h - step * (SKILLS.length - 1)) / 2;
+    for (const t of SKILLS) {
+      const n = scoreOf(r.party, t.id);
+      // centred on its own half of the column: the shapes are different widths and left
+      // against a margin they read as a ragged edge rather than a list
+      const icon = this.add.image(rect.x + 26, y, iconKeyFor(t.icon)).setOrigin(0.5);
+      icon.setScale(TUNING.questSkillScale).setAlpha(n ? 1 : 0.3);
+      this.layer.add(icon);
+      this.text(rect.x + rect.w - 10, y - 10, `${n}`, TUNING.questBodySize,
+        n ? COLORS.menuAccent : COLORS.menuRule).setOrigin(1, 0);
+      y += step;
+    }
   }
 
   // The trail along the bottom: what has been walked, what is being walked, and how many
@@ -608,10 +646,11 @@ export default class Quest extends Phaser.Scene {
     this.scrim = this.add.graphics().setDepth(-100);
     this.scrim.fillStyle(COLORS.menuFill, 0.82);
     this.scrim.fillRect(band.x, band.y, band.w, band.h);
+    // the engine works on the road, not in the column beside it
     this.activity = engineFor(e.activity, this, {
-      x: this.left + 40,
+      x: band.x + 40,
       top: band.y + 34,
-      barW: Math.min(430, this.wide - 80),
+      barW: Math.min(430, band.w - 80),
     });
     this.activity.start((judgments) => {
       const failed = this.activity?.failed;
@@ -627,7 +666,7 @@ export default class Quest extends Phaser.Scene {
   // just the name of the work over the top of it; the engine draws everything else
   activityHead(r, rect) {
     const e = run.kindOf(r.nodes[r.at].kind);
-    this.text(this.left, rect.y + 4, `${r.at + 1}. ${e.name} — ${e.activity}`,
+    this.text(rect.x + 12, rect.y + 4, `${r.at + 1}. ${e.name} — ${e.activity}`,
       TUNING.questBodySize + 2, COLORS.menuText);
   }
 
