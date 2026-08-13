@@ -228,22 +228,6 @@ export const INVENTORY = [
   },
 ];
 
-export const COMPANIONS = [
-  {
-    label: 'Pim',
-    note: 'Eager — refuse',
-    body: [
-      'Nine years old, counts crows, misses nothing, and has decided you are leaving and wants to see the gate when you do.',
-      'Follows you as far as the well and then stops, because the well is where Mam\'s rule is.',
-      'Taking this child anywhere is a decision the village would not forgive, and Pim knows more about the treeline than any adult here will admit to knowing.',
-    ],
-  },
-  {
-    label: 'Warden Ilse Marrow',
-    note: 'Refused',
-    body: [
-      'Will not leave the gate. That is not stubbornness, it is the entire job, and she has carried back enough to have stopped debating it.',
-      'She has offered a different thing instead: if the bell rings and nobody is pulling the rope, she will come to you. That is a promise from a woman who does not make them.',
-    ],
-  },
-];
+// Who would walk out with you, and who would not. Empty while the cast is written: a
+// name here is a person the player has already met and formed a view about.
+export const COMPANIONS = [];
