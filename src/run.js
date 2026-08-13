@@ -365,6 +365,13 @@ function checkOf(node, e) {
   return { ...check(run.party, spec.skill, spec.dc), held: spec.held, lost: spec.lost };
 }
 
+// An encounter that hands the party a choice is a scene rather than a job: it is walked
+// through whatever anybody knows, and it is the ways through it that close. Everything
+// else is work, and work nobody can do is work the party walks past.
+function isScene(e) {
+  return (e.beats || []).some((b) => b.choose);
+}
+
 function resolve(node) {
   const e = node.only ? KIND[node.only] : weighted(run.bias);
   run.bias = null;
@@ -372,6 +379,17 @@ function resolve(node) {
   node.kind = e.id;
   node.conBefore = run.con;
   node.harvest = harvestOf(node, e);
+
+  // Nobody on the run has a single point in the work this node is. They do not get to
+  // try it and fail at it — they stand and look at it and go on. Nothing is rolled,
+  // nothing is taken, nothing is learned, and the walking is all it costs.
+  if (node.harvest && !node.harvest.score && !isScene(e)) {
+    node.passed = true;
+    node.check = null;
+    settle(null);
+    return;
+  }
+
   node.check = checkOf(node, e);
 
   // A node written out beat by beat plays those beats first and settles at the end of
@@ -411,6 +429,14 @@ function toBeat(node, id) {
   if (b.con) node.conBeat += b.con;
   if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
   if (b.draw) node.beatDraw = b.draw; // the beat walked into decides which table, if any
+
+  // Every way on closed to this party and no plain way past: there is nothing here they
+  // can do, so the scene ends where it stands. Content that always writes one way through
+  // needing nothing never reaches this.
+  if (b.choose && b.choose.every(shutTo)) {
+    node.passed = true;
+    outOfBeats(node);
+  }
 }
 
 // E on a beat: the next one it names, one of two if it tosses for it, or the one the
@@ -432,11 +458,18 @@ export function advance() {
 // activity, in which case the beats were the walk up to it and the player takes the
 // controls now. That is how a node gets words in front of its minigame.
 function outOfBeats(node) {
-  if (hasEngine(KIND[node.kind].activity)) {
+  if (!node.passed && hasEngine(KIND[node.kind].activity)) {
     run.phase = 'activity';
     return;
   }
   settle(null);
+}
+
+// A way through a scene that names work nobody on the run knows is a way the party
+// cannot take. The words stay on the card — you are told what you are not equipped for —
+// and the option simply will not answer. A way that names no skill is open to anybody.
+export function shutTo(option) {
+  return !!(option && option.skill) && !scoreOf(run.party, option.skill);
 }
 
 // An option that names a skill is rolled as it is taken, by whoever in the party is
@@ -446,7 +479,7 @@ export function pickBeat(i) {
   if (!run || run.phase !== 'beat') return run;
   const node = run.nodes[run.at];
   const opt = node.beat.choose && node.beat.choose[i];
-  if (!opt) return run;
+  if (!opt || shutTo(opt)) return run;
   if (opt.skill) {
     node.actorId = bestAt(run.party, opt.skill);
     node.check = check(run.party, opt.skill, opt.dc);
@@ -486,13 +519,15 @@ export function settle(played) {
   // What the encounter pays and whatever the beats picked up on the way through it, both
   // of them a fixed list, and then whatever came off a draw table on top of that.
   const paid = {};
-  for (const [m, range] of Object.entries({ ...e.spoils, ...(node.beatSpoils || {}) })) {
-    paid[m] = Math.round(roll(range) * take);
-  }
-  const table = node.beatDraw || e.draw;
-  if (table) {
-    const tilt = tiltOf(node.harvest ? node.harvest.score : 0);
-    for (const [m, n] of Object.entries(offTable(table, take, tilt))) paid[m] = (paid[m] || 0) + n;
+  if (!node.passed) {
+    for (const [m, range] of Object.entries({ ...e.spoils, ...(node.beatSpoils || {}) })) {
+      paid[m] = Math.round(roll(range) * take);
+    }
+    const table = node.beatDraw || e.draw;
+    if (table) {
+      const tilt = tiltOf(node.harvest ? node.harvest.score : 0);
+      for (const [m, n] of Object.entries(offTable(table, take, tilt))) paid[m] = (paid[m] || 0) + n;
+    }
   }
 
   node.spoils = {};
@@ -503,7 +538,7 @@ export function settle(played) {
       give(m, n);
     }
   }
-  node.xp = Math.round(roll(e.xp)
+  node.xp = node.passed ? 0 : Math.round(roll(e.xp)
     * (night ? TUNING.questNightXp : 1)
     * (node.check && node.check.pass ? TUNING.checkPassXp : 1));
   run.xp += node.xp;
@@ -512,7 +547,7 @@ export function settle(played) {
   // What the node did to the party, in one number: the road's standing cost, what the
   // encounter itself takes or puts back, how the party bore up in front of it, and how
   // well they did the work. They are kept apart so the readout can say which was which.
-  const taken = roll(e.con);
+  const taken = node.passed ? 0 : roll(e.con); // a node walked past takes nothing but the road
   node.conRoad = -TUNING.questConDecay;
   node.conKind = taken < 0 && night ? -Math.round(-taken * TUNING.questNightCon) : taken;
   node.conCheck = node.check ? (node.check.pass ? TUNING.questConHeld : -TUNING.questConLost) : 0;
@@ -608,6 +643,14 @@ export function groundLine(q, ids) {
 export function harvestLine(h) {
   if (!h || !h.score) return null;
   return `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more out of it.`;
+}
+
+// Why a node gave up nothing: not a failure, an absence. Said in place of the roll and
+// the take, because there was neither.
+export function passedLine(node) {
+  if (!node.passed) return null;
+  const skill = node.harvest ? node.harvest.skill.name : 'this work';
+  return `Nobody walking this knows ${skill}. The party looks at it a while and goes on.`;
 }
 
 // who is walking it and what each of them is worth to the pool — the readout under the

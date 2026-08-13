@@ -150,8 +150,15 @@ export default class Quest extends Phaser.Scene {
       const opts = b.choose;
       if (this.approaching) return; // it has not got here yet
       if (opts) {
-        if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + opts.length) % opts.length;
-        else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % opts.length;
+        // the cursor steps over a way the party cannot take rather than landing on it
+        const step = (d) => {
+          for (let i = 1; i <= opts.length; i++) {
+            const at = (((this.row + d * i) % opts.length) + opts.length) % opts.length;
+            if (!run.shutTo(opts[at])) { this.row = at; return; }
+          }
+        };
+        if (k === 'arrowup' || k === 'w') step(-1);
+        else if (k === 'arrowdown' || k === 's') step(1);
         else if (k === 'enter' || k === ' ' || k === 'e') { run.pickBeat(this.row); this.row = 0; }
         else if (k === 'escape') run.abandon();
       } else if (k === 'e' || k === ' ' || k === 'enter') run.advance();
@@ -618,6 +625,15 @@ export default class Quest extends Phaser.Scene {
     const n = r.nodes[r.at];
     const e = run.kindOf(n.kind);
     const out = [];
+    // work nobody here can do: what the encounter is, and then the walking on
+    const passed = run.passedLine(n);
+    if (passed) {
+      for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
+      out.push([passed, TUNING.questBodySize, COLORS.menuMapFolk]);
+      const con = run.conLines(n);
+      if (con) out.push([con, TUNING.questBodySize, COLORS.menuMapFolk]);
+      return out;
+    }
     if (e.activity) {
       out.push([`${e.activity} — waiting on that engine. For now the party works it out and moves on.`,
         TUNING.questHintSize, COLORS.menuDim]);
@@ -646,6 +662,10 @@ export default class Quest extends Phaser.Scene {
     const n = r.nodes[r.at];
     const b = n.beat;
     const out = [];
+    // the cursor never rests on a way the party cannot take, including the first draw
+    if (b.choose && run.shutTo(b.choose[this.row])) {
+      this.row = Math.max(0, b.choose.findIndex((o) => !run.shutTo(o)));
+    }
     for (const para of b.text || []) {
       if (typeof para === 'string') {
         out.push([fill(para, n.actorId), TUNING.questBodySize, COLORS.menuDim]);
@@ -664,10 +684,17 @@ export default class Quest extends Phaser.Scene {
     }
     (b.choose || []).forEach((o, i) => {
       const on = i === this.row;
-      out.push([`${on ? '>' : ' '} ${fill(o.text)}`, TUNING.questBodySize,
-        on ? COLORS.menuAccent : COLORS.menuDim]);
+      const shut = run.shutTo(o);
+      out.push([`${shut ? '·' : on ? '>' : ' '} ${fill(o.text)}`, TUNING.questBodySize,
+        shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
       if (!o.skill) return;
-      // who would take it and how hard it is, before it is taken rather than after
+      // who would take it and how hard it is, before it is taken rather than after — or,
+      // where nobody could take it, that nobody could
+      if (shut) {
+        out.push([`    ${skillOf(o.skill).name} — nobody walking this has any.`,
+          TUNING.questHintSize, COLORS.menuRule]);
+        return;
+      }
       const who = run.actorFor(o.skill);
       out.push([`    ${skillOf(o.skill).name} DC ${o.dc} — ${nameOf(who)} would try it`,
         TUNING.questHintSize, on ? COLORS.menuText : COLORS.menuRule]);

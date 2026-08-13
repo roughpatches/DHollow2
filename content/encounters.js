@@ -14,9 +14,16 @@
 //   read     — the skill that can spot this kind coming at a fork, and what they say.
 //              A kind with no read is one nobody can see coming. Whoever has the most
 //              points in it is the one who speaks.
-//   harvest  — the skill this work is done with. Every point the walking party has in
-//              it adds skillYieldPerPoint to the spoils, so who you take decides what
-//              you carry home. A kind with no harvest pays the same to anybody.
+//   harvest  — the skill this work is done with, and the gate on it. A party with no
+//              points in it at all cannot work the node: they walk past, and it is not
+//              rolled, played or paid. With a point or more, every one of them adds
+//              skillYieldPerPoint to what comes off it, so who you take decides both
+//              whether you can do the work and what you carry home from it. A kind with
+//              no harvest is open to anybody and pays them all the same.
+//              A kind whose beats hand the party a choice is exempt: that is a scene
+//              rather than a job, so it plays, and the ways through it that name a
+//              skill nobody has are what close instead. Write one way needing nothing
+//              and there is always a way out of a scene.
 //   check    — a roll against a difficulty, in the manner of the table: the party's
 //              best at the skill rolls a die and adds their points, and needs the DC.
 //              `held` and `lost` are the line said either way. What holding and losing
