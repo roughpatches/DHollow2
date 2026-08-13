@@ -17,8 +17,10 @@ const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
 // Skills live here rather than in content/party.js because the player's are chosen in
 // the hut and everyone's could move later; content says what they start as.
+// The name is here for the same reason: everyone else is named in content, and the
+// player is named in the hut, by the player.
 const state = new Map(PARTY.map((c) => [c.id, {
-  level: 1, xp: 0, bond: c.bond || 0, skills: { ...c.skills },
+  level: 1, xp: 0, bond: c.bond || 0, skills: { ...c.skills }, name: c.name,
 }]));
 
 // a misspent or misspelt skill list is a content mistake, and content mistakes are
@@ -65,6 +67,40 @@ export const YOU = PARTY.find((c) => c.you).id;
 // what the hut scene hands back: three skills against the points put on each
 export function setSkills(id, skills) {
   stateOf(id).skills = { ...skills };
+}
+
+// and the name typed in front of it. Everything that shows a name reads it through
+// nameOf, so the player's is not a special case anywhere else.
+export function nameOf(id) {
+  return stateOf(id).name;
+}
+
+export function setName(id, name) {
+  const n = name.trim().slice(0, TUNING.nameMaxLength);
+  if (n) stateOf(id).name = n;
+}
+
+// Everyone is they/them unless their block says otherwise: put `they: 'she'` on a
+// character in content/party.js and the three forms follow from it.
+const PRONOUNS = {
+  they: ['they', 'them', 'their'],
+  he: ['he', 'him', 'his'],
+  she: ['she', 'her', 'her'],
+};
+
+// The tokens any authored line can carry, resolved as the line is shown rather than
+// when it is written: the player has no name until the hut, and who attempts a check
+// is not known until the party is standing in front of it. `actor` is whoever that
+// turned out to be — leave it out and there is nobody to be.
+export function fill(text, actor) {
+  const c = actor ? charOf(actor) : null;
+  const [they, them, their] = PRONOUNS[(c && c.they) || 'they'];
+  return text
+    .split('{playerName}').join(nameOf(YOU))
+    .split('{skillActor}').join(actor ? nameOf(actor) : 'Somebody')
+    .split('{they}').join(they)
+    .split('{them}').join(them)
+    .split('{their}').join(their);
 }
 
 export function charOf(id) {
@@ -190,7 +226,7 @@ export function check(ids, skillId, dc) {
   const die = 1 + Math.floor(Math.random() * TUNING.checkDie);
   const total = die + rank;
   return {
-    name: who ? charOf(who).name : 'Nobody',
+    name: who ? nameOf(who) : 'Nobody',
     you: who === YOU, // 'You roll', not 'You rolls'
     skill: skillOf(skillId),
     rank,
@@ -231,7 +267,7 @@ export function partyRows() {
     const skills = skillsOf(c.id);
     const fears = (c.fears || []).map((f) => FEAR[f]).filter(Boolean);
     return {
-      label: c.name,
+      label: nameOf(c.id),
       note: `Lv ${s.level} · Con ${conOf(c.id)}`,
       body: [
         `Level ${s.level}    Constitution ${conOf(c.id)}    `
@@ -266,7 +302,7 @@ export function skillRows() {
         `A point adds ${TUNING.skillBonusPerPoint} to ${t.activities.join(', ')}, one to any ${t.name} roll, `
           + `and ${Math.round(TUNING.skillYieldPerPoint * 100)}% to what work of that kind pays the party.`,
         held.length
-          ? held.map((c) => `${c.name} ${rankOf(c.id, t.id)}`).join('\n')
+          ? held.map((c) => `${nameOf(c.id)} ${rankOf(c.id, t.id)}`).join('\n')
           : 'Nobody in Dreadhollow has spent a point on this.',
         t.unlocks.map((u) => `— ${u}`).join('\n'),
         ...t.body,

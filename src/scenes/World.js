@@ -107,6 +107,7 @@ export default class World extends Phaser.Scene {
     if (!this.scene.isActive('Menu')) this.scene.launch('Menu');
     if (!this.scene.isActive('Quest')) this.scene.launch('Quest');
     if (!this.scene.isActive('Skills')) this.scene.launch('Skills');
+    if (!this.scene.isActive('Name')) this.scene.launch('Name');
 
     this.frozen = false;
     this.doorLocked = true; // cleared once the player steps off the tile they spawned on

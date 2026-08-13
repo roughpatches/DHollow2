@@ -1,4 +1,9 @@
-// The Map tab. Same label/note/body as the other tabs, plus two fields it alone reads:
+// The Map tab. Same label/note/body as the other tabs, plus the fields it alone reads:
+//   id       — how a quest's `at` names this place. Only a zone a job is walked in needs one.
+//   terrain  — the ground a zone is: forest, water, and whatever else gets walked on.
+//              A skill that reads that ground is worth constitution to everyone who sets
+//              out here; see `terrain` in content/skills.js and conPerTerrainPoint in
+//              tuning.js. A place with no terrain gives nobody anything.
 //   map      — which grid in content/maps.js to draw. Required; an entry without it is a list row.
 //   at       — optional [x, y] tile to ring on that map, for a landmark inside a larger place.
 //   quest    — optional id from content/quests.js. The entry becomes somewhere you set
@@ -33,6 +38,8 @@ export const PLACES = [
   {
     // No walkable map: the Greywood is where a run happens, not somewhere you stroll.
     // `quest` makes the entry somewhere you set out for — Enter starts the job.
+    id: 'greywood',
+    terrain: 'forest',
     label: 'The Greywood',
     note: 'Wilds',
     quest: 'firstday',

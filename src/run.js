@@ -8,11 +8,13 @@
 
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
+import { PLACES } from '../content/places.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
 import {
   roster, charOf, award, raiseBond, conOf, conTotal,
-  rankOf, scoreOf, check, skillOf, walking, fighters, YOU,
+  rankOf, scoreOf, check, bestAt, skillOf, walking, fighters, YOU,
+  nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
 import { give, nameOf } from './town.js';
 import * as story from './story.js';
@@ -20,6 +22,8 @@ import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
 
 const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
+// The zones a job can be walked in. Only a place a job sets out from needs an id.
+const ZONE = Object.fromEntries(PLACES.filter((p) => p.id).map((p) => [p.id, p]));
 
 // Nothing is fought by daylight. What comes out of the ground and what follows a party
 // home only does either after dark, so a day run draws from the table with the combat
@@ -105,8 +109,8 @@ export function blockers(id, when) {
   for (const cid of q.must || []) {
     const c = charOf(cid);
     if (!c) out.push('Somebody this job needs is not here.');
-    else if (!roster().includes(c)) out.push(`${c.name} is not available.`);
-    else if (!asked(cid, q, at).willing) out.push(`${c.name} will not come on this.`);
+    else if (!roster().includes(c)) out.push(`${whoIs(cid)} is not available.`);
+    else if (!asked(cid, q, at).willing) out.push(`${whoIs(cid)} will not come on this.`);
   }
   const willing = [YOU, ...roster().filter((c) => asked(c.id, q, at).willing).map((c) => c.id)];
   if (willing.length < q.party) out.push(`Needs ${q.party}; counting you, ${willing.length} will walk it.`);
@@ -154,6 +158,28 @@ export function mixAt(when) {
     .join('   ');
 }
 
+// --- ground ----------------------------------------------------------------
+// A job is walked somewhere, and somewhere is made of something. A party carrying the
+// skill that reads that ground sets out with more in them than one that does not — which
+// is the whole of why you take the woodsman into the wood. A job handed out over a bar
+// rather than set out for from a place has no ground yet and this is worth nothing to it.
+
+export function terrainOf(q) {
+  const zone = q && q.at && ZONE[q.at];
+  return (zone && zone.terrain) || null;
+}
+
+// which skills read a given ground
+export function readsGround(terrain) {
+  return terrain ? SKILLS.filter((t) => t.terrain === terrain) : [];
+}
+
+// and what a set of people are worth on it, in constitution
+export function groundCon(ids, terrain) {
+  return readsGround(terrain).reduce((n, t) => n + scoreOf(ids, t.id), 0)
+    * TUNING.conPerTerrainPoint;
+}
+
 // --- starting --------------------------------------------------------------
 
 export function start(id, when, party) {
@@ -165,7 +191,8 @@ export function start(id, when, party) {
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
     .filter((id, i, all) => all.indexOf(id) === i);
   const nodes = quest.line ? authored(quest.line) : drawn(quest);
-  const con = conTotal(who);
+  // everyone's own constitution, and what knowing this ground adds to it
+  const con = conTotal(who) + groundCon(who, terrainOf(quest));
   run = {
     quest, when: at, party: who, nodes, at: -1, state: 'running', bias: null,
     spoils: {}, xp: 0, con, conMax: con,
@@ -259,7 +286,7 @@ function readOf(kind) {
   const seen = walkers().filter((c) => rankOf(c.id, kind.read.skill) > 0);
   if (!seen.length) return null;
   const c = seen.reduce((a, b) => (rankOf(b.id, kind.read.skill) > rankOf(a.id, kind.read.skill) ? b : a));
-  return { who: c.name, line: kind.read.line };
+  return { who: whoIs(c.id), line: kind.read.line };
 }
 
 export function choose(i) {
@@ -310,6 +337,16 @@ function resolve(node) {
   node.harvest = harvestOf(node, e);
   node.check = checkOf(node, e);
 
+  // A node written out beat by beat plays those beats first and settles at the end of
+  // whichever one the party walked into. See content/encounters.js.
+  if (e.beats) {
+    node.beatSpoils = {};
+    node.conBeat = 0;
+    run.phase = 'beat';
+    toBeat(node, e.beats[0].id);
+    return;
+  }
+
   // A node with an engine behind it does not pay out until it has been played. The run
   // waits here; the scene hands back what the player made of it.
   if (hasEngine(e.activity)) {
@@ -317,6 +354,71 @@ function resolve(node) {
     return;
   }
   settle(null);
+}
+
+// --- beats -----------------------------------------------------------------
+// An authored encounter: paragraphs, a choice or two, and a way through to the end of
+// it. Nothing here is drawn or weighted — the whole shape is in the content. A beat
+// carrying `spoils`, `con` or `flag` does that on the way through, and the node settles
+// on the first beat with no way on.
+
+function toBeat(node, id) {
+  const b = KIND[node.kind].beats.find((x) => x.id === id);
+  node.beat = b;
+  if (!b) {
+    outOfBeats(node); // a `then` pointing at nothing is the end of them
+    return;
+  }
+  story.set(b.flag);
+  if (b.con) node.conBeat += b.con;
+  if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
+}
+
+// E on a beat: the next one it names, one of two if it tosses for it, or the one the
+// roll already made decides.
+export function advance() {
+  if (!run || run.phase !== 'beat') return run;
+  const node = run.nodes[run.at];
+  const b = node.beat;
+  if (b.choose) return run; // a choice is answered, not pressed past
+  const next = b.result
+    ? (node.check && node.check.pass ? b.result.hit : b.result.miss)
+    : (b.toss ? pick(b.toss) : b.then);
+  if (!next) outOfBeats(node);
+  else toBeat(node, next);
+  return run;
+}
+
+// The end of the beats is the end of the node — unless the encounter also names an
+// activity, in which case the beats were the walk up to it and the player takes the
+// controls now. That is how a node gets words in front of its minigame.
+function outOfBeats(node) {
+  if (hasEngine(KIND[node.kind].activity)) {
+    run.phase = 'activity';
+    return;
+  }
+  settle(null);
+}
+
+// An option that names a skill is rolled as it is taken, by whoever in the party is
+// best at that skill. The beat it leads to narrates the attempt; a later beat's
+// `result` reads the roll back and picks the way out.
+export function pickBeat(i) {
+  if (!run || run.phase !== 'beat') return run;
+  const node = run.nodes[run.at];
+  const opt = node.beat.choose && node.beat.choose[i];
+  if (!opt) return run;
+  if (opt.skill) {
+    node.actorId = bestAt(run.party, opt.skill);
+    node.check = check(run.party, opt.skill, opt.dc);
+  }
+  toBeat(node, opt.then);
+  return run;
+}
+
+// who would take a given option, so the party can be told before they take it
+export function actorFor(skill) {
+  return run ? bestAt(run.party, skill) : null;
 }
 
 // What the node came to. `played` is what an engine handed back — { judgments, failed } —
@@ -343,7 +445,8 @@ export function settle(played) {
   }
 
   node.spoils = {};
-  for (const [m, range] of Object.entries(e.spoils)) {
+  // what the encounter pays, plus whatever the beats picked up on the way through it
+  for (const [m, range] of Object.entries({ ...e.spoils, ...(node.beatSpoils || {}) })) {
     const n = Math.round(roll(range) * take);
     if (n > 0) {
       node.spoils[m] = n;
@@ -367,7 +470,8 @@ export function settle(played) {
   node.conWork = !played ? 0
     : node.failed ? TUNING.activityConWorst
       : node.quality >= TUNING.activityConGood ? TUNING.activityConBest : 0;
-  node.con = node.conRoad + node.conKind + node.conCheck + node.conWork;
+  node.conBeat = node.conBeat || 0; // what an authored beat did on the way through
+  node.con = node.conRoad + node.conKind + node.conCheck + node.conWork + node.conBeat;
 
   run.con = Math.max(0, Math.min(run.conMax, run.con + node.con));
   node.conAfter = run.con;
@@ -426,14 +530,30 @@ export function placeLines(id) {
   if (!story.ok(q)) return ['Nothing here yet.'];
   const stop = blockers(id);
   const head = `${q.label} — ${q.size} work, ${q.when === 'any' ? 'day or night' : q.when + ' only'}.`;
-  if (stop.length) return [head, q.goal, ...stop];
-  return [head, q.goal, 'Ready. [Enter] to set out.'];
+  const ground = groundLine(q, walking().map((c) => c.id));
+  if (stop.length) return [head, q.goal, ...(ground ? [ground] : []), ...stop];
+  return [head, q.goal, ...(ground ? [ground] : []), 'Ready. [Enter] to set out.'];
 }
 
 // a roll, said the way a table says it: die, what the skill added, and what it came to
 export function checkLine(c) {
   return `${c.skill.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
     + ` = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
+}
+
+// What the ground is worth to a given crew, said where the crew is picked. Null when the
+// job has no ground, so nothing is said about nothing.
+export function groundLine(q, ids) {
+  const terrain = terrainOf(q);
+  if (!terrain) return null;
+  const skills = readsGround(terrain);
+  if (!skills.length) return `${terrain} ground. Nothing anybody knows reads it.`;
+  const score = skills.reduce((n, t) => n + scoreOf(ids, t.id), 0);
+  const named = skills.map((t) => t.name).join(' and ');
+  const ground = `${terrain[0].toUpperCase()}${terrain.slice(1)} ground`;
+  return score
+    ? `${ground} — ${named} ${score} between you, and ${groundCon(ids, terrain)} constitution for it.`
+    : `${ground} — nobody coming has a point of ${named}, and it is worth ${TUNING.conPerTerrainPoint} apiece out there.`;
 }
 
 export function harvestLine(h) {
@@ -444,7 +564,7 @@ export function harvestLine(h) {
 // who is walking it and what each of them is worth to the pool — the readout under the
 // crew screen and along the bottom of the crawl
 export function partyLine(who = walkers()) {
-  return who.map((c) => `${c.name} ${conOf(c.id)}`).join('    ');
+  return who.map((c) => `${whoIs(c.id)} ${conOf(c.id)}`).join('    ');
 }
 
 // what the bar across the top of the crawl says next to itself
@@ -458,6 +578,7 @@ export function conLines(node) {
   const say = (n, why) => { if (n) out.push(`${n > 0 ? '+' : ''}${n} ${why}`); };
   say(node.conRoad, 'walking it');
   say(node.conKind, node.conKind > 0 ? 'put back here' : 'taken here');
+  say(node.conBeat, node.conBeat > 0 ? 'put back in it' : 'taken in it');
   say(node.conCheck, node.conCheck > 0 ? 'for holding' : 'for losing it');
   say(node.conWork, node.conWork > 0 ? 'for good work' : 'for botching it');
   return out.length ? `${out.join('    ')}    →  ${node.conAfter}` : '';
@@ -478,7 +599,7 @@ export function questRows() {
       note,
       body: [
         `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it, you included.`
-          + (q.must ? `  ${q.must.map((m) => charOf(m).name).join(' and ')} must be on it.` : '')
+          + (q.must ? `  ${q.must.map((m) => whoIs(m)).join(' and ')} must be on it.` : '')
           + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`)
           + (q.when === 'day' ? '  Nothing to fight by daylight.' : '  After dark wants a fighter along.'),
         q.goal,

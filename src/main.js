@@ -4,6 +4,7 @@ import Dialogue from './scenes/Dialogue.js';
 import Menu from './scenes/Menu.js';
 import Quest from './scenes/Quest.js';
 import Skills from './scenes/Skills.js';
+import Name from './scenes/Name.js';
 import { report } from './placeholders.js';
 import * as party from './party.js';
 import * as town from './town.js';
@@ -32,5 +33,5 @@ window.game = new Phaser.Game({
   backgroundColor: COLORS.bg,
   pixelArt: true,
   physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
-  scene: [World, Dialogue, Menu, Quest, Skills],
+  scene: [World, Dialogue, Menu, Quest, Skills, Name],
 });

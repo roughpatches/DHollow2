@@ -60,6 +60,10 @@ function run(scene, step, done) {
     done();
   } else if (step.say || step.narrate) {
     say(scene, step, done);
+  } else if (step.choose) {
+    choose(scene, step, done);
+  } else if (step.name) {
+    naming(scene, done);
   } else if (step.skills) {
     skills(scene, done);
   } else if (step.prone !== undefined) {
@@ -132,6 +136,29 @@ function say(scene, step, done) {
     lines: step.narrate || step.lines,
     portrait: def ? (def.portrait || def.palette) : null,
   });
+}
+
+// The player never speaks, so every choice they get is something they do. Which one
+// they took is not kept anywhere: a branch that reconverges immediately is a beat in
+// which the player moved, not a fork in the story. Give a step `sets` when one of them
+// has to mean something later.
+function choose(scene, step, done) {
+  const once = () => {
+    scene.game.events.off('choice:end', once);
+    done();
+  };
+  scene.game.events.on('choice:end', once);
+  scene.game.events.emit('choice:start', { options: step.choose });
+}
+
+// the one thing the game cannot know about the player at boot. See src/scenes/Name.js.
+function naming(scene, done) {
+  const once = () => {
+    scene.game.events.off('name:done', once);
+    done();
+  };
+  scene.game.events.on('name:done', once);
+  scene.game.events.emit('name:choose');
 }
 
 // the same shape as a line of dialogue: the scene stops until the player has answered

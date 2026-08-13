@@ -28,6 +28,12 @@
 //              that puts something back. Night multiplies what it takes; see tuning.js.
 //   only     — true if this kind is never drawn at random and only turns up where a
 //              quest's `line` names it. Authored nodes carry it; the road's own do not.
+//   beats    — an encounter written out card by card instead of settled in one roll:
+//              paragraphs, the choices the party gets, and the ways through. The shape
+//              is documented on the one that has them. A kind without beats is a kind
+//              the table resolves on its own, which is most of them. A kind with beats
+//              AND an activity plays the beats first and hands over the controls when
+//              they run out — words in front of a minigame.
 //   body     — what the encounter is, in the world's voice. Yours to write.
 
 export const ENCOUNTERS = [
@@ -75,10 +81,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Calming',
     weight: { day: 4, night: 3 },
-    read: { skill: 'animalhandling', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
-    harvest: 'animalhandling',
+    read: { skill: 'woodcraft', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
+    harvest: 'woodcraft',
     check: {
-      skill: 'animalhandling',
+      skill: 'woodcraft',
       dc: 13,
       held: 'It stands still long enough to be worth the standing still.',
       lost: 'It bolts, and it does not bolt away from you first.',
@@ -223,7 +229,7 @@ export const ENCOUNTERS = [
     nature: 'combat',
     activity: 'Fighting',
     weight: { day: 1, night: 5 },
-    read: { skill: 'animalhandling', line: 'Everything that should be making noise on that side has stopped.' },
+    read: { skill: 'woodcraft', line: 'Everything that should be making noise on that side has stopped.' },
     harvest: null,
     check: {
       skill: 'perception',
@@ -262,63 +268,358 @@ export const ENCOUNTERS = [
   // shape they need is here, the words are not.
 
   {
-    id: 'firstcut',
-    name: 'The first stand',
+    // The first node of the first job: water before timber. `Casting` is the three-phase
+    // fishing act imported from StarScape — cast, hook, reel — and the rod is the test
+    // here rather than a roll. See src/minigames/FishEngine.js.
+    //
+    // Its beats are the walk up to the water. A node with both beats and an activity
+    // plays the beats first and hands over the controls when they run out, so the stream
+    // is read before anybody casts into it.
+    id: 'firstcast',
+    name: 'The stream',
     nature: 'gather',
-    activity: 'Felling',
+    activity: 'Casting',
     only: true,
     weight: { day: 0, night: 0 },
-    read: { skill: 'woodcutting', line: 'Aldis puts a hand on one and says this one. He does not say why.' },
-    harvest: 'woodcutting',
-    check: null, // the axe is the test here, not a roll
-    spoils: { timber: [3, 5] },
+    read: { skill: 'fishing', line: '[Placeholder Text]' },
+    harvest: 'fishing',
+    check: null, // the rod is the test here, not a roll
+    spoils: { provisions: [3, 5] },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'water',
+        text: [
+          'The trees give out onto water. A stream, wide and shallow and peat-brown.',
+          "It's slow enough that you have to watch a leaf a while to be sure which way it's going.",
+          'Skaters and flies ripple on the surface. Cast a line?',
+        ],
+      },
+    ],
   },
   {
-    id: 'greenwood',
-    name: '[Placeholder — the Woodcraft way]',
+    // The Woodcraft way through the fork. Written out beat by beat rather than settled
+    // in one roll: see `beats` below, and src/run.js for what plays them.
+    id: 'heron',
+    name: "The heron's nest",
     nature: 'gather',
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
     read: { skill: 'woodcraft', line: '[Placeholder Text]' },
     harvest: 'woodcraft',
-    check: {
-      skill: 'woodcraft',
-      dc: 12,
-      held: '[Placeholder Text]',
-      lost: '[Placeholder Text]',
-    },
-    spoils: { timber: [1, 2] },
+    check: null, // the beats carry their own rolls, one per way in
+    spoils: {}, // and their own spoils: nothing is taken off this by walking past it
     xp: [10, 16],
-    con: [-1, 0],
+    con: [0, 0],
     body: ['[Placeholder Text]'],
+
+    // A beat is a card. `text` is what is on it — a string is narration, { cry } is a
+    // noise the bird makes. `then` is the next beat, `toss` is two of them and a coin,
+    // `result` reads back the roll made on the way in, and `choose` hands it to the
+    // player. `spoils`, `con` and `flag` are what walking through this beat did. A beat
+    // with no way on is the end of the encounter.
+    beats: [
+      {
+        id: 'alders',
+        text: [
+          "The trees ahead are dead alders. Bare, grey, standing in water that doesn't move.",
+          'You smell it before you see it — fish, old fish, and something turning underneath that.',
+        ],
+        then: 'nest',
+      },
+      {
+        id: 'nest',
+        text: [
+          'The nest is wedged in the fork of the tallest of them. Branches as thick as your forearm, woven through with weed and packed with mud.',
+          'It is bigger than a cart.',
+        ],
+        then: 'bird',
+      },
+      {
+        id: 'bird',
+        text: [
+          'The heron is not in it.',
+          "It's on the ground beneath, standing in the shallows with its wings half-open and its head down level with its shoulders. It has been watching you since before you saw it.",
+        ],
+        then: 'skree',
+      },
+      {
+        id: 'skree',
+        text: [
+          { cry: 'SKREEEE!!!' },
+          '[Placeholder Text]', // companion bark — the size of the bird, or a warning
+        ],
+        then: 'ways',
+      },
+      {
+        id: 'ways',
+        choose: [
+          {
+            text: '[Approach slowly and try to settle it.]',
+            skill: 'woodcraft',
+            dc: 15,
+            then: 'settling',
+          },
+          {
+            text: "[Hold back and work out what's wrong with it.]",
+            skill: 'perception',
+            dc: 10,
+            then: 'watching',
+          },
+          {
+            text: '[Skirt the water and keep moving.]',
+            then: 'skirting',
+          },
+        ],
+      },
+
+      // the Woodcraft way
+      {
+        id: 'settling',
+        text: [
+          "{skillActor} goes ahead of the party. Low, slow, hands open and out where the bird can see they're empty.",
+          '{skillActor} comes at an angle rather than straight on — the way you come at anything that has already decided you are the problem.',
+          { cry: 'Tk-tk-tk. Tk-tk-tk-tk.' },
+          { cry: 'Rrrrrrhh.' },
+          "The clattering stops. What replaces it is lower, and comes from much further down, and it doesn't stop while {skillActor} is moving.",
+        ],
+        result: { hit: 'settled', miss: 'misjudged' },
+      },
+      {
+        id: 'settled',
+        text: [
+          { cry: 'Hnnh.' },
+          'The sound thins. Goes ragged at the end of it. The wings fold. It shifts its weight, steps sideways out of the shallows, and lets the party past.',
+        ],
+        then: 'secondbird',
+      },
+      {
+        id: 'secondbird',
+        text: [
+          "Past the trunk, back in the reeds, is the second bird. Three arrows in it, set low on the body, where they wouldn't spoil the plumage.",
+        ],
+        spoils: { canvas: [1, 2] },
+        flag: 'poacher-clue', // somebody is shooting the Greywood for feathers
+        then: 'notfollowed',
+      },
+      {
+        id: 'notfollowed',
+        text: [
+          { cry: 'Kraa.' },
+          "The heron doesn't follow you out.",
+        ],
+      },
+      {
+        id: 'misjudged',
+        text: ['{skillActor} misjudges it. One step too many, or one step too quick.'],
+        then: 'provoked',
+      },
+
+      // the Perception way
+      {
+        id: 'watching',
+        text: ['{skillActor} stops the party at the treeline and watches instead.'],
+        result: { hit: 'shells', miss: 'tooslow' },
+      },
+      {
+        id: 'shells',
+        text: ['{skillActor} tips {their} chin at the near side of the nest.'],
+        then: 'counting',
+      },
+      {
+        id: 'counting',
+        text: [
+          "It's torn open. And below it, shells broken open.",
+          'Pale green, thick as a thumbnail, scattered across the ground. Empty.',
+          'You count four before you stop counting.',
+        ],
+        then: 'realising',
+      },
+      {
+        id: 'realising',
+        text: [
+          { cry: 'Skreeeeeeee—' },
+          '[Placeholder Text]', // companion bark — the realisation
+        ],
+        then: 'northward',
+      },
+      {
+        id: 'northward',
+        text: [
+          'The bird hauls itself up out of the water and takes flight north over the treeline.',
+          "It doesn't look back.",
+        ],
+        spoils: { timber: [1, 2] }, // the nest is a cartload of branches and nobody is coming back for it
+      },
+      {
+        id: 'tooslow',
+        text: ['{skillActor} is still working it out when the bird decides the party has been standing there long enough.'],
+        then: 'provoked',
+      },
+
+      // the way past, and where all three failures end up
+      {
+        id: 'skirting',
+        text: [
+          'You keep to the far edge of the water. Slow, eyes down, nothing sudden.',
+          "You're almost past when it moves.",
+        ],
+        then: 'provoked',
+      },
+      {
+        id: 'provoked',
+        text: [
+          "The bird's wings come all the way out. Six feet. Seven. The bird is suddenly the largest thing in the clearing.",
+          { cry: 'RRRRAAAHHHHH—' },
+        ],
+        toss: ['attacks', 'holds'],
+      },
+      {
+        id: 'attacks',
+        text: [
+          { cry: 'FRAWNK!' },
+          'It crosses the water in two strides and it is faster than anything that size.',
+        ],
+        con: -4, // what it costs. Flat, like every other number in this table.
+      },
+      {
+        id: 'holds',
+        text: [
+          'It steps back. It puts itself between you and the tree, and it stays there until you are past the alders and gone.',
+        ],
+      },
+    ],
   },
   {
-    id: 'fenherbs',
-    name: '[Placeholder — the Alchemy way]',
+    // The other way through the fork, written out the same way. Both ways can turn up
+    // the same poacher: grey feathers under the bank here, a shot bird in the reeds
+    // there, and the one flag either of them raises.
+    id: 'mushrooms',
+    name: 'The mushroom copse',
     nature: 'gather',
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
     read: { skill: 'alchemy', line: '[Placeholder Text]' },
     harvest: 'alchemy',
-    check: {
-      skill: 'alchemy',
-      dc: 12,
-      held: '[Placeholder Text]',
-      lost: '[Placeholder Text]',
-    },
-    spoils: { pitch: [1, 2] },
+    check: null, // the beats carry their own rolls, one per way in
+    spoils: {}, // and their own spoils: the hollow gives up nothing to walking past it
     xp: [10, 16],
-    con: [-1, 0],
+    con: [0, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'hollow',
+        text: [
+          'The path drops into a hollow where the light goes green and stops moving.',
+          'A fallen oak lies across it, half sunk into the leaf mould, and the whole length of it is furred with mushrooms.',
+        ],
+        then: 'crowded',
+      },
+      {
+        id: 'crowded',
+        text: [
+          "Hundreds. Pale caps the size of a fist, crowded so close along the trunk that there's no bark left showing.",
+          '[Placeholder Text]', // companion bark — recognition, or appetite
+        ],
+        then: 'ways',
+      },
+      {
+        id: 'ways',
+        choose: [
+          {
+            text: '[Sort the good from the bad.]',
+            skill: 'alchemy',
+            dc: 15,
+            then: 'cutting',
+          },
+          {
+            text: '[Read the ground around the hollow.]',
+            skill: 'woodcraft',
+            dc: 10,
+            then: 'rim',
+          },
+          {
+            text: '[Leave them where they are.]',
+            then: 'past',
+          },
+        ],
+      },
+
+      // the Alchemy way
+      {
+        id: 'cutting',
+        text: [
+          '{skillActor} kneels into the mould and starts cutting stems.',
+          'Every cut gets turned to the light and watched.',
+        ],
+        result: { hit: 'sorted', miss: 'blistered' },
+      },
+      {
+        id: 'sorted',
+        text: [
+          'The cut flesh bruises blue on some of them.',
+          '{skillActor} takes the ones that stay white, and buries the rest deep enough that nothing else finds them.',
+        ],
+        spoils: { pitch: [2, 3] },
+      },
+      {
+        id: 'blistered',
+        text: [
+          "{skillActor} cuts, and watches, and can't see it. The light down here is green and everything already looks dark.",
+          'They throw the mushroom away, just to be certain.',
+          "As you proceed back down the path, it does not take long before {skillActor}'s hands are covered in ugly purple bumps.",
+        ],
+        con: -3, // what it costs. Flat, like every other number in this table.
+      },
+
+      // the Woodcraft way
+      {
+        id: 'rim',
+        text: ['{skillActor} leaves the trunk alone and walks the rim of the hollow instead.'],
+        result: { hit: 'snare', miss: 'wire' },
+      },
+      {
+        id: 'snare',
+        text: [
+          'The mould has been walked on. Not by deer.',
+          'Twenty feet in, a snare line strung between two saplings at knee height. It has been there long enough to rust.',
+          "There's a cold fire under the bank, and beside it a bundle of feathers, trimmed at the quill and tied off.",
+          'Grey, most of them.',
+          '[Placeholder Text]', // companion bark — the realisation
+        ],
+        spoils: { nails: [2, 4] },
+        flag: 'poacher-clue', // the same clue the heron's second bird raises
+      },
+      {
+        id: 'wire',
+        text: [
+          '{skillActor} walks the rim and comes back with a coil of wire and a broken arrow.',
+          "A broken arrow tells you somebody stood here. It doesn't tell you when, or how many, or what for.",
+        ],
+        spoils: { nails: [1, 2] }, // salvage, and nothing to make of it
+      },
+
+      // and the way past
+      {
+        id: 'past',
+        text: [
+          'You keep to the path and leave the hollow to itself.',
+          'The light stays green until the ground comes back up.',
+        ],
+      },
+    ],
   },
   {
+    // The timber the job was taken for. Beats first, then the axe: the tree is read
+    // before it is cut, the same way the stream is read before anybody casts into it.
     id: 'secondcut',
-    name: 'The second stand',
+    name: 'The oak',
     nature: 'gather',
     activity: 'Felling',
     only: true,
@@ -330,21 +631,118 @@ export const ENCOUNTERS = [
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'oak',
+        text: [
+          'The oak stands alone in a clearing it made for itself. Nothing else has been allowed to get tall within thirty feet of it.',
+          'One limb is down — old, storm-torn, half sunk into the ground and still attached at the shoulder.',
+          'The heartwood in the break is dark and dry and sound.',
+          'Fell the oak?',
+        ],
+      },
+    ],
   },
   {
+    // Where the job ends. A plot node: Aldis is the only one who speaks, nothing is
+    // rolled, and it plays straight through to the road home. `{ who, line }` in a
+    // beat's text is somebody saying it; the rest is what the two of them are looking at.
     id: 'aldiswood',
-    name: '[Placeholder — the plot event]',
+    name: 'The grove',
     nature: 'talk',
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
     read: null,
     harvest: null,
-    // no check of its own: the goal takes the job's own roll, from content/quests.js
-    check: null,
+    check: null, // and the job's own roll was taken out of it; see content/quests.js
     spoils: {},
     xp: [20, 20],
     con: [0, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'stench',
+        text: [
+          { who: 'aldis', line: 'That stench.' }, // stopping
+          { who: 'aldis', line: "Breathe through your mouth. It doesn't help much, but it helps." },
+        ],
+        then: 'before',
+      },
+      {
+        id: 'before',
+        text: [{ who: 'aldis', line: "I've smelled this before. Never this strong." }],
+        then: 'stag',
+      },
+      {
+        id: 'stag',
+        text: [
+          'A red stag. Fourteen points, maybe more. Hard to count now.',
+          'There are arrows in it. Six at the shoulder and the flank, one low in the neck.',
+          'The fletching is grey.',
+          { who: 'aldis', line: 'There they are.' }, // quietly
+          { who: 'aldis', line: "Seven shots to put it down. That isn't skill. That's overkill." },
+        ],
+        then: 'wrong',
+      },
+      {
+        id: 'wrong',
+        text: [
+          'The body is wrong.',
+          'The spine has been turned somewhere a spine does not turn. The hindquarters face away from the shoulders. The ribs stand open, and they were opened from the inside.',
+          { who: 'aldis', line: "Nothing eats like this. This wasn't a hunt." },
+        ],
+        then: 'beetles',
+      },
+      {
+        id: 'beetles',
+        text: [
+          'Something moves in the eye socket.',
+          'Then the mouth. Then the whole open length of the flank, all at once.',
+          'Beetles. Black, thumbnail-sized, coming out of the animal in a steady unbroken pour, over the antlers and down into the moss.',
+          { who: 'aldis', line: '[Placeholder Text]' }, // his line here was left blank
+        ],
+        then: 'everyway',
+      },
+      {
+        id: 'everyway',
+        text: [
+          { who: 'aldis', line: "I've walked these woods since I could walk." },
+          { who: 'aldis', line: 'I know every way a thing dies out here. I know the wolf kills. I know the winter kills. I know the ones that just lie down under a tree because they\'re finished.' },
+          { who: 'aldis', line: "I don't know this one." },
+        ],
+        then: 'sevenarrows',
+      },
+      {
+        id: 'sevenarrows',
+        text: [
+          { who: 'aldis', line: "The men who shot this stood where we're standing." },
+          { who: 'aldis', line: "Seven arrows into it, and then they didn't take one thing off the body. Not the antlers. Not the hide. Not a strip of it." },
+        ],
+        then: 'wheretheywent', // the beat before the question is the press that gets to it
+      },
+      {
+        id: 'wheretheywent',
+        text: [{ who: 'aldis', line: 'So where did they go?' }],
+        then: 'gregorious',
+      },
+      {
+        id: 'gregorious',
+        text: [
+          { who: 'aldis', line: "Let's head back to Gregorious. He's been here longest." },
+          { who: 'aldis', line: "If he doesn't know what that was, nobody in Dreadhollow does." },
+        ],
+        then: 'lightgoing',
+      },
+      {
+        id: 'lightgoing',
+        text: [
+          { who: 'aldis', line: 'Every time I say this place will come back… it gets a little worse.' },
+          { who: 'aldis', line: "It's getting dark. We should get going…" },
+        ],
+      },
+    ],
   },
 ];

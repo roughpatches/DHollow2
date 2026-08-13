@@ -10,7 +10,7 @@ export const CHARACTER = [
     // The player came in off the sea, not down the south road: see content/scenes.js.
     // Aldis Rooke is the hunter who found them, and is a recruit, not the player.
     label: 'Name',
-    note: '[Placeholder Text]',
+    note: '{playerName}', // typed in the hut; see content/scenes.js
     body: ['[Placeholder Text]'],
   },
   {

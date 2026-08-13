@@ -1,7 +1,9 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
-import { roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, YOU } from '../party.js';
+import {
+  roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, nameOf, fill, YOU,
+} from '../party.js';
 import { createWalk } from '../walk.js';
 import { markKey } from '../textures.js';
 import { meterBar } from '../minigames/meters.js';
@@ -143,12 +145,27 @@ export default class Quest extends Phaser.Scene {
       if (k === 'escape' || k === 'enter' || k === 'e' || k === ' ') this.close();
       return;
     }
+    if (r.phase === 'beat') {
+      const b = r.nodes[r.at].beat;
+      const opts = b.choose;
+      if (this.approaching) return; // it has not got here yet
+      if (opts) {
+        if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + opts.length) % opts.length;
+        else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % opts.length;
+        else if (k === 'enter' || k === ' ' || k === 'e') { run.pickBeat(this.row); this.row = 0; }
+        else if (k === 'escape') run.abandon();
+      } else if (k === 'e' || k === ' ' || k === 'enter') run.advance();
+      else if (k === 'escape') run.abandon();
+      this.draw();
+      return;
+    }
     if (r.phase === 'fork') {
       if (k === 'arrowup' || k === 'w') this.row = 0;
       else if (k === 'arrowdown' || k === 's') this.row = 1;
       else if (k === 'arrowleft' || k === 'a') this.row = 0;
       else if (k === 'arrowright' || k === 'd') this.row = 1;
-      else if (k === 'enter' || k === ' ' || k === 'e') run.choose(this.row);
+      // the cursor belongs to the card it is on: whatever is drawn next starts at its top
+      else if (k === 'enter' || k === ' ' || k === 'e') { run.choose(this.row); this.row = 0; }
       else if (k === 'escape') run.abandon();
     } else if (k === 'e' || k === ' ' || k === 'enter') {
       if (this.approaching) return; // it has not got here yet
@@ -359,6 +376,11 @@ export default class Quest extends Phaser.Scene {
           : 'Something out there will have to be fought. Nobody coming can.',
         TUNING.questBodySize, armed ? COLORS.menuText : COLORS.menuMapFolk, this.wide).height + 10;
     }
+    // the ground, and what this crew is worth on it — half the reason to take somebody
+    const ground = run.groundLine(this.job, this.crew());
+    if (ground) {
+      y += this.text(this.left, y, ground, TUNING.questBodySize, COLORS.menuMapMark, this.wide).height + 10;
+    }
     // the job's own roll is named before the crew is picked, because it is the reason
     // to pick one crew over another
     if (this.job.check) {
@@ -382,7 +404,7 @@ export default class Quest extends Phaser.Scene {
         + (isCombat(c.id) ? '   fights' : '');
       this.text(this.left + this.wide, y + 2, worth,
         TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
-      y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${c.name}`,
+      y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${nameOf(c.id)}`,
         TUNING.questBodySize, on ? colour : (taken ? COLORS.menuAccent : COLORS.menuDim)).height + 2;
       const why = required
         ? `This job does not go without them. ${recruit.why(c.id, this.job, this.when_)}`
@@ -409,12 +431,12 @@ export default class Quest extends Phaser.Scene {
 
     // A node the party has not walked up to yet is not a node they know anything about,
     // so the approach runs first and the card only opens when it has arrived.
-    if (r.state === 'running' && (r.phase === 'node' || r.phase === 'activity') && this.shownAt !== r.at) {
+    if (r.state === 'running' && (r.phase === 'node' || r.phase === 'activity' || r.phase === 'beat')
+      && this.shownAt !== r.at) {
       this.shownAt = r.at;
       this.approaching = true;
       this.walk.approach(run.kindOf(r.nodes[r.at].kind).nature, () => {
         this.approaching = false;
-        if (run.active()?.phase === 'activity') this.startActivity();
         this.draw();
       });
     }
@@ -423,17 +445,29 @@ export default class Quest extends Phaser.Scene {
       this.walk.pass();
     }
 
+    // the controls are handed over wherever the activity phase came from: straight off
+    // the node, or off the last beat of the walk up to it
+    if (r.state === 'running' && r.phase === 'activity' && !this.approaching) this.startActivity();
+
     this.conBar(r, band.bar);
     this.trail(r, band.trail);
 
     if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
     else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
+    else if (r.state === 'running' && r.phase === 'beat' && !this.approaching) {
+      this.card(band.walk, this.beatLines(r), this.nodeHead(r));
+    }
     else if (r.state === 'running' && !this.approaching) this.card(band.walk, this.nodeLines(r), this.nodeHead(r));
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r));
 
     if (r.state !== 'running') this.hint('[Enter] Back to town');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.kindOf(r.nodes[r.at].kind).activity) : 'Walking.');
+    else if (r.phase === 'beat' && !this.approaching) {
+      this.hint(r.nodes[r.at].beat.choose
+        ? '[Up/Down] Choose    [Enter] Do it    [Esc] Turn back'
+        : '[E] Go on    [Esc] Turn back');
+    }
     else if (this.approaching) this.hint('[E] Press on    [Esc] Turn back');
     else this.hint('[E] Press on    [Esc] Turn back');
   }
@@ -512,13 +546,15 @@ export default class Quest extends Phaser.Scene {
     const g = this.add.graphics();
     this.layer.add(g);
     const texts = [];
-    let y = rect.y + pad + 26;
+    let tall = 0;
     for (const [str, size, colour] of lines) {
       const t = this.text(0, 0, str, size, colour, w - pad * 2);
       texts.push(t);
-      y += t.height + 8;
+      tall += t.height + 8;
     }
-    const h = y - rect.y - pad + 8;
+    // the head, the paragraphs, and the same pad above and below them: a card that is
+    // shorter than what is on it clips its last line
+    const h = pad + 26 + tall - 8 + pad;
     const x = rect.x + (rect.w - w) / 2;
     const top = rect.y + 10; // the party stays visible on the road under it
     g.fillStyle(COLORS.menuFill, 0.94);
@@ -589,7 +625,9 @@ export default class Quest extends Phaser.Scene {
     for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
     if (n.check) {
       out.push([run.checkLine(n.check), TUNING.questBodySize, n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk]);
-      out.push([n.check.pass ? n.check.held : n.check.lost, TUNING.questBodySize, COLORS.menuText]);
+      // a beat node's roll was said in the beats; it carries no line of its own
+      const said = n.check.pass ? n.check.held : n.check.lost;
+      if (said) out.push([said, TUNING.questBodySize, COLORS.menuText]);
     }
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
@@ -598,6 +636,42 @@ export default class Quest extends Phaser.Scene {
     if (harvest) out.push([harvest, TUNING.questHintSize, COLORS.menuDim]);
     const con = run.conLines(n);
     if (con) out.push([con, TUNING.questBodySize, n.con >= 0 ? COLORS.menuMapMark : COLORS.menuMapFolk]);
+    return out;
+  }
+
+  // An authored encounter, a beat at a time: what the party sees, what the bird says,
+  // and — where the beat is a choice — what they can do about it. A cry is drawn apart
+  // from the narration around it, because it is a noise and not a sentence.
+  beatLines(r) {
+    const n = r.nodes[r.at];
+    const b = n.beat;
+    const out = [];
+    for (const para of b.text || []) {
+      if (typeof para === 'string') {
+        out.push([fill(para, n.actorId), TUNING.questBodySize, COLORS.menuDim]);
+      } else if (para.cry) {
+        out.push([fill(para.cry, n.actorId), TUNING.questBodySize, COLORS.menuMapMark]);
+      } else {
+        // somebody on the road saying it, named the way a fork's reading is named
+        out.push([`${nameOf(para.who)}: ${fill(para.line, n.actorId)}`,
+          TUNING.questBodySize, COLORS.menuText]);
+      }
+    }
+    // the roll is shown once, on the beat that reads it back
+    if (b.result && n.check) {
+      out.push([run.checkLine(n.check), TUNING.questBodySize,
+        n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk]);
+    }
+    (b.choose || []).forEach((o, i) => {
+      const on = i === this.row;
+      out.push([`${on ? '>' : ' '} ${fill(o.text)}`, TUNING.questBodySize,
+        on ? COLORS.menuAccent : COLORS.menuDim]);
+      if (!o.skill) return;
+      // who would take it and how hard it is, before it is taken rather than after
+      const who = run.actorFor(o.skill);
+      out.push([`    ${skillOf(o.skill).name} DC ${o.dc} — ${nameOf(who)} would try it`,
+        TUNING.questHintSize, on ? COLORS.menuText : COLORS.menuRule]);
+    });
     return out;
   }
 

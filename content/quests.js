@@ -19,7 +19,8 @@
 //   ready — a second flag, for a job that is known about but not yet agreed to.
 //   sets  — a flag raised the first time it is walked to the end.
 //   must  — character ids who have to be on it. Somebody the job will not go without.
-//   at    — the Map tab entry it is set out from, instead of Gregorious's board.
+//   at    — the id of the place it is set out from, instead of Gregorious's board.
+//           That place's terrain is the ground the job is walked on. See content/places.js.
 //   check — the roll the last node asks for, in the same shape encounters use: a skill,
 //           a DC, and the line said whether it is held or lost. The job's own test,
 //           standing in front of the goal, rather than whatever the road threw up.
@@ -45,20 +46,18 @@ export const QUESTS = [
     at: 'greywood',
     tags: ['forest', 'timber', 'wild', 'leavingtown'],
     giver: 'gregorious',
-    // The first job is authored rather than drawn: fell a tree, take one of two ways
-    // through the wood, fell another, and then whatever Aldis has been walking toward.
+    // The first job is authored rather than drawn: fish the water on the way out, take
+    // one of two ways through the wood, fell a stand, and then the grove.
     line: [
-      'firstcut',
-      ['greenwood', 'fenherbs'],
+      'firstcast',
+      ['heron', 'mushrooms'],
       'secondcut',
       'aldiswood',
     ],
-    check: {
-      skill: 'woodcraft',
-      dc: 12,
-      held: 'Aldis picks the stand, and the stand gives up what the inn needs.',
-      lost: 'You cut what was nearest instead of what was best, and half of it is green.',
-    },
+    // No roll in front of this goal: the last node is the grove, and the grove is a plot
+    // node that plays straight through. Put a `check` back here the day the job ends on
+    // something that can be got right or wrong.
+    check: null,
     goal: 'Bring back enough timber and provisions to put the Sea Hag right.',
     body: ['[Placeholder Text]'],
   },

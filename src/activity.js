@@ -7,12 +7,18 @@
 
 import { TUNING } from '../tuning.js';
 import { FellEngine } from './minigames/FellEngine.js';
+import { FishEngine } from './minigames/FishEngine.js';
 
 const ENGINES = {
   Felling: {
     make: (scene, layout) => new FellEngine(scene, { ...TUNING.fell, layout }),
     // what the player is holding while they do it, said on the screen
     hint: '[Hold Space] Swing    [Left/Right] Face or back cut',
+  },
+  Casting: {
+    make: (scene, layout) => new FishEngine(scene, { ...TUNING.fish, layout }),
+    // one key does all three phases; each of them says on screen what it wants of it
+    hint: '[Hold Space] Cast, and hold the line    [Space] Set the hook',
   },
 };
 
