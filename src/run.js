@@ -73,6 +73,26 @@ function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+// A node that draws its yield rather than paying a fixed list of it: `count` things come
+// off it, and each one of them is drawn against the odds. Rarity lives in the odds and
+// nowhere else, so a party good enough to take five things off a stream takes five draws
+// at the same table rather than better fish. See `draw` in content/encounters.js.
+function offTable(table, take) {
+  const odds = Object.entries(table.odds);
+  const total = odds.reduce((n, [, w]) => n + w, 0);
+  const out = {};
+  for (let i = Math.round(roll(table.count) * take); i > 0; i--) {
+    let r = Math.random() * total;
+    let hit = odds[odds.length - 1];
+    for (const o of odds) {
+      r -= o[1];
+      if (r <= 0) { hit = o; break; }
+    }
+    out[hit[0]] = (out[hit[0]] || 0) + 1;
+  }
+  return out;
+}
+
 export function questOf(id) {
   return QUESTS.find((q) => q.id === id);
 }
@@ -341,6 +361,7 @@ function resolve(node) {
   // whichever one the party walked into. See content/encounters.js.
   if (e.beats) {
     node.beatSpoils = {};
+    node.beatDraw = null;
     node.conBeat = 0;
     run.phase = 'beat';
     toBeat(node, e.beats[0].id);
@@ -372,6 +393,7 @@ function toBeat(node, id) {
   story.set(b.flag);
   if (b.con) node.conBeat += b.con;
   if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
+  if (b.draw) node.beatDraw = b.draw; // the beat walked into decides which table, if any
 }
 
 // E on a beat: the next one it names, one of two if it tosses for it, or the one the
@@ -444,10 +466,17 @@ export function settle(played) {
       : TUNING.activityKeepFloor + (1 - TUNING.activityKeepFloor) * node.quality;
   }
 
-  node.spoils = {};
-  // what the encounter pays, plus whatever the beats picked up on the way through it
+  // What the encounter pays and whatever the beats picked up on the way through it, both
+  // of them a fixed list, and then whatever came off a draw table on top of that.
+  const paid = {};
   for (const [m, range] of Object.entries({ ...e.spoils, ...(node.beatSpoils || {}) })) {
-    const n = Math.round(roll(range) * take);
+    paid[m] = Math.round(roll(range) * take);
+  }
+  const table = node.beatDraw || e.draw;
+  if (table) for (const [m, n] of Object.entries(offTable(table, take))) paid[m] = (paid[m] || 0) + n;
+
+  node.spoils = {};
+  for (const [m, n] of Object.entries(paid)) {
     if (n > 0) {
       node.spoils[m] = n;
       run.spoils[m] = (run.spoils[m] || 0) + n;

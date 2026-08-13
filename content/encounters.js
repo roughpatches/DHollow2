@@ -21,7 +21,15 @@
 //              best at the skill rolls a die and adds their points, and needs the DC.
 //              `held` and `lost` are the line said either way. What holding and losing
 //              are worth is in tuning.js, not here.
-//   spoils   — materials taken, [least, most] each. Rolled per node.
+//   spoils   — materials taken, [least, most] each. Rolled per node. A node that always
+//              hands over the same things names them here.
+//   draw     — a yield drawn rather than listed, for a node where what you get is a
+//              question of luck: `count` things come off it, [least, most], and each one
+//              of them is drawn against `odds`. Odds are drop rates written the way a
+//              designer says them — 50, 30, 20 — and are read against each other, so
+//              they need not add up to a hundred. Rarity lives in the odds; the count is
+//              what skill and the activity move, so working a node better takes more
+//              draws at the same table rather than better things off it.
 //   xp       — experience, [least, most].
 //   con      — what it does to the party's constitution, [least, most]. Negative takes
 //              and positive gives, so a spring or a dry barn can be written as a kind
@@ -284,9 +292,11 @@ export const ENCOUNTERS = [
     read: { skill: 'fishing', line: '[Placeholder Text]' },
     harvest: 'fishing',
     check: null, // the rod is the test here, not a roll
-    // what comes out of the water, by name and by nothing else. The rod decides how much
-    // of it: see `take` in src/run.js. A cast botched badly enough catches nothing.
-    spoils: { brooktrout: [1, 3], perch: [0, 2], bluegill: [0, 2] },
+    spoils: {},
+    // The Greywood's water, at the base rates. The rod decides how many fish come out of
+    // it — see `take` in src/run.js — and the table decides what each of them is. A cast
+    // botched badly enough catches nothing at all.
+    draw: { count: [3, 5], odds: { bluegill: 50, perch: 30, brooktrout: 20 } },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
@@ -323,7 +333,9 @@ export const ENCOUNTERS = [
     // noise the bird makes. `then` is the next beat, `toss` is two of them and a coin,
     // `result` reads back the roll made on the way in, and `choose` hands it to the
     // player. `spoils`, `con` and `flag` are what walking through this beat did. A beat
-    // with no way on is the end of the encounter.
+    // with no way on is the end of the encounter. A beat can carry a `draw` table as
+    // well, for a way through whose yield is luck rather than a settled thing; the nest
+    // below has none, because what it gives up is decided by which way you came at it.
     beats: [
       {
         id: 'alders',
@@ -570,8 +582,9 @@ export const ENCOUNTERS = [
           'The cut flesh bruises blue on some of them.',
           '{skillActor} takes the ones that stay white, and buries the rest deep enough that nothing else finds them.',
         ],
-        // the pale caps off the trunk, and the black ones nobody sees who isn't looking
-        spoils: { oystermushroom: [2, 4], blacktrumpet: [1, 3] },
+        // the pale caps off the trunk, and the black ones nobody sees who isn't looking:
+        // an even split, so a good cut is as likely to be one as the other
+        draw: { count: [3, 5], odds: { oystermushroom: 50, blacktrumpet: 50 } },
       },
       {
         id: 'blistered',
@@ -632,9 +645,11 @@ export const ENCOUNTERS = [
     read: { skill: 'woodcutting', line: 'The same again, and the light going.' },
     harvest: 'woodcutting',
     check: null,
-    // the tree, broken up: limb wood off the storm-torn shoulder, trunk wood out of the
-    // fell, and the sound dark core the beat below is looking at when it says so
-    spoils: { oakbranch: [1, 3], oaklog: [1, 2], heartwood: [0, 1] },
+    spoils: {},
+    // The tree, broken up, at the Greywood's base rates: mostly limb wood off the
+    // storm-torn shoulder, sometimes trunk wood, and now and then the sound dark core
+    // the beat below is looking at when it says so.
+    draw: { count: [3, 5], odds: { oakbranch: 50, oaklog: 30, heartwood: 20 } },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
