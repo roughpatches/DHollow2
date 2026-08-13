@@ -23,20 +23,20 @@ export default class Dialogue extends Phaser.Scene {
     this.box = this.add.graphics();
 
     this.nameText = this.add.text(0, top + 12, '', {
-      fontFamily: 'monospace',
+      fontFamily: TUNING.font,
       fontSize: `${TUNING.dialogueNameSize}px`,
       color: hex(COLORS.dialogueName),
     });
 
     this.bodyText = this.add.text(0, top + 40, '', {
-      fontFamily: 'monospace',
+      fontFamily: TUNING.font,
       fontSize: `${TUNING.dialogueFontSize}px`,
       color: hex(COLORS.dialogueText),
       lineSpacing: 4,
     });
 
     this.hint = this.add.text(0, top + h - 26, '[E]', {
-      fontFamily: 'monospace',
+      fontFamily: TUNING.font,
       fontSize: '14px',
       color: hex(COLORS.dialogueEdge),
     }).setOrigin(1, 0);

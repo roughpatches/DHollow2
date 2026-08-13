@@ -130,7 +130,7 @@ export const UI = {
     // a band across the crawl, over and under the road
     band: {
       at: [196, 11, 295, 81], slice: [183, 110, 43, 36],
-      flat: [21, 21, 21, 21], pad: [62, 62, 24, 22], shade: 0.3,
+      flat: [21, 21, 21, 21], pad: [66, 68, 24, 22], shade: 0.3,
     },
     // the card that opens at each node: paper, and written on in ink
     plaque: {

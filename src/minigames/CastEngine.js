@@ -16,7 +16,7 @@
 // than StarScape's parchment hexes, its config comes from TUNING.fish in tuning.js, and
 // the reactive water layer it signalled is not here. The mechanic is untouched.
 
-import { COLOR } from './ui.js';
+import { COLOR, FONT } from './ui.js';
 import { trackWidget, meterBar, clamp01 } from './meters.js';
 
 export class CastEngine {
@@ -53,12 +53,12 @@ export class CastEngine {
     this.BW = L.barW ?? 320;
     const bx = L.x;
     this.statusText = this.scene.add.text(bx, L.top, 'Hold SPACE to pay out line — release to present the fly in the lane',
-      { fontSize: '16px', fontFamily: 'monospace', color: COLOR.muted });
+      { fontSize: '16px', fontFamily: FONT, color: COLOR.muted });
     this.presLabel = this.scene.add.text(bx, L.top + 34, 'presentation',
-      { fontSize: '15px', fontFamily: 'monospace', color: COLOR.text });
+      { fontSize: '15px', fontFamily: FONT, color: COLOR.text });
     this.presBar = meterBar(this.scene, bx, L.top + 64, this.BW, 14, 'bar_atb');
     this.lineText = this.scene.add.text(bx, L.top + 92, '',
-      { fontSize: '18px', fontFamily: 'monospace', color: COLOR.text });
+      { fontSize: '18px', fontFamily: FONT, color: COLOR.text });
     // one widget for the whole water: the track is the reach, the band is the feeding
     // lane, the marker is the fly
     this.water = trackWidget(this.scene, bx, L.top + 140, this.BW, { height: 22 });

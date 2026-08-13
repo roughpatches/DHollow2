@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dreadhollow</title>
 <style>
+  /* The face everything in the game is set in. One file, every weight: it is the
+     variable cut, so a heavy line is really heavy rather than smeared by the browser.
+     The name is repeated in tuning.js, which is where the game asks for it. */
+  @font-face {
+    font-family: 'Libre Baskerville';
+    src: url('vendor/LibreBaskerville.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: block;
+  }
   html, body { margin: 0; height: 100%; background: #0b0d10; overflow: hidden; }
   body { display: grid; place-items: center; }
   canvas { image-rendering: pixelated; }

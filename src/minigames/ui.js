@@ -46,6 +46,10 @@ export const COLOR = {
   ink: hex(COLORS.ui.ink),
 };
 
+// The face, taken off tuning.js the same way the palette is, so an engine that reads its
+// colours from the kit reads its lettering from it too.
+export const FONT = TUNING.font;
+
 // Paint a scene's background the stage colour — call once in create().
 export function stage(scene) {
   scene.cameras.main.setBackgroundColor(COLOR.stage);
@@ -54,7 +58,7 @@ export function stage(scene) {
 // A screen title (top-left by default). A light fill and a dark stroke keeps it legible
 // on both the dark stage and a lighter scrim.
 export function title(scene, text, x = 32, y = 26) {
-  const t = scene.add.text(x, y, text, { fontFamily: 'monospace', fontSize: '26px', color: COLOR.onWood });
+  const t = scene.add.text(x, y, text, { fontFamily: FONT, fontSize: '26px', color: COLOR.onWood });
   t.setStroke(COLOR.ink, 4);
   return t;
 }
@@ -65,7 +69,7 @@ export function button(scene, cx, cy, w, h, label, onClick, opts = {}) {
   const frame = opts.locked ? 'btn_locked' : 'btn';
   const bg = panel(scene, cx, cy, w, h, frame);
   const color = opts.locked ? COLOR.muted : opts.color ?? COLOR.text;
-  const style = { fontFamily: 'monospace', fontSize: opts.fontSize ?? '17px', color };
+  const style = { fontFamily: FONT, fontSize: opts.fontSize ?? '17px', color };
   const txt = opts.align === 'left'
     ? scene.add.text(cx - w / 2 + 14, cy, label, style).setOrigin(0, 0.5)
     : scene.add.text(cx, cy, label, style).setOrigin(0.5);
@@ -91,7 +95,7 @@ export function backButton(scene, onClick, cx = 84, cy = 44) {
 export function feedback(scene, cx, cy, kind) {
   const name = `fb_${kind.toLowerCase()}`;
   const ribbon = scene.add.image(0, 0, 'ui', FRAME[name] ? name : 'fb_good');
-  const txt = scene.add.text(0, -1, kind.toUpperCase(), { fontFamily: 'monospace', fontSize: '13px', color: COLOR.ink }).setOrigin(0.5);
+  const txt = scene.add.text(0, -1, kind.toUpperCase(), { fontFamily: FONT, fontSize: '13px', color: COLOR.ink }).setOrigin(0.5);
   return scene.add.container(cx, cy, [ribbon, txt]);
 }
 
@@ -136,7 +140,7 @@ export function activityFrame(scene, { title: titleStr = '', onBack, backLabel =
   const headerH = 50, headerCy = INSET + headerH / 2;
   const header = bar(headerCy, headerH);
   const titleText = scene.add
-    .text(INSET + 16, headerCy, titleStr, { fontFamily: 'monospace', fontSize: '20px', color: COLOR.gold })
+    .text(INSET + 16, headerCy, titleStr, { fontFamily: FONT, fontSize: '20px', color: COLOR.gold })
     .setOrigin(0, 0.5).setDepth(DEPTH.text);
   let back = null;
   if (onBack) {
@@ -147,13 +151,13 @@ export function activityFrame(scene, { title: titleStr = '', onBack, backLabel =
   const descH = 56, descCy = INSET + headerH + 8 + descH / 2;
   const descBar = bar(descCy, descH);
   const descText = scene.add
-    .text(INSET + 16, descCy, '', { fontFamily: 'monospace', fontSize: '15px', color: COLOR.muted, wordWrap: { width: innerW - 32 }, lineSpacing: 3 })
+    .text(INSET + 16, descCy, '', { fontFamily: FONT, fontSize: '15px', color: COLOR.muted, wordWrap: { width: innerW - 32 }, lineSpacing: 3 })
     .setOrigin(0, 0.5).setDepth(DEPTH.text);
 
   const footerH = 54, footerCy = H - INSET - footerH / 2;
   const footer = bar(footerCy, footerH);
   const statusText = scene.add
-    .text(INSET + 16, footerCy, '', { fontFamily: 'monospace', fontSize: '16px', color: COLOR.text, wordWrap: { width: innerW - 220 }, lineSpacing: 2 })
+    .text(INSET + 16, footerCy, '', { fontFamily: FONT, fontSize: '16px', color: COLOR.text, wordWrap: { width: innerW - 220 }, lineSpacing: 2 })
     .setOrigin(0, 0.5).setDepth(DEPTH.text);
   let action = null;
 
@@ -187,7 +191,7 @@ export function resultCard(scene, body, text, color = COLOR.text) {
   const cy = body.y + h / 2 + 6;
   const p = panel(scene, body.cx, cy, w, h, 'panel').setDepth(DEPTH.panel + 5);
   const t = scene.add
-    .text(body.cx - w / 2 + 26, cy - h / 2 + 24, text, { fontFamily: 'monospace', fontSize: '16px', color, wordWrap: { width: w - 52 }, lineSpacing: 7 })
+    .text(body.cx - w / 2 + 26, cy - h / 2 + 24, text, { fontFamily: FONT, fontSize: '16px', color, wordWrap: { width: w - 52 }, lineSpacing: 7 })
     .setOrigin(0, 0).setDepth(DEPTH.text);
   return { objects: [p, t], destroy: () => { p.destroy(); t.destroy(); } };
 }
@@ -205,7 +209,7 @@ export function recipeCard(scene, bodyRect, spec) {
   owned.push(panel(scene, cx, cy, cardW, cardH, 'panel').setDepth(DEPTH.panel + 5));
   let y = cy - cardH / 2 + 22;
   const line = (t, style, x = leftX, origin = 0) => {
-    const o = scene.add.text(x, y, t, { fontFamily: 'monospace', ...style }).setOrigin(origin, 0).setDepth(DEPTH.text);
+    const o = scene.add.text(x, y, t, { fontFamily: FONT, ...style }).setOrigin(origin, 0).setDepth(DEPTH.text);
     owned.push(o);
     return o;
   };

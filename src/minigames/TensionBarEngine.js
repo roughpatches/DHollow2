@@ -16,7 +16,7 @@
 // same drift — the integrity pips are one of the kit's bars, and the reactive water layer
 // it signalled is not here. The physics and the sampling are untouched.
 
-import { COLOR } from './ui.js';
+import { COLOR, FONT } from './ui.js';
 import { trackWidget, meterBar, resolveBarKind } from './meters.js';
 
 function clamp(value, min, max) {
@@ -55,9 +55,9 @@ export class TensionBarEngine {
     const bx = L.x;
     this.statusText = this.scene.add.text(bx, L.top,
       'Hold SPACE to keep the line in the band — too many slips and it snaps',
-      { fontSize: '16px', fontFamily: 'monospace', color: COLOR.muted });
+      { fontSize: '16px', fontFamily: FONT, color: COLOR.muted });
     this.lineLabel = this.scene.add.text(bx, L.top + 34, 'line',
-      { fontSize: '15px', fontFamily: 'monospace', color: COLOR.text });
+      { fontSize: '15px', fontFamily: FONT, color: COLOR.text });
 
     this.failed = false;
     if (this.config.lineIntegrity != null) {
@@ -67,7 +67,7 @@ export class TensionBarEngine {
     }
 
     this.tensionText = this.scene.add.text(bx, L.top + 92, '',
-      { fontSize: '18px', fontFamily: 'monospace', color: COLOR.text });
+      { fontSize: '18px', fontFamily: FONT, color: COLOR.text });
     this.bar = trackWidget(this.scene, bx, L.top + 140, this.BW, { height: 22 });
 
     this._drawIntegrity();

@@ -9,7 +9,7 @@
 // public judgments / completed / failed, and the same press/release the axe answers to.
 // The engines themselves know nothing about any of it.
 
-import { COLOR } from './ui.js';
+import { COLOR, FONT } from './ui.js';
 import { PhaseSequenceEngine } from './PhaseSequenceEngine.js';
 import { CastEngine } from './CastEngine.js';
 import { HookSetEngine } from './HookSetEngine.js';
@@ -35,7 +35,7 @@ export class FishEngine {
     const L = this.config.layout;
     const inner = { ...L, top: L.top + HEAD };
     this.headText = this.scene.add.text(L.x, L.top, '', {
-      fontSize: '18px', fontFamily: 'monospace', color: COLOR.gold,
+      fontSize: '18px', fontFamily: FONT, color: COLOR.gold,
     });
 
     const phases = [

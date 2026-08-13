@@ -21,7 +21,7 @@
 // parchment hexes, the config its caller hands it comes from TUNING.fell in
 // tuning.js, and the v1 document citations are stripped. The mechanic is untouched.
 
-import { COLOR } from './ui.js';
+import { COLOR, FONT } from './ui.js';
 import { trackWidget, arcGauge, meterBar, popFeedback, ribbonKind, resolveFrame, resolveBarKind } from './meters.js';
 
 function clamp01(v) {
@@ -71,7 +71,7 @@ export class FellEngine {
     this.BW = L.barW ?? 320; // fills the plate when the hybrid supplies a width
     const bx = L.x;
     // Cut progress — the bespoke `bar_fell` (Amber/Leaf) once baked, else `bar_atb`.
-    this.cutText = this.scene.add.text(bx, L.top, '', { fontSize: '18px', fontFamily: 'monospace', color: COLOR.text });
+    this.cutText = this.scene.add.text(bx, L.top, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.text });
     this.cutBar = meterBar(this.scene, bx, L.top + 30, this.BW, 14, resolveBarKind(this.scene, 'bar_fell', 'bar_atb'));
 
     // A pip row reading `cut` quantized, right-aligned on the cut row. No-op until
@@ -86,15 +86,15 @@ export class FellEngine {
 
     // Lean read — the bespoke `lean_gauge` arc (plumb-bob marker + roaming safe-band) once
     // baked, else the generic linear track. Both expose the same setBand/setMarker API.
-    this.leanText = this.scene.add.text(bx, L.top + 48, '', { fontSize: '18px', fontFamily: 'monospace', color: COLOR.text });
+    this.leanText = this.scene.add.text(bx, L.top + 48, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.text });
     this.leanGauge = this.scene.textures.get('ui')?.has('lean_gauge')
       ? arcGauge(this.scene, bx + this.BW / 2, L.top + 92, { scale: 1.7 })
       : trackWidget(this.scene, bx, L.top + 86, this.BW, { height: 20 });
-    this.sideText = this.scene.add.text(bx, L.top + 128, '', { fontSize: '17px', fontFamily: 'monospace', color: COLOR.gold });
+    this.sideText = this.scene.add.text(bx, L.top + 128, '', { fontSize: '17px', fontFamily: FONT, color: COLOR.gold });
 
     // Swing power track with moving bite-zone + marker. The bite window uses the bespoke
     // grain-gold "good cut" band and the axe-bit marker once baked, else the generic pair.
-    this.powerText = this.scene.add.text(bx, L.top + 146, 'Swing — hold SPACE, release in the moving bite', { fontSize: '16px', fontFamily: 'monospace', color: COLOR.muted });
+    this.powerText = this.scene.add.text(bx, L.top + 146, 'Swing — hold SPACE, release in the moving bite', { fontSize: '16px', fontFamily: FONT, color: COLOR.muted });
     this.powerTrack = trackWidget(this.scene, bx, L.top + 178, this.BW, {
       height: 22,
       markerKey: resolveFrame(this.scene, 'ui', ['axe_marker', 'marker']),
@@ -104,8 +104,8 @@ export class FellEngine {
 
     // Soundness (break gate). The grove_split overlay on the trunk IS the gauge now — it
     // retires the generic bar_integrity for this activity; keep a small numeric readout here.
-    this.soundText = this.scene.add.text(bx, L.top + 244, '', { fontSize: '18px', fontFamily: 'monospace', color: COLOR.grass });
-    this.statusText = this.scene.add.text(bx, L.top + 276, '← face cut   → back cut', { fontSize: '15px', fontFamily: 'monospace', color: COLOR.muted });
+    this.soundText = this.scene.add.text(bx, L.top + 244, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.grass });
+    this.statusText = this.scene.add.text(bx, L.top + 276, '← face cut   → back cut', { fontSize: '15px', fontFamily: FONT, color: COLOR.muted });
 
     this._layout();
   }

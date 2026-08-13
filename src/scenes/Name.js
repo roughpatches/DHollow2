@@ -109,7 +109,7 @@ export default class Name extends Phaser.Scene {
 
   text(x, y, str, size, color) {
     const t = this.add.text(x, y, str, {
-      fontFamily: 'monospace',
+      fontFamily: TUNING.font,
       fontSize: `${size}px`,
       color: hex(color),
       lineSpacing: 4,

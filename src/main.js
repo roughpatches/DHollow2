@@ -24,6 +24,10 @@ window.story = story;
 // unwritten text is announced on every boot, so it can't quietly accumulate
 console.info(report());
 
+// Nothing is drawn until the face is in. Phaser bakes a line of text to a texture the
+// moment it is written, and a line baked against a fallback stays that shape.
+await document.fonts.load(`16px ${TUNING.font}`);
+
 // exposed so the game can be poked from the browser console
 window.game = new Phaser.Game({
   type: Phaser.AUTO,

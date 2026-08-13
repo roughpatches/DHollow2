@@ -13,7 +13,7 @@
 // it — the colours are the kit's tokens, and the reactive water layer it signalled is
 // not here. The waiting, the feints and both windows are untouched.
 
-import { COLOR } from './ui.js';
+import { COLOR, FONT } from './ui.js';
 import { trackWidget, popFeedback } from './meters.js';
 
 export class HookSetEngine {
@@ -43,9 +43,9 @@ export class HookSetEngine {
     const bx = L.x;
     this.statusText = this.scene.add.text(bx, L.top,
       'Watch the float — set the hook (SPACE) on the real take, not a nibble',
-      { fontSize: '16px', fontFamily: 'monospace', color: COLOR.muted });
+      { fontSize: '16px', fontFamily: FONT, color: COLOR.muted });
     this.readText = this.scene.add.text(bx, L.top + 92, 'The water is quiet.',
-      { fontSize: '18px', fontFamily: 'monospace', color: COLOR.text });
+      { fontSize: '18px', fontFamily: FONT, color: COLOR.text });
     // the line, with the float riding it. Nothing to aim at: the float only moves when
     // something below it moves.
     this.line = trackWidget(this.scene, bx, L.top + 140, this.BW, { height: 22, band: false });

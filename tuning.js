@@ -8,6 +8,11 @@ export const TUNING = {
   viewWidth: 960,
   viewHeight: 640,
 
+  // Every word in the game is set in this. The face itself is declared in index.html
+  // and loaded before the game starts, because a line of text is baked to a texture the
+  // moment it is written and one baked against a fallback stays wrong.
+  font: "'Libre Baskerville', serif",
+
   walkSpeed: 78,
   walkFrameRate: 7, // a placeholder walk is two frames; a drawn one has its own rates
   artWalkFrameRate: 10,
