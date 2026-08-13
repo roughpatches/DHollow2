@@ -4,6 +4,8 @@
 //   note  — the short value shown right of it (slot, count, standing, status)
 //   body  — the paragraphs shown in the detail pane. Add as many as you like.
 // Add, delete, or rewrite entries freely. The menu reads whatever is here.
+// An Inventory entry also names an `icon`, which is a picture in src/icons.js. One
+// naming an icon that isn't there gets a blank square rather than nothing.
 
 export const CHARACTER = [
   {
@@ -154,6 +156,7 @@ export const INVENTORY = [
   {
     label: 'Travel bread',
     note: 'x4',
+    icon: 'bread',
     body: [
       'Hard enough to be a tool. Soaks up stew, which is the only way anyone eats it.',
     ],
@@ -161,6 +164,7 @@ export const INVENTORY = [
   {
     label: 'Tallow candle',
     note: 'x6',
+    icon: 'candle',
     body: [
       'Burns about two hours and smells like the inside of a butcher\'s.',
       'Six is more than a careful person needs and fewer than the Bell\'s upstairs corridor makes you wish you had.',
@@ -169,6 +173,7 @@ export const INVENTORY = [
   {
     label: 'Flint and steel',
     note: 'x1',
+    icon: 'flint',
     body: [
       'Reliable in the dry. In the wet it is two interesting rocks.',
     ],
@@ -176,6 +181,7 @@ export const INVENTORY = [
   {
     label: 'Coil of hemp rope',
     note: '30 ft',
+    icon: 'rope',
     body: [
       'Carter\'s rope, still smelling of the cart. Frayed at one end where it was cut in a hurry rather than untied.',
     ],
@@ -183,6 +189,7 @@ export const INVENTORY = [
   {
     label: 'Fever powder',
     note: 'x2',
+    icon: 'powder',
     body: [
       'Bought from Vesna Quill, who wrote the dose on the paper and then said it aloud twice.',
       'One measure in water. Not two. She was extremely clear that it is not two.',
@@ -191,6 +198,7 @@ export const INVENTORY = [
   {
     label: 'Grave-pin',
     note: 'x1',
+    icon: 'gravepin',
     body: [
       'Eight inches of black iron, flattened head, no point worth the name — it is meant to be driven, not to pierce.',
       'Krael sells them by the dozen to one customer. He would not say what they are for. He said to ask Grast, and he said it like a man passing something heavy to someone else.',
@@ -199,6 +207,7 @@ export const INVENTORY = [
   {
     label: 'Bell-metal shard',
     note: 'x1',
+    icon: 'bellshard',
     body: [
       'A curl of bronze the size of a thumbnail, picked up under the Bell\'s sign post.',
       'It is warm. It has been warm since you picked it up, and the weather has not been.',
@@ -207,6 +216,7 @@ export const INVENTORY = [
   {
     label: 'Sexton\'s tally slip',
     note: 'x1',
+    icon: 'tally',
     body: [
       'A strip of card with forty-one marks on it in three different hands.',
       'Thirty-eight are the same steady stroke. Three are older, thinner, and were made by somebody who pressed much harder.',
@@ -215,6 +225,7 @@ export const INVENTORY = [
   {
     label: 'Dried river-mint',
     note: 'x9',
+    icon: 'mint',
     body: [
       'Grows on the strip behind the chapel. Chewing it takes the taste of the well water out of your mouth, which is a thing several people have now warned you about.',
     ],
@@ -222,6 +233,7 @@ export const INVENTORY = [
   {
     label: 'Waterskin',
     note: 'Half',
+    icon: 'waterskin',
     body: [
       'Filled at the ford, two days south. Everyone here has asked where you filled it before they let you drink from it.',
     ],

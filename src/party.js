@@ -300,7 +300,8 @@ export function skillRows() {
       note: `${score} in town`,
       body: [
         `A point adds ${TUNING.skillBonusPerPoint} to ${t.activities.join(', ')}, one to any ${t.name} roll, `
-          + `and ${Math.round(TUNING.skillYieldPerPoint * 100)}% to what work of that kind pays the party.`,
+          + `and ${Math.round(TUNING.skillYieldPerPoint * 100)}% to what work of that kind pays the party. `
+          + 'It also turns up the scarcer things more often, where the work has any.',
         held.length
           ? held.map((c) => `${nameOf(c.id)} ${rankOf(c.id, t.id)}`).join('\n')
           : 'Nobody in Dreadhollow has spent a point on this.',

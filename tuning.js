@@ -142,6 +142,14 @@ export const TUNING = {
   skillYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
   // party's score for that work adds this much on top of the roll
 
+  // What a point is worth to a node that draws its yield off a table (see `draw` in
+  // content/encounters.js). Points flatten the table toward its rare end — every one of
+  // them raises each weight to a lower power, which leaves an even table even and moves
+  // an uneven one toward its scarcer rows. A table's order never inverts: no amount of
+  // Woodcutting takes more heartwood off an oak than branches.
+  skillOddsPerPoint: 0.06,
+  skillOddsMost: 0.6, // and this is as flat as any table gets, at any score
+
   // Skill checks. A die, plus the skill, against a DC written on the encounter or the
   // job. The best in the party rolls it. A natural top always holds and a natural 1
   // never does, so no DC is a wall and none is a formality.
@@ -190,6 +198,11 @@ export const TUNING = {
 
   menuMapCell: 12, // a map tile's size on the Map tab; shrinks to fit a big map
   menuMapHeight: 208,
+
+  // The Inventory tab's grid. Columns and visible rows are whatever fits the panel at
+  // this cell size, so widening a square narrows the grid rather than overrunning it.
+  menuIconCell: 60,
+  menuIconPx: 32, // the icon inside a square; placeholder icons are drawn at 16
 };
 
 // [base, detail] per tile. Retint the whole world from this table.
@@ -221,6 +234,28 @@ export const COLORS = {
   questSkyNight: 0x11141d,
   questNightTint: 0x6a7590, // laid over the landscape after dark
   questTrailFill: 0x0d0f13, // the strip along the bottom the trail is drawn on
+
+  // What a placeholder item icon is made of (src/icons.js): the body of the thing, and
+  // the mark on it. Retint here and every wooden thing changes at once.
+  icon: {
+    wood: [0x6b4f2a, 0x8a6b3c],
+    stone: [0x6f7379, 0x9aa0a6],
+    iron: [0x4a4f58, 0x878d96],
+    bronze: [0x8a6a2f, 0xc9a95f],
+    cloth: [0x8d8266, 0xb9ab8c],
+    pitch: [0x2b2a2e, 0x4a4652],
+    food: [0xa8763f, 0xd0a061],
+    herb: [0x5d7a4a, 0x86a466],
+    glass: [0x7f9fa8, 0xbcd4d9],
+    bone: [0xa8a292, 0xd9d3c4],
+    trout: [0x6d6a4a, 0xb4553f],
+    perch: [0xb08a34, 0x5c4a22],
+    bluegill: [0x4c6f7a, 0x2c3b46],
+    heart: [0x4a3520, 0x7a5a30],
+    soot: [0x33302f, 0x57514c],
+    ash: [0x8f9298, 0xc2c5cb],
+    shell: [0xa8bfa2, 0x6d8069],
+  },
 
   // The minigame UI kit, drawn into the generated 'ui' atlas at boot. Retint here and
   // every widget an activity engine draws follows; nothing else reads these.
