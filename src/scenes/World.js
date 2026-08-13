@@ -6,6 +6,7 @@ import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js
 import {
   preloadArt, buildArt, bakeTiles, slotFor, fitBody, stand, raiseStructures, restate,
 } from '../art.js';
+import { preloadFrames, buildFrames } from '../frames.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
 import {
@@ -31,11 +32,13 @@ export default class World extends Phaser.Scene {
   // the only files the game loads; everyone without art is drawn at boot instead
   preload() {
     preloadArt(this);
+    preloadFrames(this);
   }
 
   create() {
     buildTextures(this);
     buildArt(this);
+    buildFrames(this);
     bakeTiles(this);
     const map = MAPS[this.mapKey];
     const w = map.rows[0].length;

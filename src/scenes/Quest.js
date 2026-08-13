@@ -5,6 +5,7 @@ import {
   roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, nameOf, fill, YOU,
 } from '../party.js';
 import { createWalk } from '../walk.js';
+import { framed, padOf, minOf } from '../frames.js';
 import { markKey } from '../textures.js';
 import { meterBar } from '../minigames/meters.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
@@ -41,8 +42,18 @@ export default class Quest extends Phaser.Scene {
   sizeTo(mode) {
     const p = mode === 'run' ? 0 : TUNING.questPad;
     this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
-    this.left = this.box.x + TUNING.menuPad;
-    this.wide = this.box.w - TUNING.menuPad * 2;
+    // The frame is the margin. A screen is written inside the flat of whichever panel it
+    // is drawn in, so nothing runs under the ironwork at either edge.
+    const pad = padOf(this.frame(mode));
+    this.left = this.box.x + pad.l;
+    this.wide = this.box.w - pad.l - pad.r;
+    this.top = this.box.y + pad.t;
+    this.foot = this.box.y + this.box.h - pad.b;
+  }
+
+  // the whole screen is one page; the crawl is bands, and a band is the smaller frame
+  frame(mode = this.mode) {
+    return mode === 'run' ? 'band' : 'page';
   }
 
   openBoard() {
@@ -241,13 +252,16 @@ export default class Quest extends Phaser.Scene {
   // party walking in the middle, the trail along the bottom.
   bands() {
     const b = this.box;
-    const barY = b.y + TUNING.menuPad + 22;
-    const top = barY + TUNING.questBarHeight + 30; // room under the bar for who is walking
+    const pad = padOf('band');
+    const barY = this.top + 22;
+    const top = barY + TUNING.questBarHeight + 54; // room under the bar for who is walking
     const bottom = b.y + b.h - TUNING.questTrailHeight;
+    const trailTop = bottom + pad.t + 4; // the ring around the goal reaches above its box
     return {
       bar: { x: this.left, y: barY, w: this.wide, h: TUNING.questBarHeight },
       walk: { x: b.x, y: top, w: b.w, h: bottom - top },
-      trail: { x: this.left, y: bottom + 12, w: this.wide, h: TUNING.questTrailHeight - 34 },
+      // the last line of the band belongs to the controls, so the trail stops above it
+      trail: { x: this.left, y: trailTop, w: this.wide, h: this.foot - 22 - trailTop },
     };
   }
 
@@ -268,37 +282,25 @@ export default class Quest extends Phaser.Scene {
   }
 
   panel(night) {
-    const b = this.box;
-    const g = this.add.graphics();
-    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 0.98);
-    g.fillRect(b.x, b.y, b.w, b.h);
-    g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
-    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    this.layer.add(g);
+    this.hang('page', this.box, night);
   }
 
-  // the strip the bar sits on, the strip the trail sits on, and the frame around both
+  // the banner the bar is on, the banner the trail is on, and the landscape between them
   chrome(night) {
     const b = this.box;
     const band = this.bands();
-    const g = this.add.graphics();
-    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 1);
-    g.fillRect(b.x, b.y, b.w, band.walk.y - b.y);
-    g.fillStyle(COLORS.questTrailFill, 1);
-    g.fillRect(b.x, band.walk.y + band.walk.h, b.w, b.y + b.h - band.walk.y - band.walk.h);
-    g.lineStyle(1, night ? COLORS.questNightEdge : COLORS.menuRule, 1);
-    g.lineBetween(b.x, band.walk.y, b.x + b.w, band.walk.y);
-    g.lineBetween(b.x, band.walk.y + band.walk.h, b.x + b.w, band.walk.y + band.walk.h);
-    if (b.x > 0) {
-      g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
-      g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    }
-    this.layer.add(g);
+    const under = band.walk.y + band.walk.h;
+    this.hang('band', { x: b.x, y: b.y, w: b.w, h: band.walk.y - b.y }, night);
+    this.hang('band', { x: b.x, y: under, w: b.w, h: b.y + b.h - under }, night);
+  }
+
+  hang(name, rect, night) {
+    for (const o of framed(this, name, rect, night)) this.layer.add(o);
   }
 
   board() {
     const jobs = run.offered();
-    let y = this.box.y + TUNING.menuPad;
+    let y = this.top;
     y += this.text(this.left, y, 'Gregorious has work', TUNING.questTitleSize, COLORS.menuAccent).height + 10;
     this.rule(y);
     y += 16;
@@ -313,11 +315,12 @@ export default class Quest extends Phaser.Scene {
       const on = i === this.row;
       const h = TUNING.questRowHeight;
       if (on) {
+        // inside the flat of the frame: a row that bleeds past it is a row on the ironwork
         const g = this.add.graphics();
         g.fillStyle(COLORS.menuSelectFill, 1);
-        g.fillRect(this.left - 8, y - 3, this.wide + 8, h);
+        g.fillRect(this.left, y - 3, this.wide, h);
         g.fillStyle(COLORS.menuAccent, 1);
-        g.fillRect(this.left - 8, y - 3, 2, h);
+        g.fillRect(this.left, y - 3, 2, h);
         this.layer.add(g);
       }
       const size = run.sizeOf(q);
@@ -345,7 +348,7 @@ export default class Quest extends Phaser.Scene {
   // Set out when? The mix behind each hour is shown rather than described, so the
   // choice is made on what the run will actually be made of.
   when() {
-    let y = this.box.y + TUNING.menuPad;
+    let y = this.top;
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
     y += this.text(this.left, y, 'Set out when?', TUNING.questBodySize, COLORS.menuText).height + 10;
     this.rule(y);
@@ -364,7 +367,7 @@ export default class Quest extends Phaser.Scene {
         on ? COLORS.menuDim : COLORS.menuRule).height + 14;
     });
 
-    this.text(this.left, this.box.y + this.box.h - 52, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
+    this.text(this.left, this.foot - 44, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
     this.hint('[Up/Down] Choose    [Enter] Set out    [Esc] Back to the board');
   }
 
@@ -373,7 +376,7 @@ export default class Quest extends Phaser.Scene {
   party() {
     const all = roster();
     const short = this.job.party - (1 + this.taking.length); // you are already on it
-    let y = this.box.y + TUNING.menuPad;
+    let y = this.top;
 
     this.text(this.left + this.wide, y + 4, `${this.when_ === 'night' ? 'after dark' : 'by day'}`,
       TUNING.menuRowSize, this.when_ === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
@@ -433,10 +436,10 @@ export default class Quest extends Phaser.Scene {
 
     // you are on it whoever else is, so you are in both readouts
     const crew = this.crew();
-    this.text(this.left, this.box.y + this.box.h - 74,
+    this.text(this.left, this.foot - 66,
       run.partyLine(crew.map((id) => charOf(id))), TUNING.menuRowSize, COLORS.menuText);
     // the crew added up: what this party would be good at if it walked out now
-    this.text(this.left, this.box.y + this.box.h - 50, scoreLine(crew),
+    this.text(this.left, this.foot - 44, scoreLine(crew),
       TUNING.questHintSize, COLORS.menuDim);
     this.hint(this.crewed()
       ? '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back'
@@ -521,7 +524,7 @@ export default class Quest extends Phaser.Scene {
     const n = r.nodes.length;
     const gap = 6;
     const w = Math.max(10, Math.min(38, (rect.w - gap * (n - 1)) / n));
-    const h = rect.h - 20;
+    const h = rect.h;
     const g = this.add.graphics();
     this.layer.add(g);
 
@@ -552,38 +555,36 @@ export default class Quest extends Phaser.Scene {
       }
     });
 
-    this.text(rect.x + rect.w, rect.y + h + 6,
+    // on the last line of the band, opposite the controls: both belong to the foot of it
+    this.text(rect.x + rect.w, this.foot - 18,
       `${Math.max(0, n - r.at - 1)} still in front of you`, TUNING.questHintSize, COLORS.menuDim).setOrigin(1, 0);
   }
 
   // Everything that happens at a node is said on one card over the landscape, so the
   // party and the ground they are standing on stay on the screen while it is read.
   card(rect, lines, head) {
-    const w = Math.min(660, rect.w - 80);
-    const pad = 18;
-    const g = this.add.graphics();
-    this.layer.add(g);
+    const pad = padOf('band');
+    const w = Math.max(Math.min(660, rect.w - 80), minOf('band').w);
+    const wrap = w - pad.l - pad.r;
     const texts = [];
     let tall = 0;
     for (const [str, size, colour] of lines) {
-      const t = this.text(0, 0, str, size, colour, w - pad * 2);
+      const t = this.text(0, 0, str, size, colour, wrap);
       texts.push(t);
       tall += t.height + 8;
     }
-    // the head, the paragraphs, and the same pad above and below them: a card that is
-    // shorter than what is on it clips its last line
-    const h = pad + 26 + tall - 8 + pad;
+    // the head, the paragraphs, and the frame's own margin above and below them: a card
+    // that is shorter than what is on it clips its last line
+    const h = pad.t + 26 + tall - 8 + pad.b;
     const x = rect.x + (rect.w - w) / 2;
     const top = rect.y + 10; // the party stays visible on the road under it
-    g.fillStyle(COLORS.menuFill, 0.94);
-    g.fillRect(x, top, w, h);
-    g.lineStyle(1, COLORS.menuEdge, 1);
-    g.strokeRect(x + 0.5, top + 0.5, w - 1, h - 1);
+    this.hang('band', { x, y: top, w, h }, run.active()?.when === 'night');
 
-    this.text(x + pad, top + pad - 4, head, TUNING.questBodySize + 4, COLORS.menuText, w - pad * 2);
-    let ty = top + pad + 26;
+    this.text(x + pad.l, top + pad.t - 4, head, TUNING.questBodySize + 4, COLORS.menuText, wrap);
+    let ty = top + pad.t + 26;
     for (const t of texts) {
-      t.setPosition(x + pad, ty);
+      t.setPosition(x + pad.l, ty);
+      this.layer.bringToTop(t); // measured before the frame was hung, so it is under it
       ty += t.height + 8;
     }
   }
@@ -762,7 +763,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   hint(str) {
-    this.text(this.left, this.box.y + this.box.h - 26, str, TUNING.questHintSize, COLORS.menuDim);
+    this.text(this.left, this.foot - 18, str, TUNING.questHintSize, COLORS.menuDim);
   }
 
   text(x, y, str, size, color, wrap) {

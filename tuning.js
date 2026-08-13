@@ -37,7 +37,7 @@ export const TUNING = {
   // The crawl is three bands: the constitution bar across the top, the party walking in
   // the middle, and the trail behind and ahead of them along the bottom.
   questBarHeight: 26,
-  questTrailHeight: 74,
+  questTrailHeight: 100, // the band along the bottom, deep enough for the frame around it
   questWalkGroundFrac: 0.68, // where the ground line sits inside the walking band
   questBodyPx: 62, // how tall a walking placeholder is drawn on the road
   questArtScale: 1.25, // drawn art carries air around the body; this brings it up to size
