@@ -23,7 +23,10 @@ export const NPCS = [
     facing: 'left',
     palette: 'aldis', // real art; see content/looks.js
     until: 'washedup', // he is only out there while the opening is unplayed
-    lines: ['[Placeholder Text]'],
+    // Nothing to say: the scene has hold of the player the whole time he is on the
+    // strand, and he is gone the moment it lets go. `silent` keeps him off the Script
+    // tab, which is for lines somebody could actually hear.
+    silent: true,
   },
   {
     // The same man, at home, from the morning after onward. `says` is a list of
@@ -131,7 +134,7 @@ export const NPCS = [
     facing: 'down',
     palette: 'gregorious', // real art; see content/looks.js
     quests: true,
-    lines: ['[Placeholder Text]'],
+    lines: ['Fancy a drink, or looking to make a little coin?'],
   },
   {
     id: 'tally',

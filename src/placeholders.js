@@ -26,6 +26,7 @@ export function linesOf(def) {
 
 // Every slot a string can sit in, named the way the designer would say it out loud.
 function dialogueSlots(npc) {
+  if (npc.silent) return []; // nobody can talk to them; there is nothing to write
   if (npc.says) {
     return npc.says.flatMap((a, i) => a.lines.map((s, j) => [`answer ${i + 1} line ${j + 1}`, s]));
   }

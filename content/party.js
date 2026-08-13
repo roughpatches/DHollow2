@@ -28,12 +28,9 @@
 // Level, XP and the bond as it stands now live in src/party.js; the constitution a run
 // has left lives on the run, in src/run.js. This file is only what a character starts as.
 //
-// Skills and fears below were read off what content/npcs.js and content/character.js
-// already say about these people — Tally will not walk the north road, Grast goes out
-// at first light and not after, Krael has no interest in leaving the smithy. The
-// three are picked so the points are spread and each of them is plainly the best in town
-// at one thing. Nobody has spent a point on Woodcutting yet — the player is the only one
-// who can bring it. Every one of these is a one-line change.
+// Aldis is the only recruit for now: the rest of the cast is being written. Everyone
+// still standing around town in content/npcs.js is somebody to talk to, not somebody to
+// take — a character becomes recruitable by getting a block here.
 
 export const PARTY = [
   {
@@ -59,52 +56,6 @@ export const PARTY = [
     // no combat: he knows the Greywood, he does not fight it. The first job is day work
     // for that reason.
     bond: 9,
-    body: ['[Placeholder Text]'],
-  },
-  {
-    id: 'tally',
-    needs: 'firstday-done', // nobody else in town is going anywhere yet
-    name: 'Tally Ruin',
-    palette: 'drunk',
-    con: 12,
-    skills: { sailing: 3, charisma: 2, woodcraft: 1 },
-    fears: ['thenorthroad', 'dark'],
-    bond: 3,
-    body: ['[Placeholder Text]'],
-  },
-  {
-    id: 'grast',
-    needs: 'firstday-done', // nobody else in town is going anywhere yet
-    name: 'Sexton Grast',
-    palette: 'sexton',
-    con: 13,
-    skills: { perception: 3, woodcraft: 2, fishing: 1 },
-    fears: ['dark', 'thedead'],
-    bond: 3,
-    body: ['[Placeholder Text]'],
-  },
-  {
-    id: 'vesna',
-    needs: 'firstday-done', // nobody else in town is going anywhere yet
-    name: 'Vesna Quill',
-    palette: 'herbalist',
-    con: 10,
-    skills: { charisma: 3, perception: 2, fishing: 1 },
-    fears: ['water', 'harm'],
-    bond: 3,
-    body: ['[Placeholder Text]'],
-  },
-  {
-    id: 'krael',
-    needs: 'firstday-done', // nobody else in town is going anywhere yet
-    name: 'Bertran Krael',
-    palette: 'smith',
-    con: 15,
-    // Smithing left the list, so his three points went to Alchemy: a smith is somebody
-    // who knows what heat does to matter. One word if you want them somewhere else.
-    skills: { alchemy: 3, woodcraft: 2, sailing: 1 },
-    fears: ['leavingtown', 'water'],
-    bond: 0,
     body: ['[Placeholder Text]'],
   },
 ];
