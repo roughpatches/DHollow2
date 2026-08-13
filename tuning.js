@@ -142,6 +142,14 @@ export const TUNING = {
   skillYieldPerPoint: 0.15, // and to what a gathering node pays: every point in the
   // party's score for that work adds this much on top of the roll
 
+  // What a point is worth to a node that draws its yield off a table (see `draw` in
+  // content/encounters.js). Points flatten the table toward its rare end — every one of
+  // them raises each weight to a lower power, which leaves an even table even and moves
+  // an uneven one toward its scarcer rows. A table's order never inverts: no amount of
+  // Woodcutting takes more heartwood off an oak than branches.
+  skillOddsPerPoint: 0.06,
+  skillOddsMost: 0.6, // and this is as flat as any table gets, at any score
+
   // Skill checks. A die, plus the skill, against a DC written on the encounter or the
   // job. The best in the party rolls it. A natural top always holds and a natural 1
   // never does, so no DC is a wall and none is a formality.

@@ -27,9 +27,11 @@
 //              question of luck: `count` things come off it, [least, most], and each one
 //              of them is drawn against `odds`. Odds are drop rates written the way a
 //              designer says them — 50, 30, 20 — and are read against each other, so
-//              they need not add up to a hundred. Rarity lives in the odds; the count is
-//              what skill and the activity move, so working a node better takes more
-//              draws at the same table rather than better things off it.
+//              they need not add up to a hundred. What is written here is the base rate,
+//              which is what a party who knows nothing about the work would see. Points
+//              in `harvest` do two things to it: more draws, and a table bent toward its
+//              scarce end. The bend never reorders a table — the common row stays the
+//              common one — and an even table is left even. See tuning.js.
 //   xp       — experience, [least, most].
 //   con      — what it does to the party's constitution, [least, most]. Negative takes
 //              and positive gives, so a spring or a dry barn can be written as a kind

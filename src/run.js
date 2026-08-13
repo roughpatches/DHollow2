@@ -73,12 +73,21 @@ function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+// How far the party's points bend a table toward its rare end. Zero leaves the odds as
+// they were written; one would make every row equally likely, and the cap keeps it well
+// short of that. See skillOddsPerPoint in tuning.js.
+function tiltOf(score) {
+  return Math.min(TUNING.skillOddsMost, score * TUNING.skillOddsPerPoint);
+}
+
 // A node that draws its yield rather than paying a fixed list of it: `count` things come
-// off it, and each one of them is drawn against the odds. Rarity lives in the odds and
-// nowhere else, so a party good enough to take five things off a stream takes five draws
-// at the same table rather than better fish. See `draw` in content/encounters.js.
-function offTable(table, take) {
-  const odds = Object.entries(table.odds);
+// off it, and each one of them is drawn against the odds. Knowing the work does two
+// things here — it takes more off the node, through `take`, and it bends the table, by
+// raising every weight to a lower power. A weight of 50 against one of 20 falls faster
+// than the 20 does, so the scarce row rises without ever passing the common one, and a
+// table already even stays even. See `draw` in content/encounters.js.
+function offTable(table, take, tilt) {
+  const odds = Object.entries(table.odds).map(([m, w]) => [m, w ** (1 - tilt)]);
   const total = odds.reduce((n, [, w]) => n + w, 0);
   const out = {};
   for (let i = Math.round(roll(table.count) * take); i > 0; i--) {
@@ -473,7 +482,10 @@ export function settle(played) {
     paid[m] = Math.round(roll(range) * take);
   }
   const table = node.beatDraw || e.draw;
-  if (table) for (const [m, n] of Object.entries(offTable(table, take))) paid[m] = (paid[m] || 0) + n;
+  if (table) {
+    const tilt = tiltOf(node.harvest ? node.harvest.score : 0);
+    for (const [m, n] of Object.entries(offTable(table, take, tilt))) paid[m] = (paid[m] || 0) + n;
+  }
 
   node.spoils = {};
   for (const [m, n] of Object.entries(paid)) {
