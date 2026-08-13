@@ -20,10 +20,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   create() {
-    const p = TUNING.questPad;
-    this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
-    this.left = this.box.x + TUNING.menuPad;
-    this.wide = this.box.w - TUNING.menuPad * 2;
+    this.sizeTo(null);
 
     this.layer = this.add.container().setDepth(29000).setVisible(false);
     this.open_ = false;
@@ -36,6 +33,16 @@ export default class Quest extends Phaser.Scene {
     });
     this.game.events.on('quest:board', this.openBoard, this);
     this.game.events.on('quest:start', this.openJob, this);
+  }
+
+  // The board, the hour and the crew are panels over wherever you are standing, because
+  // you are still standing there. The crawl is not: once the party has set out, the town
+  // is not behind them any more, so it takes the whole screen.
+  sizeTo(mode) {
+    const p = mode === 'run' ? 0 : TUNING.questPad;
+    this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
+    this.left = this.box.x + TUNING.menuPad;
+    this.wide = this.box.w - TUNING.menuPad * 2;
   }
 
   openBoard() {
@@ -213,6 +220,7 @@ export default class Quest extends Phaser.Scene {
   begin(when) {
     const r = run.start(this.job.id, when, this.taking);
     this.mode = 'run';
+    this.sizeTo(this.mode);
     this.row = 0;
     this.activity = null;
     this.walk?.destroy();
@@ -237,6 +245,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   draw() {
+    this.sizeTo(this.mode);
     this.layer.removeAll(true);
     const r = run.active();
     const night = this.mode === 'run' && r && r.when === 'night';
@@ -273,8 +282,10 @@ export default class Quest extends Phaser.Scene {
     g.lineStyle(1, night ? COLORS.questNightEdge : COLORS.menuRule, 1);
     g.lineBetween(b.x, band.walk.y, b.x + b.w, band.walk.y);
     g.lineBetween(b.x, band.walk.y + band.walk.h, b.x + b.w, band.walk.y + band.walk.h);
-    g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
-    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+    if (b.x > 0) {
+      g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
+      g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+    }
     this.layer.add(g);
   }
 
