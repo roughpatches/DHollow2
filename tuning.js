@@ -42,7 +42,7 @@ export const TUNING = {
   // The crawl is three bands: the constitution bar across the top, the party walking in
   // the middle, and the trail behind and ahead of them along the bottom.
   questBarHeight: 26,
-  questSkillWidth: 84, // the column down the side of the road, taken off the road's width
+  questSkillWidth: 108, // the column down the side of the road, taken off the road's width
   questSkillStep: 52, // how far apart the skills sit in it
   questSkillScale: 2, // an icon is drawn at 16 and stood up to this
   questTrailHeight: 100, // the band along the bottom, deep enough for the frame around it

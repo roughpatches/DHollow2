@@ -14,6 +14,7 @@ import { meterBar } from '../minigames/meters.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
 const CARD = 'plaque'; // the panel a node's account is written on
+const COLUMN = 'band'; // and the one stood on its end beside the road
 
 // The crawl. Runs over World, which freezes behind it. Three bands: the party's
 // constitution across the top, the party walking the landscape in the middle, and the
@@ -305,8 +306,8 @@ export default class Quest extends Phaser.Scene {
     this.hang('band', { x: b.x, y: under, w: b.w, h: b.y + b.h - under }, night);
   }
 
-  hang(name, rect, night) {
-    for (const o of framed(this, name, rect, night)) this.layer.add(o);
+  hang(name, rect, night, turned) {
+    for (const o of framed(this, name, rect, night, turned)) this.layer.add(o);
   }
 
   board() {
@@ -542,29 +543,26 @@ export default class Quest extends Phaser.Scene {
   }
 
   // Down the side of the road: what the party can do, kept in front of the player for the
-  // whole run instead of being read once on the way out of town.
+  // whole run instead of being read once on the way out of town. The banner from the
+  // sheet, stood on its end.
   skills(r, rect) {
     const rows = this.scored();
     if (!rows.length) return; // and a party with nothing between them gets no column
-    const night = r.when === 'night';
-    const g = this.add.graphics();
-    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 1);
-    g.fillRect(rect.x, rect.y, rect.w, rect.h);
-    g.lineStyle(1, night ? COLORS.questNightEdge : COLORS.menuRule, 1);
-    g.lineBetween(rect.x + rect.w - 0.5, rect.y, rect.x + rect.w - 0.5, rect.y + rect.h);
-    this.layer.add(g);
+    this.hang(COLUMN, rect, r.when === 'night', true);
 
+    const pad = padOf(COLUMN, true);
+    const tall = rect.h - pad.t - pad.b;
     // spread down the column, however many of them there turn out to be
-    const step = Math.min(TUNING.questSkillStep, rect.h / rows.length);
-    let y = rect.y + (rect.h - step * (rows.length - 1)) / 2;
+    const step = Math.min(TUNING.questSkillStep, tall / rows.length);
+    let y = rect.y + pad.t + (tall - step * (rows.length - 1)) / 2;
     for (const { skill: t, n } of rows) {
       // centred on its own half of the column: the shapes are different widths and left
       // against a margin they read as a ragged edge rather than a list
-      const icon = this.add.image(rect.x + 26, y, iconKeyFor(t.icon)).setOrigin(0.5);
+      const icon = this.add.image(rect.x + pad.l + 16, y, iconKeyFor(t.icon)).setOrigin(0.5);
       icon.setScale(TUNING.questSkillScale);
       this.layer.add(icon);
-      this.text(rect.x + rect.w - 10, y - 10, `${n}`, TUNING.questBodySize, COLORS.menuAccent)
-        .setOrigin(1, 0);
+      this.text(rect.x + rect.w - pad.r - 6, y - 10, `${n}`, TUNING.questBodySize,
+        COLORS.menuAccent).setOrigin(1, 0);
       y += step;
     }
   }

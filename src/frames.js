@@ -70,10 +70,12 @@ function paperOf(ctx, x, y, w, h) {
   return best;
 }
 
-// where the flat of the frame starts, on each side
-export function padOf(name) {
+// Where the flat of the frame starts, on each side — read the way the frame is standing.
+// A frame stood on its end has its rails where its ends were and its ends where its
+// rails were, so its margins turn with it.
+export function padOf(name, turned) {
   const [l, r, t, b] = UI.frames[name].pad;
-  return { l, r, t, b };
+  return turned ? { l: t, r: b, t: r, b: l } : { l, r, t, b };
 }
 
 // the smallest a frame can be drawn: the edges it never stretches, back to back
@@ -87,28 +89,35 @@ export function inkOf(name, colour) {
   return UI.frames[name].ink ? INK.get(colour) ?? colour : colour;
 }
 
-// A frame at a rectangle, and the shade over its board that lets text be read on it.
-// Returns them back to front, for whatever is drawing to add in that order. A panel is
-// never drawn smaller than its own edges: a short card grows to its frame rather than
-// crushing it.
-export function framed(scene, name, rect, night) {
+// A frame at a rectangle, with the shade over its board that lets text be read on it.
+// Returns it as one thing, for whatever is drawing to add. A panel is never drawn
+// smaller than its own edges: a short card grows to its frame rather than crushing it.
+//
+// `turned` stands the frame on its end. Every frame on the sheet is painted lying down,
+// and a panel taller than it is wide would have to be stretched into a shape none of
+// them was ever painted in; built to the rectangle's other dimension and turned a
+// quarter, the ironwork keeps its own proportions. The frame's top edge is the one that
+// ends up on the left.
+export function framed(scene, name, rect, night, turned) {
   const f = UI.frames[name];
   const [l, r, t, b] = f.slice;
-  const w = Math.max(rect.w, l + r);
-  const h = Math.max(rect.h, t + b);
+  const w = Math.max(turned ? rect.h : rect.w, l + r);
+  const h = Math.max(turned ? rect.w : rect.h, t + b);
   const src = SOURCE[name];
-  const nine = scene.add
-    .nineslice(rect.x, rect.y, src.key, src.frame, w, h, l, r, t, b)
-    .setOrigin(0, 0);
+  const parts = [scene.add.nineslice(0, 0, src.key, src.frame, w, h, l, r, t, b).setOrigin(0, 0)];
   // The panels take the same cold the landscape does after dark. A page does not: it is
   // held up and read, and ink on a cold page cannot be.
-  if (night && !f.ink) nine.setTint(COLORS.questNightTint);
-  if (!f.shade) return [nine];
-  // the board inside the rails, not the box the text is written in: a shade that stops
-  // short of the rails reads as a second frame drawn inside the first
-  const [fl, fr, ft, fb] = f.flat;
-  const g = scene.add.graphics();
-  g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, f.shade);
-  g.fillRect(rect.x + fl, rect.y + ft, w - fl - fr, h - ft - fb);
-  return [nine, g];
+  if (night && !f.ink) parts[0].setTint(COLORS.questNightTint);
+  if (f.shade) {
+    // the board inside the rails, not the box the text is written in: a shade that stops
+    // short of the rails reads as a second frame drawn inside the first
+    const [fl, fr, ft, fb] = f.flat;
+    const g = scene.add.graphics();
+    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, f.shade);
+    g.fillRect(fl, ft, w - fl - fr, h - ft - fb);
+    parts.push(g);
+  }
+  const box = scene.add.container(rect.x, rect.y + (turned ? rect.h : 0), parts);
+  if (turned) box.setRotation(-Math.PI / 2);
+  return [box];
 }
