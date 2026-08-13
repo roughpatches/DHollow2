@@ -15,6 +15,7 @@ export const TILE_NAMES = [
   'grass', 'path', 'dirt', 'water', 'tree', 'wall', 'roof', 'door', 'wood', 'stone',
   'well', 'grave', 'bar', 'forge', 'shelf', 'altar', 'pew', 'crate', 'hearth', 'rug',
   'treetop', 'sand', 'flotsam', 'spar', 'bed',
+  'deck', 'rot', 'piling', 'wreck', 'post', 'rubble', 'scrub', 'bramble', 'stump', 'fence',
 ];
 
 export const TILE_INDEX = Object.fromEntries(TILE_NAMES.map((n, i) => [n, i]));
@@ -163,6 +164,66 @@ const TILE_DRAW = {
     fill(g, COLORS.spar[0], o + 1, 4, 14, 8);
     fill(g, COLORS.spar[1], o + 1, 6, 14, 1);
     fill(g, COLORS.spar[1], o + 1, 10, 14, 1);
+  },
+  // --- the harbour ---------------------------------------------------------
+  deck: (g, o) => {
+    base(g, o, COLORS.deck[0]);
+    stripes(g, o, COLORS.deck[1], [1, 6, 11]);
+    fill(g, COLORS.rot[1], o + 7, 0, 1, TS); // the seam between two runs of planking
+  },
+  // decking with the sea showing through it, so it is drawn over water rather than over
+  // planking: what is left is the beams, not the deck
+  rot: (g, o) => {
+    base(g, o, COLORS.water[0]);
+    fill(g, COLORS.rot[0], o, 1, TS, 4);
+    fill(g, COLORS.rot[0], o, 9, TS, 3);
+    fill(g, COLORS.deck[0], o + 2, 1, 6, 1);
+    fill(g, COLORS.deck[0], o + 9, 9, 5, 1);
+    fill(g, COLORS.rot[1], o + 5, 1, 2, 4); // and the gaps in those
+    fill(g, COLORS.rot[1], o + 11, 9, 2, 3);
+  },
+  piling: (g, o) => {
+    base(g, o, COLORS.water[0]);
+    fill(g, COLORS.piling[1], o + 4, 6, 8, 7); // the shadow it throws on the water
+    fill(g, COLORS.piling[0], o + 5, 4, 6, 7);
+    fill(g, COLORS.deck[0], o + 6, 5, 4, 3); // the sawn top, salt-bleached
+  },
+  wreck: (g, o) => {
+    base(g, o, COLORS.water[0]);
+    fill(g, COLORS.wreck[0], o + 1, 4, 14, 10);
+    fill(g, COLORS.wreck[1], o + 1, 4, 14, 2); // what is still above the waterline
+    specks(g, o, COLORS.wreck[1], [[3, 8], [10, 11]], 3, 1);
+  },
+  post: (g, o) => {
+    base(g, o, COLORS.stone[0]);
+    fill(g, COLORS.post[0], o + 6, 2, 4, 13);
+    fill(g, COLORS.post[1], o + 5, 13, 6, 2); // the flange at the foot
+  },
+  // --- and what is taking the town back ------------------------------------
+  rubble: (g, o) => {
+    base(g, o, COLORS.dirt[0]);
+    specks(g, o, COLORS.rubble[0], [[1, 3], [8, 2], [4, 8], [10, 9], [2, 12]], 5, 4);
+    specks(g, o, COLORS.rubble[1], [[2, 4], [9, 3], [5, 9]], 3, 2);
+  },
+  scrub: (g, o) => {
+    base(g, o, COLORS.grass[0]);
+    specks(g, o, COLORS.grass[1], [[1, 6], [11, 2], [6, 13]], 4, 2);
+    specks(g, o, COLORS.scrub[1], [[3, 2], [8, 5], [13, 8], [5, 10], [10, 13]], 2, 3);
+  },
+  bramble: (g, o) => {
+    base(g, o, COLORS.bramble[0]);
+    specks(g, o, COLORS.bramble[1], [[2, 3], [7, 6], [11, 4], [4, 10], [9, 12]], 4, 2);
+    specks(g, o, COLORS.scrub[1], [[6, 2], [12, 11]], 2, 2);
+  },
+  stump: (g, o) => {
+    base(g, o, COLORS.grass[0]);
+    fill(g, COLORS.stump[0], o + 3, 5, 10, 9);
+    fill(g, COLORS.stump[1], o + 4, 4, 8, 4); // the sawn face, weathering pale
+  },
+  fence: (g, o) => {
+    base(g, o, COLORS.grass[0]);
+    fill(g, COLORS.fence[1], o, 9, TS, 2); // the rail
+    for (const x of [1, 6, 11]) fill(g, COLORS.fence[0], o + x, 2, 3, 13);
   },
   // the slice of a tree that draws over actors: crown only, so someone standing
   // below the treeline loses their head to the leaves and not their whole body

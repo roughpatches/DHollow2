@@ -3,7 +3,7 @@
 // Both end up under the same texture keys, so nothing downstream knows the difference.
 
 import { TUNING } from '../tuning.js';
-import { LOOKS, STRUCTURES, GROUND } from '../content/looks.js';
+import { LOOKS, STRUCTURES, GROUND, PROPS } from '../content/looks.js';
 import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX, TILE_NAMES } from './textures.js';
 import { buildingOf, levelOf } from './town.js';
 
@@ -46,6 +46,11 @@ export function preloadArt(scene) {
   }
   for (const g of GROUND) {
     if (!scene.textures.exists(g.sheet)) scene.load.image(g.sheet, g.sheet);
+  }
+  for (const p of PROPS) {
+    if (!scene.textures.exists(propKey(p.art))) {
+      scene.load.image(propKey(p.art), `art/props/${p.art}.png`);
+    }
   }
 }
 
@@ -126,6 +131,14 @@ export function bakeTiles(scene) {
     SLOT[g.tile] = g.cells.map(([sx, sy], i) => {
       const slot = i === 0 ? TILE_INDEX[g.tile] : next++;
       ctx.drawImage(sheet, sx, sy, P, P, slot * P, 0, P, P);
+      // A sheet painted lighter than the world wants it is multiplied down here rather
+      // than repainted: the seawater keeps its swell and stops reading as pale stone.
+      if (g.shade) {
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = `#${g.shade.toString(16).padStart(6, '0')}`;
+        ctx.fillRect(slot * P, 0, P, P);
+        ctx.globalCompositeOperation = 'source-over';
+      }
       return slot;
     });
   }
@@ -176,6 +189,24 @@ function clearUnder(scene, spec, img) {
       const solid = tile.collides;
       scene.ground.putTileAt(slotFor(spec.under || 'grass', x, y), x, y).setCollision(solid);
     }
+  }
+}
+
+// --- props -----------------------------------------------------------------
+// A crate, a cask, a lamp post. One picture, centred on the tile it stands on and
+// standing on the bottom of it, sorted by its feet like an actor — so you walk behind a
+// stack of crates and in front of the next one down the quay. The tile underneath is
+// what stops you; nothing here touches collision.
+
+function propKey(art) {
+  return `prop_${art}`;
+}
+
+export function raiseProps(scene, mapKey) {
+  const TS = TUNING.tileSize;
+  for (const p of PROPS.filter((q) => q.map === mapKey)) {
+    const img = scene.add.image(p.at[0] * TS + TS / 2, (p.at[1] + 1) * TS, propKey(p.art));
+    img.setOrigin(0.5, 1).setDepth(img.y);
   }
 }
 

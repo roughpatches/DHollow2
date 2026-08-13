@@ -73,4 +73,89 @@ export const NPCS = [
     quests: true,
     lines: ['Fancy a drink, or looking to make a little coin?'],
   },
+
+  // --- the town ---------------------------------------------------------------
+  // Eleven houses with anybody in them, and these are the people who are outdoors in
+  // them. Placeholder palettes from tuning.js until any of them have art.
+  {
+    id: 'cray',
+    name: 'Mother Cray',
+    map: 'village',
+    x: 28,
+    y: 44,
+    facing: 'left', // out at the water, over her work
+    palette: 'elder',
+    lines: [
+      'Mind the boards on the second dock. They look like decking and they are not.',
+      'I mend nets for four boats. There is one boat. You do the arithmetic on that and tell me what I am doing out here.',
+    ],
+  },
+  {
+    id: 'nedsalt',
+    name: 'Ned Salt',
+    map: 'village',
+    x: 34,
+    y: 43,
+    facing: 'up',
+    palette: 'drunk',
+    lines: [
+      'Hag opens when Gregorious feels like it and shuts when the light goes. Same as everything.',
+      'You came off the point, they say. Off the point, in that. Hm.',
+      'I would not go back up that way after dark. I would not go anywhere after dark, but especially not that way.',
+    ],
+  },
+  {
+    id: 'wick',
+    name: 'Wick',
+    map: 'village',
+    x: 73,
+    y: 11,
+    facing: 'down',
+    palette: 'sexton',
+    lines: [
+      'Sexton. Still sexton, though the chapel it belongs to has no roof, so mostly I cut grass.',
+      'Forty-one stones in here and I know every name on them. Some of the newer ones I put in myself, and I did not have anybody to help me carry.',
+      'If the roof goes back on that, I will ring the bell. There is still a bell.',
+    ],
+  },
+  {
+    id: 'tallow',
+    name: 'Tallow',
+    map: 'village',
+    x: 66,
+    y: 20,
+    facing: 'down',
+    palette: 'child',
+    lines: [
+      'The well is dry. You can shout down it and it does not answer properly.',
+      'There were twelve of us. Now it is me and the Harrow girls and they are not allowed out past the square.',
+    ],
+  },
+  {
+    id: 'bess',
+    name: 'Bess Harrow',
+    map: 'village',
+    x: 72,
+    y: 40,
+    facing: 'right',
+    palette: 'herbalist',
+    lines: [
+      'Everything worth picking grows where the houses used to be. Ask me why and I will tell you it is the lime in the old mortar, and that is only half of it.',
+      'This was a lane. There were gates along it and a name for it. Now it is where I go for nettles.',
+      'Do not follow it any further than I do.',
+    ],
+  },
+  {
+    id: 'pell',
+    name: 'Old Pell',
+    map: 'village',
+    x: 43,
+    y: 50,
+    facing: 'left',
+    palette: 'warden',
+    lines: [
+      'This whole row was fishing families. Nine doors. Mine is the one with anybody behind it.',
+      'The fish are still out there. That is not the problem. The problem is what you do with the fish once you have them and nobody comes to buy.',
+    ],
+  },
 ];

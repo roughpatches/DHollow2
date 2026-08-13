@@ -27,6 +27,18 @@ export const TILES = {
   sand: {},
   flotsam: {}, // small wreckage; you walk over it
   spar: { solid: true }, // ship timber; you walk around it
+  // the harbour
+  deck: {}, // dock planking, sound enough to walk out on
+  rot: {}, // planking that is mostly still there. You would not run on it
+  piling: { solid: true }, // a post where a dock used to be
+  wreck: { solid: true }, // a hull, half under
+  post: { solid: true }, // a harbour lamp or a mooring bollard
+  // the town, and what is taking it back
+  rubble: { solid: true }, // a wall that came down
+  scrub: {}, // dying grass, bracken, dead leaves
+  bramble: { solid: true }, // thicket you go round
+  stump: { solid: true },
+  fence: { solid: true },
 };
 
 export const LEGEND = {
@@ -54,6 +66,16 @@ export const LEGEND = {
   S: 'sand',
   w: 'flotsam',
   W: 'spar',
+  '-': 'deck',
+  ';': 'rot',
+  i: 'piling',
+  V: 'wreck',
+  l: 'post',
+  R: 'rubble',
+  '"': 'scrub',
+  '%': 'bramble',
+  n: 'stump',
+  '|': 'fence',
 };
 
 export const MAPS = {
@@ -75,13 +97,13 @@ export const MAPS = {
       '#________________#',
       '########D#########',
     ],
-    doors: [{ x: 8, y: 11, to: 'village', spawn: [16, 16] }],
+    doors: [{ x: 8, y: 11, to: 'village', spawn: [42, 39] }],
   },
 
-  // Where the game opens, and the western edge of the town afterwards. The tide put the
-  // player here and the storm put everything else; the village lane runs out onto it.
+  // Where the game opens: the point, north up the coast from the town. The tide put the
+  // player here and the storm put everything else; the track south runs into Dreadhollow.
   shore: {
-    name: 'The Dreadhollow outskirts',
+    name: 'The point',
     spawn: [16, 8],
     rows: [
       '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
@@ -101,45 +123,96 @@ export const MAPS = {
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
     ],
-    doors: [{ x: 17, y: 15, to: 'village', spawn: [3, 21] }],
+    doors: [{ x: 17, y: 15, to: 'village', spawn: [11, 1] }],
   },
+
+  // Dreadhollow itself, and the whole of the walkable town. The harbour is southwest:
+  // one dock still takes a boat and the rest are pilings. The Sea Hag stands where the
+  // dock meets the quay, Aldis's house is the next door up the harbour road, and the
+  // road runs northeast to the square with the burnt chapel shut across its north end.
+  // Every step away from the water is a step further into the wood.
   village: {
     name: 'Dreadhollow',
-    spawn: [19, 12],
+    spawn: [42, 39],
     rows: [
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
-      'TT.................,,.................TT',
-      'TT...T.............,,............T....TT',
-      'TT..=======........,,.......=======...TT',
-      'TT..=======........,,.......=======...TT',
-      'TT..#######........,,.......#######...TT',
-      'TT..###D###........,,.......#######...TT',
-      'TT.....,...........,,..........,......TT',
-      'TT.....,...........,,..........,......TT',
-      'TT.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.TT',
-      'TT.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.TT',
-      'TT...........,=====,,....,............TT',
-      'TT...........,=====,,.oo.,............TT',
-      'TT...........,#####,,.oo.,............TT',
-      'TT...........,##D##,,....,..======....TT',
-      'TT..=======..,.....,,....,..======....TT',
-      'TT..=======..,.....,,....,..######....TT',
-      'TT..#######..,.....,,....,..######....TT',
-      'TT..###D###..,.....,,....,..######....TT',
-      'TT.....,.....,.....,,....,....,.......TT',
-      'T,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.TT',
-      'TT.................,,.................TT',
-      'TT.~~~~~~~~~.......,,....x.x.x.x.x....TT',
-      'TT.~~~~~~~~~.......,,.................TT',
-      'TT.~~~~~~~~~.......,,....x.x.x.x.x....TT',
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
-      'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+      '~~~SSSSSTSTSTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+      '~~~~SSSSTSSSSSTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
+      '~~~~SSSS"SSSSS""""TTTTTTTTT%TTnTTTTTTTnTT%nTTT"TTTTTTTTTTT%T...."""""""""""""""""""TTTTTTTTTTTTT',
+      '~~~~SSSSSSSSSS"RRR"R""TTTTTTTTTTTTTT%TTTTTTn%."RRRTRRTTTnTnT"..."""""""""""""""""""""%TTTTnnTTTT',
+      '~~~~SSSS"SSSSS"""""R""TTTTTnTn%TTnTTTnTTTTnTT."R""TnRTnTTT"""":..RR"R"|||||||||||||"""""TTnTTnTT',
+      '~~~~SSSwSS":::"R"""""%T%TTT%TnTTnTT%TT%TT%nTTT""R"""TTTTT"""::::."""".|"""""""""""|"RRRRRR""TTTT',
+      '~~~~wSSSS"""::"RRRRR"""""""""""""TTTTTTTTTTT.."RRRRRR""""":::::..RRRR.|.x"x"x"x"x"|"RR"""R"""%TT',
+      '~~~~SwSS"S""::"""""""""""""""""""""TTTnnTTnTT."""""""""":::::"........|.."""""""""|""""R"R""""TT',
+      '~~~~SWSS"""":::"""""""""RRRRR:R"""""Tn%TnTTTTn"""""""""::::"""........|.."x"""x"""|"R""RRR""""TT',
+      '~~~~~SSSS"""":::""""""""R::::::"""""""TT%TTTTnT"""""""":::"""..======.|.""""""""""|"""""""""""TT',
+      '~~~~~SSwSSS""":::"""""""R:R:::R""""""""TTnTTTT""""""""":::"....======"|"x"x"x"""x"|"""""""""""TT',
+      '~~~~~wSSw"S"""":::""""""RRRRRRR"""""""""""TTT"...=====.:::.....======"|"""""""""""|""""""::"""TT',
+      '~~~~~SwSSSS""""":::"""""""""""""""""""""""""""...=====.:::.....======"|"x"x"""x"x"|"""""":::""TT',
+      '~~~~~~SSSwSS""..":::"""""""...""""""""""""""""...#####.:::.....######"|"""""""""""|"""""::::""TT',
+      '~~~~~~SSSSS""..."":::""""""..RR:R"""""""""""""...#####.:::.....######"||||""|||||||"""":,,::""TT',
+      '~~~~~~SSwS"""..."""::::""""..R::R""""""""""""".........:::,,...##D###"""":::""""""""""",,,,:""TT',
+      '~~~~~~SSSWW""...""""":::"""""R:::"""""""RRRR:R"........:::+++++++++++++++++:"""""""""",,,,,"""TT',
+      '~~~~~~~SSSSSS".."""""":::""""RRRR"====""R:::RR"".======:::+l++++++++++++lR+,""""""""":,,,,""""TT',
+      '~~~~~~~wSSS""""""""""""::::"""""""====""R::R:R"""======":,++++c+++++++c++++,c"""""""::,,,"""""TT',
+      '~~~~~~~~wSSw""""""""""""":::""""""####"":::::R"""======"",+++++++++++++++++,"T"""""::,,,""""""TT',
+      '~~~~~~~~SSSSSS""""""====""::::""""####""RRRRRR"""######"",+++++++++++++++++R,,,,,,,,,,,"""""""TT',
+      '~~~~~~~~SSSSSS""""""####"""":::""""""""""""""""""######"",+++++o+++++++++++,c,,,,,,,,,""""""""TT',
+      '~~~~~~~~~SSSS"S"""""####""""":c:""""""""""""""""""""""""",+++++++++c+++++++,,,,c,,,,,"""RRRRRRTT',
+      '~~~~~~~~~SSSS"S""""""TTT"""""":::::.."""""""""""""RR:R""",+++++++++++++++++,,c,,,,,,"""""""R"RTT',
+      '~~~~~~~~~SWSS""""""====T""""""".::::.."""""R:RR"""R::R""",+++c+++++++++++++,,,,,,,,"""""R""R"RTT',
+      '~~~~~~~~~~SSSSSS"""####.........::::::.""""RR::"""R::R"..,++c++++++++++c+++::TRT%"""""""RRR""RTT',
+      '~~~~~~~~~~SSSS"S"""####...........:c:::."""RRRR"""R:RR...,+++++++++++c+++++:c::TT"""""""""""""TT',
+      '~~~~~~~~~~~SwSS"S""".........RR:RRR::::::""""""""""""...,,+l++R+++++c++++l+,n:::::""""""""""""TT',
+      '~~~~~~~~~~~SSwSS"""".R:RRR...R::::R..::::::""""""""""..,,,+++++++++++++++++,TnT:::::"""""""TT"TT',
+      '~~~~~~~~~~~~SSSS"S"".R:R:R...R:::::...:::::::"""""""".,:,,,,,,,,,,::,,,,,,,,TTTTT:::::"""""TTTTT',
+      '~~~~~~~~~~~~SSSSSS"..RR:::...RRRRRRTT...:::::::"""""",:::,..""""""::....c.TTTnTTTTTT:::::""TT%TT',
+      '~~~~~~~~~~~~~WSSS....RRRRR....T%T%%TTTT"""::::::"""",,::,.."======::=====.%TTTTTTTTT..::::""TTTT',
+      '~~~~~~~~~~~~~SSSWSS."".......TTT======n"""""::::::",,,::""""======::=====.TnRRRRRRRTT..":"""%TTT',
+      '~~~~~~~~~~~~~~SSSSSS"""......Tnn======T"""""c":::::,,,::""""######:c#####.%%RRRRRRRT%.R:RR:RTTTT',
+      '~~~~~~~~~~~~~~SSWS.S""R+RRRR.TTT######Tc""""""":::::::::""""######::#####.TTRRRRRRRTT.R:::RRTTTT',
+      '~~~~~~~~~~~~~~~SSSS.S"+++++R..%n######""======"..::::::"""""".....::......%TRRRRRRRT..::ff:R.TTT',
+      '~~~~~~~~~~~~~~~SSwSS""+++++R...%%nTTT"""======".,,:::::"""""".....:::....TTTRRRRRRR...R::::R."TT',
+      '~~~~~~~~~~~~~~~~wWSSS"RRRRRR....""""""""######",,,,,"::"RRRRRRR....::....T"TRRRRRRR...RR:::R""TT',
+      '~~~~~~~~~~~~~~~~SSSSSS""........""""""""##D###,,l,,.:::"R:::::R.....::...TTnTTTT"""...RRRRRR""TT',
+      '~~~~~~~~~~~~~~~~~SSSSSS".===.=======""""":::::::,,...::"R:R:R::.....:::"""TT"T""""""""""""""""TT',
+      '~~~~~~~~~~~~~~~~~SSSS""".===.=======""""":::::::,....::.RRRRRRR..""""::""""""R""R""""""""""""TTT',
+      '~~~~~~~~~~~~~~~~~~SSSSS".###.#######"""",:::::::.....::.......""""""":::"""n"""R"""""""""""""TTT',
+      '~~~~~~~~~~~~~~~~~~~SwSwSS###.###D###",,,,l,,:::.R""RR.::..RRRRRRR"""""::"""""RRRR"""""""""""TTTT',
+      '~~~~~~~~~~~~~~~~~~~S+++lc+c++c+++,,,,,,,,,,,:::.R""RR.::..:::::::""""""::"""""""""""""""""""TTTT',
+      '~~~~~~~~~~~~~~~~~~~~cc+++c++++++,c,,,l,,,,,:::..RRR"R.::..R::::RR"RRRR":::"RR"R"""""%""""""TTTTT',
+      '~~~~~~~~~~~~~~~~~~~~++c++++c+++,,,c,,,,,,"":::........:::.RRRRRRR"R:::"":""R"R""""TT%"""""TTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~i;~~;;~~~--,,,,,+""""::::.........:........."R:RR"""".RRRR.""""TTT""%TTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~i;~~;;~~l---,~+c+""".:::.......c....RRR:R....""""""""......."TTTTTTTTnTT%TT',
+      '~~~~~~~~~~~~~~~~~~~~~;~~~~;~~~---~~+++====:::............R::::...."""""""........TnTTTTTTTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~i~~~;;~~~---~~+++====.:c:..RRRRRR...R::RR....""""""".......nTTT%TTTTTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~i~~~;;~~~-l-~~+c+####.:::..R::::R...RRRRR...."""""n"T......TT%nTTTTTTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~;~~~;~~~~---~~+++####.:::..R:::R:.........""TTTTTTT%T.....TTnTTTTTTTnTTnTTT',
+      '~~~~~~~~~~~~~~~~~~~~~i~~~~;~~~---~~+++"====.:::.R:RRRR......."""T%nTTnTTT.......TTTnTTTTTTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~i~~~~i~~~---~~+c+.####.:::............""""Tn%TTTT%%T......"TT%TTTnTTTTTT%TT',
+      '~~~~~~~~~~~~~~~~~~VVV~~~~i~~~~---~~+++.####.::::........."""""%T%TTTnTTTT...""""TT%T%TT%TnTTTnTT',
+      '~~~~~~~~~~~~~~~~~WVVV~~~~~i~~~---l~+++SSS..c.:::......."""""TT%TTTTTTTTnT.."""""TTTTTnTTTT%%TTTT',
+      '~~~~~~~~~~~~~~~~~~VVV~~~~i~~~~--l~~+++SSS.....:::.====="""""nTTTTT%TTTTTT.."""""TTTTTTTTTnTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~W~~~~~~~~---~~+++~SSSSS..::::====="""""TTTTTTTT%TTT..""""""TT%TTTTTnTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~i-i~~+++~~~SSSS..:::#####"""""TTTT%TTTTT%%.."""""""Tn%TT%TT%TnTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+++~~~~~~SSS:::#####"""""TTTTTTTnT%T..."""""""TTTnTn%TTTTTTTT',
+      '~~~~~~~~~~~~~~~~~;;;;;~~~~~;;;~~~~~+++~~~~~~~~SwSSS.."""""""""""""TTT....""""""""TT%TT%TTTnnTnTT',
+      '~~~~~~~~~~~~~~~~~~~~~~i~i~i~~~~~~~~~~~~~~~~~~~~~SSSSS"""""""""...........""""""""T%%TT%TTTTn%nTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSwSS"n"""............"""""""""nTTTTTTT%%TTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wSSSTS"............."""""""""TTTTTT%TTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSwS"............""""""""""TTTTTTTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSwSS........"""""""""""%T%TT%nTT%TTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSS""""""""""""""""""TTTT%nTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSS"S"""""""""""""TTn%TTT%TTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSS"S"""""""""TT%TTTTTnTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSSSS""TTTT%TTnTTTTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSSSSTTTTTTTTTTTTTTTTT',
+      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SSSSSSTTTTTTTTTTTTTT',
     ],
     doors: [
-      { x: 7, y: 7, to: 'tavern', spawn: [9, 13] },
-      { x: 2, y: 21, to: 'shore', spawn: [17, 14] },
-      { x: 16, y: 15, to: 'hut', spawn: [8, 10] },
+      { x: 32, y: 42, to: 'tavern', spawn: [9, 13] },
+      { x: 42, y: 38, to: 'hut', spawn: [8, 10] },
+      { x: 65, y: 15, to: 'chapel', spawn: [10, 13] },
+      { x: 11, y: 0, to: 'shore', spawn: [17, 14] },
     ],
   },
 
@@ -163,9 +236,31 @@ export const MAPS = {
       '#____________________#',
       '#########D############',
     ],
-    doors: [{ x: 9, y: 14, to: 'village', spawn: [7, 8] }],
+    doors: [{ x: 9, y: 14, to: 'village', spawn: [32, 43] }],
   },
 
-
-
+  // Inside the chapel. The door is shut until the roof is back on, so this is what the
+  // last stage of the repair opens: swept flags, the pews that survived, and the altar.
+  chapel: {
+    name: 'The chapel',
+    spawn: [10, 13],
+    rows: [
+      '######################',
+      '#++++++++++++++++++++#',
+      '#+++++++++aa+++++++++#',
+      '#++++++++++++++++++++#',
+      '#++++pppp++pppp++++++#',
+      '#++++pppp++pppp++++++#',
+      '#++++++++++++++++++++#',
+      '#++++pppp++pppp++++++#',
+      '#++++pppp++pppp++++++#',
+      '#++++++++++++++++++++#',
+      '#++++pppp++pppp++++++#',
+      '#++++pppp++pppp++++++#',
+      '#++++++++++++++++++++#',
+      '#++++++++++++++++++++#',
+      '##########D###########',
+    ],
+    doors: [{ x: 10, y: 14, to: 'village', spawn: [65, 16] }],
+  },
 };

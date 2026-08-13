@@ -4,7 +4,8 @@ import { NPCS } from '../../content/npcs.js';
 import { buildTextures } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
 import {
-  preloadArt, buildArt, bakeTiles, slotFor, fitBody, stand, raiseStructures, restate,
+  preloadArt, buildArt, bakeTiles, slotFor, fitBody, stand, raiseStructures, raiseProps,
+  restate,
 } from '../art.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
@@ -75,6 +76,7 @@ export default class World extends Phaser.Scene {
 
     // buildings with art stand over their tiles before anyone walks in front of them
     this.built = raiseStructures(this, this.mapKey);
+    raiseProps(this, this.mapKey);
 
     this.npcs = [];
     // `until` and `after` name a scene: someone can be on the strand only until the
