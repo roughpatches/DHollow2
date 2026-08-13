@@ -28,7 +28,10 @@ export const SKILLS = [
       'Name what a plant does before it is boiled, not after.',
       'Get a second draught out of the same weight of leaf.',
     ],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The ability to identify natural ingredients and combine them into potions and medicines.',
+      '(Allows for the creation of potions, etc. STILL UNDER DEVELOPMENT)',
+    ],
   },
   {
     id: 'woodcraft',
@@ -39,7 +42,10 @@ export const SKILLS = [
       'Read a tree\'s lean before the first cut.',
       'Salvage a botched cut instead of losing the stock.',
     ],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Knowledge of the forest, its creatures, and its habitats.',
+      '(Provides bonus to Constitution in forest areas)',
+    ],
   },
   {
     id: 'woodcutting',
@@ -50,7 +56,10 @@ export const SKILLS = [
       'Drop a tree where you said it would go, with a crowd watching.',
       'Keep a saw out of the bind on the last third of a cut.',
     ],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The ability to identify, fell, and shape wood.',
+      '(Provides bonus to loot drops from woodcutting nodes)',
+    ],
   },
   {
     id: 'sailing',
@@ -61,7 +70,10 @@ export const SKILLS = [
       'Hold a course in weather that would beach a landsman.',
       'Judge a hull\'s soundness before boarding it.',
     ],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Knowledge of the sea and navigable waters.',
+      '(Provides bonus to Constitution in water areas)',
+    ],
   },
   {
     id: 'fishing',
@@ -72,7 +84,10 @@ export const SKILLS = [
       'Spot a feeding lane from the bank.',
       'Set the hook on a feint without losing the fish.',
     ],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The ability to read water and catch fish.',
+      '(Provides bonus to loot drops from fishing nodes)',
+    ],
   },
   {
     id: 'charisma',
@@ -83,7 +98,10 @@ export const SKILLS = [
       'Ask a second question where one was the limit.',
       'Get a price named before you have to name one.',
     ],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The ability to influence others through manner and speech.',
+      '(STILL UNDER DEVELOPMENT)',
+    ],
   },
   {
     id: 'perception',
@@ -94,7 +112,29 @@ export const SKILLS = [
       'Notice the thing that has been moved before you notice it is missing.',
       'Call a halt before the party walks onto bad ground.',
     ],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The ability to notice what is there, and to understand what it means.',
+      '(STILL UNDER DEVELOPMENT)',
+    ],
+  },
+  {
+    // Back on the list. Broken crag and Iron in the ditch have been asking for it all
+    // along — they name it as what the work is done with and what the roll is against —
+    // and with no such skill they rolled on the die alone and said so at boot. Nobody in
+    // town has spent a point on it: Krael's three are still on Alchemy, one word away in
+    // content/party.js if they should come back here.
+    id: 'smithing',
+    name: 'Smithing',
+    activities: ['Smelting', 'Forging', 'Salvage'],
+    draws: ['ruin', 'road'],
+    unlocks: [
+      'Tell sound iron from rust before it is carried anywhere.',
+      'Get a second pull out of a bloom that would have gone to scrap.',
+    ],
+    body: [
+      'The ability to smelt and forge items from workable ores and other materials.',
+      '(Allows for the creation of smithing items, etc. STILL UNDER DEVELOPMENT)',
+    ],
   },
   {
     id: 'animalhandling',
