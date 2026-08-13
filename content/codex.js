@@ -17,7 +17,7 @@ export const BESTIARY = [
     label: 'Fen-lights',
     note: 'Seen',
     body: [
-      'Low green lights over the water east of the village, an hour either side of midnight.',
+      'Low green lights over the water west of the village, an hour either side of midnight.',
       'The village explanation is marsh gas and the village behaviour is to bolt the shutters on that side, which are two different opinions from the same people.',
       'They keep pace with a walking man. They do not keep pace with a running one — they arrive first.',
     ],
