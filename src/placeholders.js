@@ -43,6 +43,19 @@ function proseSlots(e) {
   return (e.body || []).map((s, i) => [`paragraph ${i + 1}`, s]);
 }
 
+// An encounter is prose, the line said about it at a fork, what is said either way on
+// its roll, and — where it has them — every paragraph of every beat.
+function encounterSlots(e) {
+  const slots = proseSlots(e);
+  if (e.read) slots.push(['fork line', e.read.line]);
+  if (e.check) slots.push(['held', e.check.held], ['lost', e.check.lost]);
+  for (const b of e.beats || []) {
+    (b.text || []).forEach((p, i) => slots.push([`${b.id} ${i + 1}`, typeof p === 'string' ? p : p.cry]));
+    (b.choose || []).forEach((o, i) => slots.push([`${b.id} option ${i + 1}`, o.text]));
+  }
+  return slots;
+}
+
 // a scripted scene's lines are written by whoever wrote the scene, and go unwritten
 // the same way anyone's do
 const SCENE_ROWS = SCENES.map((sc) => ({
@@ -58,7 +71,7 @@ const SOURCES = [
   ['Buildings', BUILDINGS, (b) => b.name, proseSlots],
   ['Materials', MATERIALS, (m) => m.name, proseSlots],
   ['Jobs', JOBS, (q) => q.label, proseSlots],
-  ['Encounters', ENCOUNTERS, (e) => e.name, proseSlots],
+  ['Encounters', ENCOUNTERS, (e) => e.name, encounterSlots],
   ['Fears', FEARS, (f) => f.name, proseSlots],
   ['Equipment', EQUIPMENT, (e) => e.label, entrySlots],
   ['Character', CHARACTER, (e) => e.label, entrySlots],

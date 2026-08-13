@@ -12,7 +12,7 @@ import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
 import {
   roster, charOf, award, raiseBond, conOf, conTotal,
-  rankOf, scoreOf, check, skillOf, walking, fighters, YOU,
+  rankOf, scoreOf, check, bestAt, skillOf, walking, fighters, YOU,
   nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
 import { give, nameOf } from './town.js';
@@ -311,6 +311,16 @@ function resolve(node) {
   node.harvest = harvestOf(node, e);
   node.check = checkOf(node, e);
 
+  // A node written out beat by beat plays those beats first and settles at the end of
+  // whichever one the party walked into. See content/encounters.js.
+  if (e.beats) {
+    node.beatSpoils = {};
+    node.conBeat = 0;
+    run.phase = 'beat';
+    toBeat(node, e.beats[0].id);
+    return;
+  }
+
   // A node with an engine behind it does not pay out until it has been played. The run
   // waits here; the scene hands back what the player made of it.
   if (hasEngine(e.activity)) {
@@ -318,6 +328,60 @@ function resolve(node) {
     return;
   }
   settle(null);
+}
+
+// --- beats -----------------------------------------------------------------
+// An authored encounter: paragraphs, a choice or two, and a way through to the end of
+// it. Nothing here is drawn or weighted — the whole shape is in the content. A beat
+// carrying `spoils`, `con` or `flag` does that on the way through, and the node settles
+// on the first beat with no way on.
+
+function toBeat(node, id) {
+  const b = KIND[node.kind].beats.find((x) => x.id === id);
+  node.beat = b;
+  if (!b) {
+    settle(null); // a `then` pointing at nothing is the end of the encounter
+    return;
+  }
+  story.set(b.flag);
+  if (b.con) node.conBeat += b.con;
+  if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
+}
+
+// E on a beat: the next one it names, one of two if it tosses for it, or the one the
+// roll already made decides.
+export function advance() {
+  if (!run || run.phase !== 'beat') return run;
+  const node = run.nodes[run.at];
+  const b = node.beat;
+  if (b.choose) return run; // a choice is answered, not pressed past
+  const next = b.result
+    ? (node.check && node.check.pass ? b.result.hit : b.result.miss)
+    : (b.toss ? pick(b.toss) : b.then);
+  if (!next) settle(null);
+  else toBeat(node, next);
+  return run;
+}
+
+// An option that names a skill is rolled as it is taken, by whoever in the party is
+// best at that skill. The beat it leads to narrates the attempt; a later beat's
+// `result` reads the roll back and picks the way out.
+export function pickBeat(i) {
+  if (!run || run.phase !== 'beat') return run;
+  const node = run.nodes[run.at];
+  const opt = node.beat.choose && node.beat.choose[i];
+  if (!opt) return run;
+  if (opt.skill) {
+    node.actorId = bestAt(run.party, opt.skill);
+    node.check = check(run.party, opt.skill, opt.dc);
+  }
+  toBeat(node, opt.then);
+  return run;
+}
+
+// who would take a given option, so the party can be told before they take it
+export function actorFor(skill) {
+  return run ? bestAt(run.party, skill) : null;
 }
 
 // What the node came to. `played` is what an engine handed back — { judgments, failed } —
@@ -344,7 +408,8 @@ export function settle(played) {
   }
 
   node.spoils = {};
-  for (const [m, range] of Object.entries(e.spoils)) {
+  // what the encounter pays, plus whatever the beats picked up on the way through it
+  for (const [m, range] of Object.entries({ ...e.spoils, ...(node.beatSpoils || {}) })) {
     const n = Math.round(roll(range) * take);
     if (n > 0) {
       node.spoils[m] = n;
@@ -368,7 +433,8 @@ export function settle(played) {
   node.conWork = !played ? 0
     : node.failed ? TUNING.activityConWorst
       : node.quality >= TUNING.activityConGood ? TUNING.activityConBest : 0;
-  node.con = node.conRoad + node.conKind + node.conCheck + node.conWork;
+  node.conBeat = node.conBeat || 0; // what an authored beat did on the way through
+  node.con = node.conRoad + node.conKind + node.conCheck + node.conWork + node.conBeat;
 
   run.con = Math.max(0, Math.min(run.conMax, run.con + node.con));
   node.conAfter = run.con;
@@ -459,6 +525,7 @@ export function conLines(node) {
   const say = (n, why) => { if (n) out.push(`${n > 0 ? '+' : ''}${n} ${why}`); };
   say(node.conRoad, 'walking it');
   say(node.conKind, node.conKind > 0 ? 'put back here' : 'taken here');
+  say(node.conBeat, node.conBeat > 0 ? 'put back in it' : 'taken in it');
   say(node.conCheck, node.conCheck > 0 ? 'for holding' : 'for losing it');
   say(node.conWork, node.conWork > 0 ? 'for good work' : 'for botching it');
   return out.length ? `${out.join('    ')}    →  ${node.conAfter}` : '';

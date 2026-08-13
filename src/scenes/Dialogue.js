@@ -93,7 +93,7 @@ export default class Dialogue extends Phaser.Scene {
   }
 
   open({ name, lines, portrait }) {
-    this.lines = lines.map(fill);
+    this.lines = lines.map((l) => fill(l));
     this.index = 0;
     this.chars = 0;
     this.open_ = true;
@@ -111,7 +111,7 @@ export default class Dialogue extends Phaser.Scene {
   // listed where the line would be. It never types itself out — a list you are reading
   // to decide from is not a line somebody is saying to you.
   ask({ options }) {
-    this.options = options.map(fill);
+    this.options = options.map((o) => fill(o));
     this.pick = 0;
     this.chose = null;
     this.open_ = true;

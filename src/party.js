@@ -80,10 +80,27 @@ export function setName(id, name) {
   if (n) stateOf(id).name = n;
 }
 
-// {playerName} in a line of dialogue, resolved as the line is shown rather than when
-// it is written — the name does not exist until the hut.
-export function fill(text) {
-  return text.split('{playerName}').join(nameOf(YOU));
+// Everyone is they/them unless their block says otherwise: put `they: 'she'` on a
+// character in content/party.js and the three forms follow from it.
+const PRONOUNS = {
+  they: ['they', 'them', 'their'],
+  he: ['he', 'him', 'his'],
+  she: ['she', 'her', 'her'],
+};
+
+// The tokens any authored line can carry, resolved as the line is shown rather than
+// when it is written: the player has no name until the hut, and who attempts a check
+// is not known until the party is standing in front of it. `actor` is whoever that
+// turned out to be — leave it out and there is nobody to be.
+export function fill(text, actor) {
+  const c = actor ? charOf(actor) : null;
+  const [they, them, their] = PRONOUNS[(c && c.they) || 'they'];
+  return text
+    .split('{playerName}').join(nameOf(YOU))
+    .split('{skillActor}').join(actor ? nameOf(actor) : 'Somebody')
+    .split('{they}').join(they)
+    .split('{them}').join(them)
+    .split('{their}').join(their);
 }
 
 export function charOf(id) {
