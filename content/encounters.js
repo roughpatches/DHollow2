@@ -295,10 +295,11 @@ export const ENCOUNTERS = [
     harvest: 'fishing',
     check: null, // the rod is the test here, not a roll
     spoils: {},
-    // The Greywood's water, at the base rates. The rod decides how many fish come out of
-    // it — see `take` in src/run.js — and the table decides what each of them is. A cast
-    // botched badly enough catches nothing at all.
-    draw: { count: [3, 5], odds: { bluegill: 50, perch: 30, brooktrout: 20 } },
+    // The Greywood's water, at the base rates. One fish is what a cast is worth to
+    // somebody with a single point of Fishing on it; everything above that is what the
+    // party knows and how the rod was worked, both of them in `take` in src/run.js. A
+    // cast worked badly usually comes home with nothing, and a botched one nearly always.
+    draw: { count: [1, 1], odds: { bluegill: 50, perch: 30, brooktrout: 20 } },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],

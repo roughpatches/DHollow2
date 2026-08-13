@@ -89,8 +89,16 @@ function tiltOf(score) {
 function offTable(table, take, tilt) {
   const odds = Object.entries(table.odds).map(([m, w]) => [m, w ** (1 - tilt)]);
   const total = odds.reduce((n, [, w]) => n + w, 0);
+  // How many things come off it, with the part of the count that falls between two
+  // things left as a chance at one more rather than rounded away. A party one point
+  // better than another is a party who sometimes comes back with an extra fish, which
+  // is what a point ought to feel like at the low end where whole fish are scarce.
+  const wanted = roll(table.count) * take;
+  let count = Math.floor(wanted);
+  if (Math.random() < wanted - count) count++;
+
   const out = {};
-  for (let i = Math.round(roll(table.count) * take); i > 0; i--) {
+  for (let i = count; i > 0; i--) {
     let r = Math.random() * total;
     let hit = odds[odds.length - 1];
     for (const o of odds) {
