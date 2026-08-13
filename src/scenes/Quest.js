@@ -5,10 +5,12 @@ import {
   roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, nameOf, fill, YOU,
 } from '../party.js';
 import { createWalk } from '../walk.js';
-import { framed, padOf, minOf } from '../frames.js';
+import { framed, padOf, minOf, inkOf } from '../frames.js';
 import { markKey } from '../textures.js';
 import { meterBar } from '../minigames/meters.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
+
+const CARD = 'plaque'; // the panel a node's account is written on
 
 // The crawl. Runs over World, which freezes behind it. Three bands: the party's
 // constitution across the top, the party walking the landscape in the middle, and the
@@ -561,15 +563,16 @@ export default class Quest extends Phaser.Scene {
   }
 
   // Everything that happens at a node is said on one card over the landscape, so the
-  // party and the ground they are standing on stay on the screen while it is read.
+  // party and the ground they are standing on stay on the screen while it is read. The
+  // card is the plaque: a page held up over the road, written in ink.
   card(rect, lines, head) {
-    const pad = padOf('band');
-    const w = Math.max(Math.min(660, rect.w - 80), minOf('band').w);
+    const pad = padOf(CARD);
+    const w = Math.max(Math.min(660, rect.w - 80), minOf(CARD).w);
     const wrap = w - pad.l - pad.r;
     const texts = [];
     let tall = 0;
     for (const [str, size, colour] of lines) {
-      const t = this.text(0, 0, str, size, colour, wrap);
+      const t = this.text(0, 0, str, size, inkOf(CARD, colour), wrap);
       texts.push(t);
       tall += t.height + 8;
     }
@@ -578,9 +581,10 @@ export default class Quest extends Phaser.Scene {
     const h = pad.t + 26 + tall - 8 + pad.b;
     const x = rect.x + (rect.w - w) / 2;
     const top = rect.y + 10; // the party stays visible on the road under it
-    this.hang('band', { x, y: top, w, h }, run.active()?.when === 'night');
+    this.hang(CARD, { x, y: top, w, h }, run.active()?.when === 'night');
 
-    this.text(x + pad.l, top + pad.t - 4, head, TUNING.questBodySize + 4, COLORS.menuText, wrap);
+    this.text(x + pad.l, top + pad.t - 4, head, TUNING.questBodySize + 4,
+      inkOf(CARD, COLORS.menuText), wrap);
     let ty = top + pad.t + 26;
     for (const t of texts) {
       t.setPosition(x + pad.l, ty);

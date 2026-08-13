@@ -228,6 +228,17 @@ export const COLORS = {
   menuMapDoor: 0xc9a95f,
   menuMapFolk: 0x9c5a46,
   menuMapMark: 0x7f9fa8,
+  // Ink, for the one panel that is a page rather than a board. Every colour above has
+  // its opposite number here and nothing else changes: a line written for the dark is
+  // read back in ink when it lands on paper. See `ink` in content/looks.js.
+  inkText: 0x241a12,
+  inkDim: 0x6d5136,
+  inkAccent: 0x7d4a10,
+  inkRule: 0x8b6c4a,
+  inkFolk: 0x86301c,
+  inkMark: 0x2c4a52,
+  inkSelectFill: 0xb5905f,
+
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,
   questSkyDay: 0x2c333c, // what the party is walking under in the middle band
