@@ -78,10 +78,10 @@ export const MAPS = {
     doors: [{ x: 8, y: 11, to: 'village', spawn: [16, 16] }],
   },
 
-  // Where the game opens. The tide put the player here and the storm put everything
-  // else. Reachable afterwards from the west end of the village lane.
+  // Where the game opens, and the western edge of the town afterwards. The tide put the
+  // player here and the storm put everything else; the village lane runs out onto it.
   shore: {
-    name: 'The strand',
+    name: 'The Dreadhollow outskirts',
     spawn: [16, 8],
     rows: [
       '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',

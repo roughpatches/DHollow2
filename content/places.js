@@ -24,7 +24,9 @@ export const PLACES = [
     ],
   },
   {
-    label: 'The strand',
+    // West out of the village lane. The strand you washed up on is the western edge of
+    // the town, so it is one place and this is what it is called.
+    label: 'The Dreadhollow outskirts',
     note: 'Open ground',
     map: 'shore',
     body: ['[Placeholder Text]'],
