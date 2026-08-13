@@ -256,7 +256,8 @@ export default class Quest extends Phaser.Scene {
 
   // The crawl is three bands inside the panel: the constitution bar across the top, the
   // party walking in the middle, the trail along the bottom. The middle band gives up a
-  // column at its left edge to the skills, and the road starts where that stops.
+  // column at its left edge to what the party can do, and the road starts where that
+  // stops.
   bands() {
     const b = this.box;
     const pad = padOf('band');
@@ -264,7 +265,8 @@ export default class Quest extends Phaser.Scene {
     const top = barY + TUNING.questBarHeight + 54; // room under the bar for who is walking
     const bottom = b.y + b.h - TUNING.questTrailHeight;
     const trailTop = bottom + pad.t + 4; // the ring around the goal reaches above its box
-    const col = TUNING.questSkillWidth;
+    // a party with nothing between them gives the road its width back
+    const col = this.scored().length ? TUNING.questSkillWidth : 0;
     return {
       bar: { x: this.left, y: barY, w: this.wide, h: TUNING.questBarHeight },
       skills: { x: b.x, y: top, w: col, h: bottom - top },
@@ -528,12 +530,22 @@ export default class Quest extends Phaser.Scene {
       TUNING.questHintSize, low ? COLORS.menuMapFolk : COLORS.menuDim).setOrigin(1, 0);
   }
 
-  // Down the side of the road: what the party is worth at each thing the road might ask
-  // of it, one number per skill, added up across everybody walking. It is the sum the
-  // crew screen ends on, kept in front of the player for the whole run instead of being
-  // read once and set out on. A skill nobody has is still on the list, because what the
-  // party cannot do is worth knowing before the node that asks for it.
+  // What the party is worth at each thing it has any points in at all, best first — the
+  // same sum the crew screen ends on. A skill nobody has is not a readout, it is a blank
+  // line, so it is not one of these.
+  scored() {
+    const r = run.active();
+    if (!r) return [];
+    return SKILLS.map((skill) => ({ skill, n: scoreOf(r.party, skill.id) }))
+      .filter((s) => s.n > 0)
+      .sort((a, b) => b.n - a.n);
+  }
+
+  // Down the side of the road: what the party can do, kept in front of the player for the
+  // whole run instead of being read once on the way out of town.
   skills(r, rect) {
+    const rows = this.scored();
+    if (!rows.length) return; // and a party with nothing between them gets no column
     const night = r.when === 'night';
     const g = this.add.graphics();
     g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 1);
@@ -542,18 +554,17 @@ export default class Quest extends Phaser.Scene {
     g.lineBetween(rect.x + rect.w - 0.5, rect.y, rect.x + rect.w - 0.5, rect.y + rect.h);
     this.layer.add(g);
 
-    // spread down the column, however many skills there turn out to be
-    const step = Math.min(TUNING.questSkillStep, rect.h / SKILLS.length);
-    let y = rect.y + (rect.h - step * (SKILLS.length - 1)) / 2;
-    for (const t of SKILLS) {
-      const n = scoreOf(r.party, t.id);
+    // spread down the column, however many of them there turn out to be
+    const step = Math.min(TUNING.questSkillStep, rect.h / rows.length);
+    let y = rect.y + (rect.h - step * (rows.length - 1)) / 2;
+    for (const { skill: t, n } of rows) {
       // centred on its own half of the column: the shapes are different widths and left
       // against a margin they read as a ragged edge rather than a list
       const icon = this.add.image(rect.x + 26, y, iconKeyFor(t.icon)).setOrigin(0.5);
-      icon.setScale(TUNING.questSkillScale).setAlpha(n ? 1 : 0.3);
+      icon.setScale(TUNING.questSkillScale);
       this.layer.add(icon);
-      this.text(rect.x + rect.w - 10, y - 10, `${n}`, TUNING.questBodySize,
-        n ? COLORS.menuAccent : COLORS.menuRule).setOrigin(1, 0);
+      this.text(rect.x + rect.w - 10, y - 10, `${n}`, TUNING.questBodySize, COLORS.menuAccent)
+        .setOrigin(1, 0);
       y += step;
     }
   }
