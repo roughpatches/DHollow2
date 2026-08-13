@@ -272,8 +272,9 @@ export default class Menu extends Phaser.Scene {
     const y0 = this.bodyY - 10;
 
     const cols = Math.max(1, Math.floor(TUNING.menuListWidth / cell));
-    // 20 leaves the count of squares its line under the last row
-    const lines = Math.max(1, Math.floor((this.box.y + this.box.h - 54 - y0) / cell));
+    // the panel's grey column ends 44 above the bottom of the box — see panel() — and the
+    // count of squares wants 20 of that for itself, so the grid takes what is left
+    const lines = Math.max(1, Math.floor((this.box.y + this.box.h - 64 - y0) / cell));
     const visible = cols * lines;
 
     // scroll a whole line at a time, and only far enough to bring the cursor back
@@ -296,12 +297,13 @@ export default class Menu extends Phaser.Scene {
       this.layer.add(g);
 
       const px = TUNING.menuIconPx;
-      const icon = this.add.image(x + cell / 2, y + 8 + px / 2, iconKeyFor(rows[i].icon));
+      const icon = this.add.image(x + cell / 2, y + 6 + px / 2, iconKeyFor(rows[i].icon));
       icon.setDisplaySize(px, px);
       this.layer.add(icon);
 
-      // the count sits in the corner of the square; the name is the detail pane's job
-      this.text(x + cell - 8, y + cell - 22, noteOf(rows[i]), TUNING.menuHintSize,
+      // the count sits under the icon rather than across it; the name is the detail
+      // pane's job. A cell of 60 leaves the icon 6 to 38 and this line 40 to 57.
+      this.text(x + cell - 8, y + cell - 20, noteOf(rows[i]), TUNING.menuHintSize,
         on ? COLORS.menuAccent : COLORS.menuDim).setOrigin(1, 0);
     }
 
