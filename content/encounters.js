@@ -616,8 +616,10 @@ export const ENCOUNTERS = [
     ],
   },
   {
+    // The timber the job was taken for. Beats first, then the axe: the tree is read
+    // before it is cut, the same way the stream is read before anybody casts into it.
     id: 'secondcut',
-    name: 'The second stand',
+    name: 'The oak',
     nature: 'gather',
     activity: 'Felling',
     only: true,
@@ -629,6 +631,18 @@ export const ENCOUNTERS = [
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'oak',
+        text: [
+          'The oak stands alone in a clearing it made for itself. Nothing else has been allowed to get tall within thirty feet of it.',
+          'One limb is down — old, storm-torn, half sunk into the ground and still attached at the shoulder.',
+          'The heartwood in the break is dark and dry and sound.',
+          'Fell the oak?',
+        ],
+      },
+    ],
   },
   {
     // Where the job ends. A plot node: Aldis is the only one who speaks, nothing is
