@@ -4,8 +4,8 @@ import { NPCS } from '../../content/npcs.js';
 import { buildTextures } from '../textures.js';
 import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
 import {
-  preloadArt, buildArt, bakeTiles, slotFor, fitBody, stand, raiseStructures, raiseProps,
-  restate,
+  preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
+  raiseProps, restate,
 } from '../art.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
@@ -45,6 +45,7 @@ export default class World extends Phaser.Scene {
     // the map as written, then whatever state the town has got itself into on top of it
     const names = map.rows.map((row) => [...row].map((ch) => LEGEND[ch]));
     for (const [x, y, ch] of patchesFor(this.mapKey)) names[y][x] = LEGEND[ch];
+    this.names = names; // what ground is where, so a seam can be worked out again later
 
     // Two grids from one: a tile with `above` also draws a second tile on a layer
     // over the actors, so you pass behind foliage instead of in front of it.
@@ -62,6 +63,16 @@ export default class World extends Phaser.Scene {
 
     this.ground = this.buildLayer(ground, 0);
     this.above = this.buildLayer(above, 20000);
+
+    // Seams: where two grounds meet, one tile painted with both of them, laid half a tile
+    // up and left so it straddles the four squares its corners came from. A seam is only
+    // ever drawn over the two grounds it is made of, so it changes nothing but the edge.
+    const seams = [];
+    for (let y = 0; y < h; y++) {
+      seams.push([]);
+      for (let x = 0; x < w; x++) seams[y].push(this.seamAt(x, y));
+    }
+    this.seams = this.buildLayer(seams, 1).setPosition(-TS / 2, -TS / 2);
 
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
@@ -221,12 +232,29 @@ export default class World extends Phaser.Scene {
     this.say(b.name, contributeLines(b.id, result), null);
   }
 
+  // the tile for the corner northwest of this square, from the four grounds around it
+  seamAt(x, y) {
+    if (x === 0 || y === 0) return -1;
+    return seamFor(this.names[y - 1][x - 1], this.names[y - 1][x],
+      this.names[y][x - 1], this.names[y][x]);
+  }
+
   // a stage's tiles go down without rebuilding the map, so the town changes under you
   applyPatch(patch) {
     for (const [x, y, ch] of patch) {
       const name = LEGEND[ch];
+      this.names[y][x] = name;
       this.ground.putTileAt(slotFor(name, x, y), x, y).setCollision(!!TILES[name].solid);
       this.above.putTileAt(TILES[name].above ? slotFor(TILES[name].above, x, y) : -1, x, y);
+    }
+    // a square that changed is a corner of four seams, and all four are now wrong
+    for (const [x, y] of patch) {
+      for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+        const [sx, sy] = [x + dx, y + dy];
+        if (sy < this.names.length && sx < this.names[0].length) {
+          this.seams.putTileAt(this.seamAt(sx, sy), sx, sy);
+        }
+      }
     }
   }
 

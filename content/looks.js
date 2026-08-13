@@ -111,6 +111,105 @@ export const GROUND = [
   },
 ];
 
+// Where two grounds meet, the tile drawn over the seam. These sheets are painted with
+// both their materials meeting along an organic edge, so every way two grounds can meet
+// at the four corners of a tile is somewhere in the sheet already — below are the windows
+// they were found at. The seam tile is laid half a tile up and left of the square it
+// belongs to, so it straddles the four squares whose corners it is drawn from.
+//   low / high — the two sides. `tiles` are the ground names on that side: several where
+//                they are the same paint, since the street and the square are one granite.
+//                `shade` is that side's shade, exactly as in GROUND above.
+//   split      — how the sheet's own pixels are told apart. `channels` is which two to
+//                subtract, and a pixel over `over` belongs to the high side. Hue, not
+//                brightness: shading in the paint must not read as the other material.
+//   cells      — [x, y] per corner code. The code's bits are northwest, northeast,
+//                southwest and southeast, and a set bit means the high side is there.
+//                6 and 9 are the two diagonals; no sheet paints them, and a seam that
+//                wants one is left hard. So is any seam where more than two grounds meet.
+// Add a pair by adding a block. A pair with no block is a hard edge, which is right where
+// somebody built the edge — a quay wall, a dock, a kerb — and wrong where nothing did.
+export const EDGES = [
+  {
+    low: { tiles: ['path', 'stone'] }, // worn granite, unshaded
+    high: { tiles: ['grass'], shade: 0x8e9c8c },
+    sheet: 'art/ground/grass-and-granite.png',
+    split: { channels: 'rg', over: 0 },
+    cells: {
+      0: [732, 64], 1: [1372, 228], 2: [1238, 210], 3: [1284, 224], 4: [1366, 88],
+      5: [480, 0], 7: [1040, 42], 8: [1244, 100], 10: [992, 0], 11: [1436, 22],
+      12: [1284, 96], 13: [490, 44], 14: [1434, 430], 15: [96, 0],
+    },
+  },
+  {
+    // the same sheet and the same windows: scrub is the same paint as grass, one shade
+    // warmer, so only the tint on the high side changes
+    low: { tiles: ['path', 'stone'] },
+    high: { tiles: ['scrub'], shade: 0xb2a37e },
+    sheet: 'art/ground/grass-and-granite.png',
+    split: { channels: 'rg', over: 0 },
+    cells: {
+      0: [732, 64], 1: [1372, 228], 2: [1238, 210], 3: [1284, 224], 4: [1366, 88],
+      5: [480, 0], 7: [1040, 42], 8: [1244, 100], 10: [992, 0], 11: [1436, 22],
+      12: [1284, 96], 13: [490, 44], 14: [1434, 430], 15: [96, 0],
+    },
+  },
+  {
+    low: { tiles: ['dirt'], shade: 0xb0a89c },
+    high: { tiles: ['grass'], shade: 0x8e9c8c },
+    sheet: 'art/ground/grass-and-dirt.png',
+    split: { channels: 'gb', over: 20 },
+    cells: {
+      0: [512, 0], 1: [1378, 216], 2: [1242, 210], 3: [1284, 216], 4: [1376, 104],
+      5: [506, 112], 7: [4, 402], 8: [588, 58], 10: [1254, 142], 11: [72, 394],
+      12: [1284, 102], 13: [136, 336], 14: [64, 436], 15: [1298, 144],
+    },
+  },
+  {
+    low: { tiles: ['dirt'], shade: 0xb0a89c },
+    high: { tiles: ['scrub'], shade: 0xb2a37e },
+    sheet: 'art/ground/grass-and-dirt.png',
+    split: { channels: 'gb', over: 20 },
+    cells: {
+      0: [512, 0], 1: [1378, 216], 2: [1242, 210], 3: [1284, 216], 4: [1376, 104],
+      5: [506, 112], 7: [4, 402], 8: [588, 58], 10: [1254, 142], 11: [72, 394],
+      12: [1284, 102], 13: [136, 336], 14: [64, 436], 15: [1298, 144],
+    },
+  },
+  {
+    low: { tiles: ['water'], shade: 0x5c7796 },
+    high: { tiles: ['sand'], shade: 0xbdb4a6 },
+    sheet: 'art/ground/water-and-sand.png',
+    split: { channels: 'rg', over: 3 },
+    cells: {
+      0: [1320, 128], 1: [68, 322], 2: [126, 324], 3: [172, 332], 4: [58, 4],
+      5: [64, 54], 7: [1262, 86], 8: [6, 4], 10: [0, 282], 11: [254, 68],
+      12: [848, 4], 13: [1244, 220], 14: [258, 124], 15: [512, 0],
+    },
+  },
+  {
+    low: { tiles: ['path', 'stone'] },
+    high: { tiles: ['dirt'], shade: 0xb0a89c },
+    sheet: 'art/ground/dirt-and-granite.png',
+    split: { channels: 'rg', over: 0 },
+    cells: {
+      0: [1152, 60], 1: [1376, 228], 2: [1238, 214], 3: [1432, 2], 4: [512, 86],
+      5: [1024, 196], 7: [124, 12], 8: [1240, 102], 10: [64, 282], 11: [430, 376],
+      12: [210, 330], 13: [134, 334], 14: [68, 324], 15: [1302, 132],
+    },
+  },
+  {
+    low: { tiles: ['dirt'], shade: 0xb0a89c },
+    high: { tiles: ['sand'], shade: 0xbdb4a6 },
+    sheet: 'art/ground/sand-and-dirt.png',
+    split: { channels: 'rb', over: 30 },
+    cells: {
+      0: [512, 0], 1: [1386, 208], 2: [1258, 230], 3: [1308, 222], 4: [1380, 102],
+      5: [1014, 208], 7: [118, 10], 8: [1262, 88], 10: [68, 424], 11: [56, 378],
+      12: [1340, 98], 13: [120, 340], 14: [54, 352], 15: [1332, 156],
+    },
+  },
+];
+
 export const STRUCTURES = [
   {
     // One stage: the Sea Hag is the one building in town that never needed repairing.
