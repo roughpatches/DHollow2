@@ -45,10 +45,10 @@ export const QUESTS = [
     at: 'greywood',
     tags: ['forest', 'timber', 'wild', 'leavingtown'],
     giver: 'gregorious',
-    // The first job is authored rather than drawn: fell a tree, take one of two ways
-    // through the wood, fell another, and then whatever Aldis has been walking toward.
+    // The first job is authored rather than drawn: fish the water on the way out, take
+    // one of two ways through the wood, fell a stand, and then the grove.
     line: [
-      'firstcut',
+      'firstcast',
       ['heron', 'mushrooms'],
       'secondcut',
       'aldiswood',

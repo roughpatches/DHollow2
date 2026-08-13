@@ -266,16 +266,19 @@ export const ENCOUNTERS = [
   // shape they need is here, the words are not.
 
   {
-    id: 'firstcut',
-    name: 'The first stand',
+    // The first node of the first job: water before timber. `Casting` is the three-phase
+    // fishing act imported from StarScape — cast, hook, reel — and the rod is the test
+    // here rather than a roll. See src/minigames/FishEngine.js.
+    id: 'firstcast',
+    name: '[Placeholder — the fishing node]',
     nature: 'gather',
-    activity: 'Felling',
+    activity: 'Casting',
     only: true,
     weight: { day: 0, night: 0 },
-    read: { skill: 'woodcutting', line: 'Aldis puts a hand on one and says this one. He does not say why.' },
-    harvest: 'woodcutting',
-    check: null, // the axe is the test here, not a roll
-    spoils: { timber: [3, 5] },
+    read: { skill: 'fishing', line: '[Placeholder Text]' },
+    harvest: 'fishing',
+    check: null, // the rod is the test here, not a roll
+    spoils: { provisions: [3, 5] },
     xp: [12, 18],
     con: [-1, 0],
     body: ['[Placeholder Text]'],

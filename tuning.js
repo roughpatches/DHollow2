@@ -67,6 +67,44 @@ export const TUNING = {
     soundnessRegenPerSec: 0.18, // and a balanced cut puts it back
   },
 
+  // Fishing (src/minigames/FishEngine.js), which is what a Casting node is: cast to find
+  // a fish, hook it when it takes, hold the line while it fights. Three engines, three
+  // blocks of numbers, and every one of them a gate.
+  fish: {
+    // Cast — hold to pay out line, release to present it in the drifting feeding lane.
+    // Short, over, or too slow and there is no fish to hook.
+    cast: {
+      payOutRateStart: 0.55, // reach per second with no line out
+      payOutRateEnd: 0.3, // and at full extension — the lengthening, slowing feel
+      lane: {
+        start: 0.42, // where the feeding lane sits before it starts moving
+        width: 0.2, // how much of the water it covers
+        driftSpeed: 0.18, // and how fast it wanders across it
+        wanderIntervalMs: 1800,
+      },
+      presentationMs: 6200, // work the cast longer than this and the fish moves off
+    },
+    // Hook — wait, then react. A nibble looks like a take and is not.
+    hook: {
+      window: { perfect: 420, good: 900 }, // how long the take stays settable
+      calmMsRange: [900, 2000], // how long the water stays quiet between events
+      feintMs: 480, // and how long a nibble lasts
+      refusals: 1, // how many nibbles come before the real thing
+    },
+    // Reel — hold the line inside a band that will not stay still.
+    reel: {
+      durationMs: 5600, // how long the fish fights
+      tickIntervalMs: 300, // and how often the hold is scored
+      zoneWidth: 0.38,
+      zoneWanderIntervalMs: 1500,
+      zoneDriftSpeed: 0.6,
+      indicatorAccel: 1.5, // how hard holding hauls the line
+      gravity: 1, // and how fast it falls back when you let go
+      maxVelocity: 1.3,
+      lineIntegrity: 5, // slips the line takes before it snaps; the 5th ends the catch
+    },
+  },
+
   // What playing an activity is worth. A judgment of perfect counts full, good most of
   // the way, a miss barely — averaged into one 0..1 quality, which is what the node then
   // pays on. A run where the party never touches an activity is unaffected by any of it.
