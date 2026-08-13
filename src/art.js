@@ -4,6 +4,7 @@
 
 import { TUNING } from '../tuning.js';
 import { LOOKS, STRUCTURES, GROUND, PROPS, EDGES } from '../content/looks.js';
+import { PLACES } from '../content/places.js';
 import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX, TILE_NAMES } from './textures.js';
 import { buildingOf, levelOf } from './town.js';
 
@@ -51,6 +52,11 @@ export function preloadArt(scene) {
     if (!scene.textures.exists(propKey(p.art))) {
       scene.load.image(propKey(p.art), `art/props/${p.art}.png`);
     }
+  }
+  // a zone's painted landscape, loaded by its own path the way the ground sheets are
+  for (const place of PLACES) {
+    const key = place.backdrop && place.backdrop.image;
+    if (key && !scene.textures.exists(key)) scene.load.image(key, key);
   }
 }
 

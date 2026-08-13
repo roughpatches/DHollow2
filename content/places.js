@@ -1,5 +1,10 @@
 // The Map tab. Same label/note/body as the other tabs, plus the fields it alone reads:
 //   id       — how a quest's `at` names this place. Only a zone a job is walked in needs one.
+//   backdrop — a painted landscape for runs walked in this zone, and how far down the
+//              image its ground line sits. Drawn at 1:1 and tiled across, so it wants to
+//              be pixel art at the game's own scale; `ground` is what registers its floor
+//              to the road the party walks on. A zone without one gets the generated
+//              bands. See src/walk.js.
 //   terrain  — the ground a zone is: forest, water, and whatever else gets walked on.
 //              A skill that reads that ground is worth constitution to everyone who sets
 //              out here; see `terrain` in content/skills.js and conPerTerrainPoint in
@@ -110,6 +115,7 @@ export const PLACES = [
     // `quest` makes the entry somewhere you set out for — Enter starts the job.
     id: 'greywood',
     terrain: 'forest',
+    backdrop: { image: 'art/greywood/backdrop.png', ground: 318 },
     label: 'The Greywood',
     note: 'Wilds',
     quest: 'firstday',
