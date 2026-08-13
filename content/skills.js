@@ -14,9 +14,6 @@
 // skillBonusPerPoint to those activities, one to any roll against a DC for that skill,
 // and skillYieldPerPoint to what the party carries out of work of that kind.
 // Add a skill by adding an entry. Nothing reads this list by position.
-//
-// Animal Handling is last and is only here because Aldis's second skill is on it. Delete
-// the block and move his two points whenever you want it gone.
 
 export const SKILLS = [
   {
@@ -34,13 +31,16 @@ export const SKILLS = [
     ],
   },
   {
+    // Animal Handling folded into this one: the forest's creatures are the forest, and
+    // Calming and the spooked-animal line came across with them.
     id: 'woodcraft',
     name: 'Woodcraft',
-    activities: ['Shaping', 'Joinery', 'Carving'],
+    activities: ['Shaping', 'Joinery', 'Carving', 'Calming'],
     draws: ['forest', 'ruin'],
     unlocks: [
       'Read a tree\'s lean before the first cut.',
       'Salvage a botched cut instead of losing the stock.',
+      'Approach a spooked animal without it bolting.',
     ],
     body: [
       'Knowledge of the forest, its creatures, and its habitats.',
@@ -135,16 +135,5 @@ export const SKILLS = [
       'The ability to smelt and forge items from workable ores and other materials.',
       '(Allows for the creation of smithing items, etc. STILL UNDER DEVELOPMENT)',
     ],
-  },
-  {
-    id: 'animalhandling',
-    name: 'Animal Handling',
-    activities: ['Herding', 'Riding', 'Calming'],
-    draws: ['beasts', 'wild'],
-    unlocks: [
-      'Approach a spooked animal without it bolting.',
-      'Read what an animal has been doing from its tracks.',
-    ],
-    body: ['[Placeholder Text]'],
   },
 ];

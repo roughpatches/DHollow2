@@ -81,10 +81,10 @@ export const ENCOUNTERS = [
     nature: 'gather',
     activity: 'Calming',
     weight: { day: 4, night: 3 },
-    read: { skill: 'animalhandling', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
-    harvest: 'animalhandling',
+    read: { skill: 'woodcraft', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
+    harvest: 'woodcraft',
     check: {
-      skill: 'animalhandling',
+      skill: 'woodcraft',
       dc: 13,
       held: 'It stands still long enough to be worth the standing still.',
       lost: 'It bolts, and it does not bolt away from you first.',
@@ -229,7 +229,7 @@ export const ENCOUNTERS = [
     nature: 'combat',
     activity: 'Fighting',
     weight: { day: 1, night: 5 },
-    read: { skill: 'animalhandling', line: 'Everything that should be making noise on that side has stopped.' },
+    read: { skill: 'woodcraft', line: 'Everything that should be making noise on that side has stopped.' },
     harvest: null,
     check: {
       skill: 'perception',
@@ -310,7 +310,7 @@ export const ENCOUNTERS = [
     only: true,
     weight: { day: 0, night: 0 },
     read: { skill: 'woodcraft', line: '[Placeholder Text]' },
-    harvest: 'animalhandling',
+    harvest: 'woodcraft',
     check: null, // the beats carry their own rolls, one per way in
     spoils: {}, // and their own spoils: nothing is taken off this by walking past it
     xp: [10, 16],
