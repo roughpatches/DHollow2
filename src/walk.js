@@ -13,30 +13,64 @@ import { charOf } from './party.js';
 
 const LAYERS = ['far', 'mid', 'near'];
 
-export function createWalk(scene, rect, party, when) {
+export function createWalk(scene, rect, party, when, backdrop) {
   const night = when === 'night';
   const layer = scene.add.container(0, 0).setDepth(28900);
   const ground = rect.y + rect.h * TUNING.questWalkGroundFrac;
 
-  // sky above the ground line, and packed earth all the way down below it, so the band
-  // has no dead colour in it anywhere
+  // A zone with a painted landscape is drawn against it; a zone without one gets the
+  // generated bands. The painting is missing until its file is in, so this asks.
+  const painted = backdrop && scene.textures.exists(backdrop.image) ? backdrop : null;
+
+  // Sky above the ground line, and packed earth all the way down below it, so the band
+  // has no dead colour in it anywhere. Under a painting the earth is the painting's own
+  // bottom edge, read off the image, so what runs out below it is the same ground.
+  const floorColour = painted
+    ? scene.textures.getPixel(0, scene.textures.get(painted.image).getSourceImage().height - 1,
+      painted.image).color
+    : COLORS.path[1];
   const sky = scene.add.graphics();
   sky.fillStyle(night ? COLORS.questSkyNight : COLORS.questSkyDay, 1);
   sky.fillRect(rect.x, rect.y, rect.w, ground - rect.y);
-  sky.fillStyle(COLORS.path[1], 1); // the road's own colour, so the band has no seam in it
+  sky.fillStyle(floorColour, 1);
   sky.fillRect(rect.x, ground, rect.w, rect.y + rect.h - ground);
   layer.add(sky);
 
+  // The painting, at 1:1 and tiled across the width — scaling pixel art by a fraction is
+  // how it stops being pixel art. It is cut along its own floor line and laid down as two
+  // strips: the trees behind the party, drifting at the far rate, and the ground under
+  // their feet, going past at the near rate. One image, two speeds, and the party stands
+  // exactly where the painting says the ground is.
+  const bands = [];
+  if (painted) {
+    const tall = scene.textures.get(painted.image).getSourceImage().height;
+    const above = ground - rect.y; // room between the top of the band and the road
+    const crop = Math.max(0, painted.ground - above); // what hangs off the top, cut off
+    const top = rect.y + Math.max(0, above - painted.ground);
+    const strip = (y, h, from, rate) => {
+      const t = scene.add.tileSprite(rect.x, y, rect.w, h, painted.image).setOrigin(0, 0);
+      t.tilePositionY = from;
+      if (night) t.setTint(COLORS.questNightTint);
+      layer.add(t);
+      bands.push({ t, rate });
+      return t;
+    };
+    strip(top, painted.ground - crop, crop, TUNING.questParallax[0]);
+    strip(ground, tall - painted.ground, painted.ground, TUNING.questParallax[2]);
+  }
+
   // Each band is tiled across the width and scrolled at its own fraction of the near
-  // ground's speed, which is the whole of the parallax.
-  const bands = LAYERS.map((name, i) => {
-    const [, h] = BAND[name];
-    const y = name === 'near' ? ground : ground - (name === 'mid' ? 4 : 12);
-    const t = scene.add.tileSprite(rect.x, y, rect.w, h, `band_${name}`).setOrigin(0, name === 'near' ? 0 : 1);
-    if (night) t.setTint(COLORS.questNightTint);
-    layer.add(t);
-    return { t, rate: TUNING.questParallax[i] };
-  });
+  // ground's speed, which is the whole of the parallax. A painted zone brings its own.
+  if (!painted) {
+    LAYERS.forEach((name, i) => {
+      const [, h] = BAND[name];
+      const y = name === 'near' ? ground : ground - (name === 'mid' ? 4 : 12);
+      const t = scene.add.tileSprite(rect.x, y, rect.w, h, `band_${name}`).setOrigin(0, name === 'near' ? 0 : 1);
+      if (night) t.setTint(COLORS.questNightTint);
+      layer.add(t);
+      bands.push({ t, rate: TUNING.questParallax[i] });
+    });
+  }
 
   // The party stands on the near band, spread back from the leading walker. The player is
   // first in the list and so is first up the road.
