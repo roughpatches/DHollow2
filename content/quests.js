@@ -53,12 +53,10 @@ export const QUESTS = [
       'secondcut',
       'aldiswood',
     ],
-    check: {
-      skill: 'woodcraft',
-      dc: 12,
-      held: 'Aldis picks the stand, and the stand gives up what the inn needs.',
-      lost: 'You cut what was nearest instead of what was best, and half of it is green.',
-    },
+    // No roll in front of this goal: the last node is the grove, and the grove is a plot
+    // node that plays straight through. Put a `check` back here the day the job ends on
+    // something that can be got right or wrong.
+    check: null,
     goal: 'Bring back enough timber and provisions to put the Sea Hag right.',
     body: ['[Placeholder Text]'],
   },

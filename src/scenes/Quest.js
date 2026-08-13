@@ -639,9 +639,15 @@ export default class Quest extends Phaser.Scene {
     const b = n.beat;
     const out = [];
     for (const para of b.text || []) {
-      out.push(typeof para === 'string'
-        ? [fill(para, n.actorId), TUNING.questBodySize, COLORS.menuDim]
-        : [fill(para.cry, n.actorId), TUNING.questBodySize, COLORS.menuMapMark]);
+      if (typeof para === 'string') {
+        out.push([fill(para, n.actorId), TUNING.questBodySize, COLORS.menuDim]);
+      } else if (para.cry) {
+        out.push([fill(para.cry, n.actorId), TUNING.questBodySize, COLORS.menuMapMark]);
+      } else {
+        // somebody on the road saying it, named the way a fork's reading is named
+        out.push([`${nameOf(para.who)}: ${fill(para.line, n.actorId)}`,
+          TUNING.questBodySize, COLORS.menuText]);
+      }
     }
     // the roll is shown once, on the beat that reads it back
     if (b.result && n.check) {

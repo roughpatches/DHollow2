@@ -50,7 +50,8 @@ function encounterSlots(e) {
   if (e.read) slots.push(['fork line', e.read.line]);
   if (e.check) slots.push(['held', e.check.held], ['lost', e.check.lost]);
   for (const b of e.beats || []) {
-    (b.text || []).forEach((p, i) => slots.push([`${b.id} ${i + 1}`, typeof p === 'string' ? p : p.cry]));
+    (b.text || []).forEach((p, i) => slots.push([`${b.id} ${i + 1}`,
+      typeof p === 'string' ? p : (p.cry || p.line)]));
     (b.choose || []).forEach((o, i) => slots.push([`${b.id} option ${i + 1}`, o.text]));
   }
   return slots;

@@ -611,19 +611,104 @@ export const ENCOUNTERS = [
     body: ['[Placeholder Text]'],
   },
   {
+    // Where the job ends. A plot node: Aldis is the only one who speaks, nothing is
+    // rolled, and it plays straight through to the road home. `{ who, line }` in a
+    // beat's text is somebody saying it; the rest is what the two of them are looking at.
     id: 'aldiswood',
-    name: '[Placeholder — the plot event]',
+    name: 'The grove',
     nature: 'talk',
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
     read: null,
     harvest: null,
-    // no check of its own: the goal takes the job's own roll, from content/quests.js
-    check: null,
+    check: null, // and the job's own roll was taken out of it; see content/quests.js
     spoils: {},
     xp: [20, 20],
     con: [0, 0],
     body: ['[Placeholder Text]'],
+
+    beats: [
+      {
+        id: 'stench',
+        text: [
+          { who: 'aldis', line: 'That stench.' }, // stopping
+          { who: 'aldis', line: "Breathe through your mouth. It doesn't help much, but it helps." },
+        ],
+        then: 'before',
+      },
+      {
+        id: 'before',
+        text: [{ who: 'aldis', line: "I've smelled this before. Never this strong." }],
+        then: 'stag',
+      },
+      {
+        id: 'stag',
+        text: [
+          'A red stag. Fourteen points, maybe more. Hard to count now.',
+          'There are arrows in it. Six at the shoulder and the flank, one low in the neck.',
+          'The fletching is grey.',
+          { who: 'aldis', line: 'There they are.' }, // quietly
+          { who: 'aldis', line: "Seven shots to put it down. That isn't skill. That's overkill." },
+        ],
+        then: 'wrong',
+      },
+      {
+        id: 'wrong',
+        text: [
+          'The body is wrong.',
+          'The spine has been turned somewhere a spine does not turn. The hindquarters face away from the shoulders. The ribs stand open, and they were opened from the inside.',
+          { who: 'aldis', line: "Nothing eats like this. This wasn't a hunt." },
+        ],
+        then: 'beetles',
+      },
+      {
+        id: 'beetles',
+        text: [
+          'Something moves in the eye socket.',
+          'Then the mouth. Then the whole open length of the flank, all at once.',
+          'Beetles. Black, thumbnail-sized, coming out of the animal in a steady unbroken pour, over the antlers and down into the moss.',
+          { who: 'aldis', line: '[Placeholder Text]' }, // his line here was left blank
+        ],
+        then: 'everyway',
+      },
+      {
+        id: 'everyway',
+        text: [
+          { who: 'aldis', line: "I've walked these woods since I could walk." },
+          { who: 'aldis', line: 'I know every way a thing dies out here. I know the wolf kills. I know the winter kills. I know the ones that just lie down under a tree because they\'re finished.' },
+          { who: 'aldis', line: "I don't know this one." },
+        ],
+        then: 'sevenarrows',
+      },
+      {
+        id: 'sevenarrows',
+        text: [
+          { who: 'aldis', line: "The men who shot this stood where we're standing." },
+          { who: 'aldis', line: "Seven arrows into it, and then they didn't take one thing off the body. Not the antlers. Not the hide. Not a strip of it." },
+        ],
+        then: 'wheretheywent', // the beat before the question is the press that gets to it
+      },
+      {
+        id: 'wheretheywent',
+        text: [{ who: 'aldis', line: 'So where did they go?' }],
+        then: 'gregorious',
+      },
+      {
+        id: 'gregorious',
+        text: [
+          { who: 'aldis', line: "Let's head back to Gregorious. He's been here longest." },
+          { who: 'aldis', line: "If he doesn't know what that was, nobody in Dreadhollow does." },
+        ],
+        then: 'lightgoing',
+      },
+      {
+        id: 'lightgoing',
+        text: [
+          { who: 'aldis', line: 'Every time I say this place will come back… it gets a little worse.' },
+          { who: 'aldis', line: "It's getting dark. We should get going…" },
+        ],
+      },
+    ],
   },
 ];
