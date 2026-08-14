@@ -142,6 +142,10 @@ export const MAPS = {
   //             times the repeat count; nothing else says how long the town is.
   //   ground  — how far down the painting the walking line sits. Measured off the image: it
   //             is what stands somebody on the cobbles rather than up against the doors.
+  //   sill    — and how far down a building stands, which is not the same line: the town is
+  //             built along the back of the pavement and walked along the cobbles in front
+  //             of it. A building dropped in stands on this, so it sits in the row rather
+  //             than out in the road. Left out, it is the walking line.
   // A door on a street has an x and nothing else, and is opened with [E] rather than
   // walked onto: on a street you would cross every doorway in town going to the tavern.
   // A door into a building (see content/buildings.js) is not listed here — the building
@@ -151,7 +155,8 @@ export const MAPS = {
     street: {
       art: 'art/town/backdrop.png',
       size: [688, 338], // the painting is 384 tall; below 338 it is empty
-      ground: 328,
+      ground: 328, // the cobbles, a little in front of the kerb
+      sill: 272, // and the back of the pavement, where the terrace stands
       repeats: 1, // one composed scene, and there is only one spire in Dreadhollow
     },
     spawn: [18],

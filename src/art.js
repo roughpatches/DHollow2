@@ -238,10 +238,11 @@ export function raiseStructures(scene, mapKey) {
   for (const s of STRUCTURES) {
     const b = buildingOf(s.id);
     if (!b || b.map !== mapKey) continue;
-    // On a street the picture stands on the walking line at the building's own place along
-    // it, and there are no tiles under it to clear: the painting is already the town.
+    // On a street the picture stands along the back of the pavement, in the row with the
+    // painted terrace rather than out in the road, at the building's own place along it.
+    // There are no tiles under it to clear: the painting is already the town.
     const img = scene.street
-      ? scene.add.image(atTile(s.at[0]), scene.groundY, stageKey(s, 0))
+      ? scene.add.image(atTile(s.at[0]), scene.sillY, stageKey(s, 0))
         .setOrigin(0.5, 1).setDepth(DEPTH.structure)
       : scene.add.image(s.at[0] * TUNING.tileSize, s.at[1] * TUNING.tileSize, stageKey(s, 0))
         .setOrigin(0, 0);

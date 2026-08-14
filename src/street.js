@@ -53,7 +53,7 @@ export function createStreet(scene, def) {
     }
   }
 
-  return { width, height: h, ground: def.ground };
+  return { width, height: h, ground: def.ground, sill: def.sill ?? def.ground };
 }
 
 // What the player is standing at: the nearest building or door within reach, or nothing.

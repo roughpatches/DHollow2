@@ -134,7 +134,8 @@ export default class World extends Phaser.Scene {
   // that line. No tiles, so nothing here bakes a grid, cuts a seam or sets a collision.
   buildStreet(map) {
     const street = createStreet(this, map.street);
-    this.groundY = street.ground;
+    this.groundY = street.ground; // where a person walks
+    this.sillY = street.sill; // and where a building stands, which is further back
     this.worldW = street.width;
     this.worldH = street.height;
     this.physics.world.setBounds(0, 0, street.width, street.height);
