@@ -102,7 +102,7 @@ export const MAPS = {
       '#________________#',
       '########D#########',
     ],
-    doors: [{ x: 8, y: 11, to: 'village', spawn: [4] }],
+    doors: [{ x: 8, y: 11, to: 'village', spawn: [7] }],
   },
 
   // Where the game opens: the point, north up the coast from the town. The tide put the
@@ -136,7 +136,9 @@ export const MAPS = {
   // the terraces, the hills and the ruined quay are in it, not standing on it — and the
   // cobbles in front are what is walked. Everything below is in tiles along that street.
   // The gap in the terrace was a painted church; it was taken out so the chapel that is
-  // repaired could stand there instead of in front of one that never changes.
+  // repaired could stand there instead of in front of one that never changes. The painting
+  // wraps, so it was also rolled three tiles sideways to put its cut in the trees at the
+  // east end rather than through the house at the west.
   //   art     — the painted town, drawn at 1:1 and laid end to end `repeats` times, every
   //             other copy flipped so the row of houses does not visibly restart.
   //   size    — how much of that painting the town is, in pixels: its width, and its height
@@ -161,9 +163,9 @@ export const MAPS = {
       sill: 272, // and the back of the pavement, where the terrace stands
       repeats: 1, // one composed scene; laid twice it would be the same town twice
     },
-    spawn: [18],
+    spawn: [21],
     doors: [
-      { x: 4, to: 'hut', label: 'Aldis Rooke\'s house' },
+      { x: 7, to: 'hut', label: 'Aldis Rooke\'s house' },
       { x: 41, to: 'shore', spawn: [17, 14], label: 'The track north' },
     ],
   },
@@ -188,7 +190,7 @@ export const MAPS = {
       '#____________________#',
       '#########D############',
     ],
-    doors: [{ x: 9, y: 14, to: 'village', spawn: [31] }],
+    doors: [{ x: 9, y: 14, to: 'village', spawn: [34] }],
   },
 
   // Inside the chapel. The door is shut until the roof is back on, so this is what the
@@ -213,6 +215,6 @@ export const MAPS = {
       '#++++++++++++++++++++#',
       '##########D###########',
     ],
-    doors: [{ x: 10, y: 14, to: 'village', spawn: [17] }],
+    doors: [{ x: 10, y: 14, to: 'village', spawn: [20] }],
   },
 };

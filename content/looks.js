@@ -232,7 +232,7 @@ export const STRUCTURES = [
     // The export carries eight angles; the town is drawn from the front, so it is south.
     id: 'tavern',
     path: 'art/seahag',
-    at: [31],
+    at: [34],
     under: 'dirt',
     stages: ['base/rotations/south.png'],
   },
@@ -241,7 +241,7 @@ export const STRUCTURES = [
     // then roofed and lit. 128 pixels of picture over the chapel's seven rows of tiles.
     id: 'chapel',
     path: 'art/chapel',
-    at: [16.75],
+    at: [19.75],
     under: 'stone', // it stands on the paving, so what its picture clears is paving
     stages: [
       'base/rotations/unknown.png',

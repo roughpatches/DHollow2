@@ -211,7 +211,7 @@ export const SCENES = [
         lines: ['Be inside by dark.'],
       },
       { fade: 'out', ms: 1100 },
-      { go: 'village', spawn: [4] }, // out his own front door, onto the shore road
+      { go: 'village', spawn: [7] }, // out his own front door, onto the shore road
     ],
   },
   {
