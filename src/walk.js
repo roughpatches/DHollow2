@@ -92,7 +92,7 @@ export function createWalk(scene, rect, party, when, backdrop) {
   // The node ahead: it walks in from off the right and stops short of the leading body,
   // which is the whole of "the party arrives at it".
   const markFrom = rect.x + rect.w + 40;
-  const markTo = rect.x + rect.w * 0.66;
+  const markTo = rect.x + rect.w - TUNING.questMarkInset;
   // a sprite rather than an image: an encounter with art of its own has that art moving
   const mark = scene.add.sprite(markFrom, ground + 4, markKey('gather')).setOrigin(0.5, 1).setScale(TUNING.questMarkScale);
   mark.setVisible(false);
