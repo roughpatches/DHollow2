@@ -47,7 +47,7 @@ export const TUNING = {
   questSkillWidth: 108, // the column down the side of the road, taken off the road's width
   questSkillStep: 52, // how far apart the skills sit in it
   questSkillPx: 32, // how big an icon is in the column, whatever size it is painted
-  questTrailHeight: 100, // the band along the bottom, deep enough for the frame around it
+  questTrailHeight: 108, // the band along the bottom, deep enough for the frame and a node in it
   questWalkGroundFrac: 0.68, // where the ground line sits inside the walking band
   questBodyPx: 62, // how tall a walking placeholder is drawn on the road
   questArtScale: 1.25, // drawn art carries air around the body; this brings it up to size
@@ -125,7 +125,7 @@ export const TUNING = {
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
 
-  questPipSize: 26, // a node on the trail, and the length of road between two of them
+  questPipSize: 32, // a node on the trail, and the length of road between two of them
   questPipGap: 18,
   questPad: 26,
   questTitleSize: 22,

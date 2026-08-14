@@ -3,8 +3,8 @@ import { SKILLS } from '../../content/skills.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
 import {
-  roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf, isCombat,
-  nameOf, fill, YOU,
+  roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf,
+  skillForActivity, isCombat, nameOf, fill, YOU,
 } from '../party.js';
 import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
@@ -631,7 +631,13 @@ export default class Quest extends Phaser.Scene {
       // of them is a stud in the road and nothing else, because it is not anything yet:
       // what a node turns out to be is rolled when the party gets there.
       if (behind && node.kind) {
-        const mark = this.add.image(cx, cy, markKey(run.kindOf(node.kind).nature));
+        // A node whose work belongs to a skill is drawn with that skill's own icon — the
+        // axe where they cut, the rod where they fished — and one that is nobody's work
+        // keeps the shape of its nature. The encounter names an activity and the skill
+        // that claims it is looked up; neither has to name the other.
+        const e = run.kindOf(node.kind);
+        const skill = skillForActivity(e.activity);
+        const mark = this.add.image(cx, cy, skill ? iconKeyFor(skill.id) : markKey(e.nature));
         // fitted, not stretched: a silhouette squashed to a box stops being a silhouette
         mark.setScale(Math.min(side / mark.width, side / mark.height));
         // in its own colours, and dimmer the further back down the road it is: these are
