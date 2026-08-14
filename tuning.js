@@ -271,6 +271,17 @@ export const COLORS = {
   conFull: 0xd1943c,
   conLow: 0xa8341f,
 
+  // What is behind the town. The paintings carry no sky — it is transparent in them, so
+  // the weather is the game's to draw — and where a panel has a hole in it you are looking
+  // through at the water. Retint here and every panel's weather follows.
+  skyHigh: 0x232a37, // overhead, where the dusk is furthest along
+  skyLow: 0x6d616a, // and down at the water, where the last of the light is
+  skyCloud: 0x2f3543, // the banks lying across it
+  skyCloudLit: 0x8a7a74, // and their undersides, catching what is left
+  seaFar: 0x55606b, // steel, out at the horizon
+  seaNear: 0x2c3540, // and darker close in
+  seaCrest: 0x77828c, // the swell on it
+
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,
   questSkyDay: 0x2c333c, // what the party is walking under in the middle band

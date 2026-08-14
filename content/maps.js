@@ -150,6 +150,9 @@ export const MAPS = {
   //             built along the back of the pavement and walked along the cobbles in front
   //             of it. A building dropped in stands on this, so it sits in the row rather
   //             than out in the road. Left out, it is the walking line.
+  //   horizon — how far down the panel the sea meets the sky, behind everything painted.
+  //             A panel that has one is outdoors and gets weather drawn behind it; one
+  //             without is indoors and gets a flat wall instead. See src/street.js.
   //   edges   — what lies off each end: { right: 'wharf', left: 'village' }. A street is a
   //             panel, not a stretch of something longer — walk into the end of one and the
   //             next is what is on the screen, standing you at its far end. Painted towns
@@ -166,6 +169,7 @@ export const MAPS = {
       size: [688, 338], // the painting is 384 tall; below 338 it is empty
       ground: 328, // the cobbles, a little in front of the kerb
       sill: 272, // and the back of the pavement, where the terrace stands
+      horizon: 205, // the hills stand in front of most of it here
       repeats: 1, // one composed scene; laid twice it would be the same town twice
       edges: { left: 'inn', right: 'wharf' },
     },
@@ -184,6 +188,7 @@ export const MAPS = {
       size: [512, 288],
       ground: 282, // the cobbles here are a shallow strip; there is not much road in front
       sill: 257,
+      horizon: 212, // the water shows through the gap in the row
       repeats: 1,
       edges: { right: 'village' },
     },
@@ -201,6 +206,7 @@ export const MAPS = {
       size: [512, 288],
       ground: 278,
       sill: 238,
+      horizon: 205, // behind the jetty, which is what you see it through
       repeats: 1,
       edges: { left: 'village' },
     },
