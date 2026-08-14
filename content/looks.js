@@ -291,6 +291,9 @@ export const PROPS = [
 //           against its own rails survives it.
 //   ink   — true if this panel is a page rather than a board: what is written on it is
 //           written in the ink colours from tuning.js instead of the light ones.
+//   hang  — how far the leaves fall below the bottom rail, in pixels. A panel lined up
+//           against another is lined up by its ironwork, not by the leaves hanging off
+//           it, so whatever does that lining up adds this back.
 export const UI = {
   sheet: 'art/Autumn-leafy-vines-twined-around-wrought-iron-framing.png',
   frames: {
@@ -309,7 +312,7 @@ export const UI = {
     // the card that opens at each node: paper, and written on in ink
     plaque: {
       at: [196, 269, 295, 110], slice: [173, 120, 54, 54],
-      flat: [18, 27, 19, 18], pad: [38, 38, 28, 26],
+      flat: [18, 27, 19, 18], pad: [38, 38, 28, 26], hang: 10,
       paper: [372, 328, 33, 31], wash: 2, ink: true,
     },
   },

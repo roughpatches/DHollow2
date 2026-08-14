@@ -8,7 +8,7 @@ import {
 } from '../party.js';
 import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
-import { framed, padOf, minOf, inkOf } from '../frames.js';
+import { framed, padOf, minOf, inkOf, hangOf } from '../frames.js';
 import { markKey } from '../textures.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
@@ -714,11 +714,14 @@ export default class Quest extends Phaser.Scene {
 
     // the head, the paragraphs, and the frame's own margin above and below them
     const h = pad.t + 26 + body - 8 + pad.b;
-    // Stood on the foot of the road and run the width of it. Short enough that its top
-    // edge is below the line everything stands on, so the party, the road and whatever
+    // Stood on the foot of the road and run the width of it, ending level with the
+    // bottom of the column beside it: the two panels are one edge. Short enough that its
+    // top is below the line everything stands on, so the party, the road and whatever
     // the party has walked up to are all still there while it is being read.
     const x = rect.x + 8;
-    const top = Math.max(rect.y + 10, rect.y + rect.h - 8 - h);
+    // by its bottom rail, not by the leaves hanging under it, so it lines up with the
+    // column beside it rather than sitting the depth of those leaves above it
+    const top = Math.max(rect.y + 10, rect.y + rect.h + hangOf(CARD) - h);
     this.hang(CARD, { x, y: top, w, h }, run.active()?.when === 'night');
 
     this.text(x + pad.l, top + pad.t - 4, head, TUNING.questBodySize + 4,
