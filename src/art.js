@@ -3,7 +3,7 @@
 // Both end up under the same texture keys, so nothing downstream knows the difference.
 
 import { TUNING } from '../tuning.js';
-import { LOOKS, STRUCTURES, GROUND, PROPS, EDGES } from '../content/looks.js';
+import { LOOKS, NODE_ART, STRUCTURES, GROUND, PROPS, EDGES } from '../content/looks.js';
 import { PLACES } from '../content/places.js';
 import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX, TILE_NAMES } from './textures.js';
 import { buildingOf, levelOf } from './town.js';
@@ -53,6 +53,17 @@ export function preloadArt(scene) {
       scene.load.image(propKey(p.art), `art/props/${p.art}.png`);
     }
   }
+  // what stands at a node, for the encounters that have art for it
+  for (const [id, art] of Object.entries(NODE_ART)) {
+    for (const state of ['stands', 'done']) {
+      for (let i = 0; i < art[state].frames; i++) {
+        const k = nodeFrame(id, state, i);
+        if (!scene.textures.exists(k)) {
+          scene.load.image(k, `${art.path}/${art[state].folder}/frame_${String(i).padStart(3, '0')}.png`);
+        }
+      }
+    }
+  }
   // a zone's painted landscape, loaded by its own path the way the ground sheets are
   for (const place of PLACES) {
     const key = place.backdrop && place.backdrop.image;
@@ -63,6 +74,7 @@ export function preloadArt(scene) {
 // The animations, once the files are in. Standing still is an animation too — a
 // character who breathes is worth the four frames it costs.
 export function buildArt(scene) {
+  buildNodeArt(scene);
   for (const look of LOOKS) {
     for (const dir of Object.keys(DIRS)) {
       for (const [set, spec, rate] of [
@@ -78,6 +90,36 @@ export function buildArt(scene) {
           repeat: -1,
         });
       }
+    }
+  }
+}
+
+// What stands at a node, and what is left of it afterwards. The standing loop runs
+// while the party is at it; the finished one is played once and held, because a tree
+// that has come down does not come down again.
+export function nodeFrame(id, state, i) {
+  return `node_${id}_${state}_${i}`;
+}
+
+export function nodeAnim(id, state) {
+  return `node_${id}_${state}`;
+}
+
+export function nodeArtFor(id) {
+  return NODE_ART[id] || null;
+}
+
+function buildNodeArt(scene) {
+  for (const [id, art] of Object.entries(NODE_ART)) {
+    for (const state of ['stands', 'done']) {
+      const k = nodeAnim(id, state);
+      if (scene.anims.exists(k)) continue;
+      scene.anims.create({
+        key: k,
+        frames: Array.from({ length: art[state].frames }, (_, i) => ({ key: nodeFrame(id, state, i) })),
+        frameRate: TUNING.artIdleFrameRate,
+        repeat: state === 'stands' ? -1 : 0,
+      });
     }
   }
 }

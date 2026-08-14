@@ -8,6 +8,7 @@ import {
   raiseProps, restate,
 } from '../art.js';
 import { preloadFrames, buildFrames } from '../frames.js';
+import { preloadIcons, buildIcons } from '../icons.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
 import {
@@ -34,12 +35,14 @@ export default class World extends Phaser.Scene {
   preload() {
     preloadArt(this);
     preloadFrames(this);
+    preloadIcons(this);
   }
 
   create() {
     buildTextures(this);
     buildArt(this);
     buildFrames(this);
+    buildIcons(this);
     bakeTiles(this);
     const map = MAPS[this.mapKey];
     const w = map.rows[0].length;

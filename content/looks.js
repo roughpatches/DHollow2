@@ -291,6 +291,9 @@ export const PROPS = [
 //           against its own rails survives it.
 //   ink   — true if this panel is a page rather than a board: what is written on it is
 //           written in the ink colours from tuning.js instead of the light ones.
+//   hang  — how far the leaves fall below the bottom rail, in pixels. A panel lined up
+//           against another is lined up by its ironwork, not by the leaves hanging off
+//           it, so whatever does that lining up adds this back.
 export const UI = {
   sheet: 'art/Autumn-leafy-vines-twined-around-wrought-iron-framing.png',
   frames: {
@@ -301,16 +304,73 @@ export const UI = {
       at: [107, 97, 480, 172], slice: [158, 320, 113, 57],
       flat: [24, 31, 39, 35], pad: [42, 46, 50, 62], shade: 0.8,
     },
-    // a band across the crawl, over and under the road
+    // A band across the crawl: over the road, under it, and stood on its end beside it.
+    // Washed like the plaque, for the same reason in a different key — the board inside
+    // it is painted with stains and highlights, and a nine-slice pulls a two-pixel slice
+    // of those the width of a screen, which is where the pale shapes came from.
     band: {
       at: [196, 11, 295, 81], slice: [183, 110, 43, 36],
       flat: [21, 21, 21, 21], pad: [66, 68, 24, 22], shade: 0.3,
+      paper: [310, 37, 47, 34], wash: 1,
     },
     // the card that opens at each node: paper, and written on in ink
     plaque: {
       at: [196, 269, 295, 110], slice: [173, 120, 54, 54],
-      flat: [18, 27, 19, 18], pad: [38, 38, 28, 26],
+      flat: [18, 27, 19, 18], pad: [38, 38, 28, 26], hang: 10,
       paper: [372, 328, 33, 31], wash: 2, ink: true,
     },
   },
+};
+
+// The skills, cut from one painted sheet of them. A cell is named by its column and row,
+// counted from one at the top-left, which is how a sheet is read off the page.
+//   sheet — the painted sheet under art/.
+//   cell  — the side of one icon on it, in pixels. Every cell is square and they abut.
+//   at    — [column, row] per skill id from content/skills.js. A skill with no entry —
+//           or every skill, until the sheet is actually in the repo — keeps the shape
+//           src/icons.js draws for it, and nothing else changes either way.
+export const SKILL_ART = {
+  sheet: 'art/pixellab-Skill-Icons-for-the-following--1786668947352.png',
+  cell: 32,
+  at: {
+    woodcraft: [1, 1],
+    woodcutting: [1, 2],
+    fishing: [1, 3],
+    sailing: [3, 4],
+    alchemy: [1, 5],
+    perception: [1, 6],
+    charisma: [1, 7],
+    smithing: [1, 8],
+  },
+};
+
+// What is standing at a node, for the encounters that have art instead of the silhouette
+// src/textures.js draws for their nature. Keyed by the encounter id in
+// content/encounters.js, and two of them can share one export.
+//   path   — the folder under art/ the export was unzipped into, as exported.
+//   stands — the loop it plays while it is still there: the folder of frames as
+//            exported, how many there are, and how far up the image its own floor sits.
+//   done   — the same for once the party has finished with it. Played once and held, so
+//            a tree that has come down stays down.
+// `ground` is per state because a state is drawn where it is drawn: the oak's roots run
+// to the bottom of its frame and the felled trunk sits well up inside its own, and both
+// have to meet the same road. Measure it off the art once — it is the empty pixels under
+// the paint — and nothing has to be recut.
+const OAK = {
+  path: 'art/oak',
+  stands: {
+    folder: 'A_large_ancient_oak_treee_w/animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown',
+    frames: 9,
+    ground: 7,
+  },
+  done: {
+    folder: 'Tree_is_cut_town_th/animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown',
+    frames: 9,
+    ground: 35,
+  },
+};
+
+export const NODE_ART = {
+  woodland: OAK, // Standing timber, the one the road rolls
+  secondcut: OAK, // and The oak, the one the first job is taken for
 };

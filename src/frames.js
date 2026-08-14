@@ -78,6 +78,11 @@ export function padOf(name, turned) {
   return turned ? { l: t, r: b, t: r, b: l } : { l, r, t, b };
 }
 
+// how far a frame's leaves fall below its bottom rail; zero for one that has none
+export function hangOf(name) {
+  return UI.frames[name].hang || 0;
+}
+
 // the smallest a frame can be drawn: the edges it never stretches, back to back
 export function minOf(name) {
   const [l, r, t, b] = UI.frames[name].slice;
