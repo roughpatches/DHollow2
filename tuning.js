@@ -54,6 +54,7 @@ export const TUNING = {
   questMarkScale: 2.5, // and how big a generated one is drawn; painted art keeps its size
   questMarkInset: 150, // how far in from the far side of the road it comes to rest
   questCardWidth: 548, // the card is held to the near side, clear of whatever is standing there
+  questCardBody: 78, // and this much of it is paragraphs; a longer account is read a page at a time
   questScrollPxPerSec: 46, // the near ground's speed; the layers behind it run slower
   questParallax: [0.15, 0.4, 1], // far, mid, near, as a fraction of that speed
   questApproachMs: 1400, // how long a node takes to walk into view

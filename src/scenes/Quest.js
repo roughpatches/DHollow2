@@ -165,7 +165,8 @@ export default class Quest extends Phaser.Scene {
       return;
     }
     if (r.state !== 'running') {
-      if (k === 'escape' || k === 'enter' || k === 'e' || k === ' ') this.close();
+      if (k === 'enter' || k === 'e' || k === ' ') { if (!this.turnPage()) this.close(); }
+      else if (k === 'escape') this.close();
       return;
     }
     if (r.phase === 'beat') {
@@ -184,7 +185,7 @@ export default class Quest extends Phaser.Scene {
         else if (k === 'arrowdown' || k === 's') step(1);
         else if (k === 'enter' || k === ' ' || k === 'e') { run.pickBeat(this.row); this.row = 0; }
         else if (k === 'escape') run.abandon();
-      } else if (k === 'e' || k === ' ' || k === 'enter') run.advance();
+      } else if (k === 'e' || k === ' ' || k === 'enter') { if (this.turnPage()) return; run.advance(); }
       else if (k === 'escape') run.abandon();
       this.draw();
       return;
@@ -199,6 +200,7 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'escape') run.abandon();
     } else if (k === 'e' || k === ' ' || k === 'enter') {
       if (this.approaching) return; // it has not got here yet
+      if (this.turnPage()) return;
       run.step();
       this.row = 0;
     } else if (k === 'escape') {
@@ -460,6 +462,10 @@ export default class Quest extends Phaser.Scene {
   crawl() {
     const r = run.active();
     const band = this.bands();
+    this.pages = 1;
+    // what the card is showing, in one string: when it changes, it is read from the top
+    const sig = `${r.state}:${r.at}:${r.phase}:${r.nodes[r.at]?.beat?.id || ''}`;
+    if (sig !== this.cardSig) { this.cardSig = sig; this.page = 0; }
 
     // A node the party has not walked up to yet is not a node they know anything about,
     // so the approach runs first and the card only opens when it has arrived.
@@ -488,20 +494,20 @@ export default class Quest extends Phaser.Scene {
     if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
     else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
     else if (r.state === 'running' && r.phase === 'beat' && !this.approaching) {
-      this.card(band.walk, this.beatLines(r), this.nodeHead(r));
+      this.card(band.walk, this.beatLines(r), this.nodeHead(r), !r.nodes[r.at].beat.choose);
     }
-    else if (r.state === 'running' && !this.approaching) this.card(band.walk, this.nodeLines(r), this.nodeHead(r));
-    else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r));
+    else if (r.state === 'running' && !this.approaching) this.card(band.walk, this.nodeLines(r), this.nodeHead(r), true);
+    else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r), true);
 
-    if (r.state !== 'running') this.hint('[Enter] Back to town');
+    if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.kindOf(r.nodes[r.at].kind).activity) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
       this.hint(r.nodes[r.at].beat.choose
         ? '[Up/Down] Choose    [Enter] Do it    [Esc] Turn back'
-        : '[E] Go on    [Esc] Turn back');
+        : `[E] ${this.page < this.pages - 1 ? 'Read on' : 'Go on'}    [Esc] Turn back`);
     }
-    else if (this.approaching) this.hint('[E] Press on    [Esc] Turn back');
+    else if (this.page < this.pages - 1) this.hint('[E] Read on    [Esc] Turn back');
     else this.hint('[E] Press on    [Esc] Turn back');
   }
 
@@ -552,6 +558,16 @@ export default class Quest extends Phaser.Scene {
       g.fillStyle(COLORS.conRivet, 1);
       g.fillRect(cx + cap / 2 - 2, y + h / 2 - 2, 3, 3);
     }
+  }
+
+  // A card longer than the space under the road is read a page at a time. Returns
+  // whether it took the keypress, so the caller only moves the party on once the last
+  // page has been read.
+  turnPage() {
+    if (this.page >= this.pages - 1) return false;
+    this.page += 1;
+    this.draw();
+    return true;
   }
 
   // What the party is worth at each thing it has any points in at all, best first — the
@@ -665,33 +681,62 @@ export default class Quest extends Phaser.Scene {
   // Everything that happens at a node is said on one card over the landscape, so the
   // party and the ground they are standing on stay on the screen while it is read. The
   // card is the plaque: a page held up over the road, written in ink.
-  card(rect, lines, head) {
+  card(rect, lines, head, paged) {
     const pad = padOf(CARD);
     const w = Math.max(Math.min(TUNING.questCardWidth, rect.w - 80), minOf(CARD).w);
     const wrap = w - pad.l - pad.r;
     const texts = [];
-    let tall = 0;
     for (const [str, size, colour] of lines) {
-      const t = this.text(0, 0, str, size, inkOf(CARD, colour), wrap);
-      texts.push(t);
+      texts.push(this.text(0, 0, str, size, inkOf(CARD, colour), wrap));
+    }
+
+    // A card as long as its account is a card over the whole road. It is read a page at
+    // a time instead: as much as the space under the party will take, and the key that
+    // moves the party on turns the page while there is one left. A card that asks a
+    // question is never paged — the question and the ways out of it are one thing.
+    const pages = [[]];
+    let tall = 0;
+    for (const t of texts) {
+      if (paged && pages.at(-1).length && tall + t.height + 8 > TUNING.questCardBody) {
+        pages.push([]);
+        tall = 0;
+      }
+      pages.at(-1).push(t);
       tall += t.height + 8;
     }
-    // the head, the paragraphs, and the frame's own margin above and below them: a card
-    // that is shorter than what is on it clips its last line
-    const h = pad.t + 26 + tall - 8 + pad.b;
-    // Held to the near side of the road, not centred on it: what is standing at the node
-    // is standing on the far side, and a card over the middle is a card over that.
+    this.pages = pages.length;
+    const at = Math.min(this.page, pages.length - 1);
+    for (const [i, page] of pages.entries()) {
+      if (i !== at) for (const t of page) t.destroy();
+    }
+    const shown = pages[at];
+    const body = shown.reduce((n, t) => n + t.height + 8, 0);
+
+    // the head, the paragraphs, and the frame's own margin above and below them
+    const h = pad.t + 26 + body - 8 + pad.b;
+    // Held to the near side of the road and stood on the bottom of it: what the party
+    // has walked up to is standing on the far side and above it, and a card anywhere but
+    // down here is a card over that.
     const x = rect.x + 8;
-    const top = rect.y + 10; // the party stays visible on the road under it
+    const top = Math.max(rect.y + 10, rect.y + rect.h - 8 - h);
     this.hang(CARD, { x, y: top, w, h }, run.active()?.when === 'night');
 
     this.text(x + pad.l, top + pad.t - 4, head, TUNING.questBodySize + 4,
       inkOf(CARD, COLORS.menuText), wrap);
     let ty = top + pad.t + 26;
-    for (const t of texts) {
+    for (const t of shown) {
       t.setPosition(x + pad.l, ty);
       this.layer.bringToTop(t); // measured before the frame was hung, so it is under it
       ty += t.height + 8;
+    }
+    // there is more of it: the same mark a page turn gets anywhere else
+    if (at < pages.length - 1) {
+      const g = this.add.graphics();
+      g.fillStyle(inkOf(CARD, COLORS.menuDim), 1);
+      const mx = x + w - pad.r;
+      const my = top + h - pad.b - 9;
+      g.fillTriangle(mx - 9, my, mx, my, mx - 4.5, my + 6);
+      this.layer.add(g);
     }
   }
 
