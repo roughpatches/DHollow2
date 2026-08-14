@@ -55,11 +55,13 @@ export function preloadArt(scene) {
   }
   // what stands at a node, for the encounters that have art for it
   for (const [id, art] of Object.entries(NODE_ART)) {
-    for (const state of ['stands', 'done']) {
-      for (let i = 0; i < art[state].frames; i++) {
-        const k = nodeFrame(id, state, i);
+    for (const [state, spec] of nodeStates(art)) {
+      for (let i = 0; i < spec.frames; i++) {
+        // art that has to be turned is loaded under its own name and turned into the one
+        // everything else asks for, so nothing downstream knows it was painted sideways
+        const k = spec.turn || spec.fade ? `${nodeFrame(id, state, i)}_asis` : nodeFrame(id, state, i);
         if (!scene.textures.exists(k)) {
-          scene.load.image(k, `${art.path}/${art[state].folder}/frame_${String(i).padStart(3, '0')}.png`);
+          scene.load.image(k, `${art.path}/${spec.folder}/frame_${String(i).padStart(3, '0')}.png`);
         }
       }
     }
@@ -109,14 +111,81 @@ export function nodeArtFor(id) {
   return NODE_ART[id] || null;
 }
 
+// the states an encounter's art actually has: everything has one it stands in, and only
+// some have one they are left in
+function nodeStates(art) {
+  return ['stands', 'done'].filter((k) => art[k]).map((k) => [k, art[k]]);
+}
+
+// One frame, turned and feathered into what it is standing on. A right angle on a square
+// canvas moves pixels without touching them, so the turn costs the art nothing; the
+// feather is an alpha ramp on whichever sides are named, for art painted as a self-
+// contained rectangle that would otherwise sit on the landscape with a seam round it.
+function dressFrame(scene, key, spec) {
+  if (scene.textures.exists(key)) return;
+  const src = scene.textures.get(`${key}_asis`).getSourceImage();
+  const turned = spec.turn % 2 === 1;
+  const w = turned ? src.height : src.width;
+  const h = turned ? src.width : src.height;
+  const tex = scene.textures.createCanvas(key, w, h);
+  const ctx = tex.getContext();
+  ctx.imageSmoothingEnabled = false;
+  ctx.translate(w / 2, h / 2);
+  if (spec.turn) ctx.rotate((Math.PI / 2) * spec.turn);
+  ctx.drawImage(src, -src.width / 2, -src.height / 2);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  if (spec.fade) {
+    const img = ctx.getImageData(0, 0, w, h);
+    feather(img, w, h, spec.fade);
+    ctx.putImageData(img, 0, 0);
+  }
+  tex.refresh();
+}
+
+// The alpha ramp, measured from where the art is rather than from where its frame is:
+// an export carries whatever air the exporter felt like and the feather has to bite into
+// the painting, not into the empty margin around it.
+function feather(img, w, h, [fl, fr, ft, fb]) {
+  const alpha = (x, y) => img.data[(y * w + x) * 4 + 3];
+  let x0 = w; let x1 = -1; let y0 = h; let y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!alpha(x, y)) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  if (x1 < 0) return;
+  // A bank is not a ruled line. How far each row's fade reaches wanders slowly along the
+  // edge, so where the art runs out is ragged the way ground is; it is a function of the
+  // pixel and not of chance, so all nine frames of a loop run out in the same place.
+  const wander = (n) => (Math.sin(n * 0.19) + Math.sin(n * 0.071)) / 5;
+  const ramp = (n, over, at) => (over ? Math.min(1, Math.max(0, n / over + wander(at))) : 1);
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const k = Math.min(
+        ramp(x - x0, fl, y), ramp(x1 - x, fr, y + 500),
+        ramp(y - y0, ft, x + 900), ramp(y1 - y, fb, x + 1300),
+      );
+      if (k < 1) img.data[(y * w + x) * 4 + 3] *= k;
+    }
+  }
+}
+
 function buildNodeArt(scene) {
   for (const [id, art] of Object.entries(NODE_ART)) {
-    for (const state of ['stands', 'done']) {
+    for (const [state, spec] of nodeStates(art)) {
+      if (spec.turn || spec.fade) {
+        for (let i = 0; i < spec.frames; i++) dressFrame(scene, nodeFrame(id, state, i), spec);
+      }
       const k = nodeAnim(id, state);
       if (scene.anims.exists(k)) continue;
       scene.anims.create({
         key: k,
-        frames: Array.from({ length: art[state].frames }, (_, i) => ({ key: nodeFrame(id, state, i) })),
+        frames: Array.from({ length: spec.frames }, (_, i) => ({ key: nodeFrame(id, state, i) })),
         frameRate: TUNING.artIdleFrameRate,
         repeat: state === 'stands' ? -1 : 0,
       });

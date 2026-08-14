@@ -154,8 +154,10 @@ export function createWalk(scene, rect, party, when, backdrop) {
 
     // The work is done and what was standing there is not standing any more: played
     // once and held, so it stays down while the party reads what it cost them.
+    // whatever was standing there is not standing any more, for the ones the party
+    // changes by working them; water is water afterwards
     felled() {
-      if (standing) wear(standing, 'done');
+      if (standing && nodeArtFor(standing).done) wear(standing, 'done');
     },
 
     // it is behind them now
