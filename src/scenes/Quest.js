@@ -683,7 +683,7 @@ export default class Quest extends Phaser.Scene {
   // card is the plaque: a page held up over the road, written in ink.
   card(rect, lines, head, paged) {
     const pad = padOf(CARD);
-    const w = Math.max(Math.min(TUNING.questCardWidth, rect.w - 80), minOf(CARD).w);
+    const w = Math.max(Math.min(TUNING.questCardWidth, rect.w - 16), minOf(CARD).w);
     const wrap = w - pad.l - pad.r;
     const texts = [];
     for (const [str, size, colour] of lines) {
@@ -714,9 +714,9 @@ export default class Quest extends Phaser.Scene {
 
     // the head, the paragraphs, and the frame's own margin above and below them
     const h = pad.t + 26 + body - 8 + pad.b;
-    // Held to the near side of the road and stood on the bottom of it: what the party
-    // has walked up to is standing on the far side and above it, and a card anywhere but
-    // down here is a card over that.
+    // Stood on the foot of the road and run the width of it. Short enough that its top
+    // edge is below the line everything stands on, so the party, the road and whatever
+    // the party has walked up to are all still there while it is being read.
     const x = rect.x + 8;
     const top = Math.max(rect.y + 10, rect.y + rect.h - 8 - h);
     this.hang(CARD, { x, y: top, w, h }, run.active()?.when === 'night');
