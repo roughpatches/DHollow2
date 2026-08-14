@@ -90,6 +90,16 @@ export const PLACES = [
     body: ['[Placeholder Text]'],
   },
   {
+    // The panel west. The town is painted a panel at a time; this is the far end of it.
+    label: 'The Seaside Inn',
+    note: 'Open ground',
+    map: 'inn',
+    body: [
+      'A clock that stopped, an inn nobody has taken a room in since, and the burnt-out shell of something older leaning on the end of the row.',
+      'West of here the cobbles give out and the road is just road.',
+    ],
+  },
+  {
     // The next panel east. The town is painted a panel at a time; this is the second.
     label: 'The wharf',
     note: 'Open ground',

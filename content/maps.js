@@ -167,12 +167,28 @@ export const MAPS = {
       ground: 328, // the cobbles, a little in front of the kerb
       sill: 272, // and the back of the pavement, where the terrace stands
       repeats: 1, // one composed scene; laid twice it would be the same town twice
-      edges: { right: 'wharf' },
+      edges: { left: 'inn', right: 'wharf' },
     },
     spawn: [21],
     doors: [
       { x: 7, to: 'hut', label: 'Aldis Rooke\'s house' },
     ],
+  },
+
+  // The panel west: the Seaside Inn under its clock, a stone ruin at the end of the row,
+  // and the last of the town before the road runs out of it.
+  inn: {
+    name: 'The Seaside Inn',
+    street: {
+      art: 'art/town/inn.png',
+      size: [512, 288],
+      ground: 282, // the cobbles here are a shallow strip; there is not much road in front
+      sill: 257,
+      repeats: 1,
+      edges: { right: 'village' },
+    },
+    spawn: [2],
+    doors: [],
   },
 
   // The next panel east: timber-framed shops, a jetty, and a boat nobody has taken out in
