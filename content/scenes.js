@@ -211,7 +211,7 @@ export const SCENES = [
         lines: ['Be inside by dark.'],
       },
       { fade: 'out', ms: 1100 },
-      { go: 'village', spawn: [58, 26] }, // out his own front door, onto the shore road
+      { go: 'village', spawn: [7] }, // out his own front door, onto the shore road
     ],
   },
   {
@@ -228,8 +228,8 @@ export const SCENES = [
     map: 'tavern',
     steps: [
       { wait: 400 },
-      { walk: 'player', to: [12, 7] },
-      { face: 'player', dir: 'up' },
+      { walk: 'player', to: [15] },
+      { face: 'player', dir: 'right' },
       { wait: 500 },
       {
         say: 'gregorious',

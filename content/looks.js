@@ -45,8 +45,9 @@ export const LOOKS = [
 //   id     — the building in content/buildings.js. Its stages and this list line up in
 //            order: first picture for the first stage, and so on down.
 //   path   — the folder under art/ the export was unzipped into.
-//   at     — where the top-left corner of the picture sits, in tiles. Fractions are
-//            fine: it is placed by eye against the walls it is standing on.
+//   at     — where the picture sits, in tiles. On a grid, its top-left corner; on a
+//            street, one number — how far along it stands, with its feet on the walking
+//            line. Fractions are fine: it is placed by eye against what it stands on.
 //   under  — the tile drawn under the picture, in place of whatever the map had there.
 //            Defaults to grass. The tiles keep their collision either way: the walls
 //            still stop you, they just stop drawing themselves.
@@ -226,21 +227,15 @@ export const EDGES = [
 ];
 
 export const STRUCTURES = [
-  {
-    // One stage: the Sea Hag is the one building in town that never needed repairing.
-    // The export carries eight angles; the town is drawn from the front, so it is south.
-    id: 'tavern',
-    path: 'art/seahag',
-    at: [56.06, 28.13],
-    under: 'dirt',
-    stages: ['base/rotations/south.png'],
-  },
+  // The Sea Hag has no entry: it is painted into the west panel, under the clock, and a
+  // building that is already in the picture does not want a second one standing on it.
+  // The export it used to be drawn from is still in art/seahag if it is wanted elsewhere.
   {
     // Three stages and the art carries all of them: burnt out, wrapped in scaffolding,
     // then roofed and lit. 128 pixels of picture over the chapel's seven rows of tiles.
     id: 'chapel',
     path: 'art/chapel',
-    at: [26.94, 12.5],
+    at: [19.75],
     under: 'stone', // it stands on the paving, so what its picture clears is paving
     stages: [
       'base/rotations/unknown.png',

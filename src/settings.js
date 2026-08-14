@@ -22,6 +22,9 @@ export function cycleSetting(id) {
 // camera, so they are pushed to it — on every World.create, and again on every change.
 export function applyToWorld(world) {
   const cam = world.cameras.main;
-  cam.setZoom(Math.max(1, TUNING.zoom + setting('view')));
+  // a street is painted 384 pixels tall and a room is not, so it is drawn further back:
+  // at the grid's own zoom you would never see a roofline
+  const base = world.street ? TUNING.streetZoom : TUNING.zoom;
+  cam.setZoom(Math.max(1, base + setting('view')));
   cam.startFollow(world.player, true, setting('camera'), setting('camera'));
 }

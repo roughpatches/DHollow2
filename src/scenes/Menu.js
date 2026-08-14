@@ -8,7 +8,7 @@ import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
 import { partyRows, skillRows, fill } from '../party.js';
-import { statusLines, carriedRows } from '../town.js';
+import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
 import { questRows, placeLines, canStart } from '../run.js';
 
@@ -374,6 +374,7 @@ export default class Menu extends Phaser.Scene {
   // than from content/places.js: move an NPC or a door and the map follows on its own.
   miniMap(entry, y, room) {
     const map = MAPS[entry.map];
+    if (map.street) return this.miniStreet(entry, y, map);
     const cols = map.rows[0].length;
     const rows = map.rows.length;
     const cell = Math.max(
@@ -416,6 +417,40 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
 
     return y + rows * cell + 8 + this.key(x0, y + rows * cell + 8, entry).height;
+  }
+
+  // A street has nothing to draw a grid of: it is one line, and the map of it is that line
+  // with everything on it marked by how far along it stands. Same pins, same key.
+  miniStreet(entry, y, map) {
+    const tiles = (map.street.size[0] * map.street.repeats) / TUNING.tileSize;
+    const cell = this.detailW / tiles;
+    const h = 16;
+    const x0 = this.detailX;
+
+    const g = this.add.graphics();
+    g.fillStyle(COLORS.path[0], 1);
+    g.fillRect(x0, y, this.detailW, h);
+    g.lineStyle(1, COLORS.menuRule, 1);
+    g.strokeRect(x0 - 1, y - 1, this.detailW + 2, h + 2);
+
+    const pin = (tx, color) => {
+      g.fillStyle(color, 1);
+      g.fillRect(Math.round(x0 + tx * cell) - 1, y, 3, h);
+    };
+
+    const pins = setting('pins');
+    if (pins !== 'none') {
+      for (const d of map.doors) pin(d.x, COLORS.menuMapDoor);
+      for (const b of buildings()) if (b.map === entry.map) pin(b.site[0], COLORS.menuMapDoor);
+    }
+    if (pins === 'all') for (const n of NPCS) if (n.map === entry.map) pin(n.x, COLORS.menuMapFolk);
+    if (entry.at) pin(entry.at[0], COLORS.menuMapMark);
+
+    const world = this.scene.get('World');
+    if (world.mapKey === entry.map) pin(world.player.x / TUNING.tileSize, COLORS.menuMapYou);
+    this.layer.add(g);
+
+    return y + h + 8 + this.key(x0, y + h + 8, entry).height;
   }
 
   key(x, y, entry) {

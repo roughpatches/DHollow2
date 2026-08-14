@@ -89,7 +89,8 @@ function walk(scene, actor, [tx, ty], done) {
     return;
   }
   const x = tx * TS + TS / 2;
-  const y = ty * TS + TS - 1;
+  // a street has one line on it, so a scene that walks somebody along one only says how far
+  const y = scene.street ? actor.y : ty * TS + TS - 1;
   const leg = (toX, toY, after) => {
     const dist = Math.hypot(toX - actor.x, toY - actor.y);
     if (dist < 1) {

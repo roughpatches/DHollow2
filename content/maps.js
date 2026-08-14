@@ -1,5 +1,10 @@
 // Maps are character grids. Editing the world means typing over characters.
 // Every row of a map must be the same length and every character must be in LEGEND.
+//
+// A map with `street` instead of `rows` is not a grid at all: it is Dreadhollow seen from
+// the side, one painted town with a line across it to walk along. Everything standing on a
+// street — a door, a building, somebody waiting — is placed by how far along it stands and
+// nothing else. See src/street.js.
 
 // solid: blocks movement. above: a second tile drawn over actors standing here.
 export const TILES = {
@@ -97,7 +102,7 @@ export const MAPS = {
       '#________________#',
       '########D#########',
     ],
-    doors: [{ x: 8, y: 11, to: 'village', spawn: [58, 26] }],
+    doors: [{ x: 8, y: 11, to: 'village', spawn: [7] }],
   },
 
   // Where the game opens: the point, north up the coast from the town. The tide put the
@@ -124,105 +129,110 @@ export const MAPS = {
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
     ],
-    doors: [{ x: 17, y: 15, to: 'village', spawn: [94, 1] }],
+    doors: [{ x: 17, y: 15, to: 'wharf', spawn: [29] }],
   },
 
-  // Dreadhollow itself, and the whole of the walkable town. The terrain is the designer's
-  // map export, read back at its own scale: 26 by 14 painted tiles of 64 pixels is 104 by
-  // 56 of the world's own, so one painted tile is four by four here.
-  // The water is east and southeast. The Sea Hag stands at the foot of the shore road
-  // where the bank runs out onto the foreshore, Aldis Rooke's is the next door up it, and
-  // the chapel shuts off the north end of the paving. Nothing else is built here yet.
+  // Dreadhollow itself: one street, seen from the side. The painting is the town behind —
+  // the terraces, the hills and the ruined quay are in it, not standing on it — and the
+  // cobbles in front are what is walked. Everything below is in tiles along that street.
+  // The gap in the terrace was a painted church; it was taken out so the chapel that is
+  // repaired could stand there instead of in front of one that never changes. The painting
+  // wraps, so it was also rolled three tiles sideways to put its cut in the trees at the
+  // east end rather than through the house at the west.
+  //   art     — the painted town, drawn at 1:1 and laid end to end `repeats` times, every
+  //             other copy flipped so the row of houses does not visibly restart.
+  //   size    — how much of that painting the town is, in pixels: its width, and its height
+  //             down to where its own ground runs out. The street is that many tiles wide
+  //             times the repeat count; nothing else says how long the town is.
+  //   ground  — how far down the painting the walking line sits. Measured off the image: it
+  //             is what stands somebody on the cobbles rather than up against the doors.
+  //   sill    — and how far down a building stands, which is not the same line: the town is
+  //             built along the back of the pavement and walked along the cobbles in front
+  //             of it. A building dropped in stands on this, so it sits in the row rather
+  //             than out in the road. Left out, it is the walking line.
+  //   horizon — how far down the panel the sea meets the sky, behind everything painted.
+  //             A panel that has one is outdoors and gets weather drawn behind it; one
+  //             without is indoors and gets a flat wall instead. See src/street.js.
+  //   edges   — what lies off each end: { right: 'wharf', left: 'village' }. A street is a
+  //             panel, not a stretch of something longer — walk into the end of one and the
+  //             next is what is on the screen, standing you at its far end. Painted towns
+  //             are painted a panel at a time and are not the same size as each other, so
+  //             this is how one is put beside another rather than joined to it.
+  // A door on a street has an x and nothing else, and is opened with [E] rather than
+  // walked onto: on a street you would cross every doorway in town going to the tavern.
+  // A door into a building (see content/buildings.js) is not listed here — the building
+  // is its own door, and its repair state is what decides whether it opens.
   village: {
     name: 'Dreadhollow',
-    spawn: [58, 26],
-    rows: [
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,....======......,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,....======......,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,....======......,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '................,,,,....,,,,======,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,######,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,######,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,##D###,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,,,,,........::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,,,,,........::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,======......::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,======......::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,....######..::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,....##D###..::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.....:::....::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.....:::....::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:=======::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:=======SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:#######SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:###D###SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:+++++++SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........:+++++++~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-    ],
+    street: {
+      art: 'art/town/backdrop.png',
+      size: [688, 338], // the painting is 384 tall; below 338 it is empty
+      ground: 328, // the cobbles, a little in front of the kerb
+      sill: 272, // and the back of the pavement, where the terrace stands
+      horizon: 205, // the hills stand in front of most of it here
+      repeats: 1, // one composed scene; laid twice it would be the same town twice
+      edges: { left: 'inn', right: 'wharf' },
+    },
+    spawn: [21],
     doors: [
-      { x: 60, y: 34, to: 'tavern', spawn: [9, 13] },
-      { x: 58, y: 25, to: 'hut', spawn: [8, 10] },
-      { x: 30, y: 19, to: 'chapel', spawn: [10, 13] },
-      { x: 94, y: 0, to: 'shore', spawn: [17, 14] },
+      { x: 7, to: 'hut', label: 'Aldis Rooke\'s house' },
     ],
   },
 
+  // The panel west: the Seaside Inn under its clock, a stone ruin at the end of the row,
+  // and the last of the town before the road runs out of it.
+  inn: {
+    name: 'The Seaside Inn',
+    street: {
+      art: 'art/town/inn.png',
+      size: [512, 288],
+      ground: 282, // the cobbles here are a shallow strip; there is not much road in front
+      sill: 257,
+      horizon: 212, // the water shows through the gap in the row
+      repeats: 1,
+      edges: { right: 'village' },
+    },
+    spawn: [2],
+    doors: [],
+  },
+
+  // The next panel east: timber-framed shops, a jetty, and a boat nobody has taken out in
+  // a while. Painted smaller than the west end and at the same scale, so it is its own
+  // panel rather than more of the same street.
+  wharf: {
+    name: 'The wharf',
+    street: {
+      art: 'art/town/wharf.png',
+      size: [512, 288],
+      ground: 278,
+      sill: 238,
+      horizon: 205, // behind the jetty, which is what you see it through
+      repeats: 1,
+      edges: { left: 'village' },
+    },
+    spawn: [2],
+    doors: [
+      { x: 30, to: 'shore', spawn: [17, 14], label: 'The track north' },
+    ],
+  },
+
+  // Inside the Sea Hag. Blank until there is a painting of it: a street with no art is
+  // the two bands it would otherwise be behind, which is a room enough to stand a
+  // landlord in and talk to him. Its lines are guesses and want measuring off the
+  // painting the day it arrives.
   tavern: {
     name: 'The Sea Hag',
-    spawn: [9, 13],
-    rows: [
-      '######################',
-      '#hh__________________#',
-      '#hh__________________#',
-      '#____________________#',
-      '#__bbbbbbbb__________#',
-      '#__bbbbbbbb__________#',
-      '#____________________#',
-      '#___cc_____cc____cc__#',
-      '#____________________#',
-      '#___cc_____cc____cc__#',
-      '#____________________#',
-      '#_____rrrrrrrr_______#',
-      '#_____rrrrrrrr_______#',
-      '#____________________#',
-      '#########D############',
+    street: {
+      art: 'art/town/seahag-inside.png',
+      size: [480, 288],
+      ground: 250,
+      sill: 214,
+      repeats: 1,
+    },
+    spawn: [9],
+    doors: [
+      { x: 6, to: 'inn', spawn: [14], label: 'Out to the street' },
     ],
-    doors: [{ x: 9, y: 14, to: 'village', spawn: [60, 35] }],
   },
 
   // Inside the chapel. The door is shut until the roof is back on, so this is what the
@@ -247,6 +257,6 @@ export const MAPS = {
       '#++++++++++++++++++++#',
       '##########D###########',
     ],
-    doors: [{ x: 10, y: 14, to: 'village', spawn: [30, 20] }],
+    doors: [{ x: 10, y: 14, to: 'village', spawn: [20] }],
   },
 };
