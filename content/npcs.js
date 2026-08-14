@@ -73,4 +73,9 @@ export const NPCS = [
     quests: true,
     lines: ['Fancy a drink, or looking to make a little coin?'],
   },
+
+  // The six townsfolk who stood on the old map — Mother Cray, Ned Salt, Wick, Tallow,
+  // Bess Harrow and Old Pell — are not placed on this one. Their written lines are in the
+  // branch history at 1a46353:content/npcs.js, ready to go back the moment there is a quay,
+  // a burying ground and a row of doors for them to stand at.
 ];

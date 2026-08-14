@@ -24,17 +24,52 @@ export const PLACES = [
     note: 'Open ground',
     map: 'village',
     body: [
-      'One road in, one road out, and the second one is shut. Four doors worth knocking on, a well nobody drinks from, and a graveyard with three stones too many.',
-      'The whole of it walks end to end in under two minutes. People here say that like it is a comfort.',
+      'Dying grass over most of it, a granite pavement in the middle laid for more people than are left to stand on it, and a bank of packed earth running down the east side to the water.',
+      'It reads west to east like a tide going out — or in. The wood is at your back, the sea is in front of you, and everything anybody ever built here is on the ground between.',
     ],
   },
   {
-    // West out of the village lane. The strand you washed up on is the western edge of
-    // the town, so it is one place and this is what it is called.
-    label: 'The Dreadhollow outskirts',
+    label: 'The paving',
+    note: 'Open ground',
+    map: 'village',
+    at: [30, 24],
+    body: [
+      'Imperial setts, laid wide enough for a market and a road out of it, going green in the joints a course at a time.',
+      'It is the only part of town that was ever finished.',
+    ],
+  },
+  {
+    label: 'The chapel',
+    note: 'Ruin',
+    map: 'village',
+    at: [30, 19],
+    building: 'chapel',
+    body: [
+      'It shuts off the north end of the paving, and it is the tallest thing left standing in Dreadhollow even with its roof in the nave.',
+      'The stone is sound. Everything above the stone is not.',
+    ],
+  },
+  {
+    // The east side of town. No dock stands on it yet, which is the point of it.
+    terrain: 'water',
+    label: 'The foreshore',
+    note: 'Shore',
+    map: 'village',
+    at: [70, 32],
+    body: [
+      'The bank runs out into a broad muddy flat and the flat runs out into deep water. There is nothing built on any of it.',
+      'A harbour was worth cutting here once. You can see where from the shape of the ground.',
+    ],
+  },
+  {
+    // North up the coast from the town, and the beach is how you walk between them.
+    label: 'The point',
     note: 'Open ground',
     map: 'shore',
-    body: ['[Placeholder Text]'],
+    body: [
+      'A north-facing spit of muddy sand at the top of the beach, out of sight of the town.',
+      'This is where the tide put you.',
+    ],
   },
   {
     label: 'Aldis Rooke\'s house',

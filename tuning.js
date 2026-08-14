@@ -316,6 +316,20 @@ export const COLORS = {
   sand: [0x494235, 0x3c362b],
   flotsam: [0x494235, 0x362a1e], // small wreckage the tide left, walkable
   spar: [0x3d3124, 0x241c14], // a beam off a ship, big enough to walk around
+
+  // the harbour
+  deck: [0x5a4831, 0x6e5940], // dock planking, salt-bleached
+  rot: [0x463a2a, 0x241d14], // the same planking with the gaps showing
+  piling: [0x2f2a20, 0x1a1610], // a post standing in the water
+  wreck: [0x2b2520, 0x413528],
+  post: [0x2b2c30, 0x565a60], // cast iron: a lamp post or a bollard
+
+  // the town, and what is taking it back
+  rubble: [0x504b44, 0x6b655c],
+  scrub: [0x3a4029, 0x6a5c32], // dying grass gone to seed, ochre at the tips
+  bramble: [0x27301f, 0x4a4326],
+  stump: [0x473a28, 0x6a5738],
+  fence: [0x473827, 0x2c2318],
 };
 
 // Actor placeholder palettes. Add an entry, reference its name from content/npcs.js.
