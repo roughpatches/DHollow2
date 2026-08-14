@@ -227,15 +227,9 @@ export const EDGES = [
 ];
 
 export const STRUCTURES = [
-  {
-    // One stage: the Sea Hag is the one building in town that never needed repairing.
-    // The export carries eight angles; the town is drawn from the front, so it is south.
-    id: 'tavern',
-    path: 'art/seahag',
-    at: [34],
-    under: 'dirt',
-    stages: ['base/rotations/south.png'],
-  },
+  // The Sea Hag has no entry: it is painted into the west panel, under the clock, and a
+  // building that is already in the picture does not want a second one standing on it.
+  // The export it used to be drawn from is still in art/seahag if it is wanted elsewhere.
   {
     // Three stages and the art carries all of them: burnt out, wrapped in scaffolding,
     // then roofed and lit. 128 pixels of picture over the chapel's seven rows of tiles.

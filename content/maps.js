@@ -210,27 +210,23 @@ export const MAPS = {
     ],
   },
 
+  // Inside the Sea Hag. Blank until there is a painting of it: a street with no art is
+  // the two bands it would otherwise be behind, which is a room enough to stand a
+  // landlord in and talk to him. Its lines are guesses and want measuring off the
+  // painting the day it arrives.
   tavern: {
     name: 'The Sea Hag',
-    spawn: [9, 13],
-    rows: [
-      '######################',
-      '#hh__________________#',
-      '#hh__________________#',
-      '#____________________#',
-      '#__bbbbbbbb__________#',
-      '#__bbbbbbbb__________#',
-      '#____________________#',
-      '#___cc_____cc____cc__#',
-      '#____________________#',
-      '#___cc_____cc____cc__#',
-      '#____________________#',
-      '#_____rrrrrrrr_______#',
-      '#_____rrrrrrrr_______#',
-      '#____________________#',
-      '#########D############',
+    street: {
+      art: 'art/town/seahag-inside.png',
+      size: [480, 288],
+      ground: 250,
+      sill: 214,
+      repeats: 1,
+    },
+    spawn: [9],
+    doors: [
+      { x: 6, to: 'inn', spawn: [14], label: 'Out to the street' },
     ],
-    doors: [{ x: 9, y: 14, to: 'village', spawn: [34] }],
   },
 
   // Inside the chapel. The door is shut until the roof is back on, so this is what the

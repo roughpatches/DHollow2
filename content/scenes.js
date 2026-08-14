@@ -228,8 +228,8 @@ export const SCENES = [
     map: 'tavern',
     steps: [
       { wait: 400 },
-      { walk: 'player', to: [12, 7] },
-      { face: 'player', dir: 'up' },
+      { walk: 'player', to: [15] },
+      { face: 'player', dir: 'right' },
       { wait: 500 },
       {
         say: 'gregorious',

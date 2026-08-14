@@ -23,15 +23,15 @@ export const BUILDINGS = [
   {
     id: 'tavern',
     name: 'The Sea Hag',
-    map: 'village',
-    site: [34],
+    map: 'inn',
+    site: [14], // the arched door under the clock, measured off the painting
     enter: 'tavern',
     level: 0,
     stages: [
       { name: 'Open', note: 'The only building in town still doing what it was built for.', open: true },
     ],
     body: [
-      'Tarred timber, low slate, and the only lit windows on the shore road. It stands at the foot of the bank where the road runs out onto the foreshore, which is where a tavern goes in a town that was ever paid for by the sea.',
+      'A clock that stopped over a door that did not. It is the last lit window at the west end of the town, and the only building on that stretch anybody has kept the rain out of.',
     ],
   },
   {

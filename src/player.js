@@ -20,11 +20,14 @@ export function spawnActor(scene, palette, tx, ty, facing = 'down') {
 // A street is painted at the size the drawn characters are drawn at, not at a tile's size,
 // so everyone is stood up to the same height from the feet in their own frames — a
 // 16-pixel placeholder and a 60-pixel export are the same person tall, as in the crawl.
+// Drawn art carries air over the head where a placeholder fills its frame, so it takes the
+// same correction the crawl gives it; otherwise the landlord is a head shorter than a blob.
 export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left') {
   const s = scene.physics.add.sprite(atTile(tx), groundY, actorFrame(palette, facing, 0));
   const foot = footOf(palette);
   s.setOrigin(0.5, foot);
-  s.setScale(TUNING.streetBodyPx / (s.frame.height * foot));
+  const air = foot < 1 ? TUNING.questArtScale : 1;
+  s.setScale((TUNING.streetBodyPx / (s.frame.height * foot)) * air);
   fitBody(s, 10, 8);
   s.palette = palette;
   s.facing = facing;
