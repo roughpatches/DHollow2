@@ -336,3 +336,34 @@ export const SKILL_ART = {
     smithing: [1, 8],
   },
 };
+
+// What is standing at a node, for the encounters that have art instead of the silhouette
+// src/textures.js draws for their nature. Keyed by the encounter id in
+// content/encounters.js, and two of them can share one export.
+//   path   — the folder under art/ the export was unzipped into, as exported.
+//   stands — the loop it plays while it is still there: the folder of frames as
+//            exported, how many there are, and how far up the image its own floor sits.
+//   done   — the same for once the party has finished with it. Played once and held, so
+//            a tree that has come down stays down.
+// `ground` is per state because a state is drawn where it is drawn: the oak's roots run
+// to the bottom of its frame and the felled trunk sits well up inside its own, and both
+// have to meet the same road. Measure it off the art once — it is the empty pixels under
+// the paint — and nothing has to be recut.
+const OAK = {
+  path: 'art/oak',
+  stands: {
+    folder: 'A_large_ancient_oak_treee_w/animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown',
+    frames: 9,
+    ground: 7,
+  },
+  done: {
+    folder: 'Tree_is_cut_town_th/animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown',
+    frames: 9,
+    ground: 35,
+  },
+};
+
+export const NODE_ART = {
+  woodland: OAK, // Standing timber, the one the road rolls
+  secondcut: OAK, // and The oak, the one the first job is taken for
+};

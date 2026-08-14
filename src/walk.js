@@ -8,7 +8,7 @@
 
 import { TUNING, COLORS } from '../tuning.js';
 import { BAND, actorFrame, walkAnim, markKey } from './textures.js';
-import { footOf } from './art.js';
+import { footOf, nodeArtFor, nodeFrame, nodeAnim } from './art.js';
 import { charOf } from './party.js';
 
 const LAYERS = ['far', 'mid', 'near'];
@@ -93,13 +93,25 @@ export function createWalk(scene, rect, party, when, backdrop) {
   // which is the whole of "the party arrives at it".
   const markFrom = rect.x + rect.w + 40;
   const markTo = rect.x + rect.w * 0.66;
-  const mark = scene.add.image(markFrom, ground + 4, markKey('gather')).setOrigin(0.5, 1).setScale(TUNING.questMarkScale);
+  // a sprite rather than an image: an encounter with art of its own has that art moving
+  const mark = scene.add.sprite(markFrom, ground + 4, markKey('gather')).setOrigin(0.5, 1).setScale(TUNING.questMarkScale);
   mark.setVisible(false);
   if (night) mark.setTint(COLORS.questNightTint);
   layer.add(mark);
 
   let moving = false;
   let arriving = null; // { until, total, onArrive }
+  let standing = null; // the encounter whose own art is on the road, if it has any
+
+  // Painted art is drawn at the size it was painted and stood on the road by its own
+  // floor line, which every state has its own measure of: the oak's roots run to the
+  // bottom of its frame and the trunk it becomes sits well up inside its own.
+  function wear(id, state) {
+    const spec = nodeArtFor(id)[state];
+    mark.setTexture(nodeFrame(id, state, 0));
+    mark.setScale(1).setOrigin(0.5, 1 - spec.ground / mark.frame.height);
+    mark.anims.play(nodeAnim(id, state), true);
+  }
 
   const api = {
     layer,
@@ -115,17 +127,37 @@ export function createWalk(scene, rect, party, when, backdrop) {
       }
     },
 
-    // start the next node walking into view; onArrive fires when it gets there
-    approach(nature, onArrive) {
-      mark.setTexture(markKey(nature || 'gather')).setVisible(true);
+    // Start the next node walking into view; onArrive fires when it gets there. An
+    // encounter with art of its own is drawn at the size it was painted and stood on the
+    // road by its own floor line; everything else is the silhouette its nature gets,
+    // which is drawn small and blown up.
+    approach(kind, onArrive) {
+      const art = nodeArtFor(kind && kind.id);
+      standing = art ? kind.id : null;
+      if (art) {
+        wear(kind.id, 'stands');
+      } else {
+        mark.anims.stop();
+        mark.setTexture(markKey((kind && kind.nature) || 'gather'));
+        mark.setScale(TUNING.questMarkScale).setOrigin(0.5, 1);
+      }
+      mark.setVisible(true);
       mark.x = markFrom;
       arriving = { until: TUNING.questApproachMs, total: TUNING.questApproachMs, onArrive };
       api.setMoving(true);
     },
 
+    // The work is done and what was standing there is not standing any more: played
+    // once and held, so it stays down while the party reads what it cost them.
+    felled() {
+      if (standing) wear(standing, 'done');
+    },
+
     // it is behind them now
     pass() {
       mark.setVisible(false);
+      mark.anims.stop();
+      standing = null;
       arriving = null;
     },
 

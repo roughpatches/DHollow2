@@ -467,7 +467,7 @@ export default class Quest extends Phaser.Scene {
       && this.shownAt !== r.at) {
       this.shownAt = r.at;
       this.approaching = true;
-      this.walk.approach(run.kindOf(r.nodes[r.at].kind).nature, () => {
+      this.walk.approach(run.kindOf(r.nodes[r.at].kind), () => {
         this.approaching = false;
         this.draw();
       });
@@ -720,6 +720,7 @@ export default class Quest extends Phaser.Scene {
       this.scrim?.destroy();
       this.scrim = null;
       this.walk.depth(28900);
+      this.walk.felled(); // whatever was standing there is not standing any more
       run.settle({ judgments, failed });
       this.draw();
     });
