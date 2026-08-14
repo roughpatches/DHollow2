@@ -16,6 +16,11 @@ const LAYERS = ['far', 'mid', 'near'];
 export function createWalk(scene, rect, party, when, backdrop) {
   const night = when === 'night';
   const layer = scene.add.container(0, 0).setDepth(28900);
+  // The road is where the party walks and where anything is placed against them. The
+  // land is what is painted, which is everything the panels are not: it runs up behind
+  // the bar and out behind the column, so nothing of the town shows through the gaps in
+  // the ironwork. Both share a ground line, and that line belongs to the road.
+  const land = rect.land || rect;
   const ground = rect.y + rect.h * TUNING.questWalkGroundFrac;
 
   // A zone with a painted landscape is drawn against it; a zone without one gets the
@@ -31,9 +36,9 @@ export function createWalk(scene, rect, party, when, backdrop) {
     : COLORS.path[1];
   const sky = scene.add.graphics();
   sky.fillStyle(night ? COLORS.questSkyNight : COLORS.questSkyDay, 1);
-  sky.fillRect(rect.x, rect.y, rect.w, ground - rect.y);
+  sky.fillRect(land.x, land.y, land.w, ground - land.y);
   sky.fillStyle(floorColour, 1);
-  sky.fillRect(rect.x, ground, rect.w, rect.y + rect.h - ground);
+  sky.fillRect(land.x, ground, land.w, land.y + land.h - ground);
   layer.add(sky);
 
   // The painting, at 1:1 and tiled across the width — scaling pixel art by a fraction is
@@ -44,11 +49,11 @@ export function createWalk(scene, rect, party, when, backdrop) {
   const bands = [];
   if (painted) {
     const tall = scene.textures.get(painted.image).getSourceImage().height;
-    const above = ground - rect.y; // room between the top of the band and the road
+    const above = ground - land.y; // room between the top of the painting and the road
     const crop = Math.max(0, painted.ground - above); // what hangs off the top, cut off
-    const top = rect.y + Math.max(0, above - painted.ground);
+    const top = land.y + Math.max(0, above - painted.ground);
     const strip = (y, h, from, rate) => {
-      const t = scene.add.tileSprite(rect.x, y, rect.w, h, painted.image).setOrigin(0, 0);
+      const t = scene.add.tileSprite(land.x, y, land.w, h, painted.image).setOrigin(0, 0);
       t.tilePositionY = from;
       if (night) t.setTint(COLORS.questNightTint);
       layer.add(t);
@@ -65,7 +70,7 @@ export function createWalk(scene, rect, party, when, backdrop) {
     LAYERS.forEach((name, i) => {
       const [, h] = BAND[name];
       const y = name === 'near' ? ground : ground - (name === 'mid' ? 4 : 12);
-      const t = scene.add.tileSprite(rect.x, y, rect.w, h, `band_${name}`).setOrigin(0, name === 'near' ? 0 : 1);
+      const t = scene.add.tileSprite(land.x, y, land.w, h, `band_${name}`).setOrigin(0, name === 'near' ? 0 : 1);
       if (night) t.setTint(COLORS.questNightTint);
       layer.add(t);
       bands.push({ t, rate: TUNING.questParallax[i] });

@@ -90,6 +90,7 @@ export default class Quest extends Phaser.Scene {
 
   close() {
     this.open_ = false;
+    this.cameras.main.setBackgroundColor('rgba(0,0,0,0)'); // the town is behind it again
     this.layer.setVisible(false);
     this.activity = null;
     this.scrim?.destroy();
@@ -244,6 +245,10 @@ export default class Quest extends Phaser.Scene {
 
   begin(when) {
     const r = run.start(this.job.id, when, this.taking);
+    // The board and the crew are panels over the town because the party is still standing
+    // in it. Once they have set out they are not, so the crawl paints its own ground and
+    // the town behind it is gone rather than showing through the ironwork.
+    this.cameras.main.setBackgroundColor(COLORS.bg);
     this.mode = 'run';
     this.sizeTo(this.mode);
     this.row = 0;
@@ -272,7 +277,15 @@ export default class Quest extends Phaser.Scene {
     return {
       bar: { x: this.left, y: barY, w: this.wide, h: TUNING.questBarHeight },
       skills: { x: b.x, y: top, w: col, h: bottom - top },
-      walk: { x: b.x + col, y: top, w: b.w - col, h: bottom - top },
+      // the road the party walks, and under it the land it is painted on, which is
+      // everything down to the trail and out to both edges
+      walk: {
+        x: b.x + col,
+        y: top,
+        w: b.w - col,
+        h: bottom - top,
+        land: { x: b.x, y: b.y, w: b.w, h: bottom - b.y },
+      },
       // the last line of the band belongs to the controls, so the trail stops above it
       trail: { x: this.left, y: trailTop, w: this.wide, h: this.foot - 22 - trailTop },
     };
