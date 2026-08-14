@@ -596,71 +596,63 @@ export default class Quest extends Phaser.Scene {
   trail(r, rect) {
     const n = r.nodes.length;
     const gap = TUNING.questPipGap;
-    const side = Math.max(8, Math.min(TUNING.questPipSize, rect.h, (rect.w - gap * (n - 1)) / n));
-    const run_ = n * side + gap * (n - 1);
+    const side = Math.max(10, Math.min(TUNING.questPipSize, rect.h, (rect.w - gap * (n - 1)) / n));
+    const span = n * side + gap * (n - 1);
     // centred: the row is the readout, not the band, and a short road left against one
     // end of a wide band reads as a thing that has come loose
-    const x0 = rect.x + (rect.w - run_) / 2;
-    const y = rect.y + (rect.h - side) / 2;
+    const x0 = rect.x + (rect.w - span) / 2;
+    const cy = rect.y + rect.h / 2;
     const g = this.add.graphics();
     this.layer.add(g);
 
-    // the rail the sockets are strung on
-    g.fillStyle(blend(COLORS.conRim, 0x000000, 0.55), 1);
-    g.fillRect(x0, y + side / 2 - 1, run_, 2);
-    g.fillStyle(COLORS.conRimLit, 0.45);
-    g.fillRect(x0, y + side / 2 - 1, run_, 1);
-
     r.nodes.forEach((node, i) => {
-      const x = x0 + i * (side + gap);
+      const cx = x0 + i * (side + gap) + side / 2;
       const here = i === r.at;
       const behind = i < r.at || (here && !this.approaching && r.phase === 'node');
-      g.fillStyle(COLORS.conTrough, 1);
-      g.fillRect(x, y, side, side);
-      // a walked node is a plate that has taken the light; one still in front of them is
-      // an empty socket, because it is not anything yet
-      if (behind) {
-        const c = here ? COLORS.conFull : blend(COLORS.conTrough, COLORS.conFull, 0.66);
-        g.fillStyle(c, 1);
-        g.fillRect(x + 2, y + 2, side - 4, side - 4);
-        g.fillStyle(blend(c, 0xffffff, 0.3), 1);
-        g.fillRect(x + 2, y + 2, side - 4, 1);
-        g.fillStyle(blend(c, 0x000000, 0.4), 1);
-        g.fillRect(x + 2, y + side - 3, side - 4, 1);
+
+      // the length of road to the next one
+      if (i < n - 1) {
+        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.3), 1);
+        g.fillRect(cx + side / 2, cy - 1, gap, 2);
+        g.fillStyle(COLORS.conRimLit, 0.6);
+        g.fillRect(cx + side / 2, cy - 1, gap, 1);
       }
-      g.lineStyle(1, blend(COLORS.conRim, 0x000000, 0.45), 1);
-      g.strokeRect(x + 0.5, y + 0.5, side - 1, side - 1);
-      g.lineStyle(1, here ? COLORS.conRivet : COLORS.conRim, 1);
-      g.lineBetween(x + 1, y + 0.5, x + side - 1, y + 0.5);
+      // a fork in it is a rivet driven through the road before the node it splits at
+      if (node.fork) {
+        const rx = cx - side / 2 - gap / 2;
+        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
+        g.fillRect(rx - 2, cy - 2, 4, 4);
+        g.fillStyle(COLORS.conRivet, 1);
+        g.fillRect(rx - 2, cy - 2, 3, 3);
+      }
+
+      // A node they have walked is the thing that was standing in it. One still in front
+      // of them is a stud in the road and nothing else, because it is not anything yet:
+      // what a node turns out to be is rolled when the party gets there.
+      if (behind && node.kind) {
+        const mark = this.add.image(cx, cy, markKey(run.kindOf(node.kind).nature));
+        // fitted, not stretched: a silhouette squashed to a box stops being a silhouette
+        mark.setScale(Math.min(side / mark.width, side / mark.height));
+        // in its own colours, and dimmer the further back down the road it is: these are
+        // dark already, and anything laid over them takes them to nothing
+        if (!here) mark.setAlpha(0.6);
+        this.layer.add(mark);
+      } else {
+        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.4), 1);
+        g.fillCircle(cx, cy, 6);
+        g.fillStyle(here ? COLORS.conRivet : COLORS.conTrough, 1);
+        g.fillCircle(cx, cy, 5);
+      }
       // where they are standing is ringed whether they have finished with it or not
       if (here) {
         g.lineStyle(1, COLORS.conRivet, 1);
-        g.strokeRect(x - 1.5, y - 1.5, side + 2, side + 2);
+        g.strokeCircle(cx, cy, side / 2 + 1);
       }
       if (node.goal) {
         g.lineStyle(1, COLORS.conRimLit, 1);
-        g.strokeRect(x - 3.5, y - 3.5, side + 6, side + 6);
-      }
-      if (node.fork) {
-        const rx = x - gap / 2;
-        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
-        g.fillRect(rx - 2, y + side / 2 - 2, 4, 4);
-        g.fillStyle(COLORS.conRivet, 1);
-        g.fillRect(rx - 2, y + side / 2 - 2, 3, 3);
-      }
-      // and what was standing in it is stamped into the plate
-      if (behind && node.kind) {
-        const mark = this.add.image(x + side / 2, y + side - 3, markKey(run.kindOf(node.kind).nature));
-        // fitted, not stretched: a silhouette squashed to a box stops being a silhouette
-        mark.setOrigin(0.5, 1).setScale(Math.min((side - 7) / mark.width, (side - 7) / mark.height));
-        mark.setTint(COLORS.conStamp);
-        this.layer.add(mark);
+        g.strokeCircle(cx, cy, side / 2 + 4);
       }
     });
-
-    // on the last line of the band, opposite the controls: both belong to the foot of it
-    this.text(rect.x + rect.w, this.foot - 18,
-      `${Math.max(0, n - r.at - 1)} still in front of you`, TUNING.questHintSize, COLORS.menuDim).setOrigin(1, 0);
   }
 
   // Everything that happens at a node is said on one card over the landscape, so the

@@ -125,8 +125,8 @@ export const TUNING = {
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
 
-  questPipSize: 26, // a node's socket on the trail, and the gap between two of them
-  questPipGap: 7,
+  questPipSize: 26, // a node on the trail, and the length of road between two of them
+  questPipGap: 18,
   questPad: 26,
   questTitleSize: 22,
   questBodySize: 16,
@@ -255,7 +255,6 @@ export const COLORS = {
   conRim: 0x5b5352,
   conRimLit: 0x928178,
   conRivet: 0x9aa0a6,
-  conStamp: 0x4a3a2a, // what a walked node's plate is stamped with
   conFull: 0xd1943c,
   conLow: 0xa8341f,
 
