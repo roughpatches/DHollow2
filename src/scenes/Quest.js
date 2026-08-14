@@ -507,6 +507,11 @@ export default class Quest extends Phaser.Scene {
     if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
     else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
     else if (r.state === 'running' && r.phase === 'beat' && !this.approaching) {
+      // A beat can be the moment the thing on the road stops being there — the heron
+      // taking flight rather than a tree coming down, but the same change of state.
+      // Said on every draw of the beat and not once when it is reached: the loop it
+      // starts is played with ignoreIfPlaying, so saying it twice changes nothing.
+      if (r.nodes[r.at].beat.leaves) this.walk.felled();
       this.card(band.walk, this.beatLines(r), this.nodeHead(r), !r.nodes[r.at].beat.choose);
     }
     else if (r.state === 'running' && !this.approaching) this.card(band.walk, this.nodeLines(r), this.nodeHead(r), true);

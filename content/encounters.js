@@ -342,8 +342,10 @@ export const ENCOUNTERS = [
     // A beat is a card. `text` is what is on it — a string is narration, { cry } is a
     // noise the bird makes. `then` is the next beat, `toss` is two of them and a coin,
     // `result` reads back the roll made on the way in, and `choose` hands it to the
-    // player. `spoils`, `con` and `flag` are what walking through this beat did. A beat
-    // with no way on is the end of the encounter. A beat can carry a `draw` table as
+    // player. `spoils`, `con` and `flag` are what walking through this beat did, and
+    // `leaves` says that this is the beat where whatever is standing on the road stops
+    // being there — the same change of state a felled tree makes, said in words rather
+    // than earned with an axe. A beat with no way on is the end of the encounter. A beat can carry a `draw` table as
     // well, for a way through whose yield is luck rather than a settled thing; the nest
     // below has none, because what it gives up is decided by which way you came at it.
     beats: [
@@ -479,6 +481,7 @@ export const ENCOUNTERS = [
           'The bird hauls itself up out of the water and takes flight north over the treeline.',
           "It doesn't look back.",
         ],
+        leaves: true, // the only way through it where the bird actually goes
         spoils: { timber: [1, 2] }, // the nest is a cartload of branches and nobody is coming back for it
       },
       {
