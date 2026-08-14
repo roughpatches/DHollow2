@@ -595,35 +595,65 @@ export default class Quest extends Phaser.Scene {
   // blanks are still in front of them. A fork is a notch, the goal is ringed.
   trail(r, rect) {
     const n = r.nodes.length;
-    const gap = 6;
-    const w = Math.max(10, Math.min(38, (rect.w - gap * (n - 1)) / n));
-    const h = rect.h;
+    const gap = TUNING.questPipGap;
+    const side = Math.max(8, Math.min(TUNING.questPipSize, rect.h, (rect.w - gap * (n - 1)) / n));
+    const run_ = n * side + gap * (n - 1);
+    // centred: the row is the readout, not the band, and a short road left against one
+    // end of a wide band reads as a thing that has come loose
+    const x0 = rect.x + (rect.w - run_) / 2;
+    const y = rect.y + (rect.h - side) / 2;
     const g = this.add.graphics();
     this.layer.add(g);
 
+    // the rail the sockets are strung on
+    g.fillStyle(blend(COLORS.conRim, 0x000000, 0.55), 1);
+    g.fillRect(x0, y + side / 2 - 1, run_, 2);
+    g.fillStyle(COLORS.conRimLit, 0.45);
+    g.fillRect(x0, y + side / 2 - 1, run_, 1);
+
     r.nodes.forEach((node, i) => {
-      const x = rect.x + i * (w + gap);
+      const x = x0 + i * (side + gap);
       const here = i === r.at;
       const behind = i < r.at || (here && !this.approaching && r.phase === 'node');
-      g.fillStyle(behind ? COLORS.menuSelectFill : COLORS.questTrailFill, 1);
-      g.fillRect(x, rect.y, w, h);
-      g.lineStyle(here ? 2 : 1, here ? COLORS.menuAccent : COLORS.menuRule, 1);
-      g.strokeRect(x + 0.5, rect.y + 0.5, w - 1, h - 1);
+      g.fillStyle(COLORS.conTrough, 1);
+      g.fillRect(x, y, side, side);
+      // a walked node is a plate that has taken the light; one still in front of them is
+      // an empty socket, because it is not anything yet
+      if (behind) {
+        const c = here ? COLORS.conFull : blend(COLORS.conTrough, COLORS.conFull, 0.66);
+        g.fillStyle(c, 1);
+        g.fillRect(x + 2, y + 2, side - 4, side - 4);
+        g.fillStyle(blend(c, 0xffffff, 0.3), 1);
+        g.fillRect(x + 2, y + 2, side - 4, 1);
+        g.fillStyle(blend(c, 0x000000, 0.4), 1);
+        g.fillRect(x + 2, y + side - 3, side - 4, 1);
+      }
+      g.lineStyle(1, blend(COLORS.conRim, 0x000000, 0.45), 1);
+      g.strokeRect(x + 0.5, y + 0.5, side - 1, side - 1);
+      g.lineStyle(1, here ? COLORS.conRivet : COLORS.conRim, 1);
+      g.lineBetween(x + 1, y + 0.5, x + side - 1, y + 0.5);
+      // where they are standing is ringed whether they have finished with it or not
+      if (here) {
+        g.lineStyle(1, COLORS.conRivet, 1);
+        g.strokeRect(x - 1.5, y - 1.5, side + 2, side + 2);
+      }
       if (node.goal) {
-        g.lineStyle(1, COLORS.menuMapMark, 1);
-        g.strokeRect(x - 2.5, rect.y - 2.5, w + 4, h + 4);
+        g.lineStyle(1, COLORS.conRimLit, 1);
+        g.strokeRect(x - 3.5, y - 3.5, side + 6, side + 6);
       }
       if (node.fork) {
-        g.fillStyle(COLORS.menuMapMark, 1);
-        g.fillRect(x - gap + 1, rect.y + h / 2 - 2, 4, 4);
+        const rx = x - gap / 2;
+        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
+        g.fillRect(rx - 2, y + side / 2 - 2, 4, 4);
+        g.fillStyle(COLORS.conRivet, 1);
+        g.fillRect(rx - 2, y + side / 2 - 2, 3, 3);
       }
-      // a walked node is notated with the thing that was standing in it; one still ahead
-      // says nothing, because it is not anything yet
+      // and what was standing in it is stamped into the plate
       if (behind && node.kind) {
-        const mark = this.add.image(x + w / 2, rect.y + h - 4, markKey(run.kindOf(node.kind).nature));
+        const mark = this.add.image(x + side / 2, y + side - 3, markKey(run.kindOf(node.kind).nature));
         // fitted, not stretched: a silhouette squashed to a box stops being a silhouette
-        mark.setOrigin(0.5, 1).setScale(Math.min((w - 8) / mark.width, (h - 8) / mark.height));
-        if (!here) mark.setAlpha(0.65);
+        mark.setOrigin(0.5, 1).setScale(Math.min((side - 7) / mark.width, (side - 7) / mark.height));
+        mark.setTint(COLORS.conStamp);
         this.layer.add(mark);
       }
     });

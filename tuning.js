@@ -125,8 +125,8 @@ export const TUNING = {
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
 
-  questPipSize: 14,
-  questPipGap: 8,
+  questPipSize: 26, // a node's socket on the trail, and the gap between two of them
+  questPipGap: 7,
   questPad: 26,
   questTitleSize: 22,
   questBodySize: 16,
@@ -255,6 +255,7 @@ export const COLORS = {
   conRim: 0x5b5352,
   conRimLit: 0x928178,
   conRivet: 0x9aa0a6,
+  conStamp: 0x4a3a2a, // what a walked node's plate is stamped with
   conFull: 0xd1943c,
   conLow: 0xa8341f,
 
@@ -263,7 +264,6 @@ export const COLORS = {
   questSkyDay: 0x2c333c, // what the party is walking under in the middle band
   questSkyNight: 0x11141d,
   questNightTint: 0x6a7590, // laid over the landscape after dark
-  questTrailFill: 0x0d0f13, // the strip along the bottom the trail is drawn on
 
   // What a placeholder item icon is made of (src/icons.js): the body of the thing, and
   // the mark on it. Retint here and every wooden thing changes at once.
