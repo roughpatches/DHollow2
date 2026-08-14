@@ -55,11 +55,13 @@ export function preloadArt(scene) {
   }
   // what stands at a node, for the encounters that have art for it
   for (const [id, art] of Object.entries(NODE_ART)) {
-    for (const state of ['stands', 'done']) {
-      for (let i = 0; i < art[state].frames; i++) {
-        const k = nodeFrame(id, state, i);
+    for (const [state, spec] of nodeStates(art)) {
+      for (let i = 0; i < spec.frames; i++) {
+        // art that has to be turned is loaded under its own name and turned into the one
+        // everything else asks for, so nothing downstream knows it was painted sideways
+        const k = dressed(spec) ? `${nodeFrame(id, state, i)}_asis` : nodeFrame(id, state, i);
         if (!scene.textures.exists(k)) {
-          scene.load.image(k, `${art.path}/${art[state].folder}/frame_${String(i).padStart(3, '0')}.png`);
+          scene.load.image(k, `${art.path}/${spec.folder}/frame_${String(i).padStart(3, '0')}.png`);
         }
       }
     }
@@ -109,14 +111,130 @@ export function nodeArtFor(id) {
   return NODE_ART[id] || null;
 }
 
+// the states an encounter's art actually has: everything has one it stands in, and only
+// some have one they are left in
+function nodeStates(art) {
+  return ['stands', 'done'].filter((k) => art[k]).map((k) => [k, art[k]]);
+}
+
+// whether a state's art is used as painted, or has something done to it first
+function dressed(spec) {
+  return !!(spec.turn || spec.trim || spec.fade || spec.shade);
+}
+
+// One frame, turned, shaded, cut back and feathered into what it is standing on. A right
+// angle on a square canvas moves pixels without touching them, so the turn costs the art
+// nothing; the shade is a multiply toward the light of the place; the trim takes an end
+// off something painted longer than the ground it has to cross; the feather is an alpha
+// ramp on whichever sides are named, for art painted as a self-contained rectangle that
+// would otherwise sit on the landscape with a seam round it.
+//
+// Trim runs before feather so the feather lands on the cut, not on the end that was cut
+// off: a shortened brook still comes out of the trees rather than starting at a wall.
+function dressFrame(scene, key, spec) {
+  if (scene.textures.exists(key)) return;
+  const src = scene.textures.get(`${key}_asis`).getSourceImage();
+  const turned = spec.turn % 2 === 1;
+  const w = turned ? src.height : src.width;
+  const h = turned ? src.width : src.height;
+  const tex = scene.textures.createCanvas(key, w, h);
+  const ctx = tex.getContext();
+  ctx.imageSmoothingEnabled = false;
+  ctx.translate(w / 2, h / 2);
+  if (spec.turn) ctx.rotate((Math.PI / 2) * spec.turn);
+  ctx.drawImage(src, -src.width / 2, -src.height / 2);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  if (spec.shade || spec.trim || spec.fade) {
+    const img = ctx.getImageData(0, 0, w, h);
+    if (spec.shade) shaded(img, spec.shade);
+    if (spec.trim) trimmed(img, w, h, spec.trim);
+    if (spec.fade) feather(img, w, h, spec.fade);
+    ctx.putImageData(img, 0, 0);
+  }
+  tex.refresh();
+}
+
+// The rectangle the paint actually occupies, which is not the canvas it came on: an
+// export carries whatever air the exporter felt like, and everything below has to work
+// from the paint.
+function boundsOf(img, w, h) {
+  let x0 = w; let x1 = -1; let y0 = h; let y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!img.data[(y * w + x) * 4 + 3]) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  return { x0, x1, y0, y1 };
+}
+
+// Paint cut off each side, for a thing painted longer than the ground it has to cross.
+// Where it is registered against the road does not move, because that is measured off
+// the frame and the frame is not what is being cut.
+function trimmed(img, w, h, [tl, tr, tt, tb]) {
+  const { x0, x1, y0, y1 } = boundsOf(img, w, h);
+  if (x1 < 0) return;
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (x - x0 < tl || x1 - x < tr || y - y0 < tt || y1 - y < tb) {
+        img.data[(y * w + x) * 4 + 3] = 0;
+      }
+    }
+  }
+}
+
+// Art painted under a light the place does not have, multiplied toward the light it does
+// rather than repainted — the same treatment the pale seawater sheet gets in bakeTiles.
+// A multiply only ever takes away, so cold art warms by losing its blue and nothing on
+// the sheet can come out brighter than it was painted.
+function shaded(img, shade) {
+  const r = (shade >> 16) & 0xff;
+  const g = (shade >> 8) & 0xff;
+  const b = shade & 0xff;
+  for (let i = 0; i < img.data.length; i += 4) {
+    img.data[i] = (img.data[i] * r) / 255;
+    img.data[i + 1] = (img.data[i + 1] * g) / 255;
+    img.data[i + 2] = (img.data[i + 2] * b) / 255;
+  }
+}
+
+// The alpha ramp, measured from where the art is rather than from where its frame is:
+// an export carries whatever air the exporter felt like and the feather has to bite into
+// the painting, not into the empty margin around it.
+function feather(img, w, h, [fl, fr, ft, fb]) {
+  const { x0, x1, y0, y1 } = boundsOf(img, w, h);
+  if (x1 < 0) return;
+  // A bank is not a ruled line. How far each row's fade reaches wanders slowly along the
+  // edge, so where the art runs out is ragged the way ground is; it is a function of the
+  // pixel and not of chance, so all nine frames of a loop run out in the same place.
+  const wander = (n) => (Math.sin(n * 0.19) + Math.sin(n * 0.071)) / 5;
+  const ramp = (n, over, at) => (over ? Math.min(1, Math.max(0, n / over + wander(at))) : 1);
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const k = Math.min(
+        ramp(x - x0, fl, y), ramp(x1 - x, fr, y + 500),
+        ramp(y - y0, ft, x + 900), ramp(y1 - y, fb, x + 1300),
+      );
+      if (k < 1) img.data[(y * w + x) * 4 + 3] *= k;
+    }
+  }
+}
+
 function buildNodeArt(scene) {
   for (const [id, art] of Object.entries(NODE_ART)) {
-    for (const state of ['stands', 'done']) {
+    for (const [state, spec] of nodeStates(art)) {
+      if (dressed(spec)) {
+        for (let i = 0; i < spec.frames; i++) dressFrame(scene, nodeFrame(id, state, i), spec);
+      }
       const k = nodeAnim(id, state);
       if (scene.anims.exists(k)) continue;
       scene.anims.create({
         key: k,
-        frames: Array.from({ length: art[state].frames }, (_, i) => ({ key: nodeFrame(id, state, i) })),
+        frames: Array.from({ length: spec.frames }, (_, i) => ({ key: nodeFrame(id, state, i) })),
         frameRate: TUNING.artIdleFrameRate,
         repeat: state === 'stands' ? -1 : 0,
       });

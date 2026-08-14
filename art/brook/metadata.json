@@ -1,0 +1,41 @@
+{
+  "group_id": "d2005de3-8ca7-4932-b629-2c9f1f2ea817",
+  "objects": [
+    {
+      "id": "5557f462-67bf-4586-b5b3-988858261dc5",
+      "name": "base",
+      "prompt": "A rocky gurgling brook running through a dark, autumnal forest. Brook only, no background, no shadow.",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_rocky_gurgling_brook_running.png"
+      },
+      "animations": {
+        "Water_gurgling_and_moving_slowly_through_the_brook": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_000.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_001.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_002.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_003.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_004.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_005.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_006.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_007.png",
+                "animations/Water_gurgling_and_moving_slowly_through_the_brook/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-14T17:00:11.914124"
+}
