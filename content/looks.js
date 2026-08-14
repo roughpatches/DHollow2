@@ -414,9 +414,27 @@ const BROOK = {
   },
 };
 
+// The nest, with the bird on it and then without. Both states are painted standing on
+// the same ground — the bottom of the nest is in the same row in every frame of both —
+// so the nest does not jump when the heron goes off it.
+const HERON = {
+  path: 'art/heron',
+  stands: {
+    folder: 'A_giant_grey-purple_heron_gu/animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown',
+    frames: 9,
+    ground: 12,
+  },
+  done: {
+    folder: 'The_heron_flies_off/animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown',
+    frames: 9,
+    ground: 12,
+  },
+};
+
 export const NODE_ART = {
   woodland: OAK, // Standing timber, the one the road rolls
   secondcut: OAK, // and The oak, the one the first job is taken for
+  heron: HERON, // The heron's nest, one way through the fork
   water: BROOK, // Standing water, rolled
   firstcast: BROOK, // and The stream, the first node of the first job
 };

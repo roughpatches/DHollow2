@@ -1,0 +1,90 @@
+{
+  "group_id": "d7c8b560-bdad-421e-9b72-ea7745810989",
+  "objects": [
+    {
+      "id": "917b94d4-154c-4ea9-a86b-ae02e9545e80",
+      "name": "base",
+      "prompt": "A giant, grey-purple heron, guarding a enormous nest.",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_giant_grey-purple_heron_gu.png"
+      },
+      "animations": {
+        "The_heron_shifts_its_weight_slightly_on_the_branch": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_000.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_001.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_002.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_003.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_004.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_005.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_006.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_007.png",
+                "animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "8f4d5b46-44bf-4b44-9d08-2d50d6739658",
+      "name": "Remove the heron",
+      "prompt": "A giant, grey-purple heron, guarding a enormous nest.",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Remove_the_heron.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "2c69f1b8-6889-4508-9ff0-54dc63c20c32",
+      "name": "The heron flies off",
+      "prompt": "A giant, grey-purple heron, guarding a enormous nest.",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/The_heron_flies_off.png"
+      },
+      "animations": {
+        "The_Heron_flies_off_from_the_nest_and_into_the_dis": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_000.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_001.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_002.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_003.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_004.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_005.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_006.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_007.png",
+                "animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-14T21:48:42.940929"
+}
