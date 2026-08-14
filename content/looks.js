@@ -357,6 +357,9 @@ export const SKILL_ART = {
 //            painted lying one way and wanted the other. A brook painted as a channel
 //            running across the frame is a brook running down the screen once it has been
 //            stood on its end, which is what a brook crossing a road looks like.
+//   shade  — a colour to multiply the art by, for art painted under a light the place
+//            does not have. A multiply only takes away, so this warms cold art by losing
+//            its blue rather than by adding anything; nothing comes out brighter.
 //   fade   — [left, right, top, bottom] pixels of the painting to ramp out to nothing on
 //            each side. Art that comes back as a self-contained rectangle — its banks
 //            painted hard to the edge of the paint — sits on the landscape with a seam
@@ -391,6 +394,9 @@ const BROOK = {
     frames: 9,
     ground: 128,
     turn: 1,
+    // Painted cold — grey rock and cyan water — under a wood that is all warm brown and
+    // amber, so it is pulled toward the Greywood's light rather than repainted.
+    shade: 0xffcda0,
     // Its banks are painted hard to the edge of the paint, so they are eaten back into
     // the forest floor either side and into the trees it comes out of. The left bank
     // takes the most because it is the squarest; the bottom takes none, because the

@@ -59,7 +59,7 @@ export function preloadArt(scene) {
       for (let i = 0; i < spec.frames; i++) {
         // art that has to be turned is loaded under its own name and turned into the one
         // everything else asks for, so nothing downstream knows it was painted sideways
-        const k = spec.turn || spec.fade ? `${nodeFrame(id, state, i)}_asis` : nodeFrame(id, state, i);
+        const k = dressed(spec) ? `${nodeFrame(id, state, i)}_asis` : nodeFrame(id, state, i);
         if (!scene.textures.exists(k)) {
           scene.load.image(k, `${art.path}/${spec.folder}/frame_${String(i).padStart(3, '0')}.png`);
         }
@@ -117,10 +117,16 @@ function nodeStates(art) {
   return ['stands', 'done'].filter((k) => art[k]).map((k) => [k, art[k]]);
 }
 
-// One frame, turned and feathered into what it is standing on. A right angle on a square
-// canvas moves pixels without touching them, so the turn costs the art nothing; the
-// feather is an alpha ramp on whichever sides are named, for art painted as a self-
-// contained rectangle that would otherwise sit on the landscape with a seam round it.
+// whether a state's art is used as painted, or has something done to it first
+function dressed(spec) {
+  return !!(spec.turn || spec.fade || spec.shade);
+}
+
+// One frame, turned, shaded and feathered into what it is standing on. A right angle on
+// a square canvas moves pixels without touching them, so the turn costs the art nothing;
+// the shade is a multiply toward the light of the place; the feather is an alpha ramp on
+// whichever sides are named, for art painted as a self-contained rectangle that would
+// otherwise sit on the landscape with a seam round it.
 function dressFrame(scene, key, spec) {
   if (scene.textures.exists(key)) return;
   const src = scene.textures.get(`${key}_asis`).getSourceImage();
@@ -135,12 +141,28 @@ function dressFrame(scene, key, spec) {
   ctx.drawImage(src, -src.width / 2, -src.height / 2);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-  if (spec.fade) {
+  if (spec.shade || spec.fade) {
     const img = ctx.getImageData(0, 0, w, h);
-    feather(img, w, h, spec.fade);
+    if (spec.shade) shaded(img, spec.shade);
+    if (spec.fade) feather(img, w, h, spec.fade);
     ctx.putImageData(img, 0, 0);
   }
   tex.refresh();
+}
+
+// Art painted under a light the place does not have, multiplied toward the light it does
+// rather than repainted — the same treatment the pale seawater sheet gets in bakeTiles.
+// A multiply only ever takes away, so cold art warms by losing its blue and nothing on
+// the sheet can come out brighter than it was painted.
+function shaded(img, shade) {
+  const r = (shade >> 16) & 0xff;
+  const g = (shade >> 8) & 0xff;
+  const b = shade & 0xff;
+  for (let i = 0; i < img.data.length; i += 4) {
+    img.data[i] = (img.data[i] * r) / 255;
+    img.data[i + 1] = (img.data[i + 1] * g) / 255;
+    img.data[i + 2] = (img.data[i + 2] * b) / 255;
+  }
 }
 
 // The alpha ramp, measured from where the art is rather than from where its frame is:
@@ -178,7 +200,7 @@ function feather(img, w, h, [fl, fr, ft, fb]) {
 function buildNodeArt(scene) {
   for (const [id, art] of Object.entries(NODE_ART)) {
     for (const [state, spec] of nodeStates(art)) {
-      if (spec.turn || spec.fade) {
+      if (dressed(spec)) {
         for (let i = 0; i < spec.frames; i++) dressFrame(scene, nodeFrame(id, state, i), spec);
       }
       const k = nodeAnim(id, state);
