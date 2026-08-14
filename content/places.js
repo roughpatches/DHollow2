@@ -24,83 +24,50 @@ export const PLACES = [
     note: 'Open ground',
     map: 'village',
     body: [
-      'A harbour, a road up out of it, and a square at the top with a burnt chapel across the north end. That is the whole plan of the place, and it was laid out for four times the people who are left in it.',
-      'It reads west to east like a tide going out. Down at the quay the windows are lit and the stone is swept. By the square the doors are boarded. Past the square the lanes still have names and nothing else, and the wood is standing in the gardens.',
+      'Dying grass over most of it, a granite pavement in the middle laid for more people than are left to stand on it, and a bank of packed earth running down the east side to the water.',
+      'It reads west to east like a tide going out — or in. The wood is at your back, the sea is in front of you, and everything anybody ever built here is on the ground between.',
     ],
   },
   {
-    // The harbour, and the reason there was ever a town here at all.
-    id: 'harbour',
-    terrain: 'water',
-    label: 'The harbour',
-    note: 'Dockside',
-    map: 'village',
-    at: [31, 52],
-    building: 'dock',
-    body: [
-      'Deep water, a stone quay, and four docks. One of them you can walk out on.',
-      'The basin was cut back into the shore by somebody with money and a reason. Both are gone; the basin is not.',
-    ],
-  },
-  {
-    label: 'The town square',
+    label: 'The paving',
     note: 'Open ground',
     map: 'village',
-    at: [66, 22],
+    at: [30, 24],
     body: [
-      'Imperial flagstones, a dry well, and the frames of market stalls that nobody has bothered to take away for firewood, which tells you something about how much firewood there is.',
-      'Big enough for a market day. It has not had one in eleven years.',
+      'Imperial setts, laid wide enough for a market and a road out of it, going green in the joints a course at a time.',
+      'It is the only part of town that was ever finished.',
     ],
   },
   {
     label: 'The chapel',
     note: 'Ruin',
     map: 'village',
-    at: [65, 15],
+    at: [30, 19],
     building: 'chapel',
     body: [
-      'It shuts off the north end of the square, and it is the tallest thing left standing in Dreadhollow even with its roof in the nave.',
+      'It shuts off the north end of the paving, and it is the tallest thing left standing in Dreadhollow even with its roof in the nave.',
       'The stone is sound. Everything above the stone is not.',
     ],
   },
   {
-    label: 'The burying ground',
-    note: 'Walled',
+    // The east side of town. No dock stands on it yet, which is the point of it.
+    terrain: 'water',
+    label: 'The foreshore',
+    note: 'Shore',
     map: 'village',
-    at: [74, 9],
+    at: [70, 32],
     body: [
-      'A walled acre east of the chapel, mown to the fence line by one man with no particular reason to keep doing it.',
-      'Forty-one stones. Wick will tell you the newest ones are the ones to read.',
+      'The bank runs out into a broad muddy flat and the flat runs out into deep water. There is nothing built on any of it.',
+      'A harbour was worth cutting here once. You can see where from the shape of the ground.',
     ],
   },
   {
-    label: 'Fishermen\'s row',
-    note: 'Lane',
-    map: 'village',
-    at: [43, 52],
-    body: [
-      'Nine doors down the east side of the basin, and one of them opens.',
-      '[Placeholder Text]',
-    ],
-  },
-  {
-    label: 'The old imperial road',
-    note: 'Lane',
-    map: 'village',
-    at: [88, 14],
-    body: [
-      'Northeast out of the square, over the ridge, and shut. Two hundred years of imperial stonework going green a course at a time.',
-      'You can follow it as far as the treeline. Past that it is a suggestion.',
-    ],
-  },
-  {
-    // West out of the village lane. The strand the player washed up on is a headland
-    // north up the coast, so the coast track is what joins the two.
+    // North up the coast from the town, and the beach is how you walk between them.
     label: 'The point',
     note: 'Open ground',
     map: 'shore',
     body: [
-      'A north-facing spit of muddy sand at the top of the coast track, out of sight of the harbour.',
+      'A north-facing spit of muddy sand at the top of the beach, out of sight of the town.',
       'This is where the tide put you.',
     ],
   },

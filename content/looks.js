@@ -64,49 +64,51 @@ export const LOOKS = [
 //   shade — optional colour multiplied over the patches, for a sheet painted lighter than
 //           the world wants it. Darkens and tints without flattening the paint.
 export const GROUND = [
+  // The seven grounds of the designer's map export, each a seamless 64-pixel tile painted
+  // for the terrain it is. One patch apiece and no need for more: seamless art laid over a
+  // field does not repeat the way four hand-cut windows of a larger sheet do. The seam
+  // tiles in EDGES below are painted from these same terrains, so a field and the edge
+  // that leaves it are the same paint.
   {
-    tile: 'grass', // kept ground: verges, yards, the strip along a street
-    sheet: 'art/ground/grass-and-granite.png',
-    cells: [[112, 328], [112, 448], [0, 328], [96, 0]],
+    tile: 'grass', // patchy dying autumn grass: most of the town stands on it
+    sheet: 'art/ground/autumn-grass.png',
+    cells: [[0, 0]],
     shade: 0x8e9c8c, // cool, and darker than the sheet: this town is not having a good year
   },
   {
-    tile: 'path', // the town street: small grey granite, worn
-    sheet: 'art/ground/grass-and-granite.png',
-    cells: [[512, 0], [960, 0], [704, 64], [768, 64]],
+    tile: 'scrub', // the same grass, kept warm and dry: ground nobody walks any more
+    sheet: 'art/ground/autumn-grass.png',
+    cells: [[0, 0]],
+    shade: 0xb2a37e,
   },
   {
-    tile: 'dirt', // packed damp earth, off the street
-    sheet: 'art/ground/grass-and-dirt.png',
-    cells: [[296, 168], [552, 40], [936, 32], [1320, 424]],
+    tile: 'dirt', // packed damp earth, and the bank down to the water
+    sheet: 'art/ground/earth.png',
+    cells: [[0, 0]],
     shade: 0xb0a89c,
   },
   {
-    tile: 'stone', // the square's flagstones: the same granite as the street, laid larger
-    sheet: 'art/ground/grass-and-granite.png',
-    cells: [[704, 192], [768, 256], [1152, 128], [1216, 192]],
+    tile: 'path', // worn granite setts, wet after rain
+    sheet: 'art/ground/street.png',
+    cells: [[0, 0]],
   },
   {
-    // Grass gone over: tufts, dead leaves, and bare earth between them. This is the tile
-    // the town turns into on the way out to the treeline.
-    tile: 'scrub',
-    sheet: 'art/ground/grass-and-dirt.png',
-    cells: [[1344, 192], [1280, 128], [96, 384], [96, 0]],
-    shade: 0xb2a37e, // kept warm and a shade darker: dead growth, not a ripe field
+    tile: 'stone', // the same granite, for a quay or a forecourt
+    sheet: 'art/ground/street.png',
+    cells: [[0, 0]],
   },
   {
-    tile: 'sand', // tan-grey mud at the tide line
-    sheet: 'art/ground/water-and-sand.png',
-    cells: [[1440, 400], [1048, 296], [920, 424], [920, 40]],
+    tile: 'sand', // tan-grey muddy seashore, at the tide line
+    sheet: 'art/ground/shore.png',
+    cells: [[0, 0]],
     shade: 0xbdb4a6,
   },
   {
-    // Grey-green seawater, three patches — the sheet has no fourth clean of foam. It is
-    // painted the value of a bright afternoon, so it is shaded down to harbour water:
-    // undarkened it reads as pale stone against the granite quay.
+    // Grey-green seawater, painted the value of a bright afternoon and shaded down to
+    // harbour water: undarkened it reads as pale stone against a granite quay.
     tile: 'water',
-    sheet: 'art/ground/water-and-sand.png',
-    cells: [[96, 0], [1280, 128], [96, 336]],
+    sheet: 'art/ground/sea.png',
+    cells: [[0, 0]],
     shade: 0x5c7796,
   },
 ];
@@ -130,6 +132,46 @@ export const GROUND = [
 // somebody built the edge — a quay wall, a dock, a kerb — and wrong where nothing did.
 export const EDGES = [
   {
+    // Off the map export: a 4x4 wang set, sixteen cells, one per corner case, so these
+    // coordinates are the tileset's own rather than windows found by looking. The bit set
+    // in a code means the seashore side, which is how the set was painted.
+    low: { tiles: ['water'], shade: 0x5c7796 },
+    high: { tiles: ['sand'], shade: 0xbdb4a6 },
+    sheet: 'art/ground/wang-water-and-sand.png',
+    split: { channels: 'rg', over: 3 },
+    cells: {
+      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
+      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
+      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
+    },
+  },
+  {
+    // The same set for grass against earth, and the bit set is the earth side here.
+    low: { tiles: ['grass'], shade: 0x8e9c8c },
+    high: { tiles: ['dirt'], shade: 0xb0a89c },
+    sheet: 'art/ground/wang-grass-and-dirt.png',
+    split: { channels: 'gb', over: 14 },
+    cells: {
+      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
+      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
+      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
+    },
+  },
+  {
+    low: { tiles: ['scrub'], shade: 0xb2a37e },
+    high: { tiles: ['dirt'], shade: 0xb0a89c },
+    sheet: 'art/ground/wang-grass-and-dirt.png',
+    split: { channels: 'gb', over: 14 },
+    cells: {
+      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
+      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
+      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
+    },
+  },
+  {
+    // The rest are windows found in the larger sheets, which carry no wang layout. The
+    // export has a grass-against-street set too, but three of its sixteen cells are the
+    // only ones with any granite painted in them, so the street keeps these.
     low: { tiles: ['path', 'stone'] }, // worn granite, unshaded
     high: { tiles: ['grass'], shade: 0x8e9c8c },
     sheet: 'art/ground/grass-and-granite.png',
@@ -141,8 +183,6 @@ export const EDGES = [
     },
   },
   {
-    // the same sheet and the same windows: scrub is the same paint as grass, one shade
-    // warmer, so only the tint on the high side changes
     low: { tiles: ['path', 'stone'] },
     high: { tiles: ['scrub'], shade: 0xb2a37e },
     sheet: 'art/ground/grass-and-granite.png',
@@ -151,39 +191,6 @@ export const EDGES = [
       0: [732, 64], 1: [1372, 228], 2: [1238, 210], 3: [1284, 224], 4: [1366, 88],
       5: [480, 0], 7: [1040, 42], 8: [1244, 100], 10: [992, 0], 11: [1436, 22],
       12: [1284, 96], 13: [490, 44], 14: [1434, 430], 15: [96, 0],
-    },
-  },
-  {
-    low: { tiles: ['dirt'], shade: 0xb0a89c },
-    high: { tiles: ['grass'], shade: 0x8e9c8c },
-    sheet: 'art/ground/grass-and-dirt.png',
-    split: { channels: 'gb', over: 20 },
-    cells: {
-      0: [512, 0], 1: [1378, 216], 2: [1242, 210], 3: [1284, 216], 4: [1376, 104],
-      5: [506, 112], 7: [4, 402], 8: [588, 58], 10: [1254, 142], 11: [72, 394],
-      12: [1284, 102], 13: [136, 336], 14: [64, 436], 15: [1298, 144],
-    },
-  },
-  {
-    low: { tiles: ['dirt'], shade: 0xb0a89c },
-    high: { tiles: ['scrub'], shade: 0xb2a37e },
-    sheet: 'art/ground/grass-and-dirt.png',
-    split: { channels: 'gb', over: 20 },
-    cells: {
-      0: [512, 0], 1: [1378, 216], 2: [1242, 210], 3: [1284, 216], 4: [1376, 104],
-      5: [506, 112], 7: [4, 402], 8: [588, 58], 10: [1254, 142], 11: [72, 394],
-      12: [1284, 102], 13: [136, 336], 14: [64, 436], 15: [1298, 144],
-    },
-  },
-  {
-    low: { tiles: ['water'], shade: 0x5c7796 },
-    high: { tiles: ['sand'], shade: 0xbdb4a6 },
-    sheet: 'art/ground/water-and-sand.png',
-    split: { channels: 'rg', over: 3 },
-    cells: {
-      0: [1320, 128], 1: [68, 322], 2: [126, 324], 3: [172, 332], 4: [58, 4],
-      5: [64, 54], 7: [1262, 86], 8: [6, 4], 10: [0, 282], 11: [254, 68],
-      12: [848, 4], 13: [1244, 220], 14: [258, 124], 15: [512, 0],
     },
   },
   {
@@ -216,8 +223,8 @@ export const STRUCTURES = [
     // The export carries eight angles; the town is drawn from the front, so it is south.
     id: 'tavern',
     path: 'art/seahag',
-    at: [28.06, 36.13],
-    under: 'stone',
+    at: [56.06, 28.13],
+    under: 'dirt',
     stages: ['base/rotations/south.png'],
   },
   {
@@ -225,8 +232,8 @@ export const STRUCTURES = [
     // then roofed and lit. 128 pixels of picture over the chapel's seven rows of tiles.
     id: 'chapel',
     path: 'art/chapel',
-    at: [61.94, 8.5],
-    under: 'stone',
+    at: [26.94, 12.5],
+    under: 'grass',
     stages: [
       'base/rotations/unknown.png',
       'wrapped_in_timber_sc/rotations/unknown.png',
@@ -244,47 +251,7 @@ export const STRUCTURES = [
 //         bottom of it, so it sorts against actors like anything else in the world.
 // Add a prop by adding a line. Placing several of the same picture is fine and cheap.
 export const PROPS = [
-  // the quay, and the one dock still worth walking out on
-  { art: 'crates_1', map: 'village', at: [21, 44] },
-  { art: 'crates_2', map: 'village', at: [24, 43] },
-  { art: 'crates_3', map: 'village', at: [27, 45] },
-  { art: 'crates_4', map: 'village', at: [34, 45] },
-  { art: 'crates_5', map: 'village', at: [36, 47] },
-  { art: 'crates_6', map: 'village', at: [36, 53] },
-  { art: 'barrel_1', map: 'village', at: [22, 45] },
-  { art: 'barrel_2', map: 'village', at: [26, 43] },
-  { art: 'barrel_3', map: 'village', at: [33, 44] },
-  { art: 'barrel_4', map: 'village', at: [36, 50] },
-  { art: 'barrel_5', map: 'village', at: [20, 44] },
-  { art: 'lamp_lit', map: 'village', at: [23, 43] },
-  { art: 'lamp_lit', map: 'village', at: [31, 50] },
-  { art: 'lamp_lit', map: 'village', at: [32, 56] },
-  { art: 'lamp_lit', map: 'village', at: [37, 44] },
-  // the terrace, and the harbour road up out of the water
-  { art: 'barrel_6', map: 'village', at: [29, 43] },
-  { art: 'crates_7', map: 'village', at: [25, 44] },
-  { art: 'lamp_lit', map: 'village', at: [41, 42] },
-  { art: 'lamp_lit', map: 'village', at: [48, 38] },
-  { art: 'barrel_7', map: 'village', at: [39, 34] },
-  { art: 'crates_8', map: 'village', at: [44, 33] },
-  // the square, and what is left of the market on it
-  { art: 'lamp_lit', map: 'village', at: [59, 17] },
-  { art: 'lamp_lit', map: 'village', at: [72, 17] },
-  { art: 'lamp_lit', map: 'village', at: [59, 27] },
-  { art: 'lamp_lit', map: 'village', at: [73, 27] },
-  { art: 'crates_9', map: 'village', at: [70, 18] },
-  { art: 'crates_10', map: 'village', at: [71, 25] },
-  { art: 'crates_1', map: 'village', at: [67, 22] },
-  { art: 'barrel_1', map: 'village', at: [62, 18] },
-  { art: 'barrel_2', map: 'village', at: [69, 26] },
-  { art: 'barrel_3', map: 'village', at: [61, 24] },
-  { art: 'crates_2', map: 'village', at: [76, 21] },
-  // the lanes: fishermen's row, the netmakers' lane, and the road out
-  { art: 'barrel_4', map: 'village', at: [44, 49] },
-  { art: 'crates_3', map: 'village', at: [43, 55] },
-  { art: 'barrel_5', map: 'village', at: [52, 47] },
-  { art: 'barrel_6', map: 'village', at: [35, 26] },
-  { art: 'crates_4', map: 'village', at: [30, 22] },
-  { art: 'barrel_7', map: 'village', at: [67, 33] },
-  { art: 'crates_5', map: 'village', at: [79, 22] },
+  // Nothing is dressed on the town map yet: the export is terrain, and where the crates,
+  // the casks and the harbour lamps go is the designer's to say. art/props/ holds nineteen
+  // pictures ready for it — one line each, and the tile under it is what stops you.
 ];
