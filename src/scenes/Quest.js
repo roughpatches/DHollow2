@@ -721,14 +721,16 @@ export default class Quest extends Phaser.Scene {
   // just the name of the work over the top of it; the engine draws everything else
   activityHead(r, rect) {
     const e = run.kindOf(r.nodes[r.at].kind);
-    this.text(rect.x + 12, rect.y + 4, `${r.at + 1}. ${e.name} — ${e.activity}`,
+    this.text(rect.x + 12, rect.y + 4, `${e.name} — ${e.activity}`,
       TUNING.questBodySize + 2, COLORS.menuText);
   }
 
+  // What is standing in front of them, and nothing about where along the road it is: the
+  // trail says that, and a party does not count off the places they have been.
   nodeHead(r) {
     const n = r.nodes[r.at];
     const e = run.kindOf(n.kind);
-    return `${r.at + 1}. ${e.name}${n.goal ? ' — the goal' : ''}`;
+    return `${e.name}${n.goal ? ' — the goal' : ''}`;
   }
 
   nodeLines(r) {
