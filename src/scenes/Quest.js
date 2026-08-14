@@ -1,4 +1,4 @@
-import { TUNING, COLORS, hex } from '../../tuning.js';
+import { TUNING, COLORS, hex, blend } from '../../tuning.js';
 import { SKILLS } from '../../content/skills.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
@@ -10,7 +10,6 @@ import { buildIcons, iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf } from '../frames.js';
 import { markKey } from '../textures.js';
-import { meterBar } from '../minigames/meters.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
 const CARD = 'plaque'; // the panel a node's account is written on
@@ -262,8 +261,9 @@ export default class Quest extends Phaser.Scene {
   bands() {
     const b = this.box;
     const pad = padOf('band');
-    const barY = this.top + 22;
-    const top = barY + TUNING.questBarHeight + 54; // room under the bar for who is walking
+    // the band over the road holds the bar and nothing else, so it is as deep as the bar
+    const barY = b.y + (TUNING.questHeadHeight - TUNING.questBarHeight) / 2;
+    const top = b.y + TUNING.questHeadHeight;
     const bottom = b.y + b.h - TUNING.questTrailHeight;
     const trailTop = bottom + pad.t + 4; // the ring around the goal reaches above its box
     // a party with nothing between them gives the road its width back
@@ -506,29 +506,53 @@ export default class Quest extends Phaser.Scene {
     else this.hint('[E] Press on    [Esc] Turn back');
   }
 
-  // The constitution bar, and what the last node did to it under the label. This is the
-  // only readout that matters at a glance: at zero the run is over wherever it stands.
+  // The constitution, and nothing else on the band with it. It is the one readout that
+  // has to be taken at a glance — at nothing the run is over wherever it stands — and a
+  // length that is going down says that faster than a sentence about it does. What each
+  // node took is said on the card at that node, which is where it happened.
+  //
+  // Iron, like everything else on the screen: a sunk trough, a rim lit along its top,
+  // and a rivet driven in at each end. What is left in them is the gold the leaves are,
+  // and it goes the red they go as it runs out.
   conBar(r, rect) {
-    const frac = r.conMax ? r.con / r.conMax : 0;
-    const low = frac <= 0.25;
-    this.text(this.left, rect.y - 22, r.quest.label, TUNING.questTitleSize - 2, COLORS.menuAccent);
-    this.text(this.left + this.wide, rect.y - 18, `${r.quest.size} · ${r.when} · node ${Math.min(r.at + 1, r.nodes.length)} of ${r.nodes.length}`,
-      TUNING.questHintSize, r.when === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
+    const frac = r.conMax ? Math.max(0, Math.min(1, r.con / r.conMax)) : 0;
+    const { x, y, w, h } = rect;
+    const g = this.add.graphics();
+    this.layer.add(g);
 
-    // the kit's bar, rebuilt with the panel because the panel is cheap and so is it
-    const bar = meterBar(this, rect.x, rect.y + rect.h / 2, rect.w, rect.h, low ? 'bar_hp' : 'bar_stamina');
-    bar.setValue(frac);
-    this.layer.add(bar.track);
-    this.layer.add(bar.fill);
+    // the trough, sunk between the two caps that hold it to the panel
+    const cap = TUNING.questBarCap;
+    const tx = x + cap;
+    const tw = w - cap * 2;
+    g.fillStyle(COLORS.conTrough, 1);
+    g.fillRect(tx, y, tw, h);
+    g.lineStyle(1, blend(COLORS.conRim, 0x000000, 0.55), 1);
+    g.strokeRect(tx + 0.5, y + 0.5, tw - 1, h - 1);
 
-    this.text(rect.x + 10, rect.y + rect.h / 2 - 8, run.conLine(r), TUNING.questBodySize,
-      low ? COLORS.menuMapFolk : COLORS.menuText);
-    // who is walking it and what each of them put into the bar, under the bar rather
-    // than on it, because a number over a moving fill cannot be read
-    this.text(rect.x, rect.y + rect.h + 8, run.partyLine(), TUNING.questHintSize, COLORS.menuDim);
-    this.text(rect.x + rect.w, rect.y + rect.h + 8,
-      low ? 'Nearly spent. At nothing they turn for home with half of it.' : 'What the road has left them.',
-      TUNING.questHintSize, low ? COLORS.menuMapFolk : COLORS.menuDim).setOrigin(1, 0);
+    const lit = Math.round((tw - 4) * frac);
+    if (lit > 0) {
+      const c = blend(COLORS.conLow, COLORS.conFull, frac);
+      g.fillStyle(c, 1);
+      g.fillRect(tx + 2, y + 2, lit, h - 4);
+      g.fillStyle(blend(c, 0xffffff, 0.32), 1); // the light along the top of it
+      g.fillRect(tx + 2, y + 2, lit, 1);
+      g.fillStyle(blend(c, 0x000000, 0.4), 1);
+      g.fillRect(tx + 2, y + h - 3, lit, 1);
+    }
+
+    // the caps: iron, lit along the top and shadowed under, with a rivet driven through
+    for (const cx of [x, x + w - cap]) {
+      g.fillStyle(COLORS.conRim, 1);
+      g.fillRect(cx, y - 3, cap, h + 6);
+      g.fillStyle(COLORS.conRimLit, 1);
+      g.fillRect(cx, y - 3, cap, 1);
+      g.fillStyle(blend(COLORS.conRim, 0x000000, 0.55), 1);
+      g.fillRect(cx, y + h + 2, cap, 1);
+      g.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
+      g.fillRect(cx + cap / 2 - 2, y + h / 2 - 2, 4, 4);
+      g.fillStyle(COLORS.conRivet, 1);
+      g.fillRect(cx + cap / 2 - 2, y + h / 2 - 2, 3, 3);
+    }
   }
 
   // What the party is worth at each thing it has any points in at all, best first — the

@@ -41,7 +41,9 @@ export const TUNING = {
 
   // The crawl is three bands: the constitution bar across the top, the party walking in
   // the middle, and the trail behind and ahead of them along the bottom.
-  questBarHeight: 26,
+  questBarHeight: 16,
+  questBarCap: 12, // the iron at each end of it, holding it to the panel
+  questHeadHeight: 84, // the band the bar sits in, deep enough for the frame around it
   questSkillWidth: 108, // the column down the side of the road, taken off the road's width
   questSkillStep: 52, // how far apart the skills sit in it
   questSkillScale: 2, // an icon is drawn at 16 and stood up to this
@@ -247,6 +249,15 @@ export const COLORS = {
   inkMark: 0x2c4a52,
   inkSelectFill: 0xb5905f,
 
+  // The constitution bar: an iron trough with what the road has not taken yet in it.
+  // Full it is the gold the leaves are, and at nothing it is the red they go to.
+  conTrough: 0x17120f,
+  conRim: 0x5b5352,
+  conRimLit: 0x928178,
+  conRivet: 0x9aa0a6,
+  conFull: 0xd1943c,
+  conLow: 0xa8341f,
+
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,
   questSkyDay: 0x2c333c, // what the party is walking under in the middle band
@@ -356,4 +367,14 @@ export const PALETTES = {
 // two places that draw text don't each keep their own copy.
 export function hex(n) {
   return `#${n.toString(16).padStart(6, '0')}`;
+}
+
+// One colour some of the way into another. What a bar that changes as it empties is
+// made of, and what puts the light and the shadow on a rail without naming a third
+// and fourth colour for every one that has them.
+export function blend(a, b, t) {
+  const at = (s) => (a >> s) & 255;
+  const bt = (s) => (b >> s) & 255;
+  const ch = (s) => Math.round(at(s) + (bt(s) - at(s)) * t) << s;
+  return ch(16) | ch(8) | ch(0);
 }

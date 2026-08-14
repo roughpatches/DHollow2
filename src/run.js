@@ -665,11 +665,6 @@ export function partyLine(who = walkers()) {
   return who.map((c) => `${whoIs(c.id)} ${conOf(c.id)}`).join('    ');
 }
 
-// what the bar across the top of the crawl says next to itself
-export function conLine(r = run) {
-  return r ? `Constitution ${r.con} of ${r.conMax}` : '';
-}
-
 // what a node did to it, in the order it happened, for the card under the encounter
 export function conLines(node) {
   const out = [];
