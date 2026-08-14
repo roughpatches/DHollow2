@@ -1,0 +1,75 @@
+{
+  "group_id": "4680e466-341d-430a-b727-6126ffb42870",
+  "objects": [
+    {
+      "id": "c6b057f4-0ef6-4c8e-8c03-8e8f20a16920",
+      "name": "base",
+      "prompt": "A large, ancient, oak treee, with large trunk and boughs, autumn leaves",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_large_ancient_oak_treee_w.png"
+      },
+      "animations": {
+        "Tree_is_cut_town_the_trunk_collapsing_to_the_righ": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_000.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_001.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_002.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_003.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_004.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_005.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_006.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_007.png",
+                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "dc7049f9-c87d-4a98-a401-f0f23925478d",
+      "name": "Tree is cut town, th",
+      "prompt": "A large, ancient, oak treee, with large trunk and boughs, autumn leaves",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Tree_is_cut_town_th.png"
+      },
+      "animations": {
+        "Tree_is_cut_down_the_trunk_crashing_to_the_ground": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_000.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_001.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_002.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_003.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_004.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_005.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_006.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_007.png",
+                "animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-14T14:39:19.413328"
+}

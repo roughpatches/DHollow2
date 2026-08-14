@@ -83,7 +83,7 @@ export const PLACES = [
     // `quest` makes the entry somewhere you set out for — Enter starts the job.
     id: 'greywood',
     terrain: 'forest',
-    backdrop: { image: 'art/greywood/backdrop.png', ground: 318 },
+    backdrop: { image: 'art/greywood/backdrop.png', ground: 350 },
     label: 'The Greywood',
     note: 'Wilds',
     quest: 'firstday',

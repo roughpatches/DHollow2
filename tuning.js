@@ -55,12 +55,16 @@ export const TUNING = {
   questHeadHeight: 84, // the band the bar sits in, deep enough for the frame around it
   questSkillWidth: 108, // the column down the side of the road, taken off the road's width
   questSkillStep: 52, // how far apart the skills sit in it
-  questSkillScale: 2, // an icon is drawn at 16 and stood up to this
-  questTrailHeight: 100, // the band along the bottom, deep enough for the frame around it
+  questSkillPx: 32, // how big an icon is in the column, whatever size it is painted
+  questTrailHeight: 108, // the band along the bottom, deep enough for the frame and a node in it
   questWalkGroundFrac: 0.68, // where the ground line sits inside the walking band
   questBodyPx: 62, // how tall a walking placeholder is drawn on the road
   questArtScale: 1.25, // drawn art carries air around the body; this brings it up to size
-  questMarkScale: 2.5, // and how big the thing up ahead is drawn
+  questMarkScale: 2.5, // and how big a generated one is drawn; painted art keeps its size
+  questMarkInset: 150, // how far in from the far side of the road it comes to rest
+  questCardWidth: 836, // the card runs the width of the road
+  questCardBody: 52, // and this much of it is paragraphs, which keeps it under the ground line;
+  // a longer account is read a page at a time
   questScrollPxPerSec: 46, // the near ground's speed; the layers behind it run slower
   questParallax: [0.15, 0.4, 1], // far, mid, near, as a fraction of that speed
   questApproachMs: 1400, // how long a node takes to walk into view
@@ -134,7 +138,7 @@ export const TUNING = {
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
 
-  questPipSize: 26, // a node on the trail, and the length of road between two of them
+  questPipSize: 32, // a node on the trail, and the length of road between two of them
   questPipGap: 18,
   questPad: 26,
   questTitleSize: 22,

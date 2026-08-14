@@ -4,9 +4,6 @@
 // untrained at.
 //   id         — how src/party.js and any activity refers to the skill.
 //   name       — shown in the menu and on a character's sheet.
-//   icon       — the shape drawn for it in the column down the side of the road, named
-//                out of src/icons.js. Those are placeholders; a drawn one loaded under
-//                the same key replaces it and nothing here changes.
 //   activities — which activities the points apply to. Named here rather than in the
 //                activity, so a new skill needs no change anywhere else.
 //   draws      — quest tags this skill is drawn to. A character with any points in it
@@ -20,13 +17,15 @@
 // What a point is worth is one number in tuning.js, the same for every skill: it adds
 // skillBonusPerPoint to those activities, one to any roll against a DC for that skill,
 // and skillYieldPerPoint to what the party carries out of work of that kind.
+// A skill's icon is its id, the way a material's is: SKILL_ART in content/looks.js says
+// which cell of the painted sheet it is cut from, and src/icons.js draws a stand-in
+// until there is paint for it. Neither wants anything named here.
 // Add a skill by adding an entry. Nothing reads this list by position.
 
 export const SKILLS = [
   {
     id: 'alchemy',
     name: 'Alchemy',
-    icon: 'flask',
     activities: ['Brewing', 'Distilling', 'Tincturing'],
     draws: ['fen', 'wild'],
     unlocks: [
@@ -43,7 +42,6 @@ export const SKILLS = [
     // Calming and the spooked-animal line came across with them.
     id: 'woodcraft',
     name: 'Woodcraft',
-    icon: 'frond',
     activities: ['Shaping', 'Joinery', 'Carving', 'Calming'],
     draws: ['forest', 'ruin'],
     terrain: 'forest',
@@ -60,7 +58,6 @@ export const SKILLS = [
   {
     id: 'woodcutting',
     name: 'Woodcutting',
-    icon: 'axe',
     activities: ['Felling', 'Sawing', 'Splitting'],
     draws: ['forest', 'timber'],
     unlocks: [
@@ -75,7 +72,6 @@ export const SKILLS = [
   {
     id: 'sailing',
     name: 'Sailing',
-    icon: 'sail',
     activities: ['Rowing', 'Rigging', 'Navigation'],
     draws: ['water', 'coast'],
     terrain: 'water',
@@ -91,7 +87,6 @@ export const SKILLS = [
   {
     id: 'fishing',
     name: 'Fishing',
-    icon: 'hook',
     activities: ['Casting', 'Hooking', 'Netting'],
     draws: ['water', 'fen'],
     unlocks: [
@@ -106,7 +101,6 @@ export const SKILLS = [
   {
     id: 'charisma',
     name: 'Charisma',
-    icon: 'speech',
     activities: ['Haggling', 'Persuasion', 'Rumour'],
     draws: ['folk', 'road'],
     unlocks: [
@@ -121,7 +115,6 @@ export const SKILLS = [
   {
     id: 'perception',
     name: 'Perception',
-    icon: 'eye',
     activities: ['Watching', 'Tracking', 'Searching'],
     draws: ['dark', 'road'],
     unlocks: [
@@ -141,7 +134,6 @@ export const SKILLS = [
     // content/party.js if they should come back here.
     id: 'smithing',
     name: 'Smithing',
-    icon: 'hammer',
     activities: ['Smelting', 'Forging', 'Salvage'],
     draws: ['ruin', 'road'],
     unlocks: [

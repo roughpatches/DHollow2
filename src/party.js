@@ -176,6 +176,13 @@ export function skillOf(skillId) {
   return SKILL[skillId] || UNTRAINED;
 }
 
+// Whose work a piece of work is. An activity is claimed by whichever skill lists it, so
+// an encounter that names one has already said which skill it belongs to and does not
+// have to say it twice. Nothing claims Fighting or Hauling, and null is the answer.
+export function skillForActivity(activity) {
+  return (activity && SKILLS.find((t) => t.activities.includes(activity))) || null;
+}
+
 export function rankOf(id, skillId) {
   return stateOf(id).skills[skillId] || 0;
 }
