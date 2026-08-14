@@ -10,7 +10,8 @@
 //              out here; see `terrain` in content/skills.js and conPerTerrainPoint in
 //              tuning.js. A place with no terrain gives nobody anything.
 //   map      — which grid in content/maps.js to draw. Required; an entry without it is a list row.
-//   at       — optional [x, y] tile to ring on that map, for a landmark inside a larger place.
+//   at       — optional tile to ring on that map, for a landmark inside a larger place.
+//              [x, y] on a grid; one number on a street, which is how far along it stands.
 //   quest    — optional id from content/quests.js. The entry becomes somewhere you set
 //              out for: its state is read live, and Enter starts the job when it can be.
 //   building — optional id from content/buildings.js. The building's repair state and what
@@ -32,7 +33,7 @@ export const PLACES = [
     label: 'The paving',
     note: 'Open ground',
     map: 'village',
-    at: [30, 24],
+    at: [38],
     body: [
       'Imperial setts, laid wide enough for a market and a road out of it, going green in the joints a course at a time.',
       'It is the only part of town that was ever finished.',
@@ -42,7 +43,7 @@ export const PLACES = [
     label: 'The chapel',
     note: 'Ruin',
     map: 'village',
-    at: [30, 19],
+    at: [30],
     building: 'chapel',
     body: [
       'It shuts off the north end of the paving, and it is the tallest thing left standing in Dreadhollow even with its roof in the nave.',
@@ -55,7 +56,7 @@ export const PLACES = [
     label: 'The foreshore',
     note: 'Shore',
     map: 'village',
-    at: [70, 32],
+    at: [60],
     body: [
       'The bank runs out into a broad muddy flat and the flat runs out into deep water. There is nothing built on any of it.',
       'A harbour was worth cutting here once. You can see where from the shape of the ground.',

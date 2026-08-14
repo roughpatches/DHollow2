@@ -1,5 +1,10 @@
 // Maps are character grids. Editing the world means typing over characters.
 // Every row of a map must be the same length and every character must be in LEGEND.
+//
+// A map with `street` instead of `rows` is not a grid at all: it is Dreadhollow seen from
+// the side, one painted town with a line across it to walk along. Everything standing on a
+// street — a door, a building, somebody waiting — is placed by how far along it stands and
+// nothing else. See src/street.js.
 
 // solid: blocks movement. above: a second tile drawn over actors standing here.
 export const TILES = {
@@ -97,7 +102,7 @@ export const MAPS = {
       '#________________#',
       '########D#########',
     ],
-    doors: [{ x: 8, y: 11, to: 'village', spawn: [58, 26] }],
+    doors: [{ x: 8, y: 11, to: 'village', spawn: [7] }],
   },
 
   // Where the game opens: the point, north up the coast from the town. The tide put the
@@ -124,81 +129,34 @@ export const MAPS = {
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
     ],
-    doors: [{ x: 17, y: 15, to: 'village', spawn: [94, 1] }],
+    doors: [{ x: 17, y: 15, to: 'village', spawn: [79] }],
   },
 
-  // Dreadhollow itself, and the whole of the walkable town. The terrain is the designer's
-  // map export, read back at its own scale: 26 by 14 painted tiles of 64 pixels is 104 by
-  // 56 of the world's own, so one painted tile is four by four here.
-  // The water is east and southeast. The Sea Hag stands at the foot of the shore road
-  // where the bank runs out onto the foreshore, Aldis Rooke's is the next door up it, and
-  // the chapel shuts off the north end of the paving. Nothing else is built here yet.
+  // Dreadhollow itself: one street, seen from the side. The painting is the town — the
+  // houses, the quay wall and the boats are in it, not standing on it — and the street
+  // runs along the front of it. Everything below is measured in tiles along that street.
+  //   art     — the painted town, drawn at 1:1 and laid end to end `repeats` times, every
+  //             other copy flipped so the row of houses does not visibly restart.
+  //   size    — [width, height] of that painting in pixels. The street is that many tiles
+  //             wide times the repeat count; nothing else says how long the town is.
+  //   ground  — how far down the painting the walking line sits. Measured off the image:
+  //             it is what stands somebody on the cobbles rather than in the water.
+  // A door on a street has an x and nothing else, and is opened with [E] rather than
+  // walked onto: on a street you would cross every doorway in town going to the tavern.
+  // A door into a building (see content/buildings.js) is not listed here — the building
+  // is its own door, and its repair state is what decides whether it opens.
   village: {
     name: 'Dreadhollow',
-    spawn: [58, 26],
-    rows: [
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............................................::::::::::::::::::::::::............::::::::SSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,....................................................::::::::::::SSSSSSSSSSSSSSSS',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,....,,,,................::::SSSSSSSSSSSSSSSSSSSS~~~~',
-      '............,,,,,,,,,,,,................,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,....======......,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,....======......,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,....======......,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSS~~~~~~~~SSSS~~~~~~~~',
-      '................,,,,....,,,,======,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,######,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,######,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,##D###,,,,,,,,,,........,,,,,,,,........::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,,,,,........::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,,,,,........::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,======......::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,....,,,,,,,,======......::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,....######..::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,....##D###..::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.....:::....::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,.....:::....::::::::SSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........::::::::::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:=======::::SSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:=======SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:#######SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:###D###SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,....,,,,,,,,,,,,,,,,,,,,,,,,........:+++++++SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........:+++++++~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '................,,,,............,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~SSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,........::::SSSS~~~~~~~~~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,,,,,,,,,,,,,............::::::::SSSSSSSS~~~~~~~~~~~~~~~~SSSS::::SSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '............,,,,,,,,,,,,,,,,........................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~SSSSSSSSSSSS~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '....................................................::::SSSSSSSSSSSSSSSS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-    ],
+    street: {
+      art: 'art/town/backdrop.png',
+      size: [688, 384],
+      ground: 322,
+      repeats: 2,
+    },
+    spawn: [18],
     doors: [
-      { x: 60, y: 34, to: 'tavern', spawn: [9, 13] },
-      { x: 58, y: 25, to: 'hut', spawn: [8, 10] },
-      { x: 30, y: 19, to: 'chapel', spawn: [10, 13] },
-      { x: 94, y: 0, to: 'shore', spawn: [17, 14] },
+      { x: 7, to: 'hut', label: 'Aldis Rooke\'s house' },
+      { x: 80, to: 'shore', spawn: [17, 14], label: 'The track north' },
     ],
   },
 
@@ -222,7 +180,7 @@ export const MAPS = {
       '#____________________#',
       '#########D############',
     ],
-    doors: [{ x: 9, y: 14, to: 'village', spawn: [60, 35] }],
+    doors: [{ x: 9, y: 14, to: 'village', spawn: [46] }],
   },
 
   // Inside the chapel. The door is shut until the roof is back on, so this is what the
@@ -247,6 +205,6 @@ export const MAPS = {
       '#++++++++++++++++++++#',
       '##########D###########',
     ],
-    doors: [{ x: 10, y: 14, to: 'village', spawn: [30, 20] }],
+    doors: [{ x: 10, y: 14, to: 'village', spawn: [30] }],
   },
 };

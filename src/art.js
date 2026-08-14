@@ -5,8 +5,10 @@
 import { TUNING } from '../tuning.js';
 import { LOOKS, STRUCTURES, GROUND, PROPS, EDGES } from '../content/looks.js';
 import { PLACES } from '../content/places.js';
+import { MAPS } from '../content/maps.js';
 import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX, TILE_NAMES } from './textures.js';
 import { buildingOf, levelOf } from './town.js';
+import { DEPTH, atTile } from './street.js';
 
 // the game says up, down, left, right; the export says north, south, west, east
 const DIRS = { down: 'south', up: 'north', left: 'west', right: 'east' };
@@ -56,6 +58,11 @@ export function preloadArt(scene) {
   // a zone's painted landscape, loaded by its own path the way the ground sheets are
   for (const place of PLACES) {
     const key = place.backdrop && place.backdrop.image;
+    if (key && !scene.textures.exists(key)) scene.load.image(key, key);
+  }
+  // and a side-on map's painted town, the same way
+  for (const map of Object.values(MAPS)) {
+    const key = map.street && map.street.art;
     if (key && !scene.textures.exists(key)) scene.load.image(key, key);
   }
 }
@@ -231,11 +238,17 @@ export function raiseStructures(scene, mapKey) {
   for (const s of STRUCTURES) {
     const b = buildingOf(s.id);
     if (!b || b.map !== mapKey) continue;
-    const img = scene.add.image(s.at[0] * TUNING.tileSize, s.at[1] * TUNING.tileSize, stageKey(s, 0));
-    img.setOrigin(0, 0).setDepth(img.y + img.height);
+    // On a street the picture stands on the walking line at the building's own place along
+    // it, and there are no tiles under it to clear: the painting is already the town.
+    const img = scene.street
+      ? scene.add.image(atTile(s.at[0]), scene.groundY, stageKey(s, 0))
+        .setOrigin(0.5, 1).setDepth(DEPTH.structure)
+      : scene.add.image(s.at[0] * TUNING.tileSize, s.at[1] * TUNING.tileSize, stageKey(s, 0))
+        .setOrigin(0, 0);
+    if (!scene.street) img.setDepth(img.y + img.height);
     out[s.id] = { spec: s, img };
     restate(out, s.id);
-    clearUnder(scene, s, img);
+    if (!scene.street) clearUnder(scene, s, img);
   }
   return out;
 }
@@ -270,8 +283,13 @@ function propKey(art) {
 export function raiseProps(scene, mapKey) {
   const TS = TUNING.tileSize;
   for (const p of PROPS.filter((q) => q.map === mapKey)) {
-    const img = scene.add.image(p.at[0] * TS + TS / 2, (p.at[1] + 1) * TS, propKey(p.art));
-    img.setOrigin(0.5, 1).setDepth(img.y);
+    // a street has one line to stand on, so a prop on one only says how far along it is
+    const img = scene.street
+      ? scene.add.image(atTile(p.at[0]), scene.groundY, propKey(p.art))
+        .setOrigin(0.5, 1).setDepth(DEPTH.prop)
+      : scene.add.image(p.at[0] * TS + TS / 2, (p.at[1] + 1) * TS, propKey(p.art))
+        .setOrigin(0.5, 1);
+    if (!scene.street) img.setDepth(img.y);
   }
 }
 

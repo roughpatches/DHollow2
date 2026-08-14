@@ -1,12 +1,16 @@
-import { TUNING } from '../../tuning.js';
+import { TUNING, COLORS, hex } from '../../tuning.js';
 import { MAPS, TILES, LEGEND } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
 import { buildTextures } from '../textures.js';
-import { createPlayer, updatePlayer, haltPlayer, spawnActor } from '../player.js';
+import {
+  createPlayer, updatePlayer, haltPlayer, spawnActor,
+  createStreetPlayer, updateStreetPlayer, spawnStreetActor,
+} from '../player.js';
 import {
   preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
   raiseProps, restate,
 } from '../art.js';
+import { createStreet, focusNear, DEPTH } from '../street.js';
 import { preloadFrames, buildFrames } from '../frames.js';
 import { findTarget, faceToward } from '../interact.js';
 import { linesOf } from '../placeholders.js';
@@ -42,55 +46,12 @@ export default class World extends Phaser.Scene {
     buildFrames(this);
     bakeTiles(this);
     const map = MAPS[this.mapKey];
-    const w = map.rows[0].length;
-    const h = map.rows.length;
-
-    // the map as written, then whatever state the town has got itself into on top of it
-    const names = map.rows.map((row) => [...row].map((ch) => LEGEND[ch]));
-    for (const [x, y, ch] of patchesFor(this.mapKey)) names[y][x] = LEGEND[ch];
-    this.names = names; // what ground is where, so a seam can be worked out again later
-
-    // Two grids from one: a tile with `above` also draws a second tile on a layer
-    // over the actors, so you pass behind foliage instead of in front of it.
-    const ground = [];
-    const above = [];
-    for (let y = 0; y < h; y++) {
-      ground.push([]);
-      above.push([]);
-      for (let x = 0; x < w; x++) {
-        const name = names[y][x];
-        ground[y].push(slotFor(name, x, y));
-        above[y].push(TILES[name].above ? slotFor(TILES[name].above, x, y) : -1);
-      }
-    }
-
-    this.ground = this.buildLayer(ground, 0);
-    this.above = this.buildLayer(above, 20000);
-
-    // Seams: where two grounds meet, one tile painted with both of them, laid half a tile
-    // up and left so it straddles the four squares its corners came from. A seam is only
-    // ever drawn over the two grounds it is made of, so it changes nothing but the edge.
-    const seams = [];
-    for (let y = 0; y < h; y++) {
-      seams.push([]);
-      for (let x = 0; x < w; x++) seams[y].push(this.seamAt(x, y));
-    }
-    this.seams = this.buildLayer(seams, 1).setPosition(-TS / 2, -TS / 2);
-
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        if (TILES[names[y][x]].solid) this.ground.getTileAt(x, y).setCollision(true);
-      }
-    }
-
-    this.physics.world.setBounds(0, 0, w * TS, h * TS);
-
-    this.player = createPlayer(this, this.spawnTile[0], this.spawnTile[1]);
-    this.physics.add.collider(this.player, this.ground);
-
-    // buildings with art stand over their tiles before anyone walks in front of them
-    this.built = raiseStructures(this, this.mapKey);
-    raiseProps(this, this.mapKey);
+    // Two kinds of place, one scene: a grid you walk around, and a street you walk along.
+    // Everything past this point — who is standing here, what the camera does, what a
+    // conversation is — is the same either way.
+    this.street = map.street || null;
+    if (this.street) this.buildStreet(map);
+    else this.buildGrid(map);
 
     this.npcs = [];
     // `until` and `after` name a scene: someone can be on the strand only until the
@@ -99,18 +60,23 @@ export default class World extends Phaser.Scene {
       && !(n.until && hasPlayed(n.until))
       && !(n.after && !hasPlayed(n.after)));
     for (const def of here) {
-      const npc = spawnActor(this, def.palette, def.x, def.y, def.facing || 'down');
+      const npc = this.street
+        ? spawnStreetActor(this, def.palette, def.x, this.groundY, def.facing || 'left')
+        : spawnActor(this, def.palette, def.x, def.y, def.facing || 'down');
       // reaches further past the feet than the player's box, so you stop beside someone
       // rather than inside them
       fitBody(npc, 12, 20, 6);
       npc.body.setImmovable(true);
       npc.def = def;
       this.npcs.push(npc);
-      this.physics.add.collider(this.player, npc);
+      // A street has one line on it and standing on that line is not a reason nobody can
+      // get past you, so people on a street are walked through rather than walked around.
+      if (this.street) npc.setDepth(DEPTH.npc);
+      else this.physics.add.collider(this.player, npc);
     }
 
     const cam = this.cameras.main;
-    cam.setBounds(0, 0, w * TS, h * TS);
+    cam.setBounds(0, 0, this.worldW, this.worldH);
     cam.setRoundPixels(true);
     applyToWorld(this);
 
@@ -164,6 +130,85 @@ export default class World extends Phaser.Scene {
     });
   }
 
+  // The town, seen from the side: the painting, the line across it, and whatever stands on
+  // that line. No tiles, so nothing here bakes a grid, cuts a seam or sets a collision.
+  buildStreet(map) {
+    const street = createStreet(this, map.street);
+    this.groundY = street.ground;
+    this.worldW = street.width;
+    this.worldH = street.height;
+    this.physics.world.setBounds(0, 0, street.width, street.height);
+
+    this.player = createStreetPlayer(this, this.spawnTile[0], street.ground);
+    this.player.setDepth(DEPTH.player);
+
+    this.built = raiseStructures(this, this.mapKey);
+    raiseProps(this, this.mapKey);
+
+    this.hint = this.add.text(0, 0, '', {
+      fontFamily: TUNING.font,
+      fontSize: `${TUNING.streetHintSize}px`,
+      color: hex(COLORS.menuAccent),
+      stroke: hex(COLORS.bg),
+      strokeThickness: 3,
+    }).setOrigin(0.5, 1).setDepth(DEPTH.hint).setVisible(false);
+  }
+
+  buildGrid(map) {
+    this.hint = null; // nothing is written over anybody's head on a grid
+    const w = map.rows[0].length;
+    const h = map.rows.length;
+
+    // the map as written, then whatever state the town has got itself into on top of it
+    const names = map.rows.map((row) => [...row].map((ch) => LEGEND[ch]));
+    for (const [x, y, ch] of patchesFor(this.mapKey)) names[y][x] = LEGEND[ch];
+    this.names = names; // what ground is where, so a seam can be worked out again later
+
+    // Two grids from one: a tile with `above` also draws a second tile on a layer
+    // over the actors, so you pass behind foliage instead of in front of it.
+    const ground = [];
+    const above = [];
+    for (let y = 0; y < h; y++) {
+      ground.push([]);
+      above.push([]);
+      for (let x = 0; x < w; x++) {
+        const name = names[y][x];
+        ground[y].push(slotFor(name, x, y));
+        above[y].push(TILES[name].above ? slotFor(TILES[name].above, x, y) : -1);
+      }
+    }
+
+    this.ground = this.buildLayer(ground, 0);
+    this.above = this.buildLayer(above, 20000);
+
+    // Seams: where two grounds meet, one tile painted with both of them, laid half a tile
+    // up and left so it straddles the four squares its corners came from. A seam is only
+    // ever drawn over the two grounds it is made of, so it changes nothing but the edge.
+    const seams = [];
+    for (let y = 0; y < h; y++) {
+      seams.push([]);
+      for (let x = 0; x < w; x++) seams[y].push(this.seamAt(x, y));
+    }
+    this.seams = this.buildLayer(seams, 1).setPosition(-TS / 2, -TS / 2);
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (TILES[names[y][x]].solid) this.ground.getTileAt(x, y).setCollision(true);
+      }
+    }
+
+    this.physics.world.setBounds(0, 0, w * TS, h * TS);
+    this.worldW = w * TS;
+    this.worldH = h * TS;
+
+    this.player = createPlayer(this, this.spawnTile[0], this.spawnTile[1]);
+    this.physics.add.collider(this.player, this.ground);
+
+    // buildings with art stand over their tiles before anyone walks in front of them
+    this.built = raiseStructures(this, this.mapKey);
+    raiseProps(this, this.mapKey);
+  }
+
   // The ground is drawn from tilePx-sized art and scaled down to a tile, so it is
   // sampled at the size it was painted rather than at the size it occupies.
   buildLayer(data, depth) {
@@ -176,13 +221,42 @@ export default class World extends Phaser.Scene {
   update() {
     if (this.frozen) {
       this.player.body.setVelocity(0, 0);
+    } else if (this.street) {
+      updateStreetPlayer(this.player, this.keys);
     } else {
       updatePlayer(this.player, this.keys);
       this.checkDoors();
     }
 
+    // A street sorts by layer, not by feet: nobody on it is ever further up the road than
+    // anybody else, so the depths set when they were placed are the last word.
+    if (this.street) {
+      this.showHint();
+      return;
+    }
     this.player.setDepth(this.player.y);
     for (const npc of this.npcs) npc.setDepth(npc.y);
+  }
+
+  // The name of whatever is within reach, written over the player's head. A painted street
+  // has its doors painted into it, and without this the only way to find one would be to
+  // walk the length of the town pressing [E].
+  showHint() {
+    if (this.frozen) {
+      this.hint.setVisible(false);
+      return;
+    }
+    const npc = findTarget(this.player, this.npcs);
+    const focus = npc ? null : focusNear(this.mapKey, this.player.x);
+    const name = npc ? npc.def.name : (focus && focus.name);
+    this.hint.setVisible(!!name);
+    if (!name) return;
+    this.hint.setText(`${name}   [E]`);
+    this.hint.setPosition(
+      Math.round(this.player.x),
+      Math.round(this.player.y - this.player.displayHeight * this.player.originY
+        - TUNING.streetHintRise),
+    );
   }
 
   tryTalk() {
@@ -202,8 +276,34 @@ export default class World extends Phaser.Scene {
       this.say(npc.def.name, lines, npc.def.portrait || npc.def.palette);
       return;
     }
+    if (this.street) {
+      const focus = focusNear(this.mapKey, this.player.x);
+      if (focus) this.reach(focus);
+      return;
+    }
     const site = this.siteAhead();
     if (site) this.workOn(site);
+  }
+
+  // What [E] does at a landmark on a street. A building still wanting materials takes what
+  // you are carrying; one that is finished and has an inside opens; a plain door just
+  // opens. Which of those a place is, is its repair state and nothing else.
+  reach(focus) {
+    if (focus.kind === 'door') {
+      this.enter(focus.door.to, focus.door.spawn);
+      return;
+    }
+    const b = focus.building;
+    if (remaining(b.id)) {
+      this.workOn(b);
+      return;
+    }
+    if (b.enter && isOpen(b.id)) this.enter(b.enter);
+    else this.say(b.name, statusLines(b.id), null);
+  }
+
+  enter(to, spawn) {
+    this.scene.restart({ map: to, spawn: spawn || MAPS[to].spawn });
   }
 
   say(name, lines, portrait) {
@@ -229,7 +329,8 @@ export default class World extends Phaser.Scene {
     const before = levelOf(b.id);
     const result = contribute(b.id);
     if (result.levelled) {
-      this.applyPatch(patchOf(b.id, before + 1));
+      // a street has no tiles for a stage to lay down; the picture is the whole of it
+      if (!this.street) this.applyPatch(patchOf(b.id, before + 1));
       restate(this.built, b.id); // and the building itself changes where it stands
     }
     this.say(b.name, contributeLines(b.id, result), null);

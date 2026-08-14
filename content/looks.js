@@ -45,8 +45,9 @@ export const LOOKS = [
 //   id     — the building in content/buildings.js. Its stages and this list line up in
 //            order: first picture for the first stage, and so on down.
 //   path   — the folder under art/ the export was unzipped into.
-//   at     — where the top-left corner of the picture sits, in tiles. Fractions are
-//            fine: it is placed by eye against the walls it is standing on.
+//   at     — where the picture sits, in tiles. On a grid, its top-left corner; on a
+//            street, one number — how far along it stands, with its feet on the walking
+//            line. Fractions are fine: it is placed by eye against what it stands on.
 //   under  — the tile drawn under the picture, in place of whatever the map had there.
 //            Defaults to grass. The tiles keep their collision either way: the walls
 //            still stop you, they just stop drawing themselves.
@@ -231,7 +232,7 @@ export const STRUCTURES = [
     // The export carries eight angles; the town is drawn from the front, so it is south.
     id: 'tavern',
     path: 'art/seahag',
-    at: [56.06, 28.13],
+    at: [46],
     under: 'dirt',
     stages: ['base/rotations/south.png'],
   },
@@ -240,7 +241,7 @@ export const STRUCTURES = [
     // then roofed and lit. 128 pixels of picture over the chapel's seven rows of tiles.
     id: 'chapel',
     path: 'art/chapel',
-    at: [26.94, 12.5],
+    at: [30],
     under: 'stone', // it stands on the paving, so what its picture clears is paving
     stages: [
       'base/rotations/unknown.png',
