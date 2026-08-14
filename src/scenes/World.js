@@ -227,6 +227,7 @@ export default class World extends Phaser.Scene {
       this.player.body.setVelocity(0, 0);
     } else if (this.street) {
       updateStreetPlayer(this.player, this.keys);
+      this.checkEdges();
     } else {
       updatePlayer(this.player, this.keys);
       this.checkDoors();
@@ -240,6 +241,24 @@ export default class World extends Phaser.Scene {
     }
     this.player.setDepth(this.player.y);
     for (const npc of this.npcs) npc.setDepth(npc.y);
+  }
+
+  // A street is a panel, not a stretch of something longer: walk into the end of one and
+  // the next one is what is on the screen, standing you a tile inside it. Walking into the
+  // end is what the world bounds already say — no distance to guess at, and no way to be
+  // stopped by the edge of a panel that has somewhere to be.
+  checkEdges() {
+    const edges = this.street.edges;
+    if (!edges) return;
+    const stopped = this.player.body.blocked;
+    if (edges.right && stopped.right) this.toPanel(edges.right, 'left');
+    else if (edges.left && stopped.left) this.toPanel(edges.left, 'right');
+  }
+
+  toPanel(to, side) {
+    const s = MAPS[to].street;
+    const last = (s.size[0] * s.repeats) / TS - 1;
+    this.scene.restart({ map: to, spawn: [side === 'left' ? 1 : last - 1] });
   }
 
   // The name of whatever is within reach, written over the player's head. A painted street

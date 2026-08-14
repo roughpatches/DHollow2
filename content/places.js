@@ -90,6 +90,16 @@ export const PLACES = [
     body: ['[Placeholder Text]'],
   },
   {
+    // The next panel east. The town is painted a panel at a time; this is the second.
+    label: 'The wharf',
+    note: 'Open ground',
+    map: 'wharf',
+    body: [
+      'Timber-framed shops leaning over the cobbles, a jetty going out over the mud, and a boat pulled up on it that nobody has had out in a long while.',
+      'The road stops being a road here and starts being a way down to the water.',
+    ],
+  },
+  {
     label: 'The Sea Hag',
     note: 'Indoors',
     map: 'tavern',

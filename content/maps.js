@@ -129,7 +129,7 @@ export const MAPS = {
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
     ],
-    doors: [{ x: 17, y: 15, to: 'village', spawn: [40] }],
+    doors: [{ x: 17, y: 15, to: 'wharf', spawn: [29] }],
   },
 
   // Dreadhollow itself: one street, seen from the side. The painting is the town behind —
@@ -150,6 +150,11 @@ export const MAPS = {
   //             built along the back of the pavement and walked along the cobbles in front
   //             of it. A building dropped in stands on this, so it sits in the row rather
   //             than out in the road. Left out, it is the walking line.
+  //   edges   — what lies off each end: { right: 'wharf', left: 'village' }. A street is a
+  //             panel, not a stretch of something longer — walk into the end of one and the
+  //             next is what is on the screen, standing you at its far end. Painted towns
+  //             are painted a panel at a time and are not the same size as each other, so
+  //             this is how one is put beside another rather than joined to it.
   // A door on a street has an x and nothing else, and is opened with [E] rather than
   // walked onto: on a street you would cross every doorway in town going to the tavern.
   // A door into a building (see content/buildings.js) is not listed here — the building
@@ -162,11 +167,30 @@ export const MAPS = {
       ground: 328, // the cobbles, a little in front of the kerb
       sill: 272, // and the back of the pavement, where the terrace stands
       repeats: 1, // one composed scene; laid twice it would be the same town twice
+      edges: { right: 'wharf' },
     },
     spawn: [21],
     doors: [
       { x: 7, to: 'hut', label: 'Aldis Rooke\'s house' },
-      { x: 41, to: 'shore', spawn: [17, 14], label: 'The track north' },
+    ],
+  },
+
+  // The next panel east: timber-framed shops, a jetty, and a boat nobody has taken out in
+  // a while. Painted smaller than the west end and at the same scale, so it is its own
+  // panel rather than more of the same street.
+  wharf: {
+    name: 'The wharf',
+    street: {
+      art: 'art/town/wharf.png',
+      size: [512, 288],
+      ground: 278,
+      sill: 238,
+      repeats: 1,
+      edges: { left: 'village' },
+    },
+    spawn: [2],
+    doors: [
+      { x: 30, to: 'shore', spawn: [17, 14], label: 'The track north' },
     ],
   },
 
