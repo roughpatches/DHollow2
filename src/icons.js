@@ -8,6 +8,7 @@
 // still gets a square, drawn as UNKNOWN.
 
 import { COLORS } from '../tuning.js';
+import { SKILL_ART } from '../content/looks.js';
 
 const PX = 16; // drawn small and scaled up in the menu, like every other placeholder here
 
@@ -227,15 +228,17 @@ const ICONS = {
   tally: ['slip', 'bone'],
   mint: ['sprig', 'herb'],
   waterskin: ['sack', 'wood'],
-  // the skills, named by `icon` in content/skills.js
-  flask: ['flask', 'glass'],
-  frond: ['frond', 'herb'],
-  axe: ['axe', 'iron'],
-  sail: ['sail', 'cloth'],
-  hook: ['hook', 'ash'],
-  speech: ['speech', 'bone'],
-  eye: ['eye', 'glass'],
-  hammer: ['hammer', 'bronze'],
+  // The skills, by their id in content/skills.js — a skill's icon is its id, the way a
+  // material's is. These are what stands in for a skill the painted sheet has no cell
+  // for, or for all of them until the sheet is in.
+  woodcraft: ['frond', 'herb'],
+  woodcutting: ['axe', 'iron'],
+  fishing: ['hook', 'ash'],
+  sailing: ['sail', 'cloth'],
+  alchemy: ['flask', 'glass'],
+  perception: ['eye', 'glass'],
+  charisma: ['speech', 'bone'],
+  smithing: ['hammer', 'bronze'],
 };
 
 const UNKNOWN = ['block', 'cloth'];
@@ -249,10 +252,34 @@ export function iconKeyFor(name) {
   return keyOf(ICONS[name] ? name : 'unknown');
 }
 
+export function preloadIcons(scene) {
+  const { sheet } = SKILL_ART;
+  if (sheet && !scene.textures.exists(sheet)) scene.load.image(sheet, sheet);
+}
+
+// One cell off the painted sheet, under the name the drawn shape would have had. Returns
+// false if there is no cell for this one or the sheet is not in the repo yet, which is
+// what sends it back to the generator.
+function cutIcon(scene, name) {
+  const at = SKILL_ART.at[name];
+  if (!at || !scene.textures.exists(SKILL_ART.sheet)) return false;
+  const px = SKILL_ART.cell;
+  const tex = scene.textures.createCanvas(keyOf(name), px, px);
+  const ctx = tex.getContext();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(scene.textures.get(SKILL_ART.sheet).getSourceImage(),
+    (at[0] - 1) * px, (at[1] - 1) * px, px, px, 0, 0, px, px);
+  tex.refresh();
+  return true;
+}
+
+// Painted where there is paint for it, drawn where there is not, and the same key either
+// way — so nothing that puts an icon on the screen knows or cares which it got.
 export function buildIcons(scene) {
   for (const [name, spec] of [...Object.entries(ICONS), ['unknown', UNKNOWN]]) {
     const key = keyOf(name);
     if (scene.textures.exists(key)) continue;
+    if (cutIcon(scene, name)) continue;
     const g = scene.make.graphics({ x: 0, y: 0 }, false);
     SHAPES[spec[0]](g, COLORS.icon[spec[1]]);
     g.generateTexture(key, PX, PX);

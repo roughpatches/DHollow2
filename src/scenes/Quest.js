@@ -6,7 +6,7 @@ import {
   roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf, isCombat,
   nameOf, fill, YOU,
 } from '../party.js';
-import { buildIcons, iconKeyFor } from '../icons.js';
+import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf } from '../frames.js';
 import { markKey } from '../textures.js';
@@ -27,7 +27,6 @@ export default class Quest extends Phaser.Scene {
 
   create() {
     this.sizeTo(null);
-    buildIcons(this); // the column down the side of the road draws these
 
     this.layer = this.add.container().setDepth(29000).setVisible(false);
     this.open_ = false;
@@ -582,8 +581,10 @@ export default class Quest extends Phaser.Scene {
     for (const { skill: t, n } of rows) {
       // centred on its own half of the column: the shapes are different widths and left
       // against a margin they read as a ragged edge rather than a list
-      const icon = this.add.image(rect.x + pad.l + 16, y, iconKeyFor(t.icon)).setOrigin(0.5);
-      icon.setScale(TUNING.questSkillScale);
+      const icon = this.add.image(rect.x + pad.l + TUNING.questSkillPx / 2, y, iconKeyFor(t.id));
+      // sized, not scaled: a drawn icon and the shape standing in for it are painted at
+      // different sizes and both have to come out the same size in the column
+      icon.setOrigin(0.5).setDisplaySize(TUNING.questSkillPx, TUNING.questSkillPx);
       this.layer.add(icon);
       this.text(rect.x + rect.w - pad.r - 6, y - 10, `${n}`, TUNING.questBodySize,
         COLORS.menuAccent).setOrigin(1, 0);

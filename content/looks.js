@@ -314,3 +314,25 @@ export const UI = {
     },
   },
 };
+
+// The skills, cut from one painted sheet of them. A cell is named by its column and row,
+// counted from one at the top-left, which is how a sheet is read off the page.
+//   sheet — the painted sheet under art/.
+//   cell  — the side of one icon on it, in pixels. Every cell is square and they abut.
+//   at    — [column, row] per skill id from content/skills.js. A skill with no entry —
+//           or every skill, until the sheet is actually in the repo — keeps the shape
+//           src/icons.js draws for it, and nothing else changes either way.
+export const SKILL_ART = {
+  sheet: 'art/skills.png',
+  cell: 32,
+  at: {
+    woodcraft: [1, 1],
+    woodcutting: [1, 2],
+    fishing: [1, 3],
+    sailing: [3, 4],
+    alchemy: [1, 5],
+    perception: [1, 6],
+    charisma: [1, 7],
+    smithing: [1, 8],
+  },
+};

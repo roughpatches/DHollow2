@@ -9,7 +9,7 @@ import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
 import { partyRows, skillRows, fill } from '../party.js';
 import { statusLines, carriedRows } from '../town.js';
-import { buildIcons, iconKeyFor } from '../icons.js';
+import { iconKeyFor } from '../icons.js';
 import { questRows, placeLines, canStart } from '../run.js';
 
 // Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
@@ -75,7 +75,6 @@ export default class Menu extends Phaser.Scene {
 
     this.layer = this.add.container().setDepth(30000).setVisible(false);
     this.open_ = false;
-    buildIcons(this); // the Inventory grid draws these; World never asks for them
 
     this.input.keyboard.on('keydown', this.onKey, this);
   }

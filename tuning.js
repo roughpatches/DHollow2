@@ -46,7 +46,7 @@ export const TUNING = {
   questHeadHeight: 84, // the band the bar sits in, deep enough for the frame around it
   questSkillWidth: 108, // the column down the side of the road, taken off the road's width
   questSkillStep: 52, // how far apart the skills sit in it
-  questSkillScale: 2, // an icon is drawn at 16 and stood up to this
+  questSkillPx: 32, // how big an icon is in the column, whatever size it is painted
   questTrailHeight: 100, // the band along the bottom, deep enough for the frame around it
   questWalkGroundFrac: 0.68, // where the ground line sits inside the walking band
   questBodyPx: 62, // how tall a walking placeholder is drawn on the road
