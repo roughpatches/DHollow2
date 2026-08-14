@@ -360,6 +360,10 @@ export const SKILL_ART = {
 //   shade  — a colour to multiply the art by, for art painted under a light the place
 //            does not have. A multiply only takes away, so this warms cold art by losing
 //            its blue rather than by adding anything; nothing comes out brighter.
+//   trim   — [left, right, top, bottom] pixels of paint to cut off, for a thing painted
+//            longer than the ground it has to cross. Where it stands against the road
+//            does not move: `ground` is measured off the frame, and the frame is not
+//            what is being cut.
 //   fade   — [left, right, top, bottom] pixels of the painting to ramp out to nothing on
 //            each side. Art that comes back as a self-contained rectangle — its banks
 //            painted hard to the edge of the paint — sits on the landscape with a seam
@@ -397,11 +401,16 @@ const BROOK = {
     // Painted cold — grey rock and cyan water — under a wood that is all warm brown and
     // amber, so it is pulled toward the Greywood's light rather than repainted.
     shade: 0xffcda0,
+    // It is painted long enough to reach halfway up the trunks, which is further into the
+    // wood than a brook crossing a road wants to be seen coming from. The far end is cut
+    // back so it comes out of the trees just above the path; the near end is left, because
+    // that is the one running off under the card.
+    trim: [0, 0, 44, 0],
     // Its banks are painted hard to the edge of the paint, so they are eaten back into
     // the forest floor either side and into the trees it comes out of. The left bank
     // takes the most because it is the squarest; the bottom takes none, because the
     // card is over it and nothing of that edge is ever seen.
-    fade: [44, 26, 40, 0],
+    fade: [44, 26, 26, 0],
   },
 };
 

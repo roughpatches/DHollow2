@@ -119,14 +119,18 @@ function nodeStates(art) {
 
 // whether a state's art is used as painted, or has something done to it first
 function dressed(spec) {
-  return !!(spec.turn || spec.fade || spec.shade);
+  return !!(spec.turn || spec.trim || spec.fade || spec.shade);
 }
 
-// One frame, turned, shaded and feathered into what it is standing on. A right angle on
-// a square canvas moves pixels without touching them, so the turn costs the art nothing;
-// the shade is a multiply toward the light of the place; the feather is an alpha ramp on
-// whichever sides are named, for art painted as a self-contained rectangle that would
-// otherwise sit on the landscape with a seam round it.
+// One frame, turned, shaded, cut back and feathered into what it is standing on. A right
+// angle on a square canvas moves pixels without touching them, so the turn costs the art
+// nothing; the shade is a multiply toward the light of the place; the trim takes an end
+// off something painted longer than the ground it has to cross; the feather is an alpha
+// ramp on whichever sides are named, for art painted as a self-contained rectangle that
+// would otherwise sit on the landscape with a seam round it.
+//
+// Trim runs before feather so the feather lands on the cut, not on the end that was cut
+// off: a shortened brook still comes out of the trees rather than starting at a wall.
 function dressFrame(scene, key, spec) {
   if (scene.textures.exists(key)) return;
   const src = scene.textures.get(`${key}_asis`).getSourceImage();
@@ -141,13 +145,46 @@ function dressFrame(scene, key, spec) {
   ctx.drawImage(src, -src.width / 2, -src.height / 2);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-  if (spec.shade || spec.fade) {
+  if (spec.shade || spec.trim || spec.fade) {
     const img = ctx.getImageData(0, 0, w, h);
     if (spec.shade) shaded(img, spec.shade);
+    if (spec.trim) trimmed(img, w, h, spec.trim);
     if (spec.fade) feather(img, w, h, spec.fade);
     ctx.putImageData(img, 0, 0);
   }
   tex.refresh();
+}
+
+// The rectangle the paint actually occupies, which is not the canvas it came on: an
+// export carries whatever air the exporter felt like, and everything below has to work
+// from the paint.
+function boundsOf(img, w, h) {
+  let x0 = w; let x1 = -1; let y0 = h; let y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!img.data[(y * w + x) * 4 + 3]) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  return { x0, x1, y0, y1 };
+}
+
+// Paint cut off each side, for a thing painted longer than the ground it has to cross.
+// Where it is registered against the road does not move, because that is measured off
+// the frame and the frame is not what is being cut.
+function trimmed(img, w, h, [tl, tr, tt, tb]) {
+  const { x0, x1, y0, y1 } = boundsOf(img, w, h);
+  if (x1 < 0) return;
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (x - x0 < tl || x1 - x < tr || y - y0 < tt || y1 - y < tb) {
+        img.data[(y * w + x) * 4 + 3] = 0;
+      }
+    }
+  }
 }
 
 // Art painted under a light the place does not have, multiplied toward the light it does
@@ -169,17 +206,7 @@ function shaded(img, shade) {
 // an export carries whatever air the exporter felt like and the feather has to bite into
 // the painting, not into the empty margin around it.
 function feather(img, w, h, [fl, fr, ft, fb]) {
-  const alpha = (x, y) => img.data[(y * w + x) * 4 + 3];
-  let x0 = w; let x1 = -1; let y0 = h; let y1 = -1;
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      if (!alpha(x, y)) continue;
-      if (x < x0) x0 = x;
-      if (x > x1) x1 = x;
-      if (y < y0) y0 = y;
-      if (y > y1) y1 = y;
-    }
-  }
+  const { x0, x1, y0, y1 } = boundsOf(img, w, h);
   if (x1 < 0) return;
   // A bank is not a ruled line. How far each row's fade reaches wanders slowly along the
   // edge, so where the art runs out is ragged the way ground is; it is a function of the
