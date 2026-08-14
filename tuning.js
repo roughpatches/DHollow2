@@ -12,7 +12,7 @@ export const TUNING = {
   // back than a grid map because a painted street is 384 pixels tall and a room is not:
   // at the grid's own zoom you would never see a roofline.
   streetZoom: 2,
-  streetBodyPx: 47, // how tall anybody standing on a street is drawn, feet to head
+  streetBodyPx: 34, // how tall anybody standing on a street is drawn, feet to head
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it

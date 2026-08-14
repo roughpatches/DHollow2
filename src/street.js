@@ -27,27 +27,30 @@ export function atTile(tx) {
   return tx * TS + TS / 2;
 }
 
-// The painting, at 1:1 and laid end to end. Every other copy is flipped, so the join is a
-// mirror — the two halves of a seam are the same edge, and the row of houses reads as a
-// longer town rather than as the same town twice.
-// The art is missing until its file is in, so this asks: without it the street is the two
-// flat bands it would otherwise be behind, which is enough to walk along and place things
-// against while the painting is being made.
+// Sky above the walking line and stone below it, across the whole street, and then the
+// painting laid over the top of it at 1:1. The bands are painted whether or not the art is
+// there: a painted town has weather in it rather than sky, and nothing at all where its
+// own ground runs out, so what shows through is the two colours the town is between.
+// Every copy after the first is flipped, so the join is a mirror — the two halves of a
+// seam are the same edge, and the row of houses reads as a longer town rather than as the
+// same town twice.
 export function createStreet(scene, def) {
   const [w, h] = def.size;
   const width = w * def.repeats;
 
+  const g = scene.add.graphics().setDepth(DEPTH.town);
+  g.fillStyle(COLORS.questSkyDay, 1);
+  g.fillRect(0, 0, width, def.ground);
+  g.fillStyle(COLORS.path[0], 1);
+  g.fillRect(0, def.ground, width, h - def.ground);
+
+  // missing until its file is in, so this asks: without it the street is the bands alone,
+  // which is enough to walk along and place things against
   if (scene.textures.exists(def.art)) {
     for (let i = 0; i < def.repeats; i++) {
       const img = scene.add.image(i * w, 0, def.art).setOrigin(0, 0).setDepth(DEPTH.town);
       if (i % 2) img.setFlipX(true);
     }
-  } else {
-    const g = scene.add.graphics().setDepth(DEPTH.town);
-    g.fillStyle(COLORS.questSkyDay, 1);
-    g.fillRect(0, 0, width, def.ground);
-    g.fillStyle(COLORS.path[0], 1);
-    g.fillRect(0, def.ground, width, h - def.ground);
   }
 
   return { width, height: h, ground: def.ground };

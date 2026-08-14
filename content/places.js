@@ -33,7 +33,7 @@ export const PLACES = [
     label: 'The paving',
     note: 'Open ground',
     map: 'village',
-    at: [38],
+    at: [22],
     body: [
       'Imperial setts, laid wide enough for a market and a road out of it, going green in the joints a course at a time.',
       'It is the only part of town that was ever finished.',
@@ -43,7 +43,7 @@ export const PLACES = [
     label: 'The chapel',
     note: 'Ruin',
     map: 'village',
-    at: [30],
+    at: [18],
     building: 'chapel',
     body: [
       'It shuts off the north end of the paving, and it is the tallest thing left standing in Dreadhollow even with its roof in the nave.',
@@ -56,7 +56,7 @@ export const PLACES = [
     label: 'The foreshore',
     note: 'Shore',
     map: 'village',
-    at: [60],
+    at: [26],
     body: [
       'The bank runs out into a broad muddy flat and the flat runs out into deep water. There is nothing built on any of it.',
       'A harbour was worth cutting here once. You can see where from the shape of the ground.',

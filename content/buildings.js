@@ -24,7 +24,7 @@ export const BUILDINGS = [
     id: 'tavern',
     name: 'The Sea Hag',
     map: 'village',
-    site: [46],
+    site: [31],
     enter: 'tavern',
     level: 0,
     stages: [
@@ -40,7 +40,7 @@ export const BUILDINGS = [
     id: 'chapel',
     name: 'The chapel',
     map: 'village',
-    site: [30],
+    site: [18],
     enter: 'chapel',
     level: 0,
     stages: [

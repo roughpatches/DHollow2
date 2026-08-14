@@ -102,7 +102,7 @@ export const MAPS = {
       '#________________#',
       '########D#########',
     ],
-    doors: [{ x: 8, y: 11, to: 'village', spawn: [7] }],
+    doors: [{ x: 8, y: 11, to: 'village', spawn: [4] }],
   },
 
   // Where the game opens: the point, north up the coast from the town. The tide put the
@@ -129,18 +129,19 @@ export const MAPS = {
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
     ],
-    doors: [{ x: 17, y: 15, to: 'village', spawn: [79] }],
+    doors: [{ x: 17, y: 15, to: 'village', spawn: [40] }],
   },
 
-  // Dreadhollow itself: one street, seen from the side. The painting is the town — the
-  // houses, the quay wall and the boats are in it, not standing on it — and the street
-  // runs along the front of it. Everything below is measured in tiles along that street.
+  // Dreadhollow itself: one street, seen from the side. The painting is the town behind —
+  // the terraces, the spire and the hills are in it, not standing on it — and the cobbles
+  // in front of it are what is walked. Everything below is in tiles along that street.
   //   art     — the painted town, drawn at 1:1 and laid end to end `repeats` times, every
   //             other copy flipped so the row of houses does not visibly restart.
-  //   size    — [width, height] of that painting in pixels. The street is that many tiles
-  //             wide times the repeat count; nothing else says how long the town is.
-  //   ground  — how far down the painting the walking line sits. Measured off the image:
-  //             it is what stands somebody on the cobbles rather than in the water.
+  //   size    — how much of that painting the town is, in pixels: its width, and its height
+  //             down to where its own ground runs out. The street is that many tiles wide
+  //             times the repeat count; nothing else says how long the town is.
+  //   ground  — how far down the painting the walking line sits. Measured off the image: it
+  //             is what stands somebody on the cobbles rather than up against the doors.
   // A door on a street has an x and nothing else, and is opened with [E] rather than
   // walked onto: on a street you would cross every doorway in town going to the tavern.
   // A door into a building (see content/buildings.js) is not listed here — the building
@@ -149,14 +150,14 @@ export const MAPS = {
     name: 'Dreadhollow',
     street: {
       art: 'art/town/backdrop.png',
-      size: [688, 384],
-      ground: 322,
-      repeats: 2,
+      size: [688, 338], // the painting is 384 tall; below 338 it is empty
+      ground: 328,
+      repeats: 1, // one composed scene, and there is only one spire in Dreadhollow
     },
     spawn: [18],
     doors: [
-      { x: 7, to: 'hut', label: 'Aldis Rooke\'s house' },
-      { x: 80, to: 'shore', spawn: [17, 14], label: 'The track north' },
+      { x: 4, to: 'hut', label: 'Aldis Rooke\'s house' },
+      { x: 41, to: 'shore', spawn: [17, 14], label: 'The track north' },
     ],
   },
 
@@ -180,7 +181,7 @@ export const MAPS = {
       '#____________________#',
       '#########D############',
     ],
-    doors: [{ x: 9, y: 14, to: 'village', spawn: [46] }],
+    doors: [{ x: 9, y: 14, to: 'village', spawn: [31] }],
   },
 
   // Inside the chapel. The door is shut until the roof is back on, so this is what the
@@ -205,6 +206,6 @@ export const MAPS = {
       '#++++++++++++++++++++#',
       '##########D###########',
     ],
-    doors: [{ x: 10, y: 14, to: 'village', spawn: [30] }],
+    doors: [{ x: 10, y: 14, to: 'village', spawn: [18] }],
   },
 };
