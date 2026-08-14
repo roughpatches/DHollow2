@@ -43,7 +43,7 @@ export const PLACES = [
     label: 'The chapel',
     note: 'Ruin',
     map: 'village',
-    at: [18],
+    at: [17],
     building: 'chapel',
     body: [
       'It shuts off the north end of the paving, and it is the tallest thing left standing in Dreadhollow even with its roof in the nave.',

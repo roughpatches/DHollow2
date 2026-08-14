@@ -40,7 +40,7 @@ export const BUILDINGS = [
     id: 'chapel',
     name: 'The chapel',
     map: 'village',
-    site: [18],
+    site: [17],
     enter: 'chapel',
     level: 0,
     stages: [

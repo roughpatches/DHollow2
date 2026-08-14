@@ -133,8 +133,10 @@ export const MAPS = {
   },
 
   // Dreadhollow itself: one street, seen from the side. The painting is the town behind —
-  // the terraces, the spire and the hills are in it, not standing on it — and the cobbles
-  // in front of it are what is walked. Everything below is in tiles along that street.
+  // the terraces, the hills and the ruined quay are in it, not standing on it — and the
+  // cobbles in front are what is walked. Everything below is in tiles along that street.
+  // The gap in the terrace was a painted church; it was taken out so the chapel that is
+  // repaired could stand there instead of in front of one that never changes.
   //   art     — the painted town, drawn at 1:1 and laid end to end `repeats` times, every
   //             other copy flipped so the row of houses does not visibly restart.
   //   size    — how much of that painting the town is, in pixels: its width, and its height
@@ -157,7 +159,7 @@ export const MAPS = {
       size: [688, 338], // the painting is 384 tall; below 338 it is empty
       ground: 328, // the cobbles, a little in front of the kerb
       sill: 272, // and the back of the pavement, where the terrace stands
-      repeats: 1, // one composed scene, and there is only one spire in Dreadhollow
+      repeats: 1, // one composed scene; laid twice it would be the same town twice
     },
     spawn: [18],
     doors: [
@@ -211,6 +213,6 @@ export const MAPS = {
       '#++++++++++++++++++++#',
       '##########D###########',
     ],
-    doors: [{ x: 10, y: 14, to: 'village', spawn: [18] }],
+    doors: [{ x: 10, y: 14, to: 'village', spawn: [17] }],
   },
 };
