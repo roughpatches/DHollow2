@@ -233,6 +233,39 @@ function stageKey(s, i) {
   return `built_${s.id}_${i}`;
 }
 
+// How much empty frame a picture carries under it. An export is padded out to a square and
+// the padding is not the same on every stage — the burnt chapel has eight pixels of nothing
+// below it and the scaffolded one has three — so a building hung by the bottom of its frame
+// floats off the pavement, and hops when it is repaired. Read off the image once and kept,
+// the way a character's `foot` is measured in content/looks.js, except that this one can be
+// measured rather than eyed.
+const PAD = {};
+
+function padBelow(scene, key) {
+  if (PAD[key] !== undefined) return PAD[key];
+  const img = scene.textures.get(key).getSourceImage();
+  const c = document.createElement('canvas');
+  c.width = img.width;
+  c.height = img.height;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const d = ctx.getImageData(0, 0, img.width, img.height).data;
+  let pad = 0;
+  for (let y = img.height - 1; y >= 0; y--) {
+    let any = false;
+    for (let x = 0; x < img.width; x++) {
+      if (d[(y * img.width + x) * 4 + 3] > 0) {
+        any = true;
+        break;
+      }
+    }
+    if (any) break;
+    pad++;
+  }
+  PAD[key] = pad;
+  return pad;
+}
+
 export function raiseStructures(scene, mapKey) {
   const out = {};
   for (const s of STRUCTURES) {
@@ -247,7 +280,7 @@ export function raiseStructures(scene, mapKey) {
       : scene.add.image(s.at[0] * TUNING.tileSize, s.at[1] * TUNING.tileSize, stageKey(s, 0))
         .setOrigin(0, 0);
     if (!scene.street) img.setDepth(img.y + img.height);
-    out[s.id] = { spec: s, img };
+    out[s.id] = { spec: s, img, scene, sill: scene.street ? scene.sillY : undefined };
     restate(out, s.id);
     if (!scene.street) clearUnder(scene, s, img);
   }
@@ -299,5 +332,9 @@ export function raiseProps(scene, mapKey) {
 export function restate(built, id) {
   const e = built[id];
   if (!e) return;
-  e.img.setTexture(stageKey(e.spec, Math.min(levelOf(id), e.spec.stages.length - 1)));
+  const key = stageKey(e.spec, Math.min(levelOf(id), e.spec.stages.length - 1));
+  e.img.setTexture(key);
+  // on a street it is stood on its own feet rather than on the bottom of its frame, and
+  // where its feet are inside that frame changes with the stage
+  if (e.sill !== undefined) e.img.setY(e.sill + padBelow(e.scene, key));
 }
