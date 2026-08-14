@@ -113,11 +113,12 @@ export const GROUND = [
   },
 ];
 
-// Where two grounds meet, the tile drawn over the seam. These sheets are painted with
-// both their materials meeting along an organic edge, so every way two grounds can meet
-// at the four corners of a tile is somewhere in the sheet already — below are the windows
-// they were found at. The seam tile is laid half a tile up and left of the square it
-// belongs to, so it straddles the four squares whose corners it is drawn from.
+// Where two grounds meet, the tile drawn over the seam, laid half a tile up and left of
+// the square it belongs to so it straddles the four squares whose corners it is drawn from.
+// Most of these are 4x4 wang sets — sixteen cells, one per way two grounds can meet at the
+// four corners of a tile — and their coordinates and corner meanings come from the map
+// export's own tileset descriptors. The rest are windows found by searching a larger sheet
+// that carries no wang layout.
 //   low / high — the two sides. `tiles` are the ground names on that side: several where
 //                they are the same paint, since the street and the square are one granite.
 //                `shade` is that side's shade, exactly as in GROUND above.
@@ -132,9 +133,9 @@ export const GROUND = [
 // somebody built the edge — a quay wall, a dock, a kerb — and wrong where nothing did.
 export const EDGES = [
   {
-    // Off the map export: a 4x4 wang set, sixteen cells, one per corner case, so these
-    // coordinates are the tileset's own rather than windows found by looking. The bit set
-    // in a code means the seashore side, which is how the set was painted.
+    // Off the map export, and the cells and corner meanings are the tileset descriptor's
+    // own: a bit set in a code is the seashore side, because that is the set's upper
+    // terrain. Sixteen cells, one per way two grounds meet at a tile's four corners.
     low: { tiles: ['water'], shade: 0x5c7796 },
     high: { tiles: ['sand'], shade: 0xbdb4a6 },
     sheet: 'art/ground/wang-water-and-sand.png',
@@ -146,7 +147,9 @@ export const EDGES = [
     },
   },
   {
-    // The same set for grass against earth, and the bit set is the earth side here.
+    // The same, for grass against earth. The bit set is the earth side: it is this set's
+    // upper terrain, which is not something to be guessed at — the names in the descriptor
+    // do not follow the codes.
     low: { tiles: ['grass'], shade: 0x8e9c8c },
     high: { tiles: ['dirt'], shade: 0xb0a89c },
     sheet: 'art/ground/wang-grass-and-dirt.png',
@@ -169,9 +172,10 @@ export const EDGES = [
     },
   },
   {
-    // The rest are windows found in the larger sheets, which carry no wang layout. The
-    // export has a grass-against-street set too, but three of its sixteen cells are the
-    // only ones with any granite painted in them, so the street keeps these.
+    // The street keeps windows out of the larger sheet. The export's own grass-against-
+    // street set is the one the designer's map uses, and its table is exact, but only three
+    // of its sixteen cells have any granite painted into them — so it cannot be drawn from
+    // until it is generated again.
     low: { tiles: ['path', 'stone'] }, // worn granite, unshaded
     high: { tiles: ['grass'], shade: 0x8e9c8c },
     sheet: 'art/ground/grass-and-granite.png',
@@ -205,14 +209,18 @@ export const EDGES = [
     },
   },
   {
-    low: { tiles: ['dirt'], shade: 0xb0a89c },
-    high: { tiles: ['sand'], shade: 0xbdb4a6 },
-    sheet: 'art/ground/sand-and-dirt.png',
-    split: { channels: 'rb', over: 30 },
+    // Seashore against earth, off the export: a wang set, exact. Both sides take the one
+    // shade because they are the same value of brown — telling them apart by hue, the way
+    // the other seams are shaded, is not something these two allow, and at the same shade
+    // it makes no difference which side a pixel is called.
+    low: { tiles: ['sand'], shade: 0xb6aea1 },
+    high: { tiles: ['dirt'], shade: 0xb6aea1 },
+    sheet: 'art/ground/wang-sand-and-dirt.png',
+    split: { channels: 'rb', over: 28 },
     cells: {
-      0: [512, 0], 1: [1386, 208], 2: [1258, 230], 3: [1308, 222], 4: [1380, 102],
-      5: [1014, 208], 7: [118, 10], 8: [1262, 88], 10: [68, 424], 11: [56, 378],
-      12: [1340, 98], 13: [120, 340], 14: [54, 352], 15: [1332, 156],
+      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
+      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
+      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
     },
   },
 ];
@@ -233,7 +241,7 @@ export const STRUCTURES = [
     id: 'chapel',
     path: 'art/chapel',
     at: [26.94, 12.5],
-    under: 'grass',
+    under: 'stone', // it stands on the paving, so what its picture clears is paving
     stages: [
       'base/rotations/unknown.png',
       'wrapped_in_timber_sc/rotations/unknown.png',
