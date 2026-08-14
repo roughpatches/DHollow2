@@ -323,7 +323,7 @@ export const UI = {
 //           or every skill, until the sheet is actually in the repo — keeps the shape
 //           src/icons.js draws for it, and nothing else changes either way.
 export const SKILL_ART = {
-  sheet: 'art/skills.png',
+  sheet: 'art/pixellab-Skill-Icons-for-the-following--1786668947352.png',
   cell: 32,
   at: {
     woodcraft: [1, 1],
