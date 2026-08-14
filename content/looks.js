@@ -304,10 +304,14 @@ export const UI = {
       at: [107, 97, 480, 172], slice: [158, 320, 113, 57],
       flat: [24, 31, 39, 35], pad: [42, 46, 50, 62], shade: 0.8,
     },
-    // a band across the crawl, over and under the road
+    // A band across the crawl: over the road, under it, and stood on its end beside it.
+    // Washed like the plaque, for the same reason in a different key — the board inside
+    // it is painted with stains and highlights, and a nine-slice pulls a two-pixel slice
+    // of those the width of a screen, which is where the pale shapes came from.
     band: {
       at: [196, 11, 295, 81], slice: [183, 110, 43, 36],
       flat: [21, 21, 21, 21], pad: [66, 68, 24, 22], shade: 0.3,
+      paper: [310, 37, 47, 34], wash: 1,
     },
     // the card that opens at each node: paper, and written on in ink
     plaque: {
