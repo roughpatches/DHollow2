@@ -263,3 +263,54 @@ export const PROPS = [
   // the casks and the harbour lamps go is the designer's to say. art/props/ holds nineteen
   // pictures ready for it — one line each, and the tile under it is what stops you.
 ];
+
+// The painted panels the quest screens are drawn in: one sheet with the frames laid out
+// on it, cut by rectangle and stretched to whatever a screen needs. A frame is stretched
+// as a nine-slice, so its corners — where all the ironwork and most of the leaves are —
+// are drawn at their own size and only a plain run of rail in the middle is pulled.
+//   at    — [x, y, w, h] of this frame on the sheet.
+//   slice — [left, right, top, bottom]: how much of each edge is never stretched. What
+//           is left in the middle is what stretches, so it is cut on a run of rail with
+//           no rivet and no leaf on it — a couple of pixels is enough, and anything
+//           wider drags an ornament out of shape.
+//   flat  — [left, right, top, bottom] from the edge of the frame in to the board inside
+//           it, where the rails stop and the panel is one colour.
+//   pad   — the same four, but in as far as text can start: the corners carry ironwork
+//           and leaves that reach further in than the rails do, and a line written at
+//           `flat` runs over them.
+//   shade — how far the board is darkened before anything is written on it, 0 to 1. The
+//           page is painted warm wood and the game's text is written for something dark;
+//           the ironwork and the leaves keep their own colour. Leave it out for a panel
+//           that wants its own colour.
+//   paper — [x, y, w, h] of a clean patch of the panel's own surface. The plaque was
+//           generated with a page of placeholder printing on it — lorem, a compass, a
+//           map — and at boot the inside is washed over in the commonest colour of this
+//           patch, which paints the printing out. Recolour the sheet and the wash follows
+//           it. Leave it out and the panel is used as painted.
+//   wash  — how far inside `flat` the washing stops, so the shadow the paper casts
+//           against its own rails survives it.
+//   ink   — true if this panel is a page rather than a board: what is written on it is
+//           written in the ink colours from tuning.js instead of the light ones.
+export const UI = {
+  sheet: 'art/Autumn-leafy-vines-twined-around-wrought-iron-framing.png',
+  frames: {
+    // The whole screen: the board, the hour, the crew. Cut to the ironwork rather than to
+    // the leaves, because a leaf hanging off the side is a leaf drawn down the whole side
+    // once the panel is stretched to a screen.
+    page: {
+      at: [107, 97, 480, 172], slice: [158, 320, 113, 57],
+      flat: [24, 31, 39, 35], pad: [42, 46, 50, 62], shade: 0.8,
+    },
+    // a band across the crawl, over and under the road
+    band: {
+      at: [196, 11, 295, 81], slice: [183, 110, 43, 36],
+      flat: [21, 21, 21, 21], pad: [66, 68, 24, 22], shade: 0.3,
+    },
+    // the card that opens at each node: paper, and written on in ink
+    plaque: {
+      at: [196, 269, 295, 110], slice: [173, 120, 54, 54],
+      flat: [18, 27, 19, 18], pad: [38, 38, 28, 26],
+      paper: [372, 328, 33, 31], wash: 2, ink: true,
+    },
+  },
+};

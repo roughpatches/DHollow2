@@ -141,6 +141,61 @@ const SHAPES = {
       fill(g, b, x - 1, 11, 4, 1);
     }
   },
+  // One apiece for the skills, for the column down the side of the road. Drawn to be
+  // told apart at a glance rather than to be looked at: a hand-drawn one under the same
+  // key replaces any of them without a line changing anywhere.
+  flask: (g, [a, b]) => {
+    fill(g, b, 6, 1, 4, 4);
+    g.fillStyle(a, 1);
+    g.fillTriangle(2, 15, 14, 15, 8, 4);
+    fill(g, b, 5, 11, 6, 1);
+  },
+  frond: (g, [a, b]) => {
+    fill(g, b, 7, 2, 2, 13);
+    g.fillStyle(a, 1);
+    for (const y of [3, 6, 9]) {
+      g.fillTriangle(7, y, 7, y + 4, 1, y + 4);
+      g.fillTriangle(9, y, 9, y + 4, 15, y + 4);
+    }
+  },
+  axe: (g, [a, b]) => {
+    fill(g, b, 9, 1, 2, 14);
+    g.fillStyle(a, 1);
+    g.fillTriangle(9, 2, 9, 9, 2, 6);
+    fill(g, b, 2, 5, 2, 2);
+  },
+  sail: (g, [a, b]) => {
+    fill(g, b, 8, 1, 1, 12);
+    g.fillStyle(a, 1);
+    g.fillTriangle(8, 2, 8, 12, 1, 12);
+    fill(g, b, 2, 13, 12, 2);
+  },
+  hook: (g, [a, b]) => {
+    fill(g, b, 9, 1, 4, 2); // the eye, across the top of the shank
+    fill(g, a, 10, 2, 2, 8); // the shank
+    fill(g, a, 8, 9, 2, 3); // round the bend
+    fill(g, a, 5, 11, 3, 2);
+    fill(g, a, 4, 7, 2, 5); // and up to the point
+    fill(g, b, 2, 5, 4, 2); // the barb
+  },
+  speech: (g, [a, b]) => {
+    fill(g, a, 1, 3, 14, 8);
+    g.fillStyle(a, 1);
+    g.fillTriangle(4, 11, 9, 11, 4, 15);
+    for (const x of [4, 7, 10]) fill(g, b, x, 6, 2, 2);
+  },
+  eye: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillEllipse(8, 8, 15, 9);
+    g.fillStyle(b, 1);
+    g.fillEllipse(8, 8, 6, 6);
+  },
+  hammer: (g, [a, b]) => {
+    fill(g, b, 6, 5, 2, 10); // the haft, off-centre, so the head is not a letter T
+    fill(g, a, 2, 2, 11, 4); // the head, longer on the peen side
+    fill(g, a, 13, 3, 1, 2);
+    fill(g, b, 2, 2, 11, 1);
+  },
 };
 
 // [shape, ink]. Ink names a pair in COLORS.icon, so retinting every wooden thing at
@@ -172,6 +227,15 @@ const ICONS = {
   tally: ['slip', 'bone'],
   mint: ['sprig', 'herb'],
   waterskin: ['sack', 'wood'],
+  // the skills, named by `icon` in content/skills.js
+  flask: ['flask', 'glass'],
+  frond: ['frond', 'herb'],
+  axe: ['axe', 'iron'],
+  sail: ['sail', 'cloth'],
+  hook: ['hook', 'ash'],
+  speech: ['speech', 'bone'],
+  eye: ['eye', 'glass'],
+  hammer: ['hammer', 'bronze'],
 };
 
 const UNKNOWN = ['block', 'cloth'];

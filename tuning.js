@@ -8,6 +8,11 @@ export const TUNING = {
   viewWidth: 960,
   viewHeight: 640,
 
+  // Every word in the game is set in this. The face itself is declared in index.html
+  // and loaded before the game starts, because a line of text is baked to a texture the
+  // moment it is written and one baked against a fallback stays wrong.
+  font: "'Libre Baskerville', serif",
+
   walkSpeed: 78,
   walkFrameRate: 7, // a placeholder walk is two frames; a drawn one has its own rates
   artWalkFrameRate: 10,
@@ -36,8 +41,13 @@ export const TUNING = {
 
   // The crawl is three bands: the constitution bar across the top, the party walking in
   // the middle, and the trail behind and ahead of them along the bottom.
-  questBarHeight: 26,
-  questTrailHeight: 74,
+  questBarHeight: 16,
+  questBarCap: 12, // the iron at each end of it, holding it to the panel
+  questHeadHeight: 84, // the band the bar sits in, deep enough for the frame around it
+  questSkillWidth: 108, // the column down the side of the road, taken off the road's width
+  questSkillStep: 52, // how far apart the skills sit in it
+  questSkillScale: 2, // an icon is drawn at 16 and stood up to this
+  questTrailHeight: 100, // the band along the bottom, deep enough for the frame around it
   questWalkGroundFrac: 0.68, // where the ground line sits inside the walking band
   questBodyPx: 62, // how tall a walking placeholder is drawn on the road
   questArtScale: 1.25, // drawn art carries air around the body; this brings it up to size
@@ -115,8 +125,8 @@ export const TUNING = {
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
 
-  questPipSize: 14,
-  questPipGap: 8,
+  questPipSize: 26, // a node on the trail, and the length of road between two of them
+  questPipGap: 18,
   questPad: 26,
   questTitleSize: 22,
   questBodySize: 16,
@@ -228,12 +238,31 @@ export const COLORS = {
   menuMapDoor: 0xc9a95f,
   menuMapFolk: 0x9c5a46,
   menuMapMark: 0x7f9fa8,
+  // Ink, for the one panel that is a page rather than a board. Every colour above has
+  // its opposite number here and nothing else changes: a line written for the dark is
+  // read back in ink when it lands on paper. See `ink` in content/looks.js.
+  inkText: 0x241a12,
+  inkDim: 0x6d5136,
+  inkAccent: 0x7d4a10,
+  inkRule: 0x8b6c4a,
+  inkFolk: 0x86301c,
+  inkMark: 0x2c4a52,
+  inkSelectFill: 0xb5905f,
+
+  // The constitution bar: an iron trough with what the road has not taken yet in it.
+  // Full it is the gold the leaves are, and at nothing it is the red they go to.
+  conTrough: 0x17120f,
+  conRim: 0x5b5352,
+  conRimLit: 0x928178,
+  conRivet: 0x9aa0a6,
+  conFull: 0xd1943c,
+  conLow: 0xa8341f,
+
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,
   questSkyDay: 0x2c333c, // what the party is walking under in the middle band
   questSkyNight: 0x11141d,
   questNightTint: 0x6a7590, // laid over the landscape after dark
-  questTrailFill: 0x0d0f13, // the strip along the bottom the trail is drawn on
 
   // What a placeholder item icon is made of (src/icons.js): the body of the thing, and
   // the mark on it. Retint here and every wooden thing changes at once.
@@ -351,4 +380,14 @@ export const PALETTES = {
 // two places that draw text don't each keep their own copy.
 export function hex(n) {
   return `#${n.toString(16).padStart(6, '0')}`;
+}
+
+// One colour some of the way into another. What a bar that changes as it empties is
+// made of, and what puts the light and the shadow on a rail without naming a third
+// and fourth colour for every one that has them.
+export function blend(a, b, t) {
+  const at = (s) => (a >> s) & 255;
+  const bt = (s) => (b >> s) & 255;
+  const ch = (s) => Math.round(at(s) + (bt(s) - at(s)) * t) << s;
+  return ch(16) | ch(8) | ch(0);
 }

@@ -1,13 +1,19 @@
-import { TUNING, COLORS, hex } from '../../tuning.js';
+import { TUNING, COLORS, hex, blend } from '../../tuning.js';
+import { SKILLS } from '../../content/skills.js';
 import * as run from '../run.js';
 import * as recruit from '../recruit.js';
 import {
-  roster, charOf, bandName, bandOf, scoreLine, skillsOf, skillOf, isCombat, nameOf, fill, YOU,
+  roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf, isCombat,
+  nameOf, fill, YOU,
 } from '../party.js';
+import { buildIcons, iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
+import { framed, padOf, minOf, inkOf } from '../frames.js';
 import { markKey } from '../textures.js';
-import { meterBar } from '../minigames/meters.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
+
+const CARD = 'plaque'; // the panel a node's account is written on
+const COLUMN = 'band'; // and the one stood on its end beside the road
 
 // The crawl. Runs over World, which freezes behind it. Three bands: the party's
 // constitution across the top, the party walking the landscape in the middle, and the
@@ -21,6 +27,7 @@ export default class Quest extends Phaser.Scene {
 
   create() {
     this.sizeTo(null);
+    buildIcons(this); // the column down the side of the road draws these
 
     this.layer = this.add.container().setDepth(29000).setVisible(false);
     this.open_ = false;
@@ -41,8 +48,18 @@ export default class Quest extends Phaser.Scene {
   sizeTo(mode) {
     const p = mode === 'run' ? 0 : TUNING.questPad;
     this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
-    this.left = this.box.x + TUNING.menuPad;
-    this.wide = this.box.w - TUNING.menuPad * 2;
+    // The frame is the margin. A screen is written inside the flat of whichever panel it
+    // is drawn in, so nothing runs under the ironwork at either edge.
+    const pad = padOf(this.frame(mode));
+    this.left = this.box.x + pad.l;
+    this.wide = this.box.w - pad.l - pad.r;
+    this.top = this.box.y + pad.t;
+    this.foot = this.box.y + this.box.h - pad.b;
+  }
+
+  // the whole screen is one page; the crawl is bands, and a band is the smaller frame
+  frame(mode = this.mode) {
+    return mode === 'run' ? 'band' : 'page';
   }
 
   openBoard() {
@@ -238,16 +255,25 @@ export default class Quest extends Phaser.Scene {
   }
 
   // The crawl is three bands inside the panel: the constitution bar across the top, the
-  // party walking in the middle, the trail along the bottom.
+  // party walking in the middle, the trail along the bottom. The middle band gives up a
+  // column at its left edge to what the party can do, and the road starts where that
+  // stops.
   bands() {
     const b = this.box;
-    const barY = b.y + TUNING.menuPad + 22;
-    const top = barY + TUNING.questBarHeight + 30; // room under the bar for who is walking
+    const pad = padOf('band');
+    // the band over the road holds the bar and nothing else, so it is as deep as the bar
+    const barY = b.y + (TUNING.questHeadHeight - TUNING.questBarHeight) / 2;
+    const top = b.y + TUNING.questHeadHeight;
     const bottom = b.y + b.h - TUNING.questTrailHeight;
+    const trailTop = bottom + pad.t + 4; // the ring around the goal reaches above its box
+    // a party with nothing between them gives the road its width back
+    const col = this.scored().length ? TUNING.questSkillWidth : 0;
     return {
       bar: { x: this.left, y: barY, w: this.wide, h: TUNING.questBarHeight },
-      walk: { x: b.x, y: top, w: b.w, h: bottom - top },
-      trail: { x: this.left, y: bottom + 12, w: this.wide, h: TUNING.questTrailHeight - 34 },
+      skills: { x: b.x, y: top, w: col, h: bottom - top },
+      walk: { x: b.x + col, y: top, w: b.w - col, h: bottom - top },
+      // the last line of the band belongs to the controls, so the trail stops above it
+      trail: { x: this.left, y: trailTop, w: this.wide, h: this.foot - 22 - trailTop },
     };
   }
 
@@ -268,37 +294,25 @@ export default class Quest extends Phaser.Scene {
   }
 
   panel(night) {
-    const b = this.box;
-    const g = this.add.graphics();
-    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 0.98);
-    g.fillRect(b.x, b.y, b.w, b.h);
-    g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
-    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    this.layer.add(g);
+    this.hang('page', this.box, night);
   }
 
-  // the strip the bar sits on, the strip the trail sits on, and the frame around both
+  // the banner the bar is on, the banner the trail is on, and the landscape between them
   chrome(night) {
     const b = this.box;
     const band = this.bands();
-    const g = this.add.graphics();
-    g.fillStyle(night ? COLORS.questNightFill : COLORS.menuFill, 1);
-    g.fillRect(b.x, b.y, b.w, band.walk.y - b.y);
-    g.fillStyle(COLORS.questTrailFill, 1);
-    g.fillRect(b.x, band.walk.y + band.walk.h, b.w, b.y + b.h - band.walk.y - band.walk.h);
-    g.lineStyle(1, night ? COLORS.questNightEdge : COLORS.menuRule, 1);
-    g.lineBetween(b.x, band.walk.y, b.x + b.w, band.walk.y);
-    g.lineBetween(b.x, band.walk.y + band.walk.h, b.x + b.w, band.walk.y + band.walk.h);
-    if (b.x > 0) {
-      g.lineStyle(2, night ? COLORS.questNightEdge : COLORS.menuEdge, 1);
-      g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    }
-    this.layer.add(g);
+    const under = band.walk.y + band.walk.h;
+    this.hang('band', { x: b.x, y: b.y, w: b.w, h: band.walk.y - b.y }, night);
+    this.hang('band', { x: b.x, y: under, w: b.w, h: b.y + b.h - under }, night);
+  }
+
+  hang(name, rect, night, turned) {
+    for (const o of framed(this, name, rect, night, turned)) this.layer.add(o);
   }
 
   board() {
     const jobs = run.offered();
-    let y = this.box.y + TUNING.menuPad;
+    let y = this.top;
     y += this.text(this.left, y, 'Gregorious has work', TUNING.questTitleSize, COLORS.menuAccent).height + 10;
     this.rule(y);
     y += 16;
@@ -313,11 +327,12 @@ export default class Quest extends Phaser.Scene {
       const on = i === this.row;
       const h = TUNING.questRowHeight;
       if (on) {
+        // inside the flat of the frame: a row that bleeds past it is a row on the ironwork
         const g = this.add.graphics();
         g.fillStyle(COLORS.menuSelectFill, 1);
-        g.fillRect(this.left - 8, y - 3, this.wide + 8, h);
+        g.fillRect(this.left, y - 3, this.wide, h);
         g.fillStyle(COLORS.menuAccent, 1);
-        g.fillRect(this.left - 8, y - 3, 2, h);
+        g.fillRect(this.left, y - 3, 2, h);
         this.layer.add(g);
       }
       const size = run.sizeOf(q);
@@ -345,7 +360,7 @@ export default class Quest extends Phaser.Scene {
   // Set out when? The mix behind each hour is shown rather than described, so the
   // choice is made on what the run will actually be made of.
   when() {
-    let y = this.box.y + TUNING.menuPad;
+    let y = this.top;
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
     y += this.text(this.left, y, 'Set out when?', TUNING.questBodySize, COLORS.menuText).height + 10;
     this.rule(y);
@@ -364,7 +379,7 @@ export default class Quest extends Phaser.Scene {
         on ? COLORS.menuDim : COLORS.menuRule).height + 14;
     });
 
-    this.text(this.left, this.box.y + this.box.h - 52, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
+    this.text(this.left, this.foot - 44, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
     this.hint('[Up/Down] Choose    [Enter] Set out    [Esc] Back to the board');
   }
 
@@ -373,7 +388,7 @@ export default class Quest extends Phaser.Scene {
   party() {
     const all = roster();
     const short = this.job.party - (1 + this.taking.length); // you are already on it
-    let y = this.box.y + TUNING.menuPad;
+    let y = this.top;
 
     this.text(this.left + this.wide, y + 4, `${this.when_ === 'night' ? 'after dark' : 'by day'}`,
       TUNING.menuRowSize, this.when_ === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
@@ -433,10 +448,10 @@ export default class Quest extends Phaser.Scene {
 
     // you are on it whoever else is, so you are in both readouts
     const crew = this.crew();
-    this.text(this.left, this.box.y + this.box.h - 74,
+    this.text(this.left, this.foot - 66,
       run.partyLine(crew.map((id) => charOf(id))), TUNING.menuRowSize, COLORS.menuText);
     // the crew added up: what this party would be good at if it walked out now
-    this.text(this.left, this.box.y + this.box.h - 50, scoreLine(crew),
+    this.text(this.left, this.foot - 44, scoreLine(crew),
       TUNING.questHintSize, COLORS.menuDim);
     this.hint(this.crewed()
       ? '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back'
@@ -468,6 +483,7 @@ export default class Quest extends Phaser.Scene {
     if (r.state === 'running' && r.phase === 'activity' && !this.approaching) this.startActivity();
 
     this.conBar(r, band.bar);
+    this.skills(r, band.skills);
     this.trail(r, band.trail);
 
     if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
@@ -490,100 +506,182 @@ export default class Quest extends Phaser.Scene {
     else this.hint('[E] Press on    [Esc] Turn back');
   }
 
-  // The constitution bar, and what the last node did to it under the label. This is the
-  // only readout that matters at a glance: at zero the run is over wherever it stands.
+  // The constitution, and nothing else on the band with it. It is the one readout that
+  // has to be taken at a glance — at nothing the run is over wherever it stands — and a
+  // length that is going down says that faster than a sentence about it does. What each
+  // node took is said on the card at that node, which is where it happened.
+  //
+  // Iron, like everything else on the screen: a sunk trough, a rim lit along its top,
+  // and a rivet driven in at each end. What is left in them is the gold the leaves are,
+  // and it goes the red they go as it runs out.
   conBar(r, rect) {
-    const frac = r.conMax ? r.con / r.conMax : 0;
-    const low = frac <= 0.25;
-    this.text(this.left, rect.y - 22, r.quest.label, TUNING.questTitleSize - 2, COLORS.menuAccent);
-    this.text(this.left + this.wide, rect.y - 18, `${r.quest.size} · ${r.when} · node ${Math.min(r.at + 1, r.nodes.length)} of ${r.nodes.length}`,
-      TUNING.questHintSize, r.when === 'night' ? COLORS.menuMapMark : COLORS.menuDim).setOrigin(1, 0);
+    const frac = r.conMax ? Math.max(0, Math.min(1, r.con / r.conMax)) : 0;
+    const { x, y, w, h } = rect;
+    const g = this.add.graphics();
+    this.layer.add(g);
 
-    // the kit's bar, rebuilt with the panel because the panel is cheap and so is it
-    const bar = meterBar(this, rect.x, rect.y + rect.h / 2, rect.w, rect.h, low ? 'bar_hp' : 'bar_stamina');
-    bar.setValue(frac);
-    this.layer.add(bar.track);
-    this.layer.add(bar.fill);
+    // the trough, sunk between the two caps that hold it to the panel
+    const cap = TUNING.questBarCap;
+    const tx = x + cap;
+    const tw = w - cap * 2;
+    g.fillStyle(COLORS.conTrough, 1);
+    g.fillRect(tx, y, tw, h);
+    g.lineStyle(1, blend(COLORS.conRim, 0x000000, 0.55), 1);
+    g.strokeRect(tx + 0.5, y + 0.5, tw - 1, h - 1);
 
-    this.text(rect.x + 10, rect.y + rect.h / 2 - 8, run.conLine(r), TUNING.questBodySize,
-      low ? COLORS.menuMapFolk : COLORS.menuText);
-    // who is walking it and what each of them put into the bar, under the bar rather
-    // than on it, because a number over a moving fill cannot be read
-    this.text(rect.x, rect.y + rect.h + 8, run.partyLine(), TUNING.questHintSize, COLORS.menuDim);
-    this.text(rect.x + rect.w, rect.y + rect.h + 8,
-      low ? 'Nearly spent. At nothing they turn for home with half of it.' : 'What the road has left them.',
-      TUNING.questHintSize, low ? COLORS.menuMapFolk : COLORS.menuDim).setOrigin(1, 0);
+    const lit = Math.round((tw - 4) * frac);
+    if (lit > 0) {
+      const c = blend(COLORS.conLow, COLORS.conFull, frac);
+      g.fillStyle(c, 1);
+      g.fillRect(tx + 2, y + 2, lit, h - 4);
+      g.fillStyle(blend(c, 0xffffff, 0.32), 1); // the light along the top of it
+      g.fillRect(tx + 2, y + 2, lit, 1);
+      g.fillStyle(blend(c, 0x000000, 0.4), 1);
+      g.fillRect(tx + 2, y + h - 3, lit, 1);
+    }
+
+    // the caps: iron, lit along the top and shadowed under, with a rivet driven through
+    for (const cx of [x, x + w - cap]) {
+      g.fillStyle(COLORS.conRim, 1);
+      g.fillRect(cx, y - 3, cap, h + 6);
+      g.fillStyle(COLORS.conRimLit, 1);
+      g.fillRect(cx, y - 3, cap, 1);
+      g.fillStyle(blend(COLORS.conRim, 0x000000, 0.55), 1);
+      g.fillRect(cx, y + h + 2, cap, 1);
+      g.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
+      g.fillRect(cx + cap / 2 - 2, y + h / 2 - 2, 4, 4);
+      g.fillStyle(COLORS.conRivet, 1);
+      g.fillRect(cx + cap / 2 - 2, y + h / 2 - 2, 3, 3);
+    }
+  }
+
+  // What the party is worth at each thing it has any points in at all, best first — the
+  // same sum the crew screen ends on. A skill nobody has is not a readout, it is a blank
+  // line, so it is not one of these.
+  scored() {
+    const r = run.active();
+    if (!r) return [];
+    return SKILLS.map((skill) => ({ skill, n: scoreOf(r.party, skill.id) }))
+      .filter((s) => s.n > 0)
+      .sort((a, b) => b.n - a.n);
+  }
+
+  // Down the side of the road: what the party can do, kept in front of the player for the
+  // whole run instead of being read once on the way out of town. The banner from the
+  // sheet, stood on its end.
+  skills(r, rect) {
+    const rows = this.scored();
+    if (!rows.length) return; // and a party with nothing between them gets no column
+    this.hang(COLUMN, rect, r.when === 'night', true);
+
+    const pad = padOf(COLUMN, true);
+    const tall = rect.h - pad.t - pad.b;
+    // spread down the column, however many of them there turn out to be
+    const step = Math.min(TUNING.questSkillStep, tall / rows.length);
+    let y = rect.y + pad.t + (tall - step * (rows.length - 1)) / 2;
+    for (const { skill: t, n } of rows) {
+      // centred on its own half of the column: the shapes are different widths and left
+      // against a margin they read as a ragged edge rather than a list
+      const icon = this.add.image(rect.x + pad.l + 16, y, iconKeyFor(t.icon)).setOrigin(0.5);
+      icon.setScale(TUNING.questSkillScale);
+      this.layer.add(icon);
+      this.text(rect.x + rect.w - pad.r - 6, y - 10, `${n}`, TUNING.questBodySize,
+        COLORS.menuAccent).setOrigin(1, 0);
+      y += step;
+    }
   }
 
   // The trail along the bottom: what has been walked, what is being walked, and how many
   // blanks are still in front of them. A fork is a notch, the goal is ringed.
   trail(r, rect) {
     const n = r.nodes.length;
-    const gap = 6;
-    const w = Math.max(10, Math.min(38, (rect.w - gap * (n - 1)) / n));
-    const h = rect.h - 20;
+    const gap = TUNING.questPipGap;
+    const side = Math.max(10, Math.min(TUNING.questPipSize, rect.h, (rect.w - gap * (n - 1)) / n));
+    const span = n * side + gap * (n - 1);
+    // centred: the row is the readout, not the band, and a short road left against one
+    // end of a wide band reads as a thing that has come loose
+    const x0 = rect.x + (rect.w - span) / 2;
+    const cy = rect.y + rect.h / 2;
     const g = this.add.graphics();
     this.layer.add(g);
 
     r.nodes.forEach((node, i) => {
-      const x = rect.x + i * (w + gap);
+      const cx = x0 + i * (side + gap) + side / 2;
       const here = i === r.at;
       const behind = i < r.at || (here && !this.approaching && r.phase === 'node');
-      g.fillStyle(behind ? COLORS.menuSelectFill : COLORS.questTrailFill, 1);
-      g.fillRect(x, rect.y, w, h);
-      g.lineStyle(here ? 2 : 1, here ? COLORS.menuAccent : COLORS.menuRule, 1);
-      g.strokeRect(x + 0.5, rect.y + 0.5, w - 1, h - 1);
-      if (node.goal) {
-        g.lineStyle(1, COLORS.menuMapMark, 1);
-        g.strokeRect(x - 2.5, rect.y - 2.5, w + 4, h + 4);
+
+      // the length of road to the next one
+      if (i < n - 1) {
+        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.3), 1);
+        g.fillRect(cx + side / 2, cy - 1, gap, 2);
+        g.fillStyle(COLORS.conRimLit, 0.6);
+        g.fillRect(cx + side / 2, cy - 1, gap, 1);
       }
+      // a fork in it is a rivet driven through the road before the node it splits at
       if (node.fork) {
-        g.fillStyle(COLORS.menuMapMark, 1);
-        g.fillRect(x - gap + 1, rect.y + h / 2 - 2, 4, 4);
+        const rx = cx - side / 2 - gap / 2;
+        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
+        g.fillRect(rx - 2, cy - 2, 4, 4);
+        g.fillStyle(COLORS.conRivet, 1);
+        g.fillRect(rx - 2, cy - 2, 3, 3);
       }
-      // a walked node is notated with the thing that was standing in it; one still ahead
-      // says nothing, because it is not anything yet
+
+      // A node they have walked is the thing that was standing in it. One still in front
+      // of them is a stud in the road and nothing else, because it is not anything yet:
+      // what a node turns out to be is rolled when the party gets there.
       if (behind && node.kind) {
-        const mark = this.add.image(x + w / 2, rect.y + h - 4, markKey(run.kindOf(node.kind).nature));
+        const mark = this.add.image(cx, cy, markKey(run.kindOf(node.kind).nature));
         // fitted, not stretched: a silhouette squashed to a box stops being a silhouette
-        mark.setOrigin(0.5, 1).setScale(Math.min((w - 8) / mark.width, (h - 8) / mark.height));
-        if (!here) mark.setAlpha(0.65);
+        mark.setScale(Math.min(side / mark.width, side / mark.height));
+        // in its own colours, and dimmer the further back down the road it is: these are
+        // dark already, and anything laid over them takes them to nothing
+        if (!here) mark.setAlpha(0.6);
         this.layer.add(mark);
+      } else {
+        g.fillStyle(blend(COLORS.conRim, 0x000000, 0.4), 1);
+        g.fillCircle(cx, cy, 6);
+        g.fillStyle(here ? COLORS.conRivet : COLORS.conTrough, 1);
+        g.fillCircle(cx, cy, 5);
+      }
+      // where they are standing is ringed whether they have finished with it or not
+      if (here) {
+        g.lineStyle(1, COLORS.conRivet, 1);
+        g.strokeCircle(cx, cy, side / 2 + 1);
+      }
+      if (node.goal) {
+        g.lineStyle(1, COLORS.conRimLit, 1);
+        g.strokeCircle(cx, cy, side / 2 + 4);
       }
     });
-
-    this.text(rect.x + rect.w, rect.y + h + 6,
-      `${Math.max(0, n - r.at - 1)} still in front of you`, TUNING.questHintSize, COLORS.menuDim).setOrigin(1, 0);
   }
 
   // Everything that happens at a node is said on one card over the landscape, so the
-  // party and the ground they are standing on stay on the screen while it is read.
+  // party and the ground they are standing on stay on the screen while it is read. The
+  // card is the plaque: a page held up over the road, written in ink.
   card(rect, lines, head) {
-    const w = Math.min(660, rect.w - 80);
-    const pad = 18;
-    const g = this.add.graphics();
-    this.layer.add(g);
+    const pad = padOf(CARD);
+    const w = Math.max(Math.min(660, rect.w - 80), minOf(CARD).w);
+    const wrap = w - pad.l - pad.r;
     const texts = [];
     let tall = 0;
     for (const [str, size, colour] of lines) {
-      const t = this.text(0, 0, str, size, colour, w - pad * 2);
+      const t = this.text(0, 0, str, size, inkOf(CARD, colour), wrap);
       texts.push(t);
       tall += t.height + 8;
     }
-    // the head, the paragraphs, and the same pad above and below them: a card that is
-    // shorter than what is on it clips its last line
-    const h = pad + 26 + tall - 8 + pad;
+    // the head, the paragraphs, and the frame's own margin above and below them: a card
+    // that is shorter than what is on it clips its last line
+    const h = pad.t + 26 + tall - 8 + pad.b;
     const x = rect.x + (rect.w - w) / 2;
     const top = rect.y + 10; // the party stays visible on the road under it
-    g.fillStyle(COLORS.menuFill, 0.94);
-    g.fillRect(x, top, w, h);
-    g.lineStyle(1, COLORS.menuEdge, 1);
-    g.strokeRect(x + 0.5, top + 0.5, w - 1, h - 1);
+    this.hang(CARD, { x, y: top, w, h }, run.active()?.when === 'night');
 
-    this.text(x + pad, top + pad - 4, head, TUNING.questBodySize + 4, COLORS.menuText, w - pad * 2);
-    let ty = top + pad + 26;
+    this.text(x + pad.l, top + pad.t - 4, head, TUNING.questBodySize + 4,
+      inkOf(CARD, COLORS.menuText), wrap);
+    let ty = top + pad.t + 26;
     for (const t of texts) {
-      t.setPosition(x + pad, ty);
+      t.setPosition(x + pad.l, ty);
+      this.layer.bringToTop(t); // measured before the frame was hung, so it is under it
       ty += t.height + 8;
     }
   }
@@ -603,10 +701,11 @@ export default class Quest extends Phaser.Scene {
     this.scrim = this.add.graphics().setDepth(-100);
     this.scrim.fillStyle(COLORS.menuFill, 0.82);
     this.scrim.fillRect(band.x, band.y, band.w, band.h);
+    // the engine works on the road, not in the column beside it
     this.activity = engineFor(e.activity, this, {
-      x: this.left + 40,
+      x: band.x + 40,
       top: band.y + 34,
-      barW: Math.min(430, this.wide - 80),
+      barW: Math.min(430, band.w - 80),
     });
     this.activity.start((judgments) => {
       const failed = this.activity?.failed;
@@ -622,14 +721,16 @@ export default class Quest extends Phaser.Scene {
   // just the name of the work over the top of it; the engine draws everything else
   activityHead(r, rect) {
     const e = run.kindOf(r.nodes[r.at].kind);
-    this.text(this.left, rect.y + 4, `${r.at + 1}. ${e.name} — ${e.activity}`,
+    this.text(rect.x + 12, rect.y + 4, `${e.name} — ${e.activity}`,
       TUNING.questBodySize + 2, COLORS.menuText);
   }
 
+  // What is standing in front of them, and nothing about where along the road it is: the
+  // trail says that, and a party does not count off the places they have been.
   nodeHead(r) {
     const n = r.nodes[r.at];
     const e = run.kindOf(n.kind);
-    return `${r.at + 1}. ${e.name}${n.goal ? ' — the goal' : ''}`;
+    return `${e.name}${n.goal ? ' — the goal' : ''}`;
   }
 
   nodeLines(r) {
@@ -762,12 +863,12 @@ export default class Quest extends Phaser.Scene {
   }
 
   hint(str) {
-    this.text(this.left, this.box.y + this.box.h - 26, str, TUNING.questHintSize, COLORS.menuDim);
+    this.text(this.left, this.foot - 18, str, TUNING.questHintSize, COLORS.menuDim);
   }
 
   text(x, y, str, size, color, wrap) {
     const t = this.add.text(x, y, str, {
-      fontFamily: 'monospace',
+      fontFamily: TUNING.font,
       fontSize: `${size}px`,
       color: hex(color),
       lineSpacing: 4,

@@ -453,7 +453,7 @@ export default class Menu extends Phaser.Scene {
 
   text(x, y, str, size, color, wrap) {
     const t = this.add.text(x, y, str, {
-      fontFamily: 'monospace',
+      fontFamily: TUNING.font,
       fontSize: `${size}px`,
       color: hex(color),
       lineSpacing: 4,
