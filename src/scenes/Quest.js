@@ -15,6 +15,7 @@ import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
 const CARD = 'plaque'; // the panel a node's account is written on
 const COLUMN = 'band'; // and the one stood on its end beside the road
+const PIP = 'plate'; // and the small square a walked node is hung in, down on the trail
 
 // The crawl. Runs over World, which freezes behind it. Three bands: the party's
 // constitution across the top, the party walking the landscape in the middle, and the
@@ -115,6 +116,7 @@ export default class Quest extends Phaser.Scene {
     this.activity?.update(time);
     if (!this.walk) return;
     this.walk.update(delta);
+    if (this.walkMark) this.walkMark.setX(this.trailX());
     const r = run.active();
     if (r && r.state === 'running' && r.phase === 'fork') this.walk.setMoving(false);
   }
@@ -304,6 +306,7 @@ export default class Quest extends Phaser.Scene {
   draw() {
     this.sizeTo(this.mode);
     this.layer.removeAll(true);
+    this.walkMark = null; // it went with the layer; the trail hangs a new one if it is walking
     const r = run.active();
     const night = this.mode === 'run' && r && r.when === 'night';
     // On the crawl the middle band is the landscape, so the panel paints only the strips
@@ -648,20 +651,34 @@ export default class Quest extends Phaser.Scene {
   // blanks are still in front of them. A fork is a notch, the goal is ringed.
   trail(r, rect) {
     const n = r.nodes.length;
-    const gap = TUNING.questPipGap;
-    const side = Math.max(10, Math.min(TUNING.questPipSize, rect.h, (rect.w - gap * (n - 1)) / n));
-    const span = n * side + gap * (n - 1);
-    // centred: the row is the readout, not the band, and a short road left against one
-    // end of a wide band reads as a thing that has come loose
-    const x0 = rect.x + (rect.w - span) / 2;
+    const least = TUNING.questPipGap;
+    // The road runs the width of the band. The nodes are spread across all of it rather
+    // than bunched in the middle of it, and only close up when there are more of them
+    // than the band will hold at the size a node is drawn.
+    // A length of road at each end, so the first node is walked up to rather than stood
+    // on from the off, and the goal has somewhere to sit that is not the edge of a panel.
+    let lead = least;
+    let side = Math.min(TUNING.questPipSize, rect.h);
+    let step = n > 1 ? (rect.w - side - lead * 2) / (n - 1) : 0;
+    if (n > 1 && step < side + least) {
+      lead = 0;
+      side = Math.max(10, (rect.w - least * (n - 1)) / n);
+      step = side + least;
+    }
+    const x0 = rect.x + lead + side / 2;
     const cy = rect.y + rect.h / 2;
+    const gap = step - side; // the length of road between two of them
+    const night = r.when === 'night';
     const g = this.add.graphics();
     this.layer.add(g);
+    // what the party's own mark is slid along, in update
+    this.pips = { x0, step, cy, from: rect.x };
 
     r.nodes.forEach((node, i) => {
-      const cx = x0 + i * (side + gap) + side / 2;
+      const cx = x0 + i * step;
       const here = i === r.at;
       const behind = i < r.at || (here && !this.approaching && r.phase === 'node');
+      const boxed = behind && !!node.kind;
 
       // the length of road to the next one
       if (i < n - 1) {
@@ -682,16 +699,21 @@ export default class Quest extends Phaser.Scene {
       // A node they have walked is the thing that was standing in it. One still in front
       // of them is a stud in the road and nothing else, because it is not anything yet:
       // what a node turns out to be is rolled when the party gets there.
-      if (behind && node.kind) {
+      if (boxed) {
         // A node whose work belongs to a skill is drawn with that skill's own icon — the
         // axe where they cut, the rod where they fished — and one that is nobody's work
         // keeps the shape of its nature. The encounter names an activity and the skill
         // that claims it is looked up; neither has to name the other.
         const e = run.kindOf(node.kind);
         const skill = skillForActivity(e.activity);
+        // set in the small square, so what they have walked reads as a row of pictures
+        // hung along the road rather than shapes floating over it
+        this.hang(PIP, { x: cx - side / 2, y: cy - side / 2, w: side, h: side }, night);
         const mark = this.add.image(cx, cy, skill ? iconKeyFor(skill.id) : markKey(e.nature));
-        // fitted, not stretched: a silhouette squashed to a box stops being a silhouette
-        mark.setScale(Math.min(side / mark.width, side / mark.height));
+        // fitted, not stretched: a silhouette squashed to a box stops being a silhouette.
+        // Inside the square's own edge, not across it, or the frame is a thing drawn over.
+        const inner = side - TUNING.questPipInset * 2;
+        mark.setScale(Math.min(inner / mark.width, inner / mark.height));
         // in its own colours, and dimmer the further back down the road it is: these are
         // dark already, and anything laid over them takes them to nothing
         if (!here) mark.setAlpha(0.6);
@@ -702,16 +724,46 @@ export default class Quest extends Phaser.Scene {
         g.fillStyle(here ? COLORS.conRivet : COLORS.conTrough, 1);
         g.fillCircle(cx, cy, 5);
       }
-      // where they are standing is ringed whether they have finished with it or not
-      if (here) {
-        g.lineStyle(1, COLORS.conRivet, 1);
-        g.strokeCircle(cx, cy, side / 2 + 1);
-      }
-      if (node.goal) {
-        g.lineStyle(1, COLORS.conRimLit, 1);
-        g.strokeCircle(cx, cy, side / 2 + 4);
-      }
+      // Where they are standing is ringed whether they have finished with it or not, and
+      // the goal a ring further out. Round a stud and square round a square: a circle
+      // drawn at a boxed node cuts its corners off.
+      const ring = (colour, out) => {
+        g.lineStyle(1, colour, 1);
+        if (boxed) g.strokeRect(cx - side / 2 - out, cy - side / 2 - out, side + out * 2, side + out * 2);
+        else g.strokeCircle(cx, cy, side / 2 + out);
+      };
+      // Not while they are still walking up to it: the mark sliding along the road is
+      // where they are, and the node they are heading for is not that yet.
+      if (here && !this.approaching) ring(COLORS.conRivet, 1);
+      if (node.goal) ring(COLORS.conRimLit, 4);
     });
+
+    // and the party themselves, somewhere on the road between the last node and the one
+    // walking into view. Only while they are walking: standing at a node, the ring round
+    // that node is where they are, and two marks saying it is one too many.
+    if (this.approaching) {
+      const m = this.add.graphics();
+      m.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
+      m.fillCircle(0, 0, TUNING.questPipYou + 1.5);
+      m.fillStyle(COLORS.conRivet, 1);
+      m.fillCircle(0, 0, TUNING.questPipYou);
+      m.setPosition(this.trailX(), cy);
+      this.layer.add(m);
+      this.walkMark = m;
+    }
+  }
+
+  // Where the party is along the trail: at the node they are standing on, or that far
+  // between it and the one behind it. The first node is walked to from the end of the
+  // band, because what is behind them there is the town.
+  trailX() {
+    const r = run.active();
+    if (!r || !this.pips) return 0;
+    const { x0, step, from } = this.pips;
+    const to = x0 + Math.min(r.at, r.nodes.length - 1) * step;
+    if (!this.approaching) return to;
+    const back = r.at > 0 ? x0 + (r.at - 1) * step : from;
+    return back + (to - back) * (this.walk ? this.walk.coming() : 1);
   }
 
   // Everything that happens at a node is said on one card over the landscape, so the

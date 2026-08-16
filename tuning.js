@@ -147,8 +147,10 @@ export const TUNING = {
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
 
-  questPipSize: 32, // a node on the trail, and the length of road between two of them
-  questPipGap: 18,
+  questPipSize: 32, // a node on the trail; they spread across the band and close up at this
+  questPipGap: 18, // the least road left between two of them before they start to shrink
+  questPipInset: 5, // how far inside its square a node's picture is drawn
+  questPipYou: 3.5, // and the party's own mark, sliding along the road between them
   questPad: 26,
   questTitleSize: 22,
   questBodySize: 16,

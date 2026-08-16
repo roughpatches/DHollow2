@@ -338,11 +338,14 @@ export const UI = {
       flat: [8, 8, 8, 8], pad: [24, 24, 20, 20],
       paper: [56, 120, 40, 40], wash: 2, ink: true,
     },
-    // and the square off the same sheet: what a face or an icon is set in
+    // The square off the same sheet: what a face or an icon is set in. The one frame
+    // used on both sides of the game — a speaker's portrait in the town, a walked node
+    // down on the trail — so it takes the cold after dark the way the road's own
+    // ironwork does rather than staying a warm square on a cold band.
     plate: {
       sheet: 'town',
       at: [160, 168, 57, 57], slice: [6, 6, 6, 6],
-      flat: [5, 5, 5, 5], pad: [10, 10, 10, 10], ink: true,
+      flat: [5, 5, 5, 5], pad: [10, 10, 10, 10],
     },
   },
 };
