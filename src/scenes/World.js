@@ -19,8 +19,8 @@ import {
   siteAt, isOpen, patchesFor, patchOf, levelOf, contribute, contributeLines, statusLines, remaining,
 } from '../town.js';
 import { applyToWorld } from '../settings.js';
-import { SCENES, OPENING } from '../../content/scenes.js';
-import { play, hasPlayed } from '../script.js';
+import { SCENES, START } from '../../content/scenes.js';
+import { play, hasPlayed, holdBack } from '../script.js';
 import * as story from '../story.js';
 
 const TS = TUNING.tileSize;
@@ -30,9 +30,15 @@ export default class World extends Phaser.Scene {
     super('World');
   }
 
+  // Whatever brought you here says where you come in; the game's own start says it when
+  // nothing did — a boot, or a restart with nothing handed to it.
   init(data) {
-    this.mapKey = data.map || OPENING.map;
-    this.spawnTile = data.spawn || MAPS[this.mapKey].spawn;
+    // Before anything is placed: a scene on hold is counted as played, so whoever it
+    // would have moved is already moved when the map decides who is standing on it.
+    for (const sc of SCENES) if (sc.hold) holdBack(sc);
+    const from = data.map ? data : START;
+    this.mapKey = from.map;
+    this.spawnTile = from.spawn || MAPS[this.mapKey].spawn;
   }
 
   // the only files the game loads; everyone without art is drawn at boot instead
@@ -120,7 +126,8 @@ export default class World extends Phaser.Scene {
     this.game.events.on('quest:open', freeze);
     this.game.events.on('quest:close', unfreeze);
 
-    // the opening plays itself the first time its map is walked into, and never again
+    // the scenes still in the game play themselves the first time their map is walked
+    // into, and never again
     const scene = SCENES.find((sc) => sc.map === this.mapKey && !hasPlayed(sc.id));
     if (scene) play(this, scene, scene.id);
 

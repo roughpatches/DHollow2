@@ -19,6 +19,17 @@ export function markPlayed(id) {
   story.set(`scene:${id}`);
 }
 
+// A scene on hold is written, kept, and not played — and it still counts as having
+// happened. It is marked played, so whoever was only on the map until it ran is gone and
+// whoever was not there until it ran has arrived, and any flag it would have raised is
+// raised. That is the difference between a scene on hold and a scene deleted: the world
+// on the other side of it is the same either way. See `hold` in content/scenes.js.
+export function holdBack(script) {
+  if (hasPlayed(script.id)) return;
+  markPlayed(script.id);
+  for (const step of script.steps) story.set(step.flag); // a step with no flag sets nothing
+}
+
 // Runs one scene against a live World. The scene owns the player and the camera for
 // its duration: World checks `scripted` before it hands control back.
 export function play(scene, script, id) {
