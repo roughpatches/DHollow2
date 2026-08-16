@@ -153,6 +153,10 @@ export const MAPS = {
   //   horizon — how far down the panel the sea meets the sky, behind everything painted.
   //             A panel that has one is outdoors and gets weather drawn behind it; one
   //             without is indoors and gets a flat wall instead. See src/street.js.
+  //   body    — how tall a person standing in this panel is drawn, feet to head. A town
+  //             painted down the length of a road and a room painted from across it are
+  //             not at the same scale, and a person is whatever size that panel says.
+  //             Left out, it is streetBodyPx from tuning.js, which is the town's.
   //   edges   — what lies off each end: { right: 'wharf', left: 'village' }. A street is a
   //             panel, not a stretch of something longer — walk into the end of one and the
   //             next is what is on the screen, standing you at its far end. Painted towns
@@ -224,6 +228,9 @@ export const MAPS = {
   // on the boards at 352, and the walking line is the aisle in front of them, short of the
   // tables the frame cuts through at the corners. That is what stands somebody at the bar
   // rather than inside it.
+  // It is painted from across the room rather than down a road, so a person in it is five
+  // times the size they are out in the town: the stools stand 67 pixels to the seat and
+  // the bar 105 to its top, which is a hundred pixels to the metre and a man at 183.
   tavern: {
     name: 'The Sea Hag',
     street: {
@@ -231,6 +238,7 @@ export const MAPS = {
       size: [688, 384], // the whole painting; unlike the town panel its floor runs to the edge
       ground: 362, // the aisle, a stride in front of the stools
       sill: 352, // where the stool legs and the bar front meet the boards
+      body: 183, // and a man standing on them, waist to the bar top
       repeats: 1, // one room; a room laid twice is two bars and one landlord
     },
     spawn: [33],

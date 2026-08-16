@@ -4,7 +4,7 @@ import { NPCS } from '../../content/npcs.js';
 import { buildTextures } from '../textures.js';
 import {
   createPlayer, updatePlayer, haltPlayer, spawnActor,
-  createStreetPlayer, updateStreetPlayer, spawnStreetActor,
+  createStreetPlayer, updateStreetPlayer, spawnStreetActor, cutBelow,
 } from '../player.js';
 import {
   preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
@@ -69,9 +69,13 @@ export default class World extends Phaser.Scene {
       && !(n.until && hasPlayed(n.until))
       && !(n.after && !hasPlayed(n.after)));
     for (const def of here) {
+      // somebody behind the bar is standing at the back of the room rather than out in
+      // the aisle, and what shows of them is cut at the line they are standing behind
       const npc = this.street
-        ? spawnStreetActor(this, def.palette, def.x, this.groundY, def.facing || 'left')
+        ? spawnStreetActor(this, def.palette, def.x,
+          def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx)
         : spawnActor(this, def.palette, def.x, def.y, def.facing || 'down');
+      if (def.behind) cutBelow(npc, def.behind);
       // reaches further past the feet than the player's box, so you stop beside someone
       // rather than inside them
       fitBody(npc, 12, 20, 6);
@@ -146,11 +150,12 @@ export default class World extends Phaser.Scene {
     const street = createStreet(this, map.street);
     this.groundY = street.ground; // where a person walks
     this.sillY = street.sill; // and where a building stands, which is further back
+    this.bodyPx = street.body; // and how tall a person is drawn, which is the panel's own
     this.worldW = street.width;
     this.worldH = street.height;
     this.physics.world.setBounds(0, 0, street.width, street.height);
 
-    this.player = createStreetPlayer(this, this.spawnTile[0], street.ground);
+    this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body);
     this.player.setDepth(DEPTH.player);
 
     this.built = raiseStructures(this, this.mapKey);

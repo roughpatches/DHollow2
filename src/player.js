@@ -1,6 +1,6 @@
 import { TUNING } from '../tuning.js';
 import { actorFrame, walkAnim } from './textures.js';
-import { fitBody, footOf, stand } from './art.js';
+import { bodyOf, fitBody, footOf, stand } from './art.js';
 import { atTile } from './street.js';
 
 const TS = TUNING.tileSize;
@@ -20,14 +20,13 @@ export function spawnActor(scene, palette, tx, ty, facing = 'down') {
 // A street is painted at the size the drawn characters are drawn at, not at a tile's size,
 // so everyone is stood up to the same height from the feet in their own frames — a
 // 16-pixel placeholder and a 60-pixel export are the same person tall, as in the crawl.
-// Drawn art carries air over the head where a placeholder fills its frame, so it takes the
-// same correction the crawl gives it; otherwise the landlord is a head shorter than a blob.
-export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left') {
+// How tall that is belongs to the panel and not to the person: a painted town seen down
+// the length of a road and a room seen from across it are not painted at the same scale,
+// so a panel that says so says it in `body` (see content/maps.js).
+export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left', bodyPx = TUNING.streetBodyPx) {
   const s = scene.physics.add.sprite(atTile(tx), groundY, actorFrame(palette, facing, 0));
-  const foot = footOf(palette);
-  s.setOrigin(0.5, foot);
-  const air = foot < 1 ? TUNING.questArtScale : 1;
-  s.setScale((TUNING.streetBodyPx / (s.frame.height * foot)) * air);
+  s.setOrigin(0.5, footOf(palette));
+  s.setScale(bodyPx / (s.frame.height * bodyOf(palette)));
   fitBody(s, 10, 8);
   s.palette = palette;
   s.facing = facing;
@@ -41,10 +40,18 @@ export function createPlayer(scene, tx, ty) {
   return s;
 }
 
-export function createStreetPlayer(scene, tx, groundY) {
-  const s = spawnStreetActor(scene, 'player', tx, groundY, 'right');
+export function createStreetPlayer(scene, tx, groundY, bodyPx) {
+  const s = spawnStreetActor(scene, 'player', tx, groundY, 'right', bodyPx);
   s.setCollideWorldBounds(true);
   return s;
+}
+
+// What shows of somebody standing behind something painted. A panel is one picture with
+// nothing drawn over the top of it, so being behind the bar is not a depth — it is a line
+// across them, above which they are the room's and below which they are the painting's.
+export function cutBelow(sprite, line) {
+  const top = sprite.y - sprite.displayHeight * sprite.originY;
+  sprite.setCrop(0, 0, sprite.frame.width, Math.max(0, (line - top) / sprite.scaleY));
 }
 
 // Left and right, and nothing else: a street has one line on it and the whole of walking

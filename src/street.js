@@ -60,7 +60,13 @@ export function createStreet(scene, def) {
     }
   }
 
-  return { width, height: h, ground: def.ground, sill: def.sill ?? def.ground };
+  return {
+    width,
+    height: h,
+    ground: def.ground,
+    sill: def.sill ?? def.ground,
+    body: def.body ?? TUNING.streetBodyPx,
+  };
 }
 
 // One sky and one sea, baked once per size and horizon and kept, since two panels the same

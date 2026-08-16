@@ -12,6 +12,9 @@
 // appear on more than one map — it is the same person, standing somewhere else.
 // `says` replaces `lines` with a list of answers, each with its own `needs` / `not`;
 // the first one whose conditions hold is what they say, and its `sets` is raised.
+// `behind` stands somebody on the far side of something painted — a bar, a counter, a
+// wall — and is how far down the panel that thing's top edge is. They stand at the back
+// of the room and nothing of them below the line is drawn. On a street only.
 
 export const NPCS = [
   {
@@ -66,9 +69,14 @@ export const NPCS = [
     id: 'gregorious',
     name: 'Gregorious',
     map: 'tavern',
-    x: 18, // at the bar, about under the taps; the way in is the far end of the room
-    facing: 'right',
-    palette: 'gregorious', // real art; see content/looks.js
+    x: 12, // behind the bar, in the clear stretch of counter between the mugs
+    facing: 'right', // down the room, at whoever has just come in
+    palette: 'gregorious-bar', // the standing barkeep; see content/looks.js
+    portrait: 'gregorious', // that export has no face, so he talks with the one that has
+    // `behind` puts somebody on the far side of something painted: they stand at the back
+    // of the room and nothing of them below this line is drawn. 245 is the bar top, which
+    // takes him at the waist.
+    behind: 245,
     quests: true,
     lines: ['Fancy a drink, or looking to make a little coin?'],
   },

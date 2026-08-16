@@ -31,15 +31,23 @@ export function preloadArt(scene) {
     const add = (k, path) => {
       if (!scene.textures.exists(k)) scene.load.image(k, `${look.path}/${path}`);
     };
-    for (const [dir, folder] of Object.entries(DIRS)) {
-      for (const [set, spec] of [['idle', look.idle], ['walk', look.walk]]) {
-        for (let i = 0; i < spec.frames; i++) {
-          add(key(look, set, dir, i), `${spec.folder}/${folder}/frame_${String(i).padStart(3, '0')}.png`);
+    // somebody who never walks anywhere is one painted rotation apiece, out of the
+    // export's own rotations folder
+    if (look.still) {
+      for (const [dir, folder] of Object.entries(DIRS)) {
+        add(actorFrame(look.id, dir, 0), `${look.still}/${folder}.png`);
+      }
+    } else {
+      for (const [dir, folder] of Object.entries(DIRS)) {
+        for (const [set, spec] of [['idle', look.idle], ['walk', look.walk]]) {
+          for (let i = 0; i < spec.frames; i++) {
+            add(key(look, set, dir, i), `${spec.folder}/${folder}/frame_${String(i).padStart(3, '0')}.png`);
+          }
         }
       }
     }
     if (look.down) add(proneKey(look.id), look.down); // only somebody who gets laid out needs one
-    add(portraitKey(look.id), look.portrait);
+    if (look.portrait) add(portraitKey(look.id), look.portrait);
   }
   for (const s of STRUCTURES) {
     s.stages.forEach((path, i) => {
@@ -85,6 +93,7 @@ export function preloadArt(scene) {
 export function buildArt(scene) {
   buildNodeArt(scene);
   for (const look of LOOKS) {
+    if (look.still) continue; // one frame each way; there is nothing to play
     for (const dir of Object.keys(DIRS)) {
       for (const [set, spec, rate] of [
         ['idle', look.idle, TUNING.artIdleFrameRate],
@@ -256,7 +265,7 @@ export function idleAnim(id, dir) {
 // standing still: the idle loop for anyone who has one, the one still frame for anyone
 // who does not
 export function stand(sprite, palette, dir) {
-  if (LOOK[palette]) sprite.anims.play(idleAnim(palette, dir), true);
+  if (LOOK[palette] && !LOOK[palette].still) sprite.anims.play(idleAnim(palette, dir), true);
   else {
     sprite.anims.stop();
     sprite.setTexture(actorFrame(palette, dir, 0));
@@ -276,6 +285,17 @@ export function fitBody(sprite, w, h, below = 0) {
 export function footOf(palette) {
   const look = LOOK[palette];
   return look ? look.foot / look.size : 1;
+}
+
+// And how much of the frame is the person: head to feet, as a fraction of it, which is
+// what stands two exports the same height as each other. Where a look measures its own
+// `head` that is exact; where it does not, the air over the head is taken to be the
+// quarter of the frame the crawl already corrects drawn art by.
+export function bodyOf(palette) {
+  const look = LOOK[palette];
+  if (!look) return 1; // a placeholder is drawn to the edges of its own frame
+  if (look.head !== undefined) return (look.foot - look.head) / look.size;
+  return look.foot / look.size / TUNING.questArtScale;
 }
 
 // --- ground ----------------------------------------------------------------

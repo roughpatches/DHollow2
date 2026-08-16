@@ -1,0 +1,36 @@
+{
+  "group_id": "219a6ea8-d17c-4f5f-9f0a-85043571f893",
+  "states": [
+    {
+      "character": {
+        "id": "17db231c-c774-49db-b2f0-320c4d2f97c8",
+        "name": "Idle",
+        "prompt": "A burly, grey-haired barkeep in a side-profile view, standing with feet firmly planted. He wears a thick, worn leather apron over a beige linen shirt with sleeves rolled to the elbows. A heavy leather belt with a hanging pouch cinches his waist. His arms are crossed firmly over a broad chest, his expression a mix of stern focus and welcoming warmth. The color palette features earthy browns, muted greys, and warm parchment tones, defined by crisp black outlines.",
+        "size": {
+          "width": 124,
+          "height": 124
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-08-16T16:03:37.445241+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-16T20:20:39.824430"
+}

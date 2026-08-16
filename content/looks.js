@@ -7,9 +7,16 @@
 //   size     — the side of one frame in pixels. Every frame in a set is square.
 //   foot     — how far down the frame the ground is. Measured once off the art: it is
 //              what stands the character on the tile rather than floating over it.
+//   head     — and how far down it the top of their head is. Given, they are drawn the
+//              height they are asked for exactly; left out, the air over the head is
+//              taken to be the quarter of the frame the crawl's art usually carries.
 //   walk     — folder of the walk cycle, and how many frames each direction has.
 //   idle     — the same for standing still. Frame 0 is what they wear when nothing is
 //              happening to them.
+//   still    — one painted rotation per direction instead of the two loops above, for
+//              somebody who stands where they are put and never walks anywhere. The
+//              folder of the rotations, as exported; the four the game uses are read
+//              out of it by name.
 //   down     — one image, for when they are laid out on the floor. Leave it out for
 //              anyone the game never puts on the floor; nothing else asks for it.
 //   portrait — the face shown while they speak.
@@ -36,6 +43,17 @@ export const LOOKS = [
     walk: { folder: 'Walking/animations/Walk', frames: 6 },
     idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
     portrait: 'Idle/portrait.png',
+  },
+  {
+    // The same man behind his own bar: painted standing, arms folded, at the size the
+    // room is painted at. He keeps the face above for talking — this export has none,
+    // and a landlord does not need two.
+    id: 'gregorious-bar',
+    path: 'art/gregorious-bar',
+    size: 124,
+    foot: 121, // the boards are all but the bottom row of the frame
+    head: 4, // and there is no air over him worth speaking of
+    still: 'Idle/rotations',
   },
 ];
 
