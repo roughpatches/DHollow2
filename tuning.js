@@ -270,6 +270,7 @@ export const COLORS = {
   inkFolk: 0x86301c,
   inkMark: 0x2c4a52,
   inkSelectFill: 0xb5905f,
+  inkPanel: 0xcbb083, // the paper a shade down: a list's ground, a grid's squares
 
   // The constitution bar: an iron trough with what the road has not taken yet in it.
   // Full it is the gold the leaves are, and at nothing it is the red they go to.

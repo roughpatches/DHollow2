@@ -1,6 +1,7 @@
-// The painted panels behind the quest screens. One sheet off disk, cut into the frames
-// named in content/looks.js and stretched by nine-slice, so a panel is the same ironwork
-// at any size it is asked for.
+// The painted panels behind every screen the game opens. The sheets come off disk, are
+// cut into the frames named in content/looks.js and stretched by nine-slice, so a panel
+// is the same frame at any size it is asked for. Which frame a screen asks for is what
+// makes the town look like the town and the road look like the road.
 
 import { COLORS } from '../tuning.js';
 import { UI } from '../content/looks.js';
@@ -18,20 +19,35 @@ const INK = new Map([
   [COLORS.menuMapFolk, COLORS.inkFolk],
   [COLORS.menuMapMark, COLORS.inkMark],
   [COLORS.menuSelectFill, COLORS.inkSelectFill],
+  // The three that are a ground rather than a line: the panel a list stands on, the
+  // squares of a grid, and the edge drawn round either. On paper they are the paper,
+  // a shade off it.
+  [COLORS.menuPanel, COLORS.inkPanel],
+  [COLORS.menuFill, COLORS.inkPanel],
+  [COLORS.menuEdge, COLORS.inkRule],
+  [COLORS.menuMapYou, COLORS.inkText], // a near-white pin is nothing at all on parchment
 ]);
 
+// which sheet a frame is cut from
+function sheetOf(name) {
+  return UI.sheets[UI.frames[name].sheet];
+}
+
 export function preloadFrames(scene) {
-  if (!scene.textures.exists(UI.sheet)) scene.load.image(UI.sheet, UI.sheet);
+  for (const sheet of Object.values(UI.sheets)) {
+    if (!scene.textures.exists(sheet)) scene.load.image(sheet, sheet);
+  }
 }
 
 // The cuts, named on the sheet's own texture. Nothing is copied and no second texture is
 // made for a frame used as painted: it is a rectangle with a name on it. A frame with
 // placeholder printing inside it is the exception — that one is washed and kept.
 export function buildFrames(scene) {
-  const tex = scene.textures.get(UI.sheet);
   for (const [name, f] of Object.entries(UI.frames)) {
+    const sheet = sheetOf(name);
+    const tex = scene.textures.get(sheet);
     if (!tex.has(name)) tex.add(name, 0, ...f.at);
-    SOURCE[name] = f.paper ? { key: washed(scene, name, f) } : { key: UI.sheet, frame: name };
+    SOURCE[name] = f.paper ? { key: washed(scene, name, f) } : { key: sheet, frame: name };
   }
 }
 
@@ -45,7 +61,7 @@ function washed(scene, name, f) {
   const tex = scene.textures.createCanvas(key, aw, ah);
   const ctx = tex.getContext();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(scene.textures.get(UI.sheet).getSourceImage(), ax, ay, aw, ah, 0, 0, aw, ah);
+  ctx.drawImage(scene.textures.get(sheetOf(name)).getSourceImage(), ax, ay, aw, ah, 0, 0, aw, ah);
 
   const [fl, fr, ft, fb] = f.flat;
   const m = f.wash;

@@ -57,9 +57,16 @@ export default class Quest extends Phaser.Scene {
     this.foot = this.box.y + this.box.h - pad.b;
   }
 
-  // the whole screen is one page; the crawl is bands, and a band is the smaller frame
+  // The board, the hour and the crew are opened standing in Dreadhollow, so they are the
+  // town's parchment. The crawl is bands of the road's own ironwork: once they have set
+  // out they are not in the town any more, and the screen says so before a word is read.
   frame(mode = this.mode) {
-    return mode === 'run' ? 'band' : 'page';
+    return mode === 'run' ? 'band' : 'parchment';
+  }
+
+  // what colour a line or a rule takes on whichever of the two the screen is
+  ink(colour) {
+    return inkOf(this.frame(), colour);
   }
 
   openBoard() {
@@ -311,7 +318,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   panel(night) {
-    this.hang('page', this.box, night);
+    this.hang(this.frame(), this.box, night);
   }
 
   // the banner the bar is on, the banner the trail is on, and the landscape between them
@@ -346,9 +353,9 @@ export default class Quest extends Phaser.Scene {
       if (on) {
         // inside the flat of the frame: a row that bleeds past it is a row on the ironwork
         const g = this.add.graphics();
-        g.fillStyle(COLORS.menuSelectFill, 1);
+        g.fillStyle(this.ink(COLORS.menuSelectFill), 1);
         g.fillRect(this.left, y - 3, this.wide, h);
-        g.fillStyle(COLORS.menuAccent, 1);
+        g.fillStyle(this.ink(COLORS.menuAccent), 1);
         g.fillRect(this.left, y - 3, 2, h);
         this.layer.add(g);
       }
@@ -944,7 +951,7 @@ export default class Quest extends Phaser.Scene {
 
   rule(y) {
     const g = this.add.graphics();
-    g.lineStyle(1, COLORS.menuRule, 1);
+    g.lineStyle(1, this.ink(COLORS.menuRule), 1);
     g.lineBetween(this.left, y, this.left + this.wide, y);
     this.layer.add(g);
   }
@@ -957,7 +964,7 @@ export default class Quest extends Phaser.Scene {
     const t = this.add.text(x, y, str, {
       fontFamily: TUNING.font,
       fontSize: `${size}px`,
-      color: hex(color),
+      color: hex(this.ink(color)),
       lineSpacing: 4,
       ...(wrap ? { wordWrap: { width: wrap } } : {}),
     });

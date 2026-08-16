@@ -11,6 +11,9 @@ import { partyRows, skillRows, fill } from '../party.js';
 import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
 import { questRows, placeLines, canStart } from '../run.js';
+import { framed, padOf, inkOf } from '../frames.js';
+
+const PANEL = 'parchment'; // the menu is opened standing in the town, so it is the town's paper
 
 // Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
 // above the log of everything else the village has told you it wants.
@@ -163,15 +166,14 @@ export default class Menu extends Phaser.Scene {
 
   panel() {
     const b = this.box;
+    for (const o of framed(this, PANEL, b)) this.layer.add(o);
     const g = this.add.graphics();
-    g.fillStyle(COLORS.menuFill, 0.97);
-    g.fillRect(b.x, b.y, b.w, b.h);
-    g.fillStyle(COLORS.menuPanel, 1);
+    g.fillStyle(this.ink(COLORS.menuPanel), 1);
     g.fillRect(this.listX - 8, this.bodyY - 10, TUNING.menuListWidth + 8, b.y + b.h - this.bodyY - 34);
-    g.lineStyle(2, COLORS.menuEdge, 1);
-    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    g.lineStyle(1, COLORS.menuRule, 1);
-    g.lineBetween(b.x + 1, b.y + TUNING.menuTabStripHeight, b.x + b.w - 1, b.y + TUNING.menuTabStripHeight);
+    const pad = padOf(PANEL);
+    g.lineStyle(1, this.ink(COLORS.menuRule), 1);
+    g.lineBetween(b.x + pad.l, b.y + TUNING.menuTabStripHeight,
+      b.x + b.w - pad.r, b.y + TUNING.menuTabStripHeight);
     this.layer.add(g);
   }
 
@@ -192,7 +194,7 @@ export default class Menu extends Phaser.Scene {
       t.setX(x);
       if (i === this.tab) {
         const g = this.add.graphics();
-        g.fillStyle(COLORS.menuAccent, 1);
+        g.fillStyle(this.ink(COLORS.menuAccent), 1);
         g.fillRect(x, y + t.height + 3, t.width, 2);
         this.layer.add(g);
       }
@@ -219,9 +221,9 @@ export default class Menu extends Phaser.Scene {
 
       if (on) {
         const g = this.add.graphics();
-        g.fillStyle(COLORS.menuSelectFill, 1);
+        g.fillStyle(this.ink(COLORS.menuSelectFill), 1);
         g.fillRect(this.listX - 8, y - 3, TUNING.menuListWidth + 8, h);
-        g.fillStyle(COLORS.menuAccent, 1);
+        g.fillStyle(this.ink(COLORS.menuAccent), 1);
         g.fillRect(this.listX - 8, y - 3, 2, h);
         this.layer.add(g);
       }
@@ -289,9 +291,9 @@ export default class Menu extends Phaser.Scene {
       const on = i === sel;
 
       const g = this.add.graphics();
-      g.fillStyle(on ? COLORS.menuSelectFill : COLORS.menuFill, 1);
+      g.fillStyle(this.ink(on ? COLORS.menuSelectFill : COLORS.menuFill), 1);
       g.fillRect(x + 2, y + 2, cell - 4, cell - 4);
-      g.lineStyle(1, on ? COLORS.menuAccent : COLORS.menuRule, 1);
+      g.lineStyle(1, this.ink(on ? COLORS.menuAccent : COLORS.menuRule), 1);
       g.strokeRect(x + 2, y + 2, cell - 4, cell - 4);
       this.layer.add(g);
 
@@ -323,7 +325,7 @@ export default class Menu extends Phaser.Scene {
     }
 
     const g = this.add.graphics();
-    g.lineStyle(1, COLORS.menuRule, 1);
+    g.lineStyle(1, this.ink(COLORS.menuRule), 1);
     g.lineBetween(this.detailX, y + 4, this.detailX + this.detailW, y + 4);
     this.layer.add(g);
     y += 18;
@@ -361,7 +363,7 @@ export default class Menu extends Phaser.Scene {
     for (const o of entry.options) {
       const on = o === current;
       const t = this.text(x + 8, y + 4, o.name, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
-      g.lineStyle(1, on ? COLORS.menuAccent : COLORS.menuRule, 1);
+      g.lineStyle(1, this.ink(on ? COLORS.menuAccent : COLORS.menuRule), 1);
       g.strokeRect(x, y, t.width + 16, t.height + 8);
       x += t.width + 16 + 10;
       bottom = y + t.height + 8;
@@ -395,12 +397,12 @@ export default class Menu extends Phaser.Scene {
         g.fillRect(x0 + tx * cell, y + ty * cell, cell, cell);
       }
     }
-    g.lineStyle(1, COLORS.menuRule, 1);
+    g.lineStyle(1, this.ink(COLORS.menuRule), 1);
     g.strokeRect(x0 - 1, y - 1, cols * cell + 2, rows * cell + 2);
 
     // grown pins read at a cell size of a few pixels, where a single tile does not
     const pin = (tx, ty, color, grow) => {
-      g.fillStyle(color, 1);
+      g.fillStyle(this.ink(color), 1);
       g.fillRect(x0 + tx * cell - grow, y + ty * cell - grow, cell + grow * 2, cell + grow * 2);
     };
 
@@ -430,11 +432,11 @@ export default class Menu extends Phaser.Scene {
     const g = this.add.graphics();
     g.fillStyle(COLORS.path[0], 1);
     g.fillRect(x0, y, this.detailW, h);
-    g.lineStyle(1, COLORS.menuRule, 1);
+    g.lineStyle(1, this.ink(COLORS.menuRule), 1);
     g.strokeRect(x0 - 1, y - 1, this.detailW + 2, h + 2);
 
     const pin = (tx, color) => {
-      g.fillStyle(color, 1);
+      g.fillStyle(this.ink(color), 1);
       g.fillRect(Math.round(x0 + tx * cell) - 1, y, 3, h);
     };
 
@@ -464,7 +466,7 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
     let last = null;
     for (const [color, name] of swatches) {
-      g.fillStyle(color, 1);
+      g.fillStyle(this.ink(color), 1);
       g.fillRect(x, y + 3, 7, 7);
       last = this.text(x + 12, y, name, TUNING.menuHintSize, COLORS.menuDim);
       x += 12 + last.width + 16;
@@ -485,11 +487,17 @@ export default class Menu extends Phaser.Scene {
     );
   }
 
+  // Everything written here is written on paper, so a colour picked for a dark board is
+  // swapped for its ink on the way to the page. Nothing that builds a line has to know.
+  ink(color) {
+    return inkOf(PANEL, color);
+  }
+
   text(x, y, str, size, color, wrap) {
     const t = this.add.text(x, y, str, {
       fontFamily: TUNING.font,
       fontSize: `${size}px`,
-      color: hex(color),
+      color: hex(this.ink(color)),
       lineSpacing: 4,
       ...(wrap ? { wordWrap: { width: wrap } } : {}),
     });
