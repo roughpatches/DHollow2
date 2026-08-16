@@ -258,6 +258,24 @@ export default class Quest extends Phaser.Scene {
       this.draw();
       return;
     }
+    // Two things standing here and light for one. Same shape as a scene's choice: the
+    // cursor steps over work nobody walking can do rather than landing on it.
+    if (r.phase === 'choose') {
+      if (this.approaching) return; // they have not got to it yet
+      const hs = r.nodes[r.at].harvests;
+      const step = (d) => {
+        for (let i = 1; i <= hs.length; i++) {
+          const at = (((this.row + d * i) % hs.length) + hs.length) % hs.length;
+          if (hs[at].score) { this.row = at; return; }
+        }
+      };
+      if (k === 'arrowup' || k === 'w') step(-1);
+      else if (k === 'arrowdown' || k === 's') step(1);
+      else if (k === 'enter' || k === ' ' || k === 'e') { run.pickWork(this.row); this.row = 0; }
+      else if (k === 'escape') run.abandon();
+      this.draw();
+      return;
+    }
     if (r.phase === 'fork') {
       // two ways or three: the cursor walks the list rather than being told which end of
       // it each key means
@@ -630,8 +648,7 @@ export default class Quest extends Phaser.Scene {
 
     // A node the party has not walked up to yet is not a node they know anything about,
     // so the approach runs first and the card only opens when it has arrived.
-    if (r.state === 'running' && (r.phase === 'node' || r.phase === 'activity' || r.phase === 'beat')
-      && this.shownAt !== r.at) {
+    if (r.state === 'running' && r.phase !== 'fork' && this.shownAt !== r.at) {
       this.shownAt = r.at;
       this.approaching = true;
       this.walk.approach(run.kindOf(r.nodes[r.at].kind), () => {
@@ -661,6 +678,9 @@ export default class Quest extends Phaser.Scene {
     this.trail(r, band.trail);
 
     if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
+    else if (r.state === 'running' && r.phase === 'choose' && !this.approaching) {
+      this.card(band.walk, this.workLines(r), this.nodeHead(r));
+    }
     else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
     else if (r.state === 'running' && r.phase === 'beat' && !this.approaching) {
       // A beat can be the moment the thing on the road stops being there — the heron
@@ -675,6 +695,7 @@ export default class Quest extends Phaser.Scene {
 
     if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
+    else if (r.phase === 'choose' && !this.approaching) this.hint('[Up/Down] Choose    [Enter] Work it    [Esc] Turn back');
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.activityOf(r.nodes[r.at])) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
       this.hint(r.nodes[r.at].beat.choose
@@ -1042,10 +1063,10 @@ export default class Quest extends Phaser.Scene {
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
     out.push([`Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`, TUNING.questBodySize, COLORS.menuAccent]);
-    // one line per piece of work they could do here, and one for whatever they could not
-    for (const line of run.harvestLines(n)) out.push([line, TUNING.questHintSize, COLORS.menuDim]);
-    const missed = run.missedLine(n);
-    if (missed) out.push([missed, TUNING.questHintSize, COLORS.menuMapFolk]);
+    // what the work they chose was worth, and what is still standing here after it
+    const worth = run.harvestLine(n);
+    if (worth) out.push([worth, TUNING.questHintSize, COLORS.menuDim]);
+    for (const line of run.leftLines(n)) out.push([line, TUNING.questHintSize, COLORS.menuMapFolk]);
     const con = run.conLines(n);
     if (con) out.push([con, TUNING.questBodySize, n.con >= 0 ? COLORS.menuMapMark : COLORS.menuMapFolk]);
     return out;
@@ -1096,6 +1117,29 @@ export default class Quest extends Phaser.Scene {
         TUNING.questHintSize, on ? COLORS.menuText : COLORS.menuRule]);
     });
     return out;
+  }
+
+  // What is standing here that could be worked, and what the party is worth at each. The
+  // node's own account is not on this card — it is on the tally afterwards, and saying it
+  // twice would make the question harder to find, not easier.
+  workLines(r) {
+    const hs = r.nodes[r.at].harvests;
+    // the cursor never rests on work nobody can do, including on the first draw
+    if (!hs[this.row] || !hs[this.row].score) {
+      this.row = Math.max(0, hs.findIndex((h) => h.score));
+    }
+    return hs.flatMap((h, i) => {
+      const on = i === this.row;
+      const shut = !h.score;
+      return [
+        [`${shut ? '·' : on ? '>' : ' '} ${h.activity} — ${h.skill.name}`, TUNING.questBodySize,
+          shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim],
+        [shut
+          ? `    Nobody walking this has a point of ${h.skill.name}.`
+          : `    ${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more off it.`,
+        TUNING.questHintSize, shut ? COLORS.menuRule : on ? COLORS.menuText : COLORS.menuRule],
+      ];
+    });
   }
 
   forkLines(r) {

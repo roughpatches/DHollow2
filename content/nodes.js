@@ -1,12 +1,15 @@
 // What a drawn run is made of. A quest with no authored `line` walks these;
 // content/encounters.js holds the authored nodes a main quest names by hand.
 //
-// There are two kinds and no third.
+// There are two kinds and no third, and both of them are a choice between two things.
 //   A RESOURCE node is somewhere with something in it. It carries one or two harvests,
-//   each with its own skill and its own yield, and the party works whichever of them
-//   anybody has a point in. A party with a point in none of them walks past the node.
+//   each with its own skill and its own yield, and the party works one of them: there is
+//   a day's light and one of it, so the other is left standing. A harvest whose skill
+//   nobody has cannot be chosen, and a node where that is true of all of them is walked
+//   past. The same resource node is never put up twice running.
 //   An ENCOUNTER node is something in the way. It offers two ways through, each one a
-//   skill check, and the party takes one of them.
+//   skill check, and the party takes one of them. A run only ever has one of each: the
+//   same thing happening twice on one walk out reads as the road running short.
 //
 // Both kinds:
 //   id      — how src/run.js refers to it, and how content/looks.js hangs art on it.
@@ -33,8 +36,9 @@
 //             that is a question of luck — `count` things come off it, each one drawn
 //             against `odds`. Odds are read against each other and need not add up to a
 //             hundred. Points in the skill take more off it and bend the table toward
-//             its scarce end; see tuning.js. Each harvest is gated on its own skill, so
-//             a two-resource node half the party can work pays half of what is there.
+//             its scarce end; see tuning.js. Write two of them and the node becomes a
+//             question the party is asked where they stand, so write two the same crew
+//             would want differently — not two spellings of one job.
 //
 // An encounter node also has:
 //   ways    — two of them. Each is `text` (the way as it is offered), the `skill` and

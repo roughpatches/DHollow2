@@ -46,8 +46,21 @@ function poolAt(when, where) {
   return KINDS.filter((e) => !e.only && (when === 'night' || e.nature !== 'combat') && inZone(e, where));
 }
 
+// What the road may still put up. Two rules, and both of them are about not repeating
+// yourself: never the kind they have just finished with, so the same stand of timber is
+// not standing there again a hundred yards on, and never a kind marked `once` that this
+// run has already had, so a party meets bad ground once a job and not four times.
+// If the two of them between them leave nothing, the rules are dropped for that draw
+// rather than the run stopping in the middle of the wood.
+function drawableAt(when, where) {
+  const pool = poolAt(when, where);
+  const last = run && run.at > 0 ? run.nodes[run.at - 1].kind : null;
+  const free = pool.filter((e) => e.id !== last && !(e.once && run.used.has(e.id)));
+  return free.length ? free : pool;
+}
+
 function readableAt(when, where) {
-  return poolAt(when, where).filter((e) => e.read);
+  return drawableAt(when, where).filter((e) => e.read);
 }
 
 // A table naming a skill the list does not have, usually one left behind by a rewrite of
@@ -296,6 +309,7 @@ export function start(id, when, party, choice = {}) {
   const con = conTotal(who) + groundCon(who, terrainOf(quest, where));
   run = {
     quest, size, where, when: at, party: who, nodes, at: -1, state: 'running',
+    used: new Set(), // the kinds this run has had that it is only allowed one of
     spoils: {}, xp: 0, con, conMax: con,
   };
   step();
@@ -412,7 +426,7 @@ export function choose(i) {
   return run;
 }
 
-function weighted(from = poolAt(run.when, run.where)) {
+function weighted(from = drawableAt(run.when, run.where)) {
   const of = (e) => e.weight[run.when];
   let r = Math.random() * from.reduce((n, e) => n + of(e), 0);
   for (const e of from) {
@@ -439,24 +453,44 @@ function harvestsOf(e) {
   });
 }
 
-// The work at this node the party can actually do, best-known first. What they are best
-// at is what the node is called and which engine opens at it, so a party who brought a
-// woodcutter to a stand with mushrooms under it swings the axe and forages second.
+// The work at this node the party can actually do, best-known first. There is a day's
+// light and one of it, so where there are two the party says which — see pickWork. The
+// order is what the cursor opens on: what they are best at is the likelier answer.
 function workedOf(node) {
   return node.harvests.filter((h) => h.score > 0).sort((a, b) => b.score - a.score);
 }
 
-// which engine a node hands over, once it is known who is standing at it
+// which engine a node hands over, once it is known what the party decided to work
 export function activityOf(node) {
-  const h = node.worked && node.worked[0];
-  return h ? h.activity : KIND[node.kind].activity;
+  return node.took ? node.took.activity : KIND[node.kind].activity;
 }
 
 // The skill whose picture stands for a node on the trail: the work they actually did
 // there, or the work the kind is, and nothing where it is nobody's work.
 export function skillAt(node) {
-  const h = node.worked && node.worked[0];
-  return h ? h.skill : skillForActivity(KIND[node.kind].activity);
+  return node.took ? node.took.skill : skillForActivity(KIND[node.kind].activity);
+}
+
+// Two things standing here and time for one of them. Answered by index into the whole
+// list, shut ones included, so the card and the answer count the same rows.
+export function pickWork(i) {
+  if (!run || run.phase !== 'choose') return run;
+  const node = run.nodes[run.at];
+  const h = node.harvests[i];
+  if (!h || !h.score) return run;
+  node.took = h;
+  toWork(node);
+  return run;
+}
+
+// and what happens once it is settled which work is being done: the engine, or straight
+// to the tally where there is no engine for it yet
+function toWork(node) {
+  if (hasEngine(activityOf(node))) {
+    run.phase = 'activity';
+    return;
+  }
+  settle(null);
 }
 
 // The job's own test stands in front of the goal; anything else the road throws up
@@ -479,8 +513,11 @@ function resolve(node) {
 
   node.kind = e.id;
   node.conBefore = run.con;
+  if (e.once) run.used.add(e.id); // and this run will not put it up a second time
   node.harvests = harvestsOf(e);
   node.worked = workedOf(node);
+  node.took = node.worked[0] || null; // until the party says otherwise, which they only
+  // get to do where there is more than one thing here they could do
 
   // Nobody on the run has a single point in any of the work this node is. They do not
   // get to try it and fail at it — they stand and look at it and go on. Nothing is
@@ -505,13 +542,17 @@ function resolve(node) {
     return;
   }
 
-  // A node with an engine behind it does not pay out until it has been played. The run
-  // waits here; the scene hands back what the player made of it.
-  if (hasEngine(activityOf(node))) {
-    run.phase = 'activity';
+  // Two things here they could work and light enough for one of them, so they say which
+  // before anything is cut, cast for or dug. One thing, or one they can do, is not a
+  // question and is not asked.
+  if (node.worked.length > 1) {
+    run.phase = 'choose';
     return;
   }
-  settle(null);
+
+  // A node with an engine behind it does not pay out until it has been played. The run
+  // waits here; the scene hands back what the player made of it.
+  toWork(node);
 }
 
 // --- beats -----------------------------------------------------------------
@@ -617,13 +658,13 @@ export function settle(played) {
     : node.failed ? TUNING.activityFailKeep
       : TUNING.activityKeepFloor + (1 - TUNING.activityKeepFloor) * node.quality;
   const takeAt = (more) => (1 + more) * (failed ? TUNING.checkFailKeep : 1) * worth;
-  const lead = node.worked && node.worked[0];
-  const take = takeAt(lead ? lead.more : 0);
+  const took = node.took || null;
+  const take = takeAt(took ? took.more : 0);
 
   // Three things pay out here, and they are kept apart because they are three different
   // shapes: what the kind itself hands over, what the beats picked up on the way through,
-  // and each piece of work at the node that somebody could actually do. A node with two
-  // resources in it pays the two of them separately, each swollen by its own skill.
+  // and the one piece of work at the node the party decided to do. The other thing that
+  // was standing here is left standing — there was only ever time for one of them.
   const paid = {};
   const put = (m, n) => { paid[m] = (paid[m] || 0) + n; };
   if (!node.passed) {
@@ -632,15 +673,14 @@ export function settle(played) {
     }
     const table = node.beatDraw || e.draw;
     if (table) {
-      for (const [m, n] of Object.entries(offTable(table, take, tiltOf(lead ? lead.score : 0)))) put(m, n);
+      for (const [m, n] of Object.entries(offTable(table, take, tiltOf(took ? took.score : 0)))) put(m, n);
     }
     // The older shape's single harvest is the kind's own spoils and draw, already paid
     // just above, so it is not paid again here.
-    for (const h of (node.worked || []).filter((x) => !x.whole)) {
-      const at = takeAt(h.more);
-      for (const [m, range] of Object.entries(h.spoils || {})) put(m, Math.round(roll(range) * at));
-      if (h.draw) {
-        for (const [m, n] of Object.entries(offTable(h.draw, at, tiltOf(h.score)))) put(m, n);
+    if (took && !took.whole) {
+      for (const [m, range] of Object.entries(took.spoils || {})) put(m, Math.round(roll(range) * take));
+      if (took.draw) {
+        for (const [m, n] of Object.entries(offTable(took.draw, take, tiltOf(took.score)))) put(m, n);
       }
     }
   }
@@ -760,20 +800,24 @@ export function groundLine(q, ids, where) {
     : `${ground} — nobody coming has a point of ${named}, and it is worth ${TUNING.conPerTerrainPoint} apiece out there.`;
 }
 
-// One line per piece of work the party could do here, so a node with two resources in it
-// says which of them the party is worth something at and which they only happened to have
-// somebody for.
-export function harvestLines(node) {
-  return (node.worked || [])
-    .map((h) => `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more off it.`);
+// What the work they chose was worth to them, in the one line that says why they chose it
+export function harvestLine(node) {
+  const h = node.took;
+  if (!h || !h.score) return null;
+  return `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more off it.`;
 }
 
-// And what was standing here that nobody could touch: the other half of a two-resource
-// node, named so the reason to bring somebody else is on the card where it cost you.
-export function missedLine(node) {
-  const missed = (node.harvests || []).filter((h) => !h.score);
-  if (!missed.length || node.passed) return null;
-  return `Nobody walking this knows ${missed.map((h) => h.skill.name).join(' or ')}. That much is left standing.`;
+// And what is still standing here: what they turned down, and what nobody walking could
+// have taken anyway. Two different sentences because they are two different regrets.
+export function leftLines(node) {
+  if (node.passed) return [];
+  const named = (list) => list.map((h) => h.skill.name).join(' and ');
+  const spare = (node.worked || []).filter((h) => h !== node.took);
+  const shut = (node.harvests || []).filter((h) => !h.score);
+  const out = [];
+  if (spare.length) out.push(`${named(spare)} left where it stood. There was light for one of them.`);
+  if (shut.length) out.push(`Nobody walking this knows ${named(shut)}. That much is left standing too.`);
+  return out;
 }
 
 // Why a node gave up nothing: not a failure, an absence. Said in place of the roll and

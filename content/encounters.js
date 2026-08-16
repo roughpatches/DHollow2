@@ -52,6 +52,9 @@
 //              that puts something back. Night multiplies what it takes; see tuning.js.
 //   only     — true if this kind is never drawn at random and only turns up where a
 //              quest's `line` names it. Authored nodes carry it; the road's own do not.
+//   once     — true if a run may only ever have one of these. Every encounter node in
+//              content/nodes.js carries it; a resource node can be given it by hand.
+//              Nothing is ever drawn twice running whether it carries this or not.
 //   beats    — an encounter written out card by card instead of settled in one roll:
 //              paragraphs, the choices the party gets, and the ways through. The shape
 //              is documented on the one that has them. A kind without beats is a kind

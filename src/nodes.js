@@ -39,6 +39,10 @@ function fromEncounter(n) {
   });
   return {
     ...n, harvest: null, check: null, spoils: {}, draw: null, activity: null, body: [], beats,
+    // Once a job, whatever the length. A resource node is a place and there is more than
+    // one clearing in a wood; an encounter is a thing that happened, and the same thing
+    // happening twice on one walk out reads as the road running short of ideas.
+    once: true,
   };
 }
 
