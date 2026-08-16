@@ -66,8 +66,8 @@ export const NPCS = [
     id: 'gregorious',
     name: 'Gregorious',
     map: 'tavern',
-    x: 18,
-    facing: 'left',
+    x: 18, // at the bar, about under the taps; the way in is the far end of the room
+    facing: 'right',
     palette: 'gregorious', // real art; see content/looks.js
     quests: true,
     lines: ['Fancy a drink, or looking to make a little coin?'],

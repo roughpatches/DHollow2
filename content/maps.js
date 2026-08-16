@@ -216,22 +216,30 @@ export const MAPS = {
     ],
   },
 
-  // Inside the Sea Hag. Blank until there is a painting of it: a street with no art is
-  // the two bands it would otherwise be behind, which is a room enough to stand a
-  // landlord in and talk to him. Its lines are guesses and want measuring off the
-  // painting the day it arrives.
+  // Inside the Sea Hag: the bar down the left half under its shelf of bottles and pewter,
+  // the tables and the wall of framed charts down the right. Painted the size of the town
+  // panel rather than the two smaller ones, so it is a long room walked along rather than
+  // a booth. No horizon — indoors, and the painting covers the bands anyway.
+  // The lines are measured off it: the stool legs and the kick of the bar front both end
+  // on the boards at 352, and the walking line is the aisle in front of them, short of the
+  // tables the frame cuts through at the corners. That is what stands somebody at the bar
+  // rather than inside it.
   tavern: {
     name: 'The Sea Hag',
     street: {
       art: 'art/town/seahag-inside.png',
-      size: [480, 288],
-      ground: 250,
-      sill: 214,
-      repeats: 1,
+      size: [688, 384], // the whole painting; unlike the town panel its floor runs to the edge
+      ground: 362, // the aisle, a stride in front of the stools
+      sill: 352, // where the stool legs and the bar front meet the boards
+      repeats: 1, // one room; a room laid twice is two bars and one landlord
     },
-    spawn: [9],
+    spawn: [33],
     doors: [
-      { x: 6, to: 'inn', spawn: [14], label: 'Out to the street' },
+      // Nothing in the painting is a door, so the way out is the open end: the bar runs to
+      // the left edge, and the right is floor and tables with the wall carrying on past the
+      // frame. You come in at that end and walk the length of the tables to reach him.
+      // Not on the last tile — the name written over your head wants room to be read.
+      { x: 36, to: 'inn', spawn: [14], label: 'Out to the street' },
     ],
   },
 
