@@ -14,7 +14,11 @@
 //              it out for somebody who stands where they are put and never walks.
 //   idle     — the same for standing still. Frame 0 is what they wear when nothing is
 //              happening to them. `yoyo` runs it out and back rather than round: a loop
-//              that ends somewhere else than it started pops when it repeats.
+//              that ends somewhere else than it started pops when it repeats. `every` is
+//              [least, most] milliseconds of standing still between one run of it and the
+//              next, for an idle that is something somebody does now and then rather than
+//              a loop they are always in; they breathe on frame 0 in between, and the
+//              wait is counted from the end of one run rather than the start of it.
 //   sides    — art painted from one side only. Its east is loaded and flipped for west,
 //              and its south does for anything facing away; nothing else is asked for.
 //   down     — one image, for when they are laid out on the floor. Leave it out for
@@ -59,6 +63,8 @@ export const LOOKS = [
       folder: 'Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms',
       frames: 9,
       yoyo: true, // he ends holding the glass and starts with folded arms; run it back
+      every: [8000, 12000], // and he does it now and then, not for ever: a man polishing
+      // one glass without stopping is a man with something wrong with him
     },
   },
 ];

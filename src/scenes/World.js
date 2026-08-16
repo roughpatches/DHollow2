@@ -8,7 +8,7 @@ import {
 } from '../player.js';
 import {
   preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
-  raiseProps, restate,
+  raiseProps, restate, occasionalIdle,
 } from '../art.js';
 import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
 import { preloadFrames, buildFrames } from '../frames.js';
@@ -64,6 +64,7 @@ export default class World extends Phaser.Scene {
 
     this.npcs = [];
     this.taken = []; // whatever anybody has picked up off the painting; see takeUp()
+    this.waiting = []; // and whoever is standing still between doing it; see idles()
     // `until` and `after` name a scene: someone can be on the strand only until the
     // opening has played, and in the house only once it has
     const here = NPCS.filter((n) => n.map === this.mapKey
@@ -86,6 +87,10 @@ export default class World extends Phaser.Scene {
       // and the mug he takes off the bar, if he takes one
       if (this.street && def.takes) {
         this.taken.push({ npc, from: def.takes.from, patch: coverPatch(this, this.street.art, def.takes) });
+      }
+      // somebody whose idle is something they do now and then stands about between times
+      if (this.street && occasionalIdle(def.palette, npc.facing)) {
+        this.waiting.push({ npc, y: npc.y, cut: def.behind, next: 0 });
       }
       // A street has one line on it and standing on that line is not a reason nobody can
       // get past you, so people on a street are walked through rather than walked around.
@@ -254,6 +259,7 @@ export default class World extends Phaser.Scene {
     // anybody else, so the depths set when they were placed are the last word.
     if (this.street) {
       this.showHint();
+      this.idles();
       this.takeUp();
       return;
     }
@@ -300,13 +306,35 @@ export default class World extends Phaser.Scene {
     );
   }
 
+  // Somebody whose idle is something they do now and then — polishing a glass, say —
+  // stands still between one run of it and the next, and breathes while they stand: a
+  // pixel of rise and fall, rounded, which is the two-frame breath a pixel artist would
+  // have drawn. The wait is counted from the end of a run rather than the start of it, so
+  // `every` in content/looks.js is the standing about rather than the whole cycle, and it
+  // is rolled again each time so a room of them does not fall into step.
+  // Whatever they are standing behind is cut again as they move, because the bar does not
+  // breathe with them.
+  idles() {
+    const rise = Math.sin((this.time.now / TUNING.streetBreathMs) * Math.PI * 2) * 0.5 + 0.5;
+    const up = Math.round(rise * TUNING.streetBreathPx);
+    for (const w of this.waiting) {
+      const idle = occasionalIdle(w.npc.palette, w.npc.facing);
+      if (w.npc.anims.isPlaying) w.next = 0; // still at it; the clock starts when it stops
+      else if (!w.next) w.next = this.time.now + idle.every[0] + Math.random() * (idle.every[1] - idle.every[0]);
+      else if (this.time.now >= w.next) w.npc.anims.play(idle.key);
+      w.npc.y = w.y - (w.npc.anims.isPlaying ? 0 : up);
+      if (w.cut) cutBelow(w.npc, w.cut);
+    }
+  }
+
   // The glass he polishes is one off his own bar. From the frame of his idle he has hold
   // of it, the mug painted on the counter is covered over, so the bar is a mug short for
-  // as long as he is holding one and has it back the moment he sets it down.
+  // as long as he is holding one — and back on it the moment he is standing there empty
+  // handed again.
   takeUp() {
     for (const t of this.taken) {
       const frame = t.npc.anims.currentFrame;
-      t.patch.setVisible(!!frame && frame.index - 1 >= t.from);
+      t.patch.setVisible(t.npc.anims.isPlaying && !!frame && frame.index - 1 >= t.from);
     }
   }
 

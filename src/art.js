@@ -121,7 +121,9 @@ export function buildArt(scene) {
           frames: Array.from({ length: spec.frames }, (_, i) => ({ key: key(look, set, dir, i) })),
           frameRate: set === 'idle' ? TUNING.artIdleFrameRate : TUNING.artWalkFrameRate,
           yoyo: !!spec.yoyo,
-          repeat: -1,
+          // something done now and then is played once each time it comes round; a loop
+          // somebody is always in runs for ever
+          repeat: spec.every ? 0 : -1,
         });
       }
     }
@@ -278,16 +280,29 @@ export function idleAnim(id, dir) {
   return `${id}_idle_${dir}`;
 }
 
-// standing still: the idle loop for anyone who has one, the one still frame for anyone
-// who does not, and either of them mirrored where the art is painted from one side
+// standing still: the idle loop for anyone who is always in one, the one still frame for
+// anyone who is not, and either of them mirrored where the art is painted from one side.
+// Somebody whose idle is something they do now and then stands on its first frame between
+// times — what plays it, and when, is the scene's (see World.idles).
 export function stand(sprite, palette, dir) {
   const [frame, flip, use] = faceFrame(palette, dir);
   sprite.setFlipX(flip);
-  if (LOOK[palette]) sprite.anims.play(idleAnim(palette, use), true);
-  else {
-    sprite.anims.stop();
-    sprite.setTexture(frame);
+  const look = LOOK[palette];
+  if (look && !(look.idle && look.idle.every)) {
+    sprite.anims.play(idleAnim(palette, use), true);
+    return;
   }
+  sprite.anims.stop();
+  sprite.setTexture(frame);
+}
+
+// The idle somebody plays now and then rather than always: which animation it is the way
+// they are facing, and the [least, most] they stand still between one run and the next.
+// Nothing for anyone whose idle is a loop they are always in.
+export function occasionalIdle(palette, dir) {
+  const look = LOOK[palette];
+  if (!look || !look.idle || !look.idle.every) return null;
+  return { key: idleAnim(palette, faceFrame(palette, dir)[2]), every: look.idle.every };
 }
 
 // The frame around a character is not the character: art frames carry a lot of air. A

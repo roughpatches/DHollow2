@@ -16,6 +16,11 @@ export const TUNING = {
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
+  // The breath under anybody standing still between one thing and the next: how far they
+  // rise, and how long a breath takes. A pixel is a breath at this size; two is a man who
+  // has just run up the road.
+  streetBreathPx: 1,
+  streetBreathMs: 3400,
 
   // Every word in the game is set in this. The face itself is declared in index.html
   // and loaded before the game starts, because a line of text is baked to a texture the
