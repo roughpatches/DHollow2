@@ -22,10 +22,17 @@
 // `beat` on a say or narrate is a note to whoever writes the lines. It is never shown —
 // it is where a delivery note like "flat, quiet" or "to himself" lives, so the box holds
 // only what is actually said.
-// The first scene's map is where the game boots. Add a scene by adding a block.
+// `hold` on a scene takes it out of the game without taking it out of the file: it is
+// written, kept, and not played, and it counts as having happened — whoever it would
+// have moved off the map has moved, and whatever flag it would have raised is raised.
+// Take the field off to put the scene back. START below is where the game begins.
+// Add a scene by adding a block.
 
 export const SCENES = [
   {
+    // On hold. The wreck, the strand and the walk up to the hut are not in the game at
+    // the moment; the game starts on the street instead. See `hold` above.
+    hold: true,
     id: 'washedup',
     map: 'shore',
     steps: [
@@ -97,6 +104,7 @@ export const SCENES = [
     ],
   },
   {
+    hold: true, // on hold with the wreck: the name and the skill sheet are asked in it
     id: 'morning',
     map: 'hut',
     steps: [
@@ -332,5 +340,6 @@ export const SCENES = [
   },
 ];
 
-// where the game boots
-export const OPENING = SCENES[0];
+// Where the game begins, when nothing else says. It was the opening's own map; with the
+// opening on hold it is the street the opening would have left the player standing on.
+export const START = { map: 'village', spawn: [7] };

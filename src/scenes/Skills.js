@@ -1,6 +1,9 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { SKILLS } from '../../content/skills.js';
 import { setSkills, worthOf, YOU } from '../party.js';
+import { framed, padOf, inkOf } from '../frames.js';
+
+const PANEL = 'parchment'; // the sheet is filled in at Aldis's table, which is in the town
 
 // Choosing what your hands still know. Opens over the hut scene, which waits on it:
 // take three skills, spread the points across them, and that is the character sheet.
@@ -13,8 +16,9 @@ export default class Skills extends Phaser.Scene {
   create() {
     const p = TUNING.questPad;
     this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
-    this.left = this.box.x + TUNING.menuPad;
-    this.wide = this.box.w - TUNING.menuPad * 2;
+    const pad = padOf(PANEL);
+    this.left = this.box.x + pad.l;
+    this.wide = this.box.w - pad.l - pad.r;
 
     this.layer = this.add.container().setDepth(29500).setVisible(false);
     this.open_ = false;
@@ -135,18 +139,12 @@ export default class Skills extends Phaser.Scene {
   // --- bits ------------------------------------------------------------------
 
   panel() {
-    const b = this.box;
-    const g = this.add.graphics();
-    g.fillStyle(COLORS.menuFill, 0.98);
-    g.fillRect(b.x, b.y, b.w, b.h);
-    g.lineStyle(2, COLORS.menuEdge, 1);
-    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    this.layer.add(g);
+    for (const o of framed(this, PANEL, this.box)) this.layer.add(o);
   }
 
   rule(y) {
     const g = this.add.graphics();
-    g.lineStyle(1, COLORS.menuRule, 1);
+    g.lineStyle(1, inkOf(PANEL, COLORS.menuRule), 1);
     g.lineBetween(this.left, y, this.left + this.wide, y);
     this.layer.add(g);
   }
@@ -155,7 +153,7 @@ export default class Skills extends Phaser.Scene {
     const t = this.add.text(x, y, str, {
       fontFamily: TUNING.font,
       fontSize: `${size}px`,
-      color: hex(color),
+      color: hex(inkOf(PANEL, color)),
       lineSpacing: 4,
       ...(wrap ? { wordWrap: { width: wrap } } : {}),
     });

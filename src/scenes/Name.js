@@ -1,5 +1,8 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { setName, YOU } from '../party.js';
+import { framed, padOf, inkOf } from '../frames.js';
+
+const PANEL = 'parchment'; // asked in the hut, answered on the town's paper
 
 // The one thing about the player the game cannot know at boot. Aldis asks, this opens
 // over the hut scene, and the scene waits on it the same way it waits on the skill
@@ -18,8 +21,9 @@ export default class Name extends Phaser.Scene {
       w: this.scale.width - p * 6,
       h: 180,
     };
-    this.left = this.box.x + TUNING.menuPad;
-    this.wide = this.box.w - TUNING.menuPad * 2;
+    const pad = padOf(PANEL);
+    this.left = this.box.x + pad.l;
+    this.wide = this.box.w - pad.l - pad.r;
 
     this.layer = this.add.container().setDepth(29600).setVisible(false);
     this.open_ = false;
@@ -98,20 +102,14 @@ export default class Name extends Phaser.Scene {
   // --- bits ------------------------------------------------------------------
 
   panel() {
-    const b = this.box;
-    const g = this.add.graphics();
-    g.fillStyle(COLORS.menuFill, 0.98);
-    g.fillRect(b.x, b.y, b.w, b.h);
-    g.lineStyle(2, COLORS.menuEdge, 1);
-    g.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    this.layer.add(g);
+    for (const o of framed(this, PANEL, this.box)) this.layer.add(o);
   }
 
   text(x, y, str, size, color) {
     const t = this.add.text(x, y, str, {
       fontFamily: TUNING.font,
       fontSize: `${size}px`,
-      color: hex(color),
+      color: hex(inkOf(PANEL, color)),
       lineSpacing: 4,
     });
     this.layer.add(t);

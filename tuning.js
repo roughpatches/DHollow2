@@ -70,6 +70,15 @@ export const TUNING = {
   questApproachMs: 1400, // how long a node takes to walk into view
   questConTweenMs: 500, // and how long the bar takes to catch up with it
 
+  // The tally raised at the corner of the road when a node is done with (src/toast.js).
+  questToastWidth: 300,
+  questToastRow: 28, // one thing taken, and how much room it gets
+  questToastIcon: 22,
+  questToastInset: 14, // how far in from the corner of the road it hangs
+  questToastFadeMs: 220,
+  questToastStepMs: 90, // how long between one line landing and the next
+  questToastHoldMs: 2800, // how long the whole tally stays up once it has landed
+
   // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
   // is. Every number the axe answers to lives here.
   fell: {
@@ -138,8 +147,10 @@ export const TUNING = {
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
 
-  questPipSize: 32, // a node on the trail, and the length of road between two of them
-  questPipGap: 18,
+  questPipSize: 32, // a node on the trail; they spread across the band and close up at this
+  questPipGap: 18, // the least road left between two of them before they start to shrink
+  questPipInset: 5, // how far inside its square a node's picture is drawn
+  questPipYou: 3.5, // and the party's own mark, sliding along the road between them
   questPad: 26,
   questTitleSize: 22,
   questBodySize: 16,
@@ -261,6 +272,7 @@ export const COLORS = {
   inkFolk: 0x86301c,
   inkMark: 0x2c4a52,
   inkSelectFill: 0xb5905f,
+  inkPanel: 0xcbb083, // the paper a shade down: a list's ground, a grid's squares
 
   // The constitution bar: an iron trough with what the road has not taken yet in it.
   // Full it is the gold the leaves are, and at nothing it is the red they go to.

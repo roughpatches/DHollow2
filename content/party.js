@@ -39,7 +39,11 @@ export const PARTY = [
     name: 'You',
     palette: 'player',
     con: 11, // the Vitality on the Character tab, and the same number for the same reason
-    skills: {}, // filled in by the scene in Aldis's hut. See content/scenes.js.
+    // Filled in by the scene in Aldis's hut, which is on hold — so these three stand in
+    // for the sheet until it is asked for again, and are overwritten the moment it is.
+    // Three skills and six points, the same as everyone else was built with, and picked
+    // to complement Aldis: he is the woodcraft, you are the rod and the axe.
+    skills: { fishing: 3, woodcutting: 2, perception: 1 },
     bond: 0,
     body: ['[Placeholder Text]'],
   },

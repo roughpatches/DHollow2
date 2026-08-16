@@ -152,6 +152,13 @@ export function createWalk(scene, rect, party, when, backdrop) {
       api.setMoving(true);
     },
 
+    // How far along the walk up to the next node they are, nothing to all of it. The
+    // trail down the bottom of the screen reads it to slide the party along the road
+    // between one node and the next, so both readouts are the same walk.
+    coming() {
+      return arriving ? 1 - Math.max(0, arriving.until) / arriving.total : 1;
+    },
+
     // The work is done and what was standing there is not standing any more: played
     // once and held, so it stays down while the party reads what it cost them.
     // whatever was standing there is not standing any more, for the ones the party

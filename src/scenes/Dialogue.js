@@ -2,6 +2,10 @@ import { TUNING, COLORS, hex } from '../../tuning.js';
 import { setting } from '../settings.js';
 import { buildTextures, portraitKey } from '../textures.js';
 import { fill } from '../party.js';
+import { framed, padOf } from '../frames.js';
+
+const BOX = 'parchment'; // talking happens in the town, so it happens on the town's paper
+const FACE = 'plate';
 
 // Runs alongside World. A line array, a box that reads it, and the speaker's face
 // beside it — nothing else. The same box also puts a choice in front of the player:
@@ -20,44 +24,41 @@ export default class Dialogue extends Phaser.Scene {
     const top = this.scale.height - h - m;
     this.metrics = { m, ps, h, top };
 
-    this.box = this.add.graphics();
+    // the panel is hung on the first line the box is opened with, not here: the sheet it
+    // is cut from is still loading while this runs
+    this.box = this.add.container();
+    this.pad = padOf(BOX);
 
     this.nameText = this.add.text(0, top + 12, '', {
       fontFamily: TUNING.font,
       fontSize: `${TUNING.dialogueNameSize}px`,
-      color: hex(COLORS.dialogueName),
+      color: hex(COLORS.inkAccent),
     });
 
     this.bodyText = this.add.text(0, top + 40, '', {
       fontFamily: TUNING.font,
       fontSize: `${TUNING.dialogueFontSize}px`,
-      color: hex(COLORS.dialogueText),
+      color: hex(COLORS.inkText),
       lineSpacing: 4,
     });
 
     this.hint = this.add.text(0, top + h - 26, '[E]', {
       fontFamily: TUNING.font,
       fontSize: '14px',
-      color: hex(COLORS.dialogueEdge),
+      color: hex(COLORS.inkDim),
     }).setOrigin(1, 0);
 
     // panel and face travel together, so the pop is one tween on one thing
     this.portraitY = top + h - ps;
     this.portrait = this.add.container(m, this.portraitY);
-    const frame = this.add.graphics();
-    frame.fillStyle(COLORS.portraitFill, 0.94);
-    frame.fillRect(0, 0, ps, ps);
-    frame.lineStyle(2, COLORS.dialogueEdge, 1);
-    frame.strokeRect(1, 1, ps - 2, ps - 2);
     this.face = this.add.image(ps / 2, ps / 2, portraitKey('player'));
     this.fitFace();
-    this.portrait.add([frame, this.face]);
+    this.portrait.add(this.face);
 
     this.options = null; // the list, while a choice is up; null while a line is
     this.chose = null; // and which of them was taken, handed on as the box closes
 
     this.group = [this.box, this.nameText, this.bodyText, this.hint, this.portrait];
-    this.layout(false);
     this.hide();
 
     this.input.keyboard.on('keydown-E', this.advance, this);
@@ -75,15 +76,22 @@ export default class Dialogue extends Phaser.Scene {
     const bx = withPortrait ? m + ps + TUNING.dialoguePortraitGap : m;
     const w = this.scale.width - bx - m;
 
-    this.box.clear();
-    this.box.fillStyle(COLORS.dialogueFill, 0.94);
-    this.box.fillRect(bx, top, w, h);
-    this.box.lineStyle(2, COLORS.dialogueEdge, 1);
-    this.box.strokeRect(bx + 1, top + 1, w - 2, h - 2);
+    const pad = this.pad;
+    this.box.removeAll(true);
+    for (const o of framed(this, BOX, { x: bx, y: top, w, h })) this.box.add(o);
 
-    this.nameText.setX(bx + 18);
-    this.bodyText.setX(bx + 18).setWordWrapWidth(w - 36);
-    this.hint.setX(bx + w - 18);
+    // The face is set in the square off the same sheet, hung once and kept: it is the
+    // same size every time, and it travels with the portrait rather than the box.
+    if (!this.plate) {
+      this.plate = this.add.container(0, 0);
+      for (const o of framed(this, FACE, { x: 0, y: 0, w: ps, h: ps })) this.plate.add(o);
+      this.portrait.addAt(this.plate, 0);
+    }
+
+    // in past the corner brackets, which reach further in than the rails do
+    this.nameText.setX(bx + pad.l);
+    this.bodyText.setX(bx + pad.l).setWordWrapWidth(w - pad.l - pad.r);
+    this.hint.setX(bx + w - pad.r);
   }
 
   hide() {

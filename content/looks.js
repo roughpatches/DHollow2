@@ -289,13 +289,23 @@ export const PROPS = [
 //   hang  — how far the leaves fall below the bottom rail, in pixels. A panel lined up
 //           against another is lined up by its ironwork, not by the leaves hanging off
 //           it, so whatever does that lining up adds this back.
+//   sheet — which sheet below it is cut from.
 export const UI = {
-  sheet: 'art/Autumn-leafy-vines-twined-around-wrought-iron-framing.png',
+  // Two schemes, and where the party is standing decides which. The autumn ironwork is
+  // the road and the wood: leaves, because that is what is around them out there. The
+  // parchment is Dreadhollow — plain paper and plain iron, because a town is not a season.
+  sheets: {
+    autumn: 'art/Autumn-leafy-vines-twined-around-wrought-iron-framing.png',
+    town: 'art/Neutral-faded-aged-parchment.png',
+  },
   frames: {
-    // The whole screen: the board, the hour, the crew. Cut to the ironwork rather than to
-    // the leaves, because a leaf hanging off the side is a leaf drawn down the whole side
-    // once the panel is stretched to a screen.
+    // A whole screen of the autumn ironwork. Cut to the ironwork rather than to the
+    // leaves, because a leaf hanging off the side is a leaf drawn down the whole side once
+    // the panel is stretched to a screen. Nothing asks for it since the board, the hour
+    // and the crew went onto the town's parchment; it is kept for the day something
+    // full-screen belongs to the road rather than to Dreadhollow.
     page: {
+      sheet: 'autumn',
       at: [107, 97, 480, 172], slice: [158, 320, 113, 57],
       flat: [24, 31, 39, 35], pad: [42, 46, 50, 62], shade: 0.8,
     },
@@ -304,15 +314,38 @@ export const UI = {
     // it is painted with stains and highlights, and a nine-slice pulls a two-pixel slice
     // of those the width of a screen, which is where the pale shapes came from.
     band: {
+      sheet: 'autumn',
       at: [196, 11, 295, 81], slice: [183, 110, 43, 36],
       flat: [21, 21, 21, 21], pad: [66, 68, 24, 22], shade: 0.3,
       paper: [310, 37, 47, 34], wash: 1,
     },
     // the card that opens at each node: paper, and written on in ink
     plaque: {
+      sheet: 'autumn',
       at: [196, 269, 295, 110], slice: [173, 120, 54, 54],
       flat: [18, 27, 19, 18], pad: [38, 38, 28, 26], hang: 10,
       paper: [372, 328, 33, 31], wash: 2, ink: true,
+    },
+
+    // Dreadhollow's own. Every screen the player opens while they are standing in the
+    // town is this one panel at whatever size it is asked for: parchment inside a plain
+    // iron frame, with a corner bracket at each of the four corners. Washed like the
+    // others, because the paint has a mottle in it that a nine-slice would pull into
+    // streaks the length of a screen.
+    parchment: {
+      sheet: 'town',
+      at: [15, 87, 131, 112], slice: [22, 22, 22, 22],
+      flat: [8, 8, 8, 8], pad: [24, 24, 20, 20],
+      paper: [56, 120, 40, 40], wash: 2, ink: true,
+    },
+    // The square off the same sheet: what a face or an icon is set in. The one frame
+    // used on both sides of the game — a speaker's portrait in the town, a walked node
+    // down on the trail — so it takes the cold after dark the way the road's own
+    // ironwork does rather than staying a warm square on a cold band.
+    plate: {
+      sheet: 'town',
+      at: [160, 168, 57, 57], slice: [6, 6, 6, 6],
+      flat: [5, 5, 5, 5], pad: [10, 10, 10, 10],
     },
   },
 };
