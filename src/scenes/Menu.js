@@ -14,6 +14,7 @@ import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
 const PANEL = 'parchment'; // the menu is opened standing in the town, so it is the town's paper
+const PLATE = 'plate'; // and a picture on it is set in the square off the same sheet
 
 // Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
 // above the log of everything else the village has told you it wants.
@@ -381,6 +382,10 @@ export default class Menu extends Phaser.Scene {
     return bottom;
   }
 
+  hang(name, rect) {
+    for (const o of framed(this, name, rect)) this.layer.add(o);
+  }
+
   // A zone: its own painted landscape at the top, whatever the job there has to say and
   // the flavour under that, and the two rows of icons stood on the foot of the panel.
   location(entry, y) {
@@ -395,12 +400,22 @@ export default class Menu extends Phaser.Scene {
 
     // To the width of the page and no further, and no taller than its share of it: the
     // painting is wider than it is tall, and squashing it to a box would stop it being a
-    // landscape. Centred, because what is left over is a margin and not a gap.
-    const place = this.add.image(0, y, entry.backdrop.image).setOrigin(0, 0);
-    place.setScale(Math.min(1, this.detailW / place.width, TUNING.menuPortraitHeight / place.height));
-    place.setX(this.detailX + (this.detailW - place.displayWidth) / 2);
+    // landscape. Centred, because what is left over is a margin and not a gap. The frame
+    // it is set in takes its own edge off both, so the picture keeps its shape inside it.
+    const edge = TUNING.menuPortraitEdge;
+    const place = this.add.image(0, 0, entry.backdrop.image).setOrigin(0, 0);
+    place.setScale(Math.min(1,
+      (this.detailW - edge * 2) / place.width,
+      (TUNING.menuPortraitHeight - edge * 2) / place.height));
+    const w = place.displayWidth;
+    const h = place.displayHeight;
+    const x = this.detailX + (this.detailW - w) / 2;
+    // the square off the town's own sheet, the one a speaker's face is set in — hung
+    // first, so the painting sits inside its rails rather than over them
+    this.hang(PLATE, { x: x - edge, y, w: w + edge * 2, h: h + edge * 2 });
+    place.setPosition(x, y + edge);
     this.layer.add(place);
-    y += place.displayHeight + 14;
+    y += h + edge * 2 + 14;
 
     // What the place is, and then one line on whether the party can go there — the job
     // itself is written out on the Quests tab, and this page is the place rather than the
