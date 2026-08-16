@@ -79,6 +79,79 @@ export const TUNING = {
   questToastStepMs: 90, // how long between one line landing and the next
   questToastHoldMs: 2800, // how long the whole tally stays up once it has landed
 
+  // Quarrying (src/minigames/QuarryEngine.js): sound the face, then break it. StarScape
+  // read these off a per-deposit richness table; there is one seam here and these are its
+  // numbers.
+  quarry: {
+    // Sound — tap on the sweeping needle before the echo fades.
+    prospect: {
+      sampleCount: 5, // soundings taken before the read is done
+      needleSpeed: 0.58, // how fast it sweeps, in bar-widths a second
+      bandWidth: 0.17, // how much of the face rings back at once
+      clarityDrainPerSec: 0.12, // the echo fading — the clock on the whole read
+      clarityPerSample: 0.3, // and what a sounding puts back into it
+      needleAccelPerSample: 1.05, // every reading is a little quicker than the last
+    },
+    // Break — charge-swing the pick at a weak point that will not sit still.
+    mine: {
+      chargeDurationMs: 1600, // a slower wind-up than the axe: this is deliberate work
+      ventPerSec: 3.4,
+      overchargeAt: 1.0, // past this the swing goes wild
+      wildChip: 0.1, // and takes this off the face's stability
+      fracturePerStrike: 0.11, // a clean deep blow, so about six of them break it out
+      glanceFractureMult: 0.25,
+      powerZone: { width: 0.2, min: 0.28, max: 0.88 }, // where the weak point sits
+      zoneSpeed: 0.41, // and how fast it sweeps the face
+      shockPerStrike: 0.13,
+      shockDecayPerSec: 0.3, // shock cools between blows: the pause is the release valve
+      shockRedAt: 0.7, // strike above this and the face cracks
+      wildShockMult: 2.2,
+      glanceShockMult: 1.5,
+      deepFractureMult: 1.65, // the greedy gear
+      deepShockMult: 1.9,
+      shallowFractureMult: 0.7, // and the safe one
+      shallowShockMult: 0.5,
+      stabilityCrackOnStrike: 0.16,
+      stabilityDrainPerSecInRed: 0.1, // a face left hot frets itself open
+      stabilityRegenPerSec: 0.13, // and a cool one knits back
+    },
+  },
+
+  // Cooking (src/minigames/MealEngine.js): cut it, then cook it and pull it in time.
+  // StarScape scaled these by the ingredient's tier; a fire on the road has no tiers.
+  meal: {
+    // Board — tap on the beat as the blade crosses the line.
+    prep: {
+      cutCount: 8, // cuts before the prep is done
+      beatIntervalMs: 700, // the tempo, steady and telegraphed
+      perfTol: 0.05, // how near the line a tap has to land to be clean
+      goodTol: 0.125, // and how near to be worth anything at all
+    },
+    // Fire — one bar filling one way, and one pull.
+    cook: {
+      doneRatePerSec: 0.05, // constant, and never a difficulty lever: 20 seconds to burnt
+      burnAt: 1.0,
+      window: {
+        base: 0.16, // how wide the pull window opens
+        floor: 0.1, // and the narrowest a run of bad tending can close it to
+        ceil: 0.34, // or the widest good tending can open it
+        highOffset: 0.04, // the window's top edge, under the burn point. It never moves.
+      },
+      cues: {
+        countMin: 4, // how many times the pot asks for something, rolled per meal
+        countMax: 7,
+        firstAtDoneness: 0.08,
+        responseWindowMs: 1800, // generous, and the same every time: recognition, not reflex
+        widthReward: 0.08, // what a right answer opens the window by
+        precisionBonus: 0.04, // and a little more for answering it promptly
+        widthPenalty: 0.1, // a wrong or missed one closes it by this
+        showKeyHint: true, // the arrow is printed with the verb
+        visualOnly: false,
+        verbs: ['flip', 'baste', 'season'], // left or right flips, up bastes, down seasons
+      },
+    },
+  },
+
   // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
   // is. Every number the axe answers to lives here.
   fell: {

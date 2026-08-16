@@ -111,8 +111,11 @@ export class FellEngine {
   }
 
   // --- inputs ---
-  setSide(dir) {
+setSide(dir) {
     if (this.completed || this.startTime === null) return;
+    // Left and right pick the side of the cut; the crawl hands over every arrow, and the
+    // two this has no use for are left alone.
+    if (dir !== 'left' && dir !== 'right') return;
     this.side = dir === 'left' ? 'face' : 'back';
   }
 
