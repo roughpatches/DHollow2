@@ -30,11 +30,28 @@ const KIND = Object.fromEntries(KINDS.map((e) => [e.id, e]));
 // The zones a job can be walked in. Only a place a job sets out from needs an id.
 const ZONE = Object.fromEntries(PLACES.filter((p) => p.id).map((p) => [p.id, p]));
 
-// A node lists the zones it belongs in. A run with no zone at all — a job handed over a
-// bar rather than set out for — draws from everything, because there is no ground to
-// tell it otherwise.
+// every skill a node names, wherever it names one
+function skillsIn(e) {
+  return [
+    e.harvest,
+    e.read && e.read.skill,
+    e.check && e.check.skill,
+    ...(e.harvests || []).map((h) => h.skill),
+    ...(e.beats || []).flatMap((b) => (b.choose || []).map((o) => o.skill)),
+  ].filter(Boolean);
+}
+
+// A node belongs somewhere twice over: it has to list the zone, and everything it asks of
+// the party has to be on what that zone is made of. A place's `skills` list is how a
+// Greywood full of timber and talk is told apart from a coast full of tide and rigging —
+// the nodes are all written, and the place picks which of them are its. A zone with no
+// list draws everything, and so does a run with no zone at all: a job handed over a bar
+// rather than set out for has no ground to tell it otherwise.
 function inZone(e, where) {
-  return !where || !e.zones || e.zones.includes(where);
+  if (!where) return true;
+  if (e.zones && !e.zones.includes(where)) return false;
+  const allowed = ZONE[where] && ZONE[where].skills;
+  return !allowed || skillsIn(e).every((id) => allowed.includes(id));
 }
 
 // Nothing is fought by daylight. What comes out of the ground and what follows a party
@@ -77,11 +94,14 @@ for (const e of KINDS) {
   }
 }
 for (const e of KINDS) {
-  const named = [e.harvest, e.read && e.read.skill, e.check && e.check.skill,
-    ...(e.harvests || []).map((h) => h.skill),
-    ...(e.beats || []).flatMap((b) => (b.choose || []).map((o) => o.skill))];
-  for (const id of named) {
-    if (id && !SKILL_IDS.has(id)) console.warn(`${e.name}: no such skill — ${id}`);
+  for (const id of skillsIn(e)) {
+    if (!SKILL_IDS.has(id)) console.warn(`${e.name}: no such skill — ${id}`);
+  }
+}
+// and a zone naming one, usually left behind by a rewrite of content/skills.js
+for (const z of PLACES.filter((p) => p.skills)) {
+  for (const id of z.skills) {
+    if (!SKILL_IDS.has(id)) console.warn(`${z.label}: no such skill — ${id}`);
   }
 }
 // Somewhere to set out for has to have something to walk. A zone open for work with

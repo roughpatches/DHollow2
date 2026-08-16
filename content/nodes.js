@@ -162,6 +162,28 @@ export const RESOURCE_NODES = [
     body: ['[Placeholder Text]'],
   },
   {
+    // Herblore's own node, the way the narrows are Woodcutting's and the water is
+    // Fishing's: one thing here, and either you brought somebody who knows it or you did
+    // not. Every other Herblore harvest in the wood is the second half of somebody
+    // else's node, which is a poor reason to spend a point.
+    id: 'bracken',
+    name: 'Fern and bracken under the eaves',
+    zones: ['greywood'],
+    nature: 'gather',
+    weight: { day: 4, night: 2 },
+    read: { skill: 'herblore', line: 'That is not all bracken. There is a third of an apothecary standing in the middle of it.' },
+    harvests: [
+      {
+        skill: 'herblore',
+        activity: 'Foraging',
+        draw: { count: [2, 4], odds: { blacktrumpet: 45, oystermushroom: 40 } },
+      },
+    ],
+    xp: [8, 14],
+    con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
     // The one node the crew you can actually put together at the start is asked a real
     // question by: both halves of it are work somebody in Dreadhollow already knows.
     id: 'logjam',
@@ -255,12 +277,12 @@ export const ENCOUNTER_NODES = [
         lostCon: 3,
       },
       {
-        text: 'Find the line across it that will take a boot.',
-        skill: 'fording',
+        text: 'Go round it, on whatever the trees are standing in.',
+        skill: 'woodcraft',
         dc: 12,
-        tried: 'Reading the ground the way you would read water: for what is under it, not what is on it.',
-        held: 'There is a line. It is nothing like the line it looks like, and it holds all four of you.',
-        lost: 'The line runs out halfway along and the party finds that out standing on it.',
+        tried: 'The long way, on root and stone, with the bad ground kept on one side the whole time.',
+        held: 'Roots the whole way. It costs an hour and nothing else.',
+        lost: 'The dry line runs out halfway along it and the party finds that out standing on it.',
         lostCon: 2,
       },
     ],
@@ -303,18 +325,18 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
-    read: { skill: 'fording', line: 'That is standing water with a current under it. It goes somewhere.' },
+    read: { skill: 'woodcraft', line: 'Nothing is growing across that stretch, and everything either side of it is.' },
     xp: [6, 12],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
     ways: [
       {
-        text: 'Cross where it is running, because running water has a bottom.',
-        skill: 'fording',
+        text: 'Find where something heavy has been across it before.',
+        skill: 'investigation',
         dc: 13,
-        tried: 'The party goes in where the surface is moving, one at a time, roped to the one behind.',
-        held: 'Knee deep the whole way, and gravel under it the whole way.',
-        lost: 'It is moving because something is pulling it, and what it is pulled into is soft.',
+        tried: 'Not the ground. What has been pressed into the ground, and how long ago, and how deep it went.',
+        held: 'Something the weight of a cart crossed here and did not sink. The party follows it over.',
+        lost: 'Everything that ever crossed here crossed somewhere else, and the party finds that out standing in it.',
         lostCon: 3,
       },
       {
@@ -446,12 +468,12 @@ export const ENCOUNTER_NODES = [
         lostCon: 4,
       },
       {
-        text: 'Have iron in every hand before anything comes up.',
-        skill: 'smithing',
+        text: 'Stand over it and be the worse thing standing there.',
+        skill: 'intimidation',
         dc: 14,
-        tried: 'Whatever is in the packs that is iron comes out of the packs.',
-        held: 'It comes up into four edges and goes back down.',
-        lost: 'Half of what came out of the packs was rust holding hands with rust.',
+        tried: 'Nobody backs off the mound. Everybody faces it, and the noise they make is not fear.',
+        held: 'Whatever was coming up thinks better of the company and goes back down into it.',
+        lost: 'It was never deciding. It was only slow.',
         spoils: { nails: [1, 3] },
         lostCon: 4,
       },
@@ -599,19 +621,19 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'smithing', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
+    read: { skill: 'investigation', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
     xp: [10, 16],
     con: [-1, 0],
     body: ['[Placeholder Text]'],
     ways: [
       {
-        text: 'Take the iron that is still worth taking.',
-        skill: 'smithing',
+        text: 'Take the bed off it while the bed is still wood.',
+        skill: 'woodcutting',
         dc: 12,
-        tried: 'Struck with the flat of a knife, one piece at a time, and listened to.',
-        held: 'Half of it rings and half of it does not, and the half that rings comes home.',
-        lost: 'All of it comes home. None of it is worth what it weighed on the way.',
-        spoils: { nails: [2, 5], ironore: [0, 1] },
+        tried: 'Boards off the frame, the sound ones stacked and the rest left where they fall.',
+        held: 'Oak, under twenty years of ditch, and dry the whole way through the middle of it.',
+        lost: 'Every board comes off in three pieces and none of the three is worth carrying.',
+        spoils: { timber: [1, 3], nails: [2, 4] },
         lostCon: 1,
       },
       {

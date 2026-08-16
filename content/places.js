@@ -9,6 +9,12 @@
 //              one is what puts the place on the Map tab.
 //   work     — true if standing work off Gregorious's board can be taken for this zone.
 //              A zone without it is somewhere written jobs go and nothing else.
+//   skills   — what this zone is made of, as skill ids from content/skills.js. A node in
+//              content/nodes.js is drawn here only if everything it asks of the party is
+//              on the list: the work in it, both ways through it, and the skill that
+//              reads it at a fork. Take a skill off the list and every node that leans on
+//              it leaves this zone's pool, still written and still waiting for the zone
+//              that wants it. A place with no list draws everything zoned to it.
 //   environment — what it is like to stand in, a word apiece, shown as a row of icons
 //              along the bottom of the tab. A word with no icon of its own gets the blank
 //              square until there is art for it; see src/icons.js.
@@ -97,6 +103,16 @@ export const PLACES = [
     // `quest` makes the entry somewhere you set out for — Enter starts the job.
     id: 'greywood',
     work: true, // and it is somewhere standing work can be taken for; see content/quests.js
+    // What the wood is made of. Sailing, Mountaineering, Fording, Mining, Alchemy,
+    // Smithing and Gem Cutting are deliberately off it: there is no tide, no face and no
+    // forge in the Greywood, and the nodes that want them are written and waiting for
+    // somewhere that has them. Put one back on this line and its nodes come back with it.
+    skills: [
+      'woodcraft',
+      'intimidation', 'persuasion', 'investigation', 'insight',
+      'woodcutting', 'fishing', 'herblore',
+      'cooking',
+    ],
     terrain: 'forest',
     backdrop: { image: 'art/greywood/backdrop.png', ground: 350 },
     label: 'The Greywood',
