@@ -12,8 +12,35 @@ import { DEPTH, atTile } from './street.js';
 
 // the game says up, down, left, right; the export says north, south, west, east
 const DIRS = { down: 'south', up: 'north', left: 'west', right: 'east' };
+// and art painted from one side is only ever exported two of those ways
+const SIDES = { down: 'south', right: 'east' };
+// which of the two a one-sided character wears facing each way, and whether it is drawn
+// the wrong way round: a side profile is turned by mirroring it, and has no back to show.
+const FACE = {
+  right: ['right', false], left: ['right', true], down: ['down', false], up: ['down', false],
+};
 
 const LOOK = Object.fromEntries(LOOKS.map((l) => [l.id, l]));
+
+// the ways this character is painted, and the folder each is exported under
+function dirsOf(look) {
+  return Object.entries(look.sides ? SIDES : DIRS);
+}
+
+// and the loops they have: everyone stands still, and only somebody who goes anywhere walks
+function setsOf(look) {
+  return [['idle', look.idle], ['walk', look.walk]].filter(([, spec]) => spec);
+}
+
+// The texture a character wears facing this way: the frame, whether it is drawn flipped,
+// and the direction their art actually calls it. Everything that stands somebody up or
+// turns them goes through here, so one-sided art is turned in one place.
+export function faceFrame(palette, dir) {
+  const look = LOOK[palette];
+  if (!look || !look.sides) return [actorFrame(palette, dir, 0), false, dir];
+  const [use, flip] = FACE[dir];
+  return [actorFrame(palette, use, 0), flip, use];
+}
 
 export function lookOf(id) {
   return LOOK[id];
@@ -31,18 +58,10 @@ export function preloadArt(scene) {
     const add = (k, path) => {
       if (!scene.textures.exists(k)) scene.load.image(k, `${look.path}/${path}`);
     };
-    // somebody who never walks anywhere is one painted rotation apiece, out of the
-    // export's own rotations folder
-    if (look.still) {
-      for (const [dir, folder] of Object.entries(DIRS)) {
-        add(actorFrame(look.id, dir, 0), `${look.still}/${folder}.png`);
-      }
-    } else {
-      for (const [dir, folder] of Object.entries(DIRS)) {
-        for (const [set, spec] of [['idle', look.idle], ['walk', look.walk]]) {
-          for (let i = 0; i < spec.frames; i++) {
-            add(key(look, set, dir, i), `${spec.folder}/${folder}/frame_${String(i).padStart(3, '0')}.png`);
-          }
+    for (const [dir, folder] of dirsOf(look)) {
+      for (const [set, spec] of setsOf(look)) {
+        for (let i = 0; i < spec.frames; i++) {
+          add(key(look, set, dir, i), `${spec.folder}/${folder}/frame_${String(i).padStart(3, '0')}.png`);
         }
       }
     }
@@ -93,18 +112,15 @@ export function preloadArt(scene) {
 export function buildArt(scene) {
   buildNodeArt(scene);
   for (const look of LOOKS) {
-    if (look.still) continue; // one frame each way; there is nothing to play
-    for (const dir of Object.keys(DIRS)) {
-      for (const [set, spec, rate] of [
-        ['idle', look.idle, TUNING.artIdleFrameRate],
-        ['walk', look.walk, TUNING.artWalkFrameRate],
-      ]) {
+    for (const [dir] of dirsOf(look)) {
+      for (const [set, spec] of setsOf(look)) {
         const k = set === 'idle' ? idleAnim(look.id, dir) : walkAnim(look.id, dir);
         if (scene.anims.exists(k)) continue;
         scene.anims.create({
           key: k,
           frames: Array.from({ length: spec.frames }, (_, i) => ({ key: key(look, set, dir, i) })),
-          frameRate: rate,
+          frameRate: set === 'idle' ? TUNING.artIdleFrameRate : TUNING.artWalkFrameRate,
+          yoyo: !!spec.yoyo,
           repeat: -1,
         });
       }
@@ -263,12 +279,14 @@ export function idleAnim(id, dir) {
 }
 
 // standing still: the idle loop for anyone who has one, the one still frame for anyone
-// who does not
+// who does not, and either of them mirrored where the art is painted from one side
 export function stand(sprite, palette, dir) {
-  if (LOOK[palette] && !LOOK[palette].still) sprite.anims.play(idleAnim(palette, dir), true);
+  const [frame, flip, use] = faceFrame(palette, dir);
+  sprite.setFlipX(flip);
+  if (LOOK[palette]) sprite.anims.play(idleAnim(palette, use), true);
   else {
     sprite.anims.stop();
-    sprite.setTexture(actorFrame(palette, dir, 0));
+    sprite.setTexture(frame);
   }
 }
 

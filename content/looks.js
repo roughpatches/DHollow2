@@ -10,13 +10,13 @@
 //   head     — and how far down it the top of their head is. Given, they are drawn the
 //              height they are asked for exactly; left out, the air over the head is
 //              taken to be the quarter of the frame the crawl's art usually carries.
-//   walk     — folder of the walk cycle, and how many frames each direction has.
+//   walk     — folder of the walk cycle, and how many frames each direction has. Leave
+//              it out for somebody who stands where they are put and never walks.
 //   idle     — the same for standing still. Frame 0 is what they wear when nothing is
-//              happening to them.
-//   still    — one painted rotation per direction instead of the two loops above, for
-//              somebody who stands where they are put and never walks anywhere. The
-//              folder of the rotations, as exported; the four the game uses are read
-//              out of it by name.
+//              happening to them. `yoyo` runs it out and back rather than round: a loop
+//              that ends somewhere else than it started pops when it repeats.
+//   sides    — art painted from one side only. Its east is loaded and flipped for west,
+//              and its south does for anything facing away; nothing else is asked for.
 //   down     — one image, for when they are laid out on the floor. Leave it out for
 //              anyone the game never puts on the floor; nothing else asks for it.
 //   portrait — the face shown while they speak.
@@ -45,15 +45,21 @@ export const LOOKS = [
     portrait: 'Idle/portrait.png',
   },
   {
-    // The same man behind his own bar: painted standing, arms folded, at the size the
-    // room is painted at. He keeps the face above for talking — this export has none,
-    // and a landlord does not need two.
+    // The same man behind his own bar, at the size the room is painted at: he unfolds his
+    // arms, takes up a glass and polishes it, and folds them again. Painted from the side,
+    // so his west is his east flipped. He keeps the face above for talking — this export
+    // has none, and a landlord does not need two.
     id: 'gregorious-bar',
     path: 'art/gregorious-bar',
-    size: 124,
-    foot: 121, // the boards are all but the bottom row of the frame
-    head: 4, // and there is no air over him worth speaking of
-    still: 'Idle/rotations',
+    size: 168,
+    foot: 143, // the boards; the animation frames carry 22 pixels of air all round
+    head: 26, // and the top of his head, so he is drawn the height he is asked for
+    sides: true,
+    idle: {
+      folder: 'Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms',
+      frames: 9,
+      yoyo: true, // he ends holding the glass and starts with folded arms; run it back
+    },
   },
 ];
 

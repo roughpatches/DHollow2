@@ -1,12 +1,12 @@
 import { TUNING } from '../tuning.js';
-import { actorFrame, walkAnim } from './textures.js';
-import { bodyOf, fitBody, footOf, stand } from './art.js';
+import { walkAnim } from './textures.js';
+import { bodyOf, faceFrame, fitBody, footOf, stand } from './art.js';
 import { atTile } from './street.js';
 
 const TS = TUNING.tileSize;
 
 export function spawnActor(scene, palette, tx, ty, facing = 'down') {
-  const s = scene.physics.add.sprite(tx * TS + TS / 2, ty * TS + TS, actorFrame(palette, facing, 0));
+  const s = scene.physics.add.sprite(tx * TS + TS / 2, ty * TS + TS, faceFrame(palette, facing)[0]);
   s.setOrigin(0.5, footOf(palette));
   fitBody(s, 10, 8);
   s.palette = palette;
@@ -24,7 +24,7 @@ export function spawnActor(scene, palette, tx, ty, facing = 'down') {
 // the length of a road and a room seen from across it are not painted at the same scale,
 // so a panel that says so says it in `body` (see content/maps.js).
 export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left', bodyPx = TUNING.streetBodyPx) {
-  const s = scene.physics.add.sprite(atTile(tx), groundY, actorFrame(palette, facing, 0));
+  const s = scene.physics.add.sprite(atTile(tx), groundY, faceFrame(palette, facing)[0]);
   s.setOrigin(0.5, footOf(palette));
   s.setScale(bodyPx / (s.frame.height * bodyOf(palette)));
   fitBody(s, 10, 8);

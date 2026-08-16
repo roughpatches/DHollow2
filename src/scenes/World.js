@@ -8,7 +8,7 @@ import {
 } from '../player.js';
 import {
   preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
-  raiseProps, restate, lookOf,
+  raiseProps, restate,
 } from '../art.js';
 import { createStreet, focusNear, DEPTH } from '../street.js';
 import { preloadFrames, buildFrames } from '../frames.js';
@@ -63,7 +63,6 @@ export default class World extends Phaser.Scene {
     else this.buildGrid(map);
 
     this.npcs = [];
-    this.breathers = []; // whoever's art is one painted frame; see breathe()
     // `until` and `after` name a scene: someone can be on the strand only until the
     // opening has played, and in the house only once it has
     const here = NPCS.filter((n) => n.map === this.mapKey
@@ -83,9 +82,6 @@ export default class World extends Phaser.Scene {
       npc.body.setImmovable(true);
       npc.def = def;
       this.npcs.push(npc);
-      // a painted rotation has no breath of its own, so one is drawn for it
-      const look = lookOf(def.palette);
-      if (this.street && look && look.still) this.breathers.push({ npc, y: npc.y, cut: def.behind });
       // A street has one line on it and standing on that line is not a reason nobody can
       // get past you, so people on a street are walked through rather than walked around.
       if (this.street) npc.setDepth(DEPTH.npc);
@@ -253,7 +249,6 @@ export default class World extends Phaser.Scene {
     // anybody else, so the depths set when they were placed are the last word.
     if (this.street) {
       this.showHint();
-      this.breathe();
       return;
     }
     this.player.setDepth(this.player.y);
@@ -297,21 +292,6 @@ export default class World extends Phaser.Scene {
       Math.round(this.player.y - this.player.displayHeight * this.player.originY
         - TUNING.streetHintRise),
     );
-  }
-
-  // A pixel of rise and fall on anybody painted as one frame, which is the whole
-  // difference between a landlord standing behind his bar and a landlord printed on it.
-  // Rounded, so it is the two-frame breath a pixel artist would have drawn rather than a
-  // slide; taken off the standing line rather than either side of it, so he never sinks
-  // through the boards. Whatever he is standing behind is cut again as he moves, because
-  // the bar does not breathe with him.
-  breathe() {
-    const rise = Math.sin((this.time.now / TUNING.streetBreathMs) * Math.PI * 2) * 0.5 + 0.5;
-    const up = Math.round(rise * TUNING.streetBreathPx);
-    for (const b of this.breathers) {
-      b.npc.y = b.y - up;
-      if (b.cut) cutBelow(b.npc, b.cut);
-    }
   }
 
   tryTalk() {

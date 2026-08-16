@@ -27,10 +27,35 @@
           "west": "Idle/rotations/west.png",
           "south-west": "Idle/rotations/south-west.png"
         },
-        "animations": {}
+        "animations": {
+          "The_barkeep_stands_with_a_steady_posture_his_arms": {
+            "south": [
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_000.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_001.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_002.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_003.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_004.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_005.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_006.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_007.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/south/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_000.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_001.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_002.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_003.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_004.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_005.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_006.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_007.png",
+              "Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms/east/frame_008.png"
+            ]
+          }
+        }
       }
     }
   ],
   "export_version": "3.1",
-  "export_date": "2026-08-16T20:20:39.824430"
+  "export_date": "2026-08-16T20:59:59.048761"
 }
