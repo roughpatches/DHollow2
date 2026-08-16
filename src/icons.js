@@ -197,6 +197,37 @@ const SHAPES = {
     fill(g, a, 13, 3, 1, 2);
     fill(g, b, 2, 2, 11, 1);
   },
+  // two peaks rather than one, so it is a range and not a tent
+  peak: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillTriangle(6, 3, 1, 13, 11, 13);
+    g.fillTriangle(11, 6, 7, 13, 15, 13);
+    g.fillStyle(b, 1);
+    g.fillTriangle(6, 3, 3, 7, 9, 7); // the snow on the taller of them
+  },
+  // reeds standing in water: the waterline is what makes it wetland and not grass
+  reed: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    for (const [x, top] of [[4, 2], [8, 1], [12, 4]]) {
+      fill(g, a, x, top, 2, 11 - top);
+      fill(g, b, x, top, 2, 2); // the head on it
+    }
+    fill(g, b, 1, 11, 14, 2); // the water they are standing in
+  },
+  // a face with nothing on it: what reading one is done against
+  mask: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillEllipse(8, 8, 12, 14);
+    fill(g, b, 5, 6, 2, 2);
+    fill(g, b, 9, 6, 2, 2);
+    fill(g, b, 5, 11, 6, 1);
+  },
+  pick: (g, [a, b]) => {
+    fill(g, b, 7, 4, 2, 11); // the haft
+    g.fillStyle(a, 1); // and the head curving away either side of it
+    g.fillTriangle(8, 3, 1, 7, 3, 3);
+    g.fillTriangle(8, 3, 15, 7, 13, 3);
+  },
 };
 
 // [shape, ink]. Ink names a pair in COLORS.icon, so retinting every wooden thing at
@@ -218,6 +249,8 @@ const ICONS = {
   heronfeather: ['feather', 'ash'],
   eggshell: ['shell', 'shell'],
   greyarrow: ['arrows', 'ash'],
+  ironore: ['grain', 'iron'],
+  roughgem: ['shard', 'glass'],
   bread: ['loaf', 'food'],
   candle: ['taper', 'bone'],
   flint: ['shard', 'stone'],
@@ -231,14 +264,26 @@ const ICONS = {
   // The skills, by their id in content/skills.js — a skill's icon is its id, the way a
   // material's is. These are what stands in for a skill the painted sheet has no cell
   // for, or for all of them until the sheet is in.
+  // terrain
   woodcraft: ['frond', 'herb'],
+  sailing: ['sail', 'cloth'],
+  mountaineering: ['peak', 'stone'],
+  fording: ['reed', 'glass'],
+  // social
+  intimidation: ['spikes', 'iron'],
+  persuasion: ['speech', 'bone'],
+  investigation: ['eye', 'glass'],
+  insight: ['mask', 'bone'],
+  // gathering
   woodcutting: ['axe', 'iron'],
   fishing: ['hook', 'ash'],
-  sailing: ['sail', 'cloth'],
+  mining: ['pick', 'stone'],
+  herblore: ['sprig', 'herb'],
+  // crafting
   alchemy: ['flask', 'glass'],
-  perception: ['eye', 'glass'],
-  charisma: ['speech', 'bone'],
   smithing: ['hammer', 'bronze'],
+  cooking: ['pot', 'bronze'],
+  gemcutting: ['shard', 'glass'],
 };
 
 const UNKNOWN = ['block', 'cloth'];

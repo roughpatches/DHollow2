@@ -92,7 +92,7 @@ export const QUESTS = [
     tags: ['fen', 'water', 'thedead', 'leavingtown'],
     giver: 'gregorious',
     check: {
-      skill: 'perception',
+      skill: 'investigation',
       dc: 13,
       held: 'Somebody counts the black water twice and gets a different number the second time — and can say where.',
       lost: 'You walk it end to end and come back able to say only that it is wet.',
@@ -128,7 +128,7 @@ export const QUESTS = [
     tags: ['road', 'forest', 'thenorthroad', 'thedead', 'leavingtown'],
     giver: 'gregorious',
     check: {
-      skill: 'perception',
+      skill: 'investigation',
       dc: 15,
       held: 'The carts are where they stopped, and so is the reason, and somebody sees the second one.',
       lost: 'You find the carts. Nobody finds the rest of it, and the dark is not lending anybody a lamp.',

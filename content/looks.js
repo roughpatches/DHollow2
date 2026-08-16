@@ -360,14 +360,19 @@ export const UI = {
 export const SKILL_ART = {
   sheet: 'art/pixellab-Skill-Icons-for-the-following--1786668947352.png',
   cell: 32,
+  // The sheet was painted for the eight skills there used to be. Six of them kept their
+  // names and two were renamed onto the cell that was already the right picture — the eye
+  // is Investigation now and the speech bubble is Persuasion. The other eight skills have
+  // no cell on it and keep the shape src/icons.js draws, which is what a skill with no
+  // entry here always did.
   at: {
     woodcraft: [1, 1],
     woodcutting: [1, 2],
     fishing: [1, 3],
     sailing: [3, 4],
     alchemy: [1, 5],
-    perception: [1, 6],
-    charisma: [1, 7],
+    investigation: [1, 6],
+    persuasion: [1, 7],
     smithing: [1, 8],
   },
 };

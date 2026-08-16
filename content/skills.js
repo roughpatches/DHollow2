@@ -4,8 +4,15 @@
 // untrained at.
 //   id         — how src/party.js and any activity refers to the skill.
 //   name       — shown in the menu and on a character's sheet.
+//   group      — terrain, social, gathering or crafting. It is what a skill is for:
+//                terrain buys constitution on ground of its kind, social and terrain
+//                skills are rolled at encounter nodes, gathering skills are the work a
+//                resource node is made of, and crafting is what is done with what comes
+//                home. Only gathering may be named by a resource node's `harvests`, and
+//                src/run.js says so at boot if anything else is.
 //   activities — which activities the points apply to. Named here rather than in the
-//                activity, so a new skill needs no change anywhere else.
+//                activity, so a new skill needs no change anywhere else. A skill rolled
+//                rather than played — every terrain and social skill — names none.
 //   draws      — quest tags this skill is drawn to. A character with any points in it
 //                is keener to come on work tagged this way, and needs less of a bond.
 //   terrain    — the ground this skill reads, matched against a zone's terrain in
@@ -23,31 +30,16 @@
 // Add a skill by adding an entry. Nothing reads this list by position.
 
 export const SKILLS = [
+  // --- terrain: what the ground is worth to you -------------------------------
   {
-    id: 'alchemy',
-    name: 'Alchemy',
-    activities: ['Brewing', 'Distilling', 'Tincturing', 'Cooking', 'Foraging'],
-    draws: ['fen', 'wild'],
-    unlocks: [
-      'Name what a plant does before it is boiled, not after.',
-      'Get a second draught out of the same weight of leaf.',
-    ],
-    body: [
-      'The ability to identify natural ingredients and combine them into potions and medicines.',
-      '(Allows for the creation of potions, etc. STILL UNDER DEVELOPMENT)',
-    ],
-  },
-  {
-    // Animal Handling folded into this one: the forest's creatures are the forest, and
-    // Calming and the spooked-animal line came across with them.
     id: 'woodcraft',
     name: 'Woodcraft',
-    activities: ['Shaping', 'Joinery', 'Carving', 'Calming'],
-    draws: ['forest', 'ruin'],
+    group: 'terrain',
+    activities: [],
+    draws: ['forest', 'wild'],
     terrain: 'forest',
     unlocks: [
       'Read a tree\'s lean before the first cut.',
-      'Salvage a botched cut instead of losing the stock.',
       'Approach a spooked animal without it bolting.',
     ],
     body: [
@@ -56,23 +48,10 @@ export const SKILLS = [
     ],
   },
   {
-    id: 'woodcutting',
-    name: 'Woodcutting',
-    activities: ['Felling', 'Sawing', 'Splitting'],
-    draws: ['forest', 'timber'],
-    unlocks: [
-      'Drop a tree where you said it would go, with a crowd watching.',
-      'Keep a saw out of the bind on the last third of a cut.',
-    ],
-    body: [
-      'The ability to identify, fell, and shape wood.',
-      '(Provides bonus to loot drops from woodcutting nodes)',
-    ],
-  },
-  {
     id: 'sailing',
     name: 'Sailing',
-    activities: ['Rowing', 'Rigging', 'Navigation'],
+    group: 'terrain',
+    activities: [],
     draws: ['water', 'coast'],
     terrain: 'water',
     unlocks: [
@@ -85,8 +64,123 @@ export const SKILLS = [
     ],
   },
   {
+    id: 'mountaineering',
+    name: 'Mountaineering',
+    group: 'terrain',
+    activities: [],
+    draws: ['road', 'wild'],
+    terrain: 'mountain',
+    unlocks: [
+      'Pick the line up a face before anybody is standing on it.',
+      'Hear loose rock in the moment there is still somewhere to stand.',
+    ],
+    body: [
+      'Knowledge of mountainous and rocky terrain.',
+      '(Provides bonus to Constitution in mountain areas)',
+    ],
+  },
+  {
+    id: 'fording',
+    name: 'Fording',
+    group: 'terrain',
+    activities: [],
+    draws: ['fen', 'water'],
+    terrain: 'wetland',
+    unlocks: [
+      'Tell standing water with a bottom from standing water without one.',
+      'Find the crossing a marsh has rather than the one it looks like it has.',
+    ],
+    body: [
+      'Knowledge of wetlands and marshy terrain.',
+      '(Provides bonus to Constitution in wetland areas)',
+    ],
+  },
+
+  // --- social: what you can do about other people ------------------------------
+  {
+    id: 'intimidation',
+    name: 'Intimidation',
+    group: 'social',
+    activities: [],
+    draws: ['dark', 'wild'],
+    unlocks: [
+      'End a conversation nobody wanted to be having.',
+      'Make something back off that had already decided not to.',
+    ],
+    body: [
+      'The ability to threaten or scare other living things.',
+      '(STILL UNDER DEVELOPMENT)',
+    ],
+  },
+  {
+    id: 'persuasion',
+    name: 'Persuasion',
+    group: 'social',
+    activities: [],
+    draws: ['folk', 'road'],
+    unlocks: [
+      'Get a price named before you have to name one.',
+      'Ask a second question where one was the limit.',
+    ],
+    body: [
+      'The ability to negotiate or convince other living things.',
+      '(STILL UNDER DEVELOPMENT)',
+    ],
+  },
+  {
+    id: 'investigation',
+    name: 'Investigation',
+    group: 'social',
+    activities: [],
+    draws: ['ruin', 'dark'],
+    unlocks: [
+      'Notice the thing that has been moved before you notice it is missing.',
+      'Say what happened somewhere from what is still lying in it.',
+    ],
+    body: [
+      'The ability to perceive an environment or setting and understand what has happened or is happening there.',
+      '(STILL UNDER DEVELOPMENT)',
+    ],
+  },
+  {
+    id: 'insight',
+    name: 'Insight',
+    group: 'social',
+    activities: [],
+    draws: ['folk', 'ruin'],
+    unlocks: [
+      'Tell a man who is lying from a man who is only frightened.',
+      'Know which of two people standing together is the one to talk to.',
+    ],
+    body: [
+      'The ability to read the emotions of living things and to understand social dynamics.',
+      '(STILL UNDER DEVELOPMENT)',
+    ],
+  },
+
+  // --- gathering: the work a resource node is made of --------------------------
+  // These four and no others may be named by a resource node's `harvests`, and each of
+  // them is a StarScape engine where there is one imported. Herblore has none yet: a
+  // Foraging node says its name, pays out and moves on until that engine lands.
+  {
+    id: 'woodcutting',
+    name: 'Woodcutting',
+    group: 'gathering',
+    activities: ['Felling', 'Sawing', 'Shaping'],
+    draws: ['forest', 'timber'],
+    unlocks: [
+      'Drop a tree where you said it would go, with a crowd watching.',
+      'Keep a saw out of the bind on the last third of a cut.',
+    ],
+    body: [
+      'The ability to identify, fell, and shape wood.',
+      '(Provides ability to engage with woodcutting nodes, and provides bonus drops from Woodcutting nodes based on level)',
+    ],
+  },
+  {
     id: 'fishing',
     name: 'Fishing',
+    group: 'gathering',
     activities: ['Casting', 'Hooking', 'Netting'],
     draws: ['water', 'fen'],
     unlocks: [
@@ -95,46 +189,61 @@ export const SKILLS = [
     ],
     body: [
       'The ability to read water and catch fish.',
-      '(Provides bonus to loot drops from fishing nodes)',
+      '(Provides ability to engage with fishing nodes, and provides bonus drops from fishing nodes based on level)',
     ],
   },
   {
-    id: 'charisma',
-    name: 'Charisma',
-    activities: ['Haggling', 'Persuasion', 'Rumour'],
-    draws: ['folk', 'road'],
+    id: 'mining',
+    name: 'Mining',
+    group: 'gathering',
+    activities: ['Quarrying', 'Prospecting', 'Panning'],
+    draws: ['ruin', 'mountain'],
     unlocks: [
-      'Ask a second question where one was the limit.',
-      'Get a price named before you have to name one.',
+      'Sound a face and say what is behind it before it is opened.',
+      'Break a seam out square instead of into rubble.',
     ],
     body: [
-      'The ability to influence others through manner and speech.',
-      '(STILL UNDER DEVELOPMENT)',
+      'The ability to identify and mine for ores and gems.',
+      '(Provides ability to engage with mining nodes, and provides bonus drops from mining nodes based on level)',
     ],
   },
   {
-    id: 'perception',
-    name: 'Perception',
-    activities: ['Watching', 'Tracking', 'Searching'],
-    draws: ['dark', 'road'],
+    id: 'herblore',
+    name: 'Herblore',
+    group: 'gathering',
+    activities: ['Foraging'],
+    draws: ['fen', 'wild'],
     unlocks: [
-      'Notice the thing that has been moved before you notice it is missing.',
-      'Call a halt before the party walks onto bad ground.',
+      'Name what a plant does before it is boiled, not after.',
+      'Cut a stand so it is still a stand next season.',
     ],
     body: [
-      'The ability to notice what is there, and to understand what it means.',
-      '(STILL UNDER DEVELOPMENT)',
+      'The ability to identify and gather usable herbs and ingredients.',
+      '(Provides ability to engage with herblore nodes, and provides bonus drops from herblore nodes based on level)',
+    ],
+  },
+
+  // --- crafting: what is done with what comes home -----------------------------
+  {
+    id: 'alchemy',
+    name: 'Alchemy',
+    group: 'crafting',
+    activities: ['Brewing', 'Distilling', 'Tincturing'],
+    draws: ['fen', 'ruin'],
+    unlocks: [
+      'Get a second draught out of the same weight of leaf.',
+      'Hold a mixture at heat without losing what was worth having in it.',
+    ],
+    body: [
+      'The ability to identify natural ingredients and combine them into potions and medicines.',
+      '(Allows for the creation of potions, etc. STILL UNDER DEVELOPMENT)',
     ],
   },
   {
-    // Back on the list. Broken crag and Iron in the ditch have been asking for it all
-    // along — they name it as what the work is done with and what the roll is against —
-    // and with no such skill they rolled on the die alone and said so at boot. Nobody in
-    // town has spent a point on it: Krael's three are still on Alchemy, one word away in
-    // content/party.js if they should come back here.
     id: 'smithing',
     name: 'Smithing',
-    activities: ['Smelting', 'Forging', 'Salvage', 'Quarrying'],
+    group: 'crafting',
+    activities: ['Smelting', 'Forging', 'Salvage'],
     draws: ['ruin', 'road'],
     unlocks: [
       'Tell sound iron from rust before it is carried anywhere.',
@@ -145,4 +254,45 @@ export const SKILLS = [
       '(Allows for the creation of smithing items, etc. STILL UNDER DEVELOPMENT)',
     ],
   },
+  {
+    id: 'cooking',
+    name: 'Cooking',
+    group: 'crafting',
+    activities: ['Cooking'],
+    draws: ['folk', 'wild'],
+    unlocks: [
+      'Get a meal out of what four people were each carrying separately.',
+      'Pull a pot off the fire on the last turn it was worth pulling.',
+    ],
+    body: [
+      'The ability to cook food and other recipes from collected ingredients.',
+      '(Allows for the creation of cooked items, etc. STILL UNDER DEVELOPMENT)',
+    ],
+  },
+  {
+    id: 'gemcutting',
+    name: 'Gem Cutting',
+    group: 'crafting',
+    activities: ['Cutting', 'Polishing'],
+    draws: ['mountain', 'ruin'],
+    unlocks: [
+      'Find the plane a stone wants to break on rather than the one you wanted.',
+      'Take a flawed stone down to the sound part of it and no further.',
+    ],
+    body: [
+      'The ability to cut and shape gemstones.',
+      '(Allows for the creation of finished gemstones, etc. STILL UNDER DEVELOPMENT)',
+    ],
+  },
 ];
+
+// The four headings above, in the order they are written, for anything that shows the
+// list grouped rather than flat. Read off the list so a new group needs nothing here.
+export const SKILL_GROUPS = [...new Set(SKILLS.map((t) => t.group))];
+
+export const GROUP_NAMES = {
+  terrain: 'Terrain',
+  social: 'Social',
+  gathering: 'Gathering',
+  crafting: 'Crafting',
+};

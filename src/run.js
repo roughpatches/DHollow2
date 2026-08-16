@@ -67,6 +67,15 @@ function readableAt(when, where) {
 // content/skills.js. It rolls the die on its own until it is pointed at something real,
 // so the run still walks; this is where the mistake is said out loud.
 const SKILL_IDS = new Set(SKILLS.map((s) => s.id));
+// The work a resource node is made of comes off the gathering half of content/skills.js
+// and nowhere else: that is what separates a resource node from an encounter node, whose
+// ways may name anything. Said here because it is a content mistake, not a crash.
+const GATHERING = new Set(SKILLS.filter((s) => s.group === 'gathering').map((s) => s.id));
+for (const e of KINDS) {
+  for (const h of e.harvests || []) {
+    if (!GATHERING.has(h.skill)) console.warn(`${e.name}: ${h.skill} is not a gathering skill.`);
+  }
+}
 for (const e of KINDS) {
   const named = [e.harvest, e.read && e.read.skill, e.check && e.check.skill,
     ...(e.harvests || []).map((h) => h.skill),
@@ -465,10 +474,14 @@ export function activityOf(node) {
   return node.took ? node.took.activity : KIND[node.kind].activity;
 }
 
-// The skill whose picture stands for a node on the trail: the work they actually did
-// there, or the work the kind is, and nothing where it is nobody's work.
+// The skill whose picture stands for a node on the trail: the work they chose to do
+// there, or — at an encounter, where there is no work — the skill of the way they took
+// through it. Either way the mark says what they did, not what was standing there. A
+// node that asked nothing of anybody keeps the silhouette of its nature.
 export function skillAt(node) {
-  return node.took ? node.took.skill : skillForActivity(KIND[node.kind].activity);
+  if (node.took) return node.took.skill;
+  if (node.check && node.check.skill) return node.check.skill;
+  return skillForActivity(KIND[node.kind].activity);
 }
 
 // Two things standing here and time for one of them. Answered by index into the whole

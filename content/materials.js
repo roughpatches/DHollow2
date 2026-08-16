@@ -15,6 +15,27 @@ export const MATERIALS = [
   { id: 'nails', name: 'Nails', start: 12, body: ['[Placeholder Text]'] },
   { id: 'pitch', name: 'Pitch', start: 0, body: ['[Placeholder Text]'] },
   { id: 'canvas', name: 'Canvas', start: 0, body: ['[Placeholder Text]'] },
+
+  // --- what comes off a face -------------------------------------------------
+  // Mining pays these; Smithing and Gem Cutting are what they are waiting for.
+  {
+    id: 'ironore',
+    name: 'Iron Ore',
+    start: 0,
+    body: [
+      'Rusty-brown lumps with the grain of the seam still on them, heavy out of all proportion to their size.',
+      'Nobody in Dreadhollow has lit a smelter in living memory. The ore does not care.',
+    ],
+  },
+  {
+    id: 'roughgem',
+    name: 'Rough Stone',
+    start: 0,
+    body: [
+      'A clouded lump with one face that catches the light and five that do not.',
+      'It is worth nothing at all until somebody who knows where it wants to break has broken it.',
+    ],
+  },
   // Everything above is what a building is repaired with, and comes off the road's own
   // encounters. Everything below is what a node of the first job hands over by name.
 

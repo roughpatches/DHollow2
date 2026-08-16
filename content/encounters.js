@@ -177,7 +177,7 @@ export const ENCOUNTERS = [
           },
           {
             text: "[Hold back and work out what's wrong with it.]",
-            skill: 'perception',
+            skill: 'investigation',
             dc: 10,
             then: 'watching',
           },
@@ -318,8 +318,8 @@ export const ENCOUNTERS = [
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
-    read: { skill: 'alchemy', line: '[Placeholder Text]' },
-    harvest: 'alchemy',
+    read: { skill: 'herblore', line: '[Placeholder Text]' },
+    harvest: 'herblore',
     check: null, // the beats carry their own rolls, one per way in
     spoils: {}, // and their own spoils: the hollow gives up nothing to walking past it
     xp: [10, 16],
@@ -348,7 +348,7 @@ export const ENCOUNTERS = [
         choose: [
           {
             text: '[Sort the good from the bad.]',
-            skill: 'alchemy',
+            skill: 'herblore',
             dc: 15,
             then: 'cutting',
           },
