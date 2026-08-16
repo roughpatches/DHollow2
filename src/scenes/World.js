@@ -10,7 +10,7 @@ import {
   preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
   raiseProps, restate,
 } from '../art.js';
-import { createStreet, focusNear, DEPTH } from '../street.js';
+import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
 import { preloadFrames, buildFrames } from '../frames.js';
 import { preloadIcons, buildIcons } from '../icons.js';
 import { findTarget, faceToward } from '../interact.js';
@@ -63,6 +63,7 @@ export default class World extends Phaser.Scene {
     else this.buildGrid(map);
 
     this.npcs = [];
+    this.taken = []; // whatever anybody has picked up off the painting; see takeUp()
     // `until` and `after` name a scene: someone can be on the strand only until the
     // opening has played, and in the house only once it has
     const here = NPCS.filter((n) => n.map === this.mapKey
@@ -82,6 +83,10 @@ export default class World extends Phaser.Scene {
       npc.body.setImmovable(true);
       npc.def = def;
       this.npcs.push(npc);
+      // and the mug he takes off the bar, if he takes one
+      if (this.street && def.takes) {
+        this.taken.push({ npc, from: def.takes.from, patch: coverPatch(this, this.street.art, def.takes) });
+      }
       // A street has one line on it and standing on that line is not a reason nobody can
       // get past you, so people on a street are walked through rather than walked around.
       if (this.street) npc.setDepth(DEPTH.npc);
@@ -249,6 +254,7 @@ export default class World extends Phaser.Scene {
     // anybody else, so the depths set when they were placed are the last word.
     if (this.street) {
       this.showHint();
+      this.takeUp();
       return;
     }
     this.player.setDepth(this.player.y);
@@ -292,6 +298,16 @@ export default class World extends Phaser.Scene {
       Math.round(this.player.y - this.player.displayHeight * this.player.originY
         - TUNING.streetHintRise),
     );
+  }
+
+  // The glass he polishes is one off his own bar. From the frame of his idle he has hold
+  // of it, the mug painted on the counter is covered over, so the bar is a mug short for
+  // as long as he is holding one and has it back the moment he sets it down.
+  takeUp() {
+    for (const t of this.taken) {
+      const frame = t.npc.anims.currentFrame;
+      t.patch.setVisible(!!frame && frame.index - 1 >= t.from);
+    }
   }
 
   tryTalk() {

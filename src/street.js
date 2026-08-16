@@ -69,6 +69,21 @@ export function createStreet(scene, def) {
   };
 }
 
+// A mug painted into the room, taken off it. The painting cannot be moved and nothing can
+// be lifted out of it, so what is lifted is the eye: a patch of bare counter is cut from
+// somewhere else along the same bar and laid over where the mug stands, at the same rows,
+// so the shadow, the lit top and the lip all line up and only the mug goes. Whoever is
+// holding it is drawn over the top of it, which is the point.
+export function coverPatch(scene, art, take) {
+  const [x, y, w, h] = take.mug;
+  const [sx, sy] = take.counter;
+  const name = `bare_${sx}_${sy}_${w}_${h}`;
+  const tex = scene.textures.get(art);
+  if (!tex.has(name)) tex.add(name, 0, sx, sy, w, h);
+  return scene.add.image(x, y, art, name)
+    .setOrigin(0, 0).setDepth(DEPTH.town + 1).setVisible(false);
+}
+
 // One sky and one sea, baked once per size and horizon and kept, since two panels the same
 // shape are the same evening. Everything about it is drawn rather than painted, so it
 // costs no files and retints out of tuning.js.

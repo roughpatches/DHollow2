@@ -69,7 +69,7 @@ export const NPCS = [
     id: 'gregorious',
     name: 'Gregorious',
     map: 'tavern',
-    x: 12, // behind the bar, in the clear stretch of counter between the mugs
+    x: 11, // behind the bar, with the pewter tankard on the counter at his right hand
     facing: 'right', // down the room, at whoever has just come in
     palette: 'gregorious-bar', // the standing barkeep; see content/looks.js
     portrait: 'gregorious', // that export has no face, so he talks with the one that has
@@ -77,6 +77,11 @@ export const NPCS = [
     // of the room and nothing of them below this line is drawn. 245 is the bar top, which
     // takes him at the waist.
     behind: 245,
+    // The glass he polishes is not one he brought with him: it is the pewter tankard
+    // painted on the counter beside him. `mug` is where it stands in the painting,
+    // `counter` the bare stretch of the same bar laid over it while he has it, and
+    // `from` the frame of his idle he takes it on.
+    takes: { mug: [210, 229, 21, 24], counter: [231, 229], from: 2 },
     quests: true,
     lines: ['Fancy a drink, or looking to make a little coin?'],
   },
