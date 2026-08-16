@@ -308,6 +308,9 @@ export const TUNING = {
 
   // The Inventory tab's grid. Columns and visible rows are whatever fits the panel at
   // this cell size, so widening a square narrows the grid rather than overrunning it.
+  menuPortraitHeight: 200, // the painted landscape at the top of a zone's page, at most
+  menuFactRow: 34, // the Environment and Resources rows at the foot of a zone's page
+  menuFactIcon: 22, // and how big an icon is on one of them
   menuIconCell: 60,
   menuIconPx: 32, // the icon inside a square; placeholder icons are drawn at 16
 };
