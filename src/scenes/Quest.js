@@ -9,6 +9,7 @@ import {
 import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf, hangOf } from '../frames.js';
+import { rewardToast, clearToast } from '../toast.js';
 import { markKey } from '../textures.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
@@ -97,6 +98,7 @@ export default class Quest extends Phaser.Scene {
     this.scrim = null;
     this.walk?.destroy();
     this.walk = null;
+    clearToast();
     run.clear();
     this.game.events.emit('quest:close');
   }
@@ -257,6 +259,7 @@ export default class Quest extends Phaser.Scene {
     this.walk = createWalk(this, this.bands().walk, r.party, when, run.backdropOf(this.job));
     this.con = null;
     this.shownAt = -1;
+    this.toasted = -1;
     this.approaching = false;
   }
 
@@ -499,6 +502,14 @@ export default class Quest extends Phaser.Scene {
     // the controls are handed over wherever the activity phase came from: straight off
     // the node, or off the last beat of the walk up to it
     if (r.state === 'running' && r.phase === 'activity' && !this.approaching) this.startActivity();
+
+    // What the node gave up, raised the moment it is settled and gone again on its own.
+    // Once per node: the card under it is redrawn on every keypress, and a tally that
+    // came back with the page turn would be a tally nobody could read past.
+    if (r.state === 'running' && r.phase === 'node' && !this.approaching && this.toasted !== r.at) {
+      this.toasted = r.at;
+      rewardToast(this, band.walk, r.nodes[r.at], r.when === 'night');
+    }
 
     this.conBar(r, band.bar);
     this.skills(r, band.skills);

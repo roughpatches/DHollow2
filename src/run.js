@@ -12,7 +12,7 @@ import { PLACES } from '../content/places.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
 import {
-  roster, charOf, award, raiseBond, conOf, conTotal,
+  roster, charOf, award, levelOf, raiseBond, conOf, conTotal,
   rankOf, scoreOf, check, bestAt, skillOf, walking, fighters, YOU,
   nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
@@ -548,7 +548,12 @@ export function settle(played) {
     * (night ? TUNING.questNightXp : 1)
     * (node.check && node.check.pass ? TUNING.checkPassXp : 1));
   run.xp += node.xp;
-  for (const c of walkers()) award(c.id, node.xp);
+  // who the node's experience took to a new level, so the tally at the node can say so
+  // where it happened rather than leaving it to be noticed on the crew screen later
+  node.levelled = [];
+  for (const c of walkers()) {
+    if (award(c.id, node.xp)) node.levelled.push({ who: whoIs(c.id), level: levelOf(c.id) });
+  }
 
   // What the node did to the party, in one number: the road's standing cost, what the
   // encounter itself takes or puts back, how the party bore up in front of it, and how

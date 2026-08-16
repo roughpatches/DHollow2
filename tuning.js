@@ -70,6 +70,15 @@ export const TUNING = {
   questApproachMs: 1400, // how long a node takes to walk into view
   questConTweenMs: 500, // and how long the bar takes to catch up with it
 
+  // The tally raised at the corner of the road when a node is done with (src/toast.js).
+  questToastWidth: 300,
+  questToastRow: 28, // one thing taken, and how much room it gets
+  questToastIcon: 22,
+  questToastInset: 14, // how far in from the corner of the road it hangs
+  questToastFadeMs: 220,
+  questToastStepMs: 90, // how long between one line landing and the next
+  questToastHoldMs: 2800, // how long the whole tally stays up once it has landed
+
   // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
   // is. Every number the axe answers to lives here.
   fell: {

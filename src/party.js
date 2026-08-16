@@ -141,6 +141,12 @@ export function award(id, xp) {
   return gained;
 }
 
+// what level somebody has reached — the crew screen says it, and so does the tally at a
+// node where the experience took somebody to a new one
+export function levelOf(id) {
+  return stateOf(id).level;
+}
+
 export function levelUp(id) {
   const s = stateOf(id);
   return award(id, Math.max(0, xpToNext(s.level) - s.xp));
