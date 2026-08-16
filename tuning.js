@@ -30,11 +30,14 @@ export const TUNING = {
   interactReach: 12,
   interactRange: 20,
 
-  // A run is a line of nodes with a fork every so often. Node counts are [least, most]
-  // and are rolled when the quest is accepted.
+  // A run is a line of nodes with a fork before some of them. Node counts are
+  // [least, most] and are rolled once the length is chosen.
   questNodes: { short: [4, 8], medium: [8, 12], long: [12, 16] },
-  questForkEvery: 3, // a fork before every nth node; 0 turns forks off
-  questBiasWeight: 10, // taking a branch multiplies that encounter's weight by this
+  questForkChance: 0.34, // the chance a node is reached by a fork rather than walked into
+  questForkWays: [2, 3], // and how many ways that fork offers, rolled per fork
+  // Whether work taken off the board can be walked after dark. Off until there is night
+  // content to walk; the quests that name `when: 'night'` themselves are unaffected.
+  questNightOpen: false,
   questBonusFactor: 2, // finishing pays this many times over what the run itself paid
   questBonusXp: { short: 150, medium: 350, long: 700 }, // and this on top, flat
   questNightCon: 1.25, // a node at night takes this much more constitution

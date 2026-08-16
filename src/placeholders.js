@@ -13,6 +13,7 @@ import { BUILDINGS } from '../content/buildings.js';
 import { MATERIALS } from '../content/materials.js';
 import { QUESTS as JOBS } from '../content/quests.js';
 import { ENCOUNTERS } from '../content/encounters.js';
+import { DRAWN_KINDS } from './nodes.js';
 import { FEARS } from '../content/fears.js';
 import { SCENES } from '../content/scenes.js';
 
@@ -74,6 +75,9 @@ const SOURCES = [
   ['Materials', MATERIALS, (m) => m.name, proseSlots],
   ['Jobs', JOBS, (q) => q.label, proseSlots],
   ['Encounters', ENCOUNTERS, (e) => e.name, encounterSlots],
+  // the drawn nodes, read in the shape run.js walks them: a resource node's prose is its
+  // own, and an encounter node's is spent on the cards its two ways are asked from
+  ['Nodes', DRAWN_KINDS, (e) => e.name, encounterSlots],
   ['Fears', FEARS, (f) => f.name, proseSlots],
   ['Equipment', EQUIPMENT, (e) => e.label, entrySlots],
   ['Character', CHARACTER, (e) => e.label, entrySlots],

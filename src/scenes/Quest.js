@@ -4,7 +4,7 @@ import * as run from '../run.js';
 import * as recruit from '../recruit.js';
 import {
   roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf,
-  skillForActivity, isCombat, nameOf, fill, YOU,
+  isCombat, nameOf, fill, YOU,
 } from '../party.js';
 import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
@@ -81,20 +81,40 @@ export default class Quest extends Phaser.Scene {
     this.game.events.emit('quest:open');
   }
 
-  // set out for somewhere named on the map: no board, straight to the hour or the crew
+  // set out for somewhere named on the map: no board, straight to the questions
   openJob(id) {
     if (this.open_) return;
-    this.job = run.questOf(id);
-    if (!this.job) return;
-    this.times = run.timesFor(this.job);
-    this.row = 0;
+    const job = run.questOf(id);
+    if (!job) return;
     this.open_ = true;
     this.swallow = true;
     this.layer.setVisible(true);
-    if (this.times.length === 1) this.toRecruiting(this.times[0]);
-    else this.mode = 'when';
+    this.take(job);
     this.draw();
     this.game.events.emit('quest:open');
+  }
+
+  // Taking a job is answering however many questions it leaves open. Standing work off
+  // the board asks all three — how long, when, and where — and a written job asks only
+  // the hour, and only if it was written to leave that free.
+  take(job) {
+    this.job = job;
+    this.times = job.procedural ? run.allTimes(job) : run.timesFor(job);
+    this.size_ = job.size || run.SIZES[0];
+    this.where_ = job.at || null;
+    this.row = 0;
+    if (job.procedural) this.mode = 'length';
+    else if (this.times.length === 1) this.toRecruiting(this.times[0]);
+    else this.mode = 'when';
+  }
+
+  // the hour chosen, and then the place if the job did not come with one
+  pickTime(when) {
+    if (!run.timeOpen(this.job, when)) return; // there is nothing out there to walk yet
+    this.when_ = when;
+    this.row = 0;
+    if (this.job.procedural) this.mode = 'where';
+    else this.toRecruiting(when);
   }
 
   close() {
@@ -131,12 +151,23 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + jobs.length) % Math.max(1, jobs.length);
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % Math.max(1, jobs.length);
       else if ((k === 'enter' || k === ' ') && jobs.length) {
-        // a job fixed to one hour skips the question; the rest ask it
-        this.job = jobs[this.row];
-        this.times = run.timesFor(this.job);
+        this.take(jobs[this.row]);
+      }
+      this.draw();
+      return;
+    }
+
+    // How long a walk. Standing work only: a written job is as long as it was written.
+    if (this.mode === 'length') {
+      // a job reached from the Map tab has no board behind it to back out onto
+      if (k === 'escape') { if (this.job.at) this.close(); else { this.mode = 'board'; this.row = 0; } }
+      else if (k === 'arrowup' || k === 'w') this.row = (this.row + run.SIZES.length - 1) % run.SIZES.length;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % run.SIZES.length;
+      else if (k === 'enter' || k === ' ') {
+        this.size_ = run.SIZES[this.row];
         this.row = 0;
-        // a job fixed to one hour has nothing to ask, so it goes straight to recruiting
-        if (this.times.length === 1) this.toRecruiting(this.times[0]);
+        // a job fixed to one hour has nothing to ask, so it goes straight past it
+        if (this.times.length === 1) this.pickTime(this.times[0]);
         else this.mode = 'when';
       }
       this.draw();
@@ -144,10 +175,30 @@ export default class Quest extends Phaser.Scene {
     }
 
     if (this.mode === 'when') {
-      if (k === 'escape') { this.mode = 'board'; this.row = 0; }
-      else if (k === 'arrowup' || k === 'w' || k === 'arrowleft' || k === 'a') this.row = 0;
-      else if (k === 'arrowdown' || k === 's' || k === 'arrowright' || k === 'd') this.row = 1;
-      else if (k === 'enter' || k === ' ') this.toRecruiting(this.times[this.row]);
+      const n = this.times.length;
+      if (k === 'escape') {
+        if (this.job.procedural) { this.mode = 'length'; this.row = 0; }
+        else if (this.job.at) this.close();
+        else { this.mode = 'board'; this.row = 0; }
+      }
+      else if (k === 'arrowup' || k === 'w' || k === 'arrowleft' || k === 'a') this.row = (this.row + n - 1) % n;
+      else if (k === 'arrowdown' || k === 's' || k === 'arrowright' || k === 'd') this.row = (this.row + 1) % n;
+      else if (k === 'enter' || k === ' ') this.pickTime(this.times[this.row]);
+      this.draw();
+      return;
+    }
+
+    // And where. Standing work only, for the same reason: a written job is set out for
+    // from wherever it was written to be set out for from.
+    if (this.mode === 'where') {
+      const places = run.zones();
+      if (k === 'escape') { this.mode = this.times.length > 1 ? 'when' : 'length'; this.row = 0; }
+      else if (k === 'arrowup' || k === 'w') this.row = (this.row + places.length - 1) % places.length;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % places.length;
+      else if ((k === 'enter' || k === ' ') && places.length) {
+        this.where_ = places[this.row].id;
+        this.toRecruiting(this.when_);
+      }
       this.draw();
       return;
     }
@@ -155,7 +206,8 @@ export default class Quest extends Phaser.Scene {
     if (this.mode === 'party') {
       const all = roster();
       if (k === 'escape') {
-        if (this.times.length > 1) { this.mode = 'when'; this.row = 0; }
+        if (this.job.procedural) { this.mode = 'where'; this.row = 0; }
+        else if (this.times.length > 1) { this.mode = 'when'; this.row = 0; }
         else if (this.job.at) this.close();
         else { this.mode = 'board'; this.row = 0; }
       }
@@ -207,10 +259,11 @@ export default class Quest extends Phaser.Scene {
       return;
     }
     if (r.phase === 'fork') {
-      if (k === 'arrowup' || k === 'w') this.row = 0;
-      else if (k === 'arrowdown' || k === 's') this.row = 1;
-      else if (k === 'arrowleft' || k === 'a') this.row = 0;
-      else if (k === 'arrowright' || k === 'd') this.row = 1;
+      // two ways or three: the cursor walks the list rather than being told which end of
+      // it each key means
+      const ways = r.nodes[r.at].branches.length;
+      if (k === 'arrowup' || k === 'w' || k === 'arrowleft' || k === 'a') this.row = (this.row + ways - 1) % ways;
+      else if (k === 'arrowdown' || k === 's' || k === 'arrowright' || k === 'd') this.row = (this.row + 1) % ways;
       // the cursor belongs to the card it is on: whatever is drawn next starts at its top
       else if (k === 'enter' || k === ' ' || k === 'e') { run.choose(this.row); this.row = 0; }
       else if (k === 'escape') run.abandon();
@@ -259,7 +312,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   begin(when) {
-    const r = run.start(this.job.id, when, this.taking);
+    const r = run.start(this.job.id, when, this.taking, { size: this.size_, where: this.where_ });
     // The board and the crew are panels over the town because the party is still standing
     // in it. Once they have set out they are not, so the crawl paints its own ground and
     // the town behind it is gone rather than showing through the ironwork.
@@ -269,7 +322,7 @@ export default class Quest extends Phaser.Scene {
     this.row = 0;
     this.activity = null;
     this.walk?.destroy();
-    this.walk = createWalk(this, this.bands().walk, r.party, when, run.backdropOf(this.job));
+    this.walk = createWalk(this, this.bands().walk, r.party, when, run.backdropOf(this.job, r.where));
     this.con = null;
     this.shownAt = -1;
     this.toasted = -1;
@@ -319,7 +372,9 @@ export default class Quest extends Phaser.Scene {
     if (this.mode === 'run') this.chrome(night);
     else this.panel(night);
     if (this.mode === 'board') this.board();
+    else if (this.mode === 'length') this.length();
     else if (this.mode === 'when') this.when();
+    else if (this.mode === 'where') this.where();
     else if (this.mode === 'party') this.party();
     else this.crawl();
   }
@@ -367,11 +422,13 @@ export default class Quest extends Phaser.Scene {
         this.layer.add(g);
       }
       const size = run.sizeOf(q);
-      const when = q.when === 'any' ? 'day or night' : `${q.when} only`;
+      const times = run.timesFor(q);
+      const when = times.length > 1 ? 'day or night' : `${times[0]} only`;
+      const length = q.size || 'your length';
       // whether it can be walked at all is the first thing worth knowing about a job,
       // and after dark that includes whether anybody coming can fight
       const crewed = run.timesFor(q).some((t) => run.canStart(q.id, t));
-      this.text(this.left + this.wide - 12, y, `${q.size} · ${size[0]}–${size[1]} nodes · ${q.party} to walk it · ${when}`,
+      this.text(this.left + this.wide - 12, y, `${length} · ${size[0]}–${size[1]} nodes · ${q.party} to walk it · ${when}`,
         TUNING.menuRowSize, on ? COLORS.menuAccent : (crewed ? COLORS.menuRule : COLORS.menuMapFolk)).setOrigin(1, 0);
       this.text(this.left + 4, y, q.label, TUNING.menuRowSize, on ? COLORS.menuText : COLORS.menuDim);
       y += h;
@@ -388,8 +445,34 @@ export default class Quest extends Phaser.Scene {
     this.hint('[Up/Down] Choose    [Enter] Accept    [Esc] Leave');
   }
 
-  // Set out when? The mix behind each hour is shown rather than described, so the
-  // choice is made on what the run will actually be made of.
+  // How far out? A length is a band and not a number — the road rolls its own count
+  // inside it — so the band is what the screen says, along with what finishing it pays.
+  length() {
+    let y = this.top;
+    y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
+    y += this.text(this.left, y, 'How long a walk?', TUNING.questBodySize, COLORS.menuText).height + 10;
+    this.rule(y);
+    y += 16;
+
+    run.SIZES.forEach((size, i) => {
+      const on = i === this.row;
+      const span = run.sizeOf(null, size);
+      y += this.text(this.left, y, `${on ? '>' : ' '} ${size[0].toUpperCase()}${size.slice(1)}`,
+        TUNING.questBodySize + 2, on ? COLORS.menuAccent : COLORS.menuDim).height + 4;
+      y += this.text(this.left + 24, y, `${span[0]} to ${span[1]} nodes, rolled when you set out.`,
+        TUNING.questBodySize, on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 4;
+      y += this.text(this.left + 24, y,
+        `Finishing it pays ${TUNING.questBonusXp[size]} xp each on top of everything the road paid.`,
+        TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).height + 14;
+    });
+
+    this.text(this.left, this.foot - 44, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
+    this.hint('[Up/Down] Choose    [Enter] That long    [Esc] Back to the board');
+  }
+
+  // Set out when? What each hour costs is shown rather than described, so the choice is
+  // made on what the run will actually be. An hour with nothing written to walk in it
+  // stays on the screen and will not answer: it is coming, and saying so is the point.
   when() {
     let y = this.top;
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
@@ -399,9 +482,18 @@ export default class Quest extends Phaser.Scene {
 
     this.times.forEach((t, i) => {
       const on = i === this.row;
+      const open = run.timeOpen(this.job, t);
+      const head = on ? COLORS.menuAccent : COLORS.menuDim;
+      // an hour that will not answer still takes the cursor, or the player loses it
       y += this.text(this.left, y, `${on ? '>' : ' '} ${t === 'day' ? 'By day' : 'After dark'}`,
-        TUNING.questBodySize + 2, on ? COLORS.menuAccent : COLORS.menuDim).height + 4;
-      y += this.text(this.left + 24, y, run.mixAt(t), TUNING.questBodySize,
+        TUNING.questBodySize + 2, open ? head : COLORS.menuRule).height + 4;
+      if (!open) {
+        y += this.text(this.left + 24, y, 'Not yet. Nothing has been written out there after dark.',
+          TUNING.questBodySize, COLORS.menuRule, this.wide - 24).height + 14;
+        return;
+      }
+      // the mix is the zone's once the zone is known, and everything drawable before that
+      y += this.text(this.left + 24, y, run.mixAt(t, this.where_), TUNING.questBodySize,
         on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 4;
       const cost = t === 'night'
         ? `The road takes ${TUNING.questNightCon}× the constitution and pays ${TUNING.questNightXp}× for it. Will not go out without a fighter.`
@@ -411,7 +503,46 @@ export default class Quest extends Phaser.Scene {
     });
 
     this.text(this.left, this.foot - 44, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
-    this.hint('[Up/Down] Choose    [Enter] Set out    [Esc] Back to the board');
+    this.hint('[Up/Down] Choose    [Enter] Set out    [Esc] Back');
+  }
+
+  // And where. A place is its ground, what is in it, and what the hour will be made of
+  // once you are standing there — which is the whole of what separates one from another.
+  where() {
+    const places = run.zones();
+    let y = this.top;
+    y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
+    y += this.text(this.left, y, 'Walk out where?', TUNING.questBodySize, COLORS.menuText).height + 10;
+    this.rule(y);
+    y += 16;
+
+    if (!places.length) {
+      this.text(this.left, y, 'Nowhere is open to walk yet.', TUNING.questBodySize, COLORS.menuDim, this.wide);
+      this.hint('[Esc] Back');
+      return;
+    }
+
+    places.forEach((p, i) => {
+      const on = i === this.row;
+      y += this.text(this.left, y, `${on ? '>' : ' '} ${p.label}`,
+        TUNING.questBodySize + 2, on ? COLORS.menuAccent : COLORS.menuDim).height + 4;
+      const ground = run.groundLine(this.job, this.crewOrRoster(), p.id);
+      if (ground) {
+        y += this.text(this.left + 24, y, ground, TUNING.questBodySize,
+          on ? COLORS.menuText : COLORS.menuRule, this.wide - 24).height + 4;
+      }
+      y += this.text(this.left + 24, y, run.mixAt(this.when_, p.id), TUNING.questHintSize,
+        on ? COLORS.menuDim : COLORS.menuRule, this.wide - 24).height + 14;
+    });
+
+    this.text(this.left, this.foot - 44, run.partyLine(), TUNING.menuRowSize, COLORS.menuText);
+    this.hint('[Up/Down] Choose    [Enter] Out that way    [Esc] Back');
+  }
+
+  // Who the ground would be read by, before anybody has been picked: everybody who could
+  // come. The crew screen says it again for the crew actually going.
+  crewOrRoster() {
+    return [YOU, ...roster().map((c) => c.id)];
   }
 
   // Who will come, who will not, and the arithmetic behind both. A refusal the player
@@ -441,7 +572,7 @@ export default class Quest extends Phaser.Scene {
         TUNING.questBodySize, armed ? COLORS.menuText : COLORS.menuMapFolk, this.wide).height + 10;
     }
     // the ground, and what this crew is worth on it — half the reason to take somebody
-    const ground = run.groundLine(this.job, this.crew());
+    const ground = run.groundLine(this.job, this.crew(), this.where_);
     if (ground) {
       y += this.text(this.left, y, ground, TUNING.questBodySize, COLORS.menuMapMark, this.wide).height + 10;
     }
@@ -544,7 +675,7 @@ export default class Quest extends Phaser.Scene {
 
     if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
-    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.kindOf(r.nodes[r.at].kind).activity) : 'Walking.');
+    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.activityOf(r.nodes[r.at])) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
       this.hint(r.nodes[r.at].beat.choose
         ? '[Up/Down] Choose    [Enter] Do it    [Esc] Turn back'
@@ -709,7 +840,7 @@ export default class Quest extends Phaser.Scene {
         // keeps the shape of its nature. The encounter names an activity and the skill
         // that claims it is looked up; neither has to name the other.
         const e = run.kindOf(node.kind);
-        const skill = skillForActivity(e.activity);
+        const skill = run.skillAt(node);
         // set in the small square, so what they have walked reads as a row of pictures
         // hung along the road rather than shapes floating over it
         this.hang(PIP, { x: cx - side / 2, y: cy - side / 2, w: side, h: side }, night);
@@ -841,8 +972,8 @@ export default class Quest extends Phaser.Scene {
 
   startActivity() {
     const r = run.active();
-    const e = run.kindOf(r.nodes[r.at].kind);
-    if (!hasEngine(e.activity) || this.activity) return;
+    const doing = run.activityOf(r.nodes[r.at]);
+    if (!hasEngine(doing) || this.activity) return;
     const band = this.bands().walk;
     // the landscape drops below the engine's own drawing, with a scrim between them so
     // the readouts are read against something rather than against a hedge
@@ -851,7 +982,7 @@ export default class Quest extends Phaser.Scene {
     this.scrim.fillStyle(COLORS.menuFill, 0.82);
     this.scrim.fillRect(band.x, band.y, band.w, band.h);
     // the engine works on the road, not in the column beside it
-    this.activity = engineFor(e.activity, this, {
+    this.activity = engineFor(doing, this, {
       x: band.x + 40,
       top: band.y + 34,
       barW: Math.min(430, band.w - 80),
@@ -870,8 +1001,8 @@ export default class Quest extends Phaser.Scene {
 
   // just the name of the work over the top of it; the engine draws everything else
   activityHead(r, rect) {
-    const e = run.kindOf(r.nodes[r.at].kind);
-    this.text(rect.x + 12, rect.y + 4, `${e.name} — ${e.activity}`,
+    const n = r.nodes[r.at];
+    this.text(rect.x + 12, rect.y + 4, `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`,
       TUNING.questBodySize + 2, COLORS.menuText);
   }
 
@@ -896,8 +1027,9 @@ export default class Quest extends Phaser.Scene {
       if (con) out.push([con, TUNING.questBodySize, COLORS.menuMapFolk]);
       return out;
     }
-    if (e.activity) {
-      out.push([`${e.activity} — waiting on that engine. For now the party works it out and moves on.`,
+    const doing = run.activityOf(n);
+    if (doing) {
+      out.push([`${doing} — waiting on that engine. For now the party works it out and moves on.`,
         TUNING.questHintSize, COLORS.menuDim]);
     }
     for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
@@ -910,8 +1042,10 @@ export default class Quest extends Phaser.Scene {
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
     out.push([`Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`, TUNING.questBodySize, COLORS.menuAccent]);
-    const harvest = run.harvestLine(n.harvest);
-    if (harvest) out.push([harvest, TUNING.questHintSize, COLORS.menuDim]);
+    // one line per piece of work they could do here, and one for whatever they could not
+    for (const line of run.harvestLines(n)) out.push([line, TUNING.questHintSize, COLORS.menuDim]);
+    const missed = run.missedLine(n);
+    if (missed) out.push([missed, TUNING.questHintSize, COLORS.menuMapFolk]);
     const con = run.conLines(n);
     if (con) out.push([con, TUNING.questBodySize, n.con >= 0 ? COLORS.menuMapMark : COLORS.menuMapFolk]);
     return out;

@@ -26,7 +26,7 @@ export const SKILLS = [
   {
     id: 'alchemy',
     name: 'Alchemy',
-    activities: ['Brewing', 'Distilling', 'Tincturing', 'Cooking'],
+    activities: ['Brewing', 'Distilling', 'Tincturing', 'Cooking', 'Foraging'],
     draws: ['fen', 'wild'],
     unlocks: [
       'Name what a plant does before it is boiled, not after.',

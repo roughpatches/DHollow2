@@ -4,8 +4,11 @@
 // and is kept — it is off the tab, not deleted, and one line in src/scenes/Menu.js puts
 // it back.
 // Same label/note/body as the other tabs, plus the fields it alone reads:
-//   id       — how a quest's `at` names this place. Only a zone a job is walked in needs
-//              one, and having one is what puts the place on the Map tab.
+//   id       — how a quest's `at` names this place, and how content/nodes.js says which
+//              nodes belong here. Only a zone a job is walked in needs one, and having
+//              one is what puts the place on the Map tab.
+//   work     — true if standing work off Gregorious's board can be taken for this zone.
+//              A zone without it is somewhere written jobs go and nothing else.
 //   environment — what it is like to stand in, a word apiece, shown as a row of icons
 //              along the bottom of the tab. A word with no icon of its own gets the blank
 //              square until there is art for it; see src/icons.js.
@@ -93,6 +96,7 @@ export const PLACES = [
     // No walkable map: the Greywood is where a run happens, not somewhere you stroll.
     // `quest` makes the entry somewhere you set out for — Enter starts the job.
     id: 'greywood',
+    work: true, // and it is somewhere standing work can be taken for; see content/quests.js
     terrain: 'forest',
     backdrop: { image: 'art/greywood/backdrop.png', ground: 350 },
     label: 'The Greywood',

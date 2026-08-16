@@ -1,19 +1,20 @@
 // One quest, being walked. The nodes between the Sea Hag and the goal are drawn fresh
 // every time a quest is accepted, so accepting the same job twice is not the same run.
 //
-// A run is a line with a fork every questForkEvery nodes. At a fork each branch leans
-// toward one kind of encounter; a character whose skill matches that kind can read it
-// off the ground, and taking that branch makes the kind much likelier at the node it
-// leads to. That is the whole of the direction system.
+// A run is a line, and some of its nodes are reached by a fork instead of walked into.
+// A fork offers two or three ways on and each way is a node: whoever can read that
+// ground says what is down there, and taking it is taking that. Which nodes can be
+// drawn at all is the zone, the hour and nothing else — see content/nodes.js.
 
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
 import { PLACES } from '../content/places.js';
 import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
+import { DRAWN_KINDS } from './nodes.js';
 import {
   roster, charOf, award, levelOf, raiseBond, conOf, conTotal,
-  rankOf, scoreOf, check, bestAt, skillOf, walking, fighters, YOU,
+  rankOf, scoreOf, check, bestAt, skillOf, skillForActivity, walking, fighters, YOU,
   nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
 import { give, nameOf } from './town.js';
@@ -21,31 +22,50 @@ import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
 
-const KIND = Object.fromEntries(ENCOUNTERS.map((e) => [e.id, e]));
+// Everything a node can turn out to be: the ones a quest names by hand, and the ones the
+// road draws. They are one shape and one lookup, so nothing downstream has to know which
+// table a node came out of.
+const KINDS = [...ENCOUNTERS, ...DRAWN_KINDS];
+const KIND = Object.fromEntries(KINDS.map((e) => [e.id, e]));
 // The zones a job can be walked in. Only a place a job sets out from needs an id.
 const ZONE = Object.fromEntries(PLACES.filter((p) => p.id).map((p) => [p.id, p]));
+
+// A node lists the zones it belongs in. A run with no zone at all — a job handed over a
+// bar rather than set out for — draws from everything, because there is no ground to
+// tell it otherwise.
+function inZone(e, where) {
+  return !where || !e.zones || e.zones.includes(where);
+}
 
 // Nothing is fought by daylight. What comes out of the ground and what follows a party
 // home only does either after dark, so a day run draws from the table with the combat
 // kinds taken out of it and a night run draws from the whole of it.
 // An authored kind is only ever reached by a quest naming it, so it is out of the table
 // the road draws from whatever the hour is.
-function poolAt(when) {
-  return ENCOUNTERS.filter((e) => !e.only && (when === 'night' || e.nature !== 'combat'));
+function poolAt(when, where) {
+  return KINDS.filter((e) => !e.only && (when === 'night' || e.nature !== 'combat') && inZone(e, where));
 }
 
-function readableAt(when) {
-  return poolAt(when).filter((e) => e.read);
+function readableAt(when, where) {
+  return poolAt(when, where).filter((e) => e.read);
 }
 
 // A table naming a skill the list does not have, usually one left behind by a rewrite of
 // content/skills.js. It rolls the die on its own until it is pointed at something real,
 // so the run still walks; this is where the mistake is said out loud.
 const SKILL_IDS = new Set(SKILLS.map((s) => s.id));
-for (const e of ENCOUNTERS) {
-  for (const named of [e.harvest, e.read && e.read.skill, e.check && e.check.skill]) {
-    if (named && !SKILL_IDS.has(named)) console.warn(`${e.name}: no such skill — ${named}`);
+for (const e of KINDS) {
+  const named = [e.harvest, e.read && e.read.skill, e.check && e.check.skill,
+    ...(e.harvests || []).map((h) => h.skill),
+    ...(e.beats || []).flatMap((b) => (b.choose || []).map((o) => o.skill))];
+  for (const id of named) {
+    if (id && !SKILL_IDS.has(id)) console.warn(`${e.name}: no such skill — ${id}`);
   }
+}
+// Somewhere to set out for has to have something to walk. A zone open for work with
+// nothing drawable in it by day is an empty run, and this is where that is cheap to say.
+for (const z of PLACES.filter((p) => p.work)) {
+  if (!poolAt('day', z.id).length) console.warn(`${z.label}: nothing in content/nodes.js is zoned here.`);
 }
 for (const q of QUESTS) {
   if (q.check && !SKILL_IDS.has(q.check.skill)) console.warn(`${q.label}: no such skill — ${q.check.skill}`);
@@ -175,19 +195,46 @@ export function active() {
   return run;
 }
 
-export function sizeOf(q) {
-  return TUNING.questNodes[q.size];
+// How many nodes a job is, in [least, most]. A job the player sets the length of has no
+// length of its own until they have set it, so before that it is the whole span.
+export function sizeOf(q, size = q && q.size) {
+  return TUNING.questNodes[size]
+    || [TUNING.questNodes.short[0], TUNING.questNodes.long[1]];
+}
+
+export const SIZES = ['short', 'medium', 'long'];
+
+// every hour a job could be walked at, open or not — the rows on the hour screen
+export function allTimes(q) {
+  return q.when === 'any' ? ['day', 'night'] : [q.when];
+}
+
+// A job whose length and place the player picks is work off the board rather than a
+// written job, and there is nothing written to walk after dark yet. A job that names
+// night itself is not affected: it was written with its own nights in it.
+export function timeOpen(q, when) {
+  return when !== 'night' || !q.procedural || TUNING.questNightOpen;
 }
 
 // a job fixed to one time can only be walked at that time; the rest are the party's call
 export function timesFor(q) {
-  return q.when === 'any' ? ['day', 'night'] : [q.when];
+  return allTimes(q).filter((t) => timeOpen(q, t));
 }
 
-// what a run at this hour is mostly made of, so the choice is made on something
-export function mixAt(when) {
+// everywhere work off the board can be walked, in the order content/places.js lists them
+export function zones() {
+  return PLACES.filter((p) => p.work && p.id);
+}
+
+export function zoneOf(id) {
+  return ZONE[id] || null;
+}
+
+// what a run at this hour and in this place is mostly made of, so the choice is made on
+// something more than the word for it
+export function mixAt(when, where) {
   const by = {};
-  for (const e of poolAt(when)) by[e.nature] = (by[e.nature] || 0) + e.weight[when];
+  for (const e of poolAt(when, where)) by[e.nature] = (by[e.nature] || 0) + e.weight[when];
   const total = Object.values(by).reduce((a, b) => a + b, 0);
   return Object.entries(by)
     .sort((a, b) => b[1] - a[1])
@@ -201,14 +248,21 @@ export function mixAt(when) {
 // is the whole of why you take the woodsman into the wood. A job handed out over a bar
 // rather than set out for from a place has no ground yet and this is worth nothing to it.
 
-export function terrainOf(q) {
-  const zone = q && q.at && ZONE[q.at];
+// Where a job is walked: the place it is set out from, or the one the player chose for
+// work they picked the place of.
+function placeOf(q, where) {
+  const id = where || (q && q.at);
+  return (id && ZONE[id]) || null;
+}
+
+export function terrainOf(q, where) {
+  const zone = placeOf(q, where);
   return (zone && zone.terrain) || null;
 }
 
 // the painted landscape a job is walked against, if its zone has one
-export function backdropOf(q) {
-  const zone = q && q.at && ZONE[q.at];
+export function backdropOf(q, where) {
+  const zone = placeOf(q, where);
   return (zone && zone.backdrop) || null;
 }
 
@@ -225,19 +279,23 @@ export function groundCon(ids, terrain) {
 
 // --- starting --------------------------------------------------------------
 
-export function start(id, when, party) {
+// `choice` is what the player picked on the way in — the length and the place — for work
+// off the board. A written job carries its own and ignores both.
+export function start(id, when, party, choice = {}) {
   const quest = questOf(id);
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
+  const size = quest.size || choice.size || 'short';
+  const where = quest.at || choice.where || null;
   // The player and the recruited walk it: they take the wounds, earn the experience,
   // and are the only ones who can read anything at a fork. The player is on it whoever
   // else is, so their three skills are the three the party always has.
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
     .filter((id, i, all) => all.indexOf(id) === i);
-  const nodes = quest.line ? authored(quest.line) : drawn(quest);
+  const nodes = quest.line ? authored(quest.line) : drawn(size);
   // everyone's own constitution, and what knowing this ground adds to it
-  const con = conTotal(who) + groundCon(who, terrainOf(quest));
+  const con = conTotal(who) + groundCon(who, terrainOf(quest, where));
   run = {
-    quest, when: at, party: who, nodes, at: -1, state: 'running', bias: null,
+    quest, size, where, when: at, party: who, nodes, at: -1, state: 'running',
     spoils: {}, xp: 0, con, conMax: con,
   };
   step();
@@ -258,13 +316,14 @@ function authored(line) {
   });
 }
 
-// and one the road wrote: a length rolled at the gate and a fork every so often
-function drawn(quest) {
-  const count = roll(sizeOf(quest));
+// and one the road wrote: a length rolled inside the band the chosen size names, and a
+// fork rolled in front of each node after that
+function drawn(size) {
+  const count = roll(TUNING.questNodes[size] || TUNING.questNodes.short);
   return Array.from({ length: count }, (_, i) => ({
     // no fork in front of the first node, and none in front of the goal: the last
     // step of a job is not a choice about where the job is
-    fork: TUNING.questForkEvery > 0 && i > 0 && i < count - 1 && i % TUNING.questForkEvery === 0,
+    fork: i > 0 && i < count - 1 && Math.random() < TUNING.questForkChance,
     goal: i === count - 1,
   }));
 }
@@ -299,22 +358,32 @@ export function step() {
   return run;
 }
 
-// two ways on, each leaning toward something, and whatever the party can read about them.
-// The two on offer are drawn against the hour, so a night fork offers night things.
+// What a fork of a given width calls its ways. A two-way fork is a left and a right; a
+// three-way one has a road straight on between them.
+const SIDES = { 1: ['Ahead'], 2: ['Left', 'Right'], 3: ['Left', 'Ahead', 'Right'] };
+
+// Two or three ways on, and each way is the node at the end of it: whoever can read that
+// ground says what is down there, and taking it is taking that. Only kinds that can be
+// read are offered, because a fork nobody can see down is a coin toss with a card in
+// front of it. The ways are drawn against the hour and the place, so a night fork in the
+// wood offers the wood's nights.
 function branches(pick) {
-  let a;
-  let b;
+  let drew;
   if (pick) {
-    [a, b] = pick.map((id) => KIND[id]);
+    drew = pick.map((id) => KIND[id]);
   } else {
-    const readable = readableAt(run.when);
-    a = weighted(null, readable);
-    b = weighted(null, readable);
-    for (let i = 0; b === a && readable.length > 1 && i < 8; i++) b = weighted(null, readable);
+    const readable = readableAt(run.when, run.where);
+    const ways = Math.min(roll(TUNING.questForkWays), readable.length);
+    drew = [];
+    for (let i = 0; drew.length < ways && i < 40; i++) {
+      const e = weighted(readable);
+      if (!drew.includes(e)) drew.push(e);
+    }
   }
-  return [a, b].map((kind, i) => ({
+  const sides = SIDES[drew.length] || drew.map((_, i) => `Way ${i + 1}`);
+  return drew.map((kind, i) => ({
     kind: kind.id,
-    side: i === 0 ? 'Left' : 'Right',
+    side: sides[i],
     read: readOf(kind),
   }));
 }
@@ -336,16 +405,15 @@ export function choose(i) {
   if (!run || run.phase !== 'fork') return run;
   const node = run.nodes[run.at];
   node.taken = node.branches[i];
-  // An authored fork is the two ways it names, so taking one is taking that one. A
-  // drawn fork only leans: the kind it points at gets much likelier, not certain.
-  if (node.pick) node.only = node.taken.kind;
-  else run.bias = node.taken.kind;
+  // A way was named before it was taken, so it is that and not a lean toward it. The
+  // party walked to the thing they were told was down there.
+  node.only = node.taken.kind;
   resolve(node);
   return run;
 }
 
-function weighted(bias, from = poolAt(run.when)) {
-  const of = (e) => e.weight[run.when] * (e.id === bias ? TUNING.questBiasWeight : 1);
+function weighted(from = poolAt(run.when, run.where)) {
+  const of = (e) => e.weight[run.when];
   let r = Math.random() * from.reduce((n, e) => n + of(e), 0);
   for (const e of from) {
     r -= of(e);
@@ -354,13 +422,41 @@ function weighted(bias, from = poolAt(run.when)) {
   return from[from.length - 1];
 }
 
-// What the party's points are worth here: everyone's points in the skill this work is
-// done with, added up, each one adding skillYieldPerPoint to what comes out of it. Who
-// you take on a job is the loudest thing you say about what you want off it.
-function harvestOf(node, e) {
-  if (!e.harvest) return null;
-  const score = scoreOf(run.party, e.harvest);
-  return { skill: skillOf(e.harvest), score, more: score * TUNING.skillYieldPerPoint };
+// The work a node has in it, and what the party's points are worth at each piece of it:
+// everyone's points in that skill added up, each one adding skillYieldPerPoint to what
+// comes out of it. Who you take on a job is the loudest thing you say about what you
+// want off it — and at a node with two resources in it, taking one specialist and not
+// the other is coming home with half of what was standing there.
+// A kind written the older way, with one `harvest` and one list of spoils, reads as a
+// node with a single piece of work whose yield is the kind's own.
+function harvestsOf(e) {
+  const listed = e.harvests || (e.harvest
+    ? [{ skill: e.harvest, activity: e.activity, spoils: e.spoils, draw: e.draw, whole: true }]
+    : []);
+  return listed.map((h) => {
+    const score = scoreOf(run.party, h.skill);
+    return { ...h, skill: skillOf(h.skill), score, more: score * TUNING.skillYieldPerPoint };
+  });
+}
+
+// The work at this node the party can actually do, best-known first. What they are best
+// at is what the node is called and which engine opens at it, so a party who brought a
+// woodcutter to a stand with mushrooms under it swings the axe and forages second.
+function workedOf(node) {
+  return node.harvests.filter((h) => h.score > 0).sort((a, b) => b.score - a.score);
+}
+
+// which engine a node hands over, once it is known who is standing at it
+export function activityOf(node) {
+  const h = node.worked && node.worked[0];
+  return h ? h.activity : KIND[node.kind].activity;
+}
+
+// The skill whose picture stands for a node on the trail: the work they actually did
+// there, or the work the kind is, and nothing where it is nobody's work.
+export function skillAt(node) {
+  const h = node.worked && node.worked[0];
+  return h ? h.skill : skillForActivity(KIND[node.kind].activity);
 }
 
 // The job's own test stands in front of the goal; anything else the road throws up
@@ -379,17 +475,17 @@ function isScene(e) {
 }
 
 function resolve(node) {
-  const e = node.only ? KIND[node.only] : weighted(run.bias);
-  run.bias = null;
+  const e = node.only ? KIND[node.only] : weighted();
 
   node.kind = e.id;
   node.conBefore = run.con;
-  node.harvest = harvestOf(node, e);
+  node.harvests = harvestsOf(e);
+  node.worked = workedOf(node);
 
-  // Nobody on the run has a single point in the work this node is. They do not get to
-  // try it and fail at it — they stand and look at it and go on. Nothing is rolled,
-  // nothing is taken, nothing is learned, and the walking is all it costs.
-  if (node.harvest && !node.harvest.score && !isScene(e)) {
+  // Nobody on the run has a single point in any of the work this node is. They do not
+  // get to try it and fail at it — they stand and look at it and go on. Nothing is
+  // rolled, nothing is taken, nothing is learned, and the walking is all it costs.
+  if (node.harvests.length && !node.worked.length && !isScene(e)) {
     node.passed = true;
     node.check = null;
     settle(null);
@@ -411,7 +507,7 @@ function resolve(node) {
 
   // A node with an engine behind it does not pay out until it has been played. The run
   // waits here; the scene hands back what the player made of it.
-  if (hasEngine(e.activity)) {
+  if (hasEngine(activityOf(node))) {
     run.phase = 'activity';
     return;
   }
@@ -464,7 +560,7 @@ export function advance() {
 // activity, in which case the beats were the walk up to it and the player takes the
 // controls now. That is how a node gets words in front of its minigame.
 function outOfBeats(node) {
-  if (!node.passed && hasEngine(KIND[node.kind].activity)) {
+  if (!node.passed && hasEngine(activityOf(node))) {
     run.phase = 'activity';
     return;
   }
@@ -509,30 +605,43 @@ export function settle(played) {
   run.phase = 'node';
 
   const failed = node.check && !node.check.pass;
-  // points in the work swell what it pays; a check lost costs part of it
-  let take = (1 + (node.harvest ? node.harvest.more : 0)) * (failed ? TUNING.checkFailKeep : 1);
-
   if (played) {
     node.played = true;
     node.failed = !!played.failed;
     node.quality = played.failed ? 0 : qualityOf(played.judgments);
     node.swings = (played.judgments || []).length;
-    take *= node.failed
-      ? TUNING.activityFailKeep
-      : TUNING.activityKeepFloor + (1 - TUNING.activityKeepFloor) * node.quality;
   }
+  // What a yield is multiplied by before it is handed over: points in the work that took
+  // it, a check lost costing part of it, and how well the engine was played.
+  const worth = !played ? 1
+    : node.failed ? TUNING.activityFailKeep
+      : TUNING.activityKeepFloor + (1 - TUNING.activityKeepFloor) * node.quality;
+  const takeAt = (more) => (1 + more) * (failed ? TUNING.checkFailKeep : 1) * worth;
+  const lead = node.worked && node.worked[0];
+  const take = takeAt(lead ? lead.more : 0);
 
-  // What the encounter pays and whatever the beats picked up on the way through it, both
-  // of them a fixed list, and then whatever came off a draw table on top of that.
+  // Three things pay out here, and they are kept apart because they are three different
+  // shapes: what the kind itself hands over, what the beats picked up on the way through,
+  // and each piece of work at the node that somebody could actually do. A node with two
+  // resources in it pays the two of them separately, each swollen by its own skill.
   const paid = {};
+  const put = (m, n) => { paid[m] = (paid[m] || 0) + n; };
   if (!node.passed) {
     for (const [m, range] of Object.entries({ ...e.spoils, ...(node.beatSpoils || {}) })) {
-      paid[m] = Math.round(roll(range) * take);
+      put(m, Math.round(roll(range) * take));
     }
     const table = node.beatDraw || e.draw;
     if (table) {
-      const tilt = tiltOf(node.harvest ? node.harvest.score : 0);
-      for (const [m, n] of Object.entries(offTable(table, take, tilt))) paid[m] = (paid[m] || 0) + n;
+      for (const [m, n] of Object.entries(offTable(table, take, tiltOf(lead ? lead.score : 0)))) put(m, n);
+    }
+    // The older shape's single harvest is the kind's own spoils and draw, already paid
+    // just above, so it is not paid again here.
+    for (const h of (node.worked || []).filter((x) => !x.whole)) {
+      const at = takeAt(h.more);
+      for (const [m, range] of Object.entries(h.spoils || {})) put(m, Math.round(roll(range) * at));
+      if (h.draw) {
+        for (const [m, n] of Object.entries(offTable(h.draw, at, tiltOf(h.score)))) put(m, n);
+      }
     }
   }
 
@@ -597,7 +706,7 @@ function finish() {
   walked.set(run.quest.id, timesWalked(run.quest.id) + 1);
   story.set(run.quest.sets);
 
-  run.bonus = { spoils: {}, xp: TUNING.questBonusXp[run.quest.size] };
+  run.bonus = { spoils: {}, xp: TUNING.questBonusXp[run.size] };
   for (const [m, n] of Object.entries(run.spoils)) {
     const extra = n * TUNING.questBonusFactor;
     run.bonus.spoils[m] = extra;
@@ -624,7 +733,7 @@ export function placeLines(id) {
   if (!q) return ['No such job.'];
   if (!story.ok(q)) return ['Nothing here yet.'];
   const stop = blockers(id);
-  const head = `${q.label} — ${q.size} work, ${q.when === 'any' ? 'day or night' : q.when + ' only'}.`;
+  const head = `${q.label} — ${q.size || 'whatever length you ask for'}, ${q.when === 'any' ? 'day or night' : q.when + ' only'}.`;
   const ground = groundLine(q, walking().map((c) => c.id));
   if (stop.length) return [head, q.goal, ...(ground ? [ground] : []), ...stop];
   return [head, q.goal, ...(ground ? [ground] : []), 'Ready. [Enter] to set out.'];
@@ -638,8 +747,8 @@ export function checkLine(c) {
 
 // What the ground is worth to a given crew, said where the crew is picked. Null when the
 // job has no ground, so nothing is said about nothing.
-export function groundLine(q, ids) {
-  const terrain = terrainOf(q);
+export function groundLine(q, ids, where) {
+  const terrain = terrainOf(q, where);
   if (!terrain) return null;
   const skills = readsGround(terrain);
   if (!skills.length) return `${terrain} ground. Nothing anybody knows reads it.`;
@@ -651,16 +760,28 @@ export function groundLine(q, ids) {
     : `${ground} — nobody coming has a point of ${named}, and it is worth ${TUNING.conPerTerrainPoint} apiece out there.`;
 }
 
-export function harvestLine(h) {
-  if (!h || !h.score) return null;
-  return `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more out of it.`;
+// One line per piece of work the party could do here, so a node with two resources in it
+// says which of them the party is worth something at and which they only happened to have
+// somebody for.
+export function harvestLines(node) {
+  return (node.worked || [])
+    .map((h) => `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more off it.`);
+}
+
+// And what was standing here that nobody could touch: the other half of a two-resource
+// node, named so the reason to bring somebody else is on the card where it cost you.
+export function missedLine(node) {
+  const missed = (node.harvests || []).filter((h) => !h.score);
+  if (!missed.length || node.passed) return null;
+  return `Nobody walking this knows ${missed.map((h) => h.skill.name).join(' or ')}. That much is left standing.`;
 }
 
 // Why a node gave up nothing: not a failure, an absence. Said in place of the roll and
 // the take, because there was neither.
 export function passedLine(node) {
   if (!node.passed) return null;
-  const skill = node.harvest ? node.harvest.skill.name : 'this work';
+  const named = (node.harvests || []).map((h) => h.skill.name);
+  const skill = named.length ? named.join(' or ') : 'this work';
   return `Nobody walking this knows ${skill}. The party looks at it a while and goes on.`;
 }
 
@@ -692,13 +813,14 @@ export function questRows() {
     if (live && live.state === 'running') note = `Node ${live.at + 1}/${live.nodes.length}`;
     else if (live && live.state === 'spent') note = 'Spent';
     else if (live && live.state === 'abandoned') note = 'Turned back';
+    const size = q.size ? `${q.size[0].toUpperCase()}${q.size.slice(1)} work` : 'Work at whatever length you ask for';
     return {
       label: q.label,
       note,
       body: [
-        `${q.size[0].toUpperCase()}${q.size.slice(1)} work — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it, you included.`
+        `${size} — ${sizeOf(q)[0]} to ${sizeOf(q)[1]} nodes, ${q.party} to walk it, you included.`
           + (q.must ? `  ${q.must.map((m) => whoIs(m)).join(' and ')} must be on it.` : '')
-          + (q.when === 'any' ? '  Day or night, your call.' : `  ${q.when === 'day' ? 'Daylight' : 'After dark'} only.`)
+          + (timesFor(q).length > 1 ? '  Day or night, your call.' : `  ${timesFor(q)[0] === 'day' ? 'Daylight' : 'After dark'} only.`)
           + (q.when === 'day' ? '  Nothing to fight by daylight.' : '  After dark wants a fighter along.'),
         q.goal,
         ...q.body,

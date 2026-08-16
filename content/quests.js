@@ -3,7 +3,12 @@
 // quest is never the same run twice.
 //   id    — how src/run.js refers to it.
 //   label — shown on the board and in the Quest Log.
-//   size  — short, medium, or long. The node count for each is in tuning.js.
+//   size  — short, medium, or long. The node count for each is in tuning.js. Leave it
+//           out on a job marked `procedural` and the player sets it when they take it.
+//   procedural — standing work rather than a written job: no `line`, no `size` and no
+//           `at`, because the player picks the length, the hour and the place when they
+//           take it off the board. What they can pick is in tuning.js and in the `work`
+//           flag in content/places.js. The nodes come from content/nodes.js.
 //   when  — day, night, or any. A job fixed to one time can only be walked at that
 //           time; 'any' lets the party choose when they set out. A day run has nothing
 //           in it to fight; a night run does, and will not go out without somebody
@@ -59,6 +64,22 @@ export const QUESTS = [
     // something that can be got right or wrong.
     check: null,
     goal: 'Bring back enough timber and provisions to put the Sea Hag right.',
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // The standing job. Gregorious does not run out of work and never has: this is the
+    // one row on the board that is always there, and what it turns out to be is three
+    // questions asked on the way out of town rather than anything written here.
+    id: 'wildwork',
+    needs: 'firstday-done',
+    label: 'Standing work in the wilds',
+    procedural: true,
+    when: 'any',
+    party: 2,
+    tags: ['forest', 'wild', 'leavingtown'],
+    giver: 'gregorious',
+    check: null,
+    goal: 'Walk out, work what is out there, and bring it back.',
     body: ['[Placeholder Text]'],
   },
   {
