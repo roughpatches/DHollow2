@@ -77,7 +77,7 @@ export const ENCOUNTERS = [
     id: 'crag',
     name: 'Broken crag',
     nature: 'gather',
-    activity: 'Hauling',
+    activity: 'Quarrying',
     weight: { day: 4, night: 1 },
     read: null,
     harvest: 'smithing',
@@ -186,6 +186,26 @@ export const ENCOUNTERS = [
     spoils: { nails: [2, 5], stone: [0, 1] },
     xp: [10, 16],
     con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // The only node that gives the party something back instead of taking it: they stop,
+    // put a fire on, and cook what they are carrying. Nothing is carried home from it —
+    // they ate it — so what a good meal is worth is the constitution it puts back into
+    // the run, and the badly cooked one is still eaten.
+    id: 'fire',
+    name: 'A fire, and what you carry',
+    nature: 'gather',
+    activity: 'Cooking',
+    weight: { day: 2, night: 4 }, // mostly a thing done after dark, when it is wanted most
+    read: { skill: 'alchemy', line: 'There is dry wood under that overhang, and it is the last of it for a mile.' },
+    // No harvest skill: anybody can put a fire on, and nothing is carried out of this one
+    // for a skill to swell. What the cooking is worth is the constitution it puts back.
+    harvest: null,
+    check: null,
+    spoils: {},
+    xp: [8, 14],
+    con: [2, 4], // a meal, and what it is worth to a party who have been walking all day
     body: ['[Placeholder Text]'],
   },
   {

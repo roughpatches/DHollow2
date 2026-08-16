@@ -8,6 +8,8 @@
 import { TUNING } from '../tuning.js';
 import { FellEngine } from './minigames/FellEngine.js';
 import { FishEngine } from './minigames/FishEngine.js';
+import { QuarryEngine } from './minigames/QuarryEngine.js';
+import { MealEngine } from './minigames/MealEngine.js';
 
 const ENGINES = {
   Felling: {
@@ -19,6 +21,14 @@ const ENGINES = {
     make: (scene, layout) => new FishEngine(scene, { ...TUNING.fish, layout }),
     // one key does all three phases; each of them says on screen what it wants of it
     hint: '[Hold Space] Cast, and hold the line    [Space] Set the hook',
+  },
+  Quarrying: {
+    make: (scene, layout) => new QuarryEngine(scene, { ...TUNING.quarry, layout }),
+    hint: '[Space] Take a sounding    [Hold Space] Swing    [Left/Right] Shallow or deep',
+  },
+  Cooking: {
+    make: (scene, layout) => new MealEngine(scene, { ...TUNING.meal, layout }),
+    hint: '[Space] Cut, and pull it off the fire    [Arrows] Tend it',
   },
 };
 

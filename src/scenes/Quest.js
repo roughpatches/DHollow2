@@ -169,11 +169,15 @@ export default class Quest extends Phaser.Scene {
 
     const r = run.active();
     if (this.activity) {
-      // the engine has the controls: space winds up and releases, left and right pick
-      // the side of the cut. Nothing else is listening.
+      // The engine has the controls: space winds up and releases, and every arrow is
+      // handed over by the name of its direction. What an engine has no use for it
+      // ignores — the axe takes two of them, the pot takes all four. Nothing else is
+      // listening.
       if (k === ' ') this.activity.chargeStart();
       else if (k === 'arrowleft' || k === 'a') this.activity.setSide('left');
       else if (k === 'arrowright' || k === 'd') this.activity.setSide('right');
+      else if (k === 'arrowup' || k === 'w') this.activity.setSide('up');
+      else if (k === 'arrowdown' || k === 's') this.activity.setSide('down');
       return;
     }
     if (r.state !== 'running') {

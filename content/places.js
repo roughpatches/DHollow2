@@ -1,7 +1,18 @@
-// The Map tab. Same label/note/body as the other tabs, plus the fields it alone reads:
-//   id       — how a quest's `at` names this place. Only a zone a job is walked in needs one.
+// The Map tab: where the party can set out for, one entry apiece, with what standing in
+// it is like on the right. An entry with an `id` is a zone and is on the tab; everything
+// else here is somewhere in town that was written for the old atlas the tab used to be,
+// and is kept — it is off the tab, not deleted, and one line in src/scenes/Menu.js puts
+// it back.
+// Same label/note/body as the other tabs, plus the fields it alone reads:
+//   id       — how a quest's `at` names this place. Only a zone a job is walked in needs
+//              one, and having one is what puts the place on the Map tab.
+//   environment — what it is like to stand in, a word apiece, shown as a row of icons
+//              along the bottom of the tab. A word with no icon of its own gets the blank
+//              square until there is art for it; see src/icons.js.
+//   resources — and what comes off it, the same way. Material ids draw the material's own
+//              icon, so a resource the game already carries needs no art of its own.
 //   backdrop — a painted landscape for runs walked in this zone, and how far down the
-//              image its ground line sits. Drawn at 1:1 and tiled across, so it wants to
+//              image its ground line sits. It is also the picture the Map tab shows. Drawn at 1:1 and tiled across, so it wants to
 //              be pixel art at the game's own scale; `ground` is what registers its floor
 //              to the road the party walks on. A zone without one gets the generated
 //              bands. See src/walk.js.
@@ -87,6 +98,8 @@ export const PLACES = [
     label: 'The Greywood',
     note: 'Wilds',
     quest: 'firstday',
+    environment: ['forest', 'water', 'dark'],
+    resources: ['timber', 'oakbranch', 'blacktrumpet', 'heronfeather'],
     body: ['[Placeholder Text]'],
   },
   {

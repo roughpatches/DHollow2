@@ -26,7 +26,7 @@ export const SKILLS = [
   {
     id: 'alchemy',
     name: 'Alchemy',
-    activities: ['Brewing', 'Distilling', 'Tincturing'],
+    activities: ['Brewing', 'Distilling', 'Tincturing', 'Cooking'],
     draws: ['fen', 'wild'],
     unlocks: [
       'Name what a plant does before it is boiled, not after.',
@@ -134,7 +134,7 @@ export const SKILLS = [
     // content/party.js if they should come back here.
     id: 'smithing',
     name: 'Smithing',
-    activities: ['Smelting', 'Forging', 'Salvage'],
+    activities: ['Smelting', 'Forging', 'Salvage', 'Quarrying'],
     draws: ['ruin', 'road'],
     unlocks: [
       'Tell sound iron from rust before it is carried anywhere.',
