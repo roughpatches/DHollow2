@@ -17,6 +17,9 @@
 //   activity — the engine that gets played, by the name src/activity.js knows it as. A
 //              recipe naming work with no engine yet is made on the spot, the way a node
 //              with no engine pays out and moves on.
+//   hard     — how hard the work is, where the engine takes a difficulty. Brewing does: it
+//              names a tier in `brew` in tuning.js, which is how many shapes go in the pot
+//              and how fast and how evenly they swell. Left out, it is the first tier.
 //   costs    — what is taken out of the pack, and taken before anything is played.
 //   makes    — what goes back into it, before the maker's points and how well it went.
 //   xp       — what finishing it is worth to the player's level, at full quality.
@@ -95,6 +98,65 @@ export const RECIPES = [
     body: [
       'A stack tall enough to hold its own heat, tapped at the bottom and fed for as long as there is anybody to feed it.',
       'One man can work it. Two men can work it properly.',
+    ],
+  },
+
+  // --- the still room --------------------------------------------------------
+  // Three potions and three tiers, which is what the pot is for: the same hands at three
+  // difficulties, so what a tier costs the player is a thing that can be felt rather than
+  // read off a table.
+  {
+    id: 'tonic',
+    name: 'Steep a tonic',
+    at: 'stillroom',
+    stage: 1,
+    level: 1,
+    skill: 'alchemy',
+    rank: 1,
+    activity: 'Brewing',
+    hard: 'simple',
+    costs: { blacktrumpet: 3 },
+    makes: { tonic: 1 },
+    xp: 12,
+    body: [
+      'Trumpets steeped at just under a boil until the water goes the colour of strong tea and twice as bitter.',
+      'Three shapes and a slow hand. This is the one an apprentice is given.',
+    ],
+  },
+  {
+    id: 'salve',
+    name: 'Ash and oyster salve',
+    at: 'stillroom',
+    stage: 1,
+    level: 3,
+    skill: 'alchemy',
+    rank: 2,
+    activity: 'Brewing',
+    hard: 'tricky',
+    costs: { oystermushroom: 4, charcoal: 2, pitch: 1 },
+    makes: { salve: 1 },
+    xp: 24,
+    body: [
+      'Caps rendered down, charcoal ground through them, and pitch worked in last while it is still too hot to touch.',
+      'Five measures, and none of them at the pace of the one before.',
+    ],
+  },
+  {
+    id: 'cordial',
+    name: 'Draw a heartwood cordial',
+    at: 'stillroom',
+    stage: 2,
+    level: 6,
+    skill: 'alchemy',
+    rank: 3,
+    activity: 'Brewing',
+    hard: 'wicked',
+    costs: { heartwood: 2, blacktrumpet: 3, eggshell: 2 },
+    makes: { cordial: 1 },
+    xp: 46,
+    body: [
+      'Heartwood shavings drawn off the still with the shell in the tub to hold the bitterness down, and the trumpets in last so they are not cooked out of it.',
+      'Seven measures, quick and uneven, and the still will not forgive one of them. There is a reason nobody has made this since the shop shut.',
     ],
   },
 

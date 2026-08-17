@@ -61,6 +61,33 @@ export const MATERIALS = [
     ],
   },
   {
+    id: 'tonic',
+    name: 'Steeped Tonic',
+    start: 0,
+    body: [
+      'A stoppered bottle of something dark that smells of the forest floor and tastes worse than it smells.',
+      'It does what it does whether or not anybody enjoys it.',
+    ],
+  },
+  {
+    id: 'salve',
+    name: 'Field Salve',
+    start: 0,
+    body: [
+      'Grey-black, stiff at the top of the pot and softer underneath, and it goes on cold.',
+      'Made to be carried by somebody who is going to need it a long way from the person who made it.',
+    ],
+  },
+  {
+    id: 'cordial',
+    name: 'Heartwood Cordial',
+    start: 0,
+    body: [
+      'Clear, amber, and heavier in the hand than a bottle that size ought to be.',
+      'The first thing to come off that still in twenty years, and the shop it came out of is not open.',
+    ],
+  },
+  {
     id: 'friedfish',
     name: 'Fried Fish',
     start: 0,

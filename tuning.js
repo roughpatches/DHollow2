@@ -164,6 +164,35 @@ export const TUNING = {
     },
   },
 
+  // Alchemy (src/minigames/BrewEngine.js), which is what a Brewing recipe is: a shape
+  // swelling in the pot and an outline to stop it inside, one for every ingredient going
+  // in. Everything above the tiers is the pot itself and is the same at any difficulty.
+  brew: {
+    radius: { min: 12, max: 84 }, // how small and how full the shape gets, in pixels
+    cycles: 3, // swells a shape gets before the measure is spoiled — the only clock
+    settleMs: 420, // the pause between one ingredient and the next
+    // What makes one potion harder than another, and the only thing that does. A recipe
+    // names one of these in `hard`; one that names nothing gets the first written.
+    //   shapes   — how many go in the pot.
+    //   periodMs — how long a full swell takes, rolled per shape. A wide range is a quick
+    //              one then a slow one, which is what a hand cannot settle into.
+    //   perfTol  — how near the outline is dead on, as a fraction of the whole swell.
+    //   goodTol  — and how near still counts for something.
+    //   target   — where in the swell the outline is set, rolled per shape. Near 0 or 1 is
+    //              a shape that hangs there and is easy; the middle is where it is quick.
+    tiers: {
+      simple: {
+        shapes: 3, periodMs: [1500, 2100], perfTol: 0.055, goodTol: 0.13, target: [0.42, 0.72],
+      },
+      tricky: {
+        shapes: 5, periodMs: [900, 1900], perfTol: 0.045, goodTol: 0.1, target: [0.34, 0.8],
+      },
+      wicked: {
+        shapes: 7, periodMs: [550, 1800], perfTol: 0.035, goodTol: 0.08, target: [0.26, 0.86],
+      },
+    },
+  },
+
   // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
   // is. Every number the axe answers to lives here.
   fell: {

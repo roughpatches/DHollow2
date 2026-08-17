@@ -15,7 +15,7 @@ import {
 import {
   buildingOf, levelOf as stageAt, give, heldOf, nameOf, remaining,
 } from './town.js';
-import { hasEngine, qualityOf } from './activity.js';
+import { hasEngine, qualityOf, hardLine } from './activity.js';
 
 const MATERIAL = new Set(MATERIALS.map((m) => m.id));
 const SKILL = new Set(SKILLS.map((t) => t.id));
@@ -90,6 +90,13 @@ export function playedAt(r) {
   return hasEngine(r.activity);
 }
 
+// What the recipe itself has to say about how it is played: how hard it is, and what goes
+// in. Only the pot reads either at the moment — a brew is a shape an ingredient at a time —
+// and an engine that wants neither is handed both and ignores them.
+export function optionsFor(r) {
+  return { hard: r.hard, labels: Object.keys(r.costs).map((m) => nameOf(m)) };
+}
+
 // Make it. `played` is what an engine handed back — { judgments, failed } — or null for
 // work there is no engine for. The costs are already gone by then: they are taken here,
 // before anything is played, because a botched smelt is ore lost and not ore returned.
@@ -131,11 +138,12 @@ export function list(pairs) {
 // what a recipe costs and pays, with what the player's points add to the paying
 export function recipeLines(r) {
   const more = moreOf(r);
+  const hard = hardLine(r.activity, r.hard);
   const out = [
     `Takes: ${list(Object.entries(r.costs))}.`,
     `Makes: ${list(Object.entries(r.makes))}${more ? `, and ${Math.round(more * 100)}% more for your ${skillOf(r.skill).name}` : ''}.`,
     playedAt(r)
-      ? `${r.activity} — worth ${r.xp} to your level, and worth doing well.`
+      ? `${r.activity}${hard ? `, ${hard}` : ''}. Worth ${r.xp} to your level, and worth doing well.`
       : `${r.activity} — worth ${r.xp} to your level. Waiting on that engine; for now it is simply done.`,
   ];
   const stop = blockers(r);

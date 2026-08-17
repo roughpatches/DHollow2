@@ -99,7 +99,9 @@ export default class Craft extends Phaser.Scene {
     if (k === 'escape') this.close();
     else if (k === 'arrowup' || k === 'w') this.step(-1);
     else if (k === 'arrowdown' || k === 's') this.step(1);
-    else if (k === 'enter' || k === 'e' || k === ' ') this.begin();
+    // Space is the engines' key and nothing else: dismissing a tally with it must not also
+    // spend the next lot of ingredients on another go.
+    else if (k === 'enter' || k === 'e') this.begin();
   }
 
   step(dir) {
@@ -132,7 +134,7 @@ export default class Craft extends Phaser.Scene {
       x: this.left + 40,
       top: this.box.y + 96,
       barW: Math.min(430, this.wide - 80),
-    });
+    }, craft.optionsFor(r));
     this.activity.start((judgments) => {
       const failed = this.activity?.failed;
       this.activity = null;

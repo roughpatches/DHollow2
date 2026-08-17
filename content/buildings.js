@@ -98,6 +98,38 @@ export const BUILDINGS = [
     ],
   },
   {
+    // The last shopfront in Dreadhollow, at the east end of the field road — the one with
+    // its sign worn past reading. Two working stages: a bench anybody can steep at, and
+    // the still itself, which is what the wicked recipes are waiting for.
+    id: 'stillroom',
+    name: 'The still room',
+    map: 'fieldroad',
+    site: [36], // the shop door, under the sign nobody can read
+    level: 0,
+    stages: [
+      {
+        name: 'Shuttered',
+        note: 'Boarded at the front and going green at the back. The shelves are still up.',
+        cost: { timber: 8, stone: 6, canvas: 4, nails: 10 },
+      },
+      {
+        name: 'Bench and stove',
+        note: 'Swept, glazed, and warm enough to hold a steep at temperature.',
+        craft: true,
+        cost: { stone: 12, ironbar: 2, canvas: 6 },
+      },
+      {
+        name: 'Still standing',
+        note: 'Copper head, worm tub, and a bench long enough to lay a whole recipe out on.',
+        craft: true,
+      },
+    ],
+    body: [
+      'An apothecary\'s shop with its sign worn past reading and its window boarded from the inside, which is not how a shop is usually boarded.',
+      'Whatever was on the shelves went with whoever left. The shelves stayed.',
+    ],
+  },
+  {
     // Inside the Sea Hag, at the far end of the bar. A workstation on an interior map
     // needs nothing the street's do not: a site, and a stage that crafts.
     id: 'kitchen',

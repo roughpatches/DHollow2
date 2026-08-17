@@ -10,6 +10,15 @@ import { FellEngine } from './minigames/FellEngine.js';
 import { FishEngine } from './minigames/FishEngine.js';
 import { QuarryEngine } from './minigames/QuarryEngine.js';
 import { MealEngine } from './minigames/MealEngine.js';
+import { BrewEngine } from './minigames/BrewEngine.js';
+
+// A brew is the one activity whose difficulty is written on the work rather than on the
+// engine: a recipe names a tier in tuning.js and that is what makes one potion harder than
+// another. Anything reaching the pot without saying — a node on the road, a recipe that
+// leaves it out — gets the first tier written.
+function brewTier(name) {
+  return TUNING.brew.tiers[name] || Object.values(TUNING.brew.tiers)[0];
+}
 
 const ENGINES = {
   Felling: {
@@ -30,18 +39,39 @@ const ENGINES = {
     make: (scene, layout) => new MealEngine(scene, { ...TUNING.meal, layout }),
     hint: '[Space] Cut, and pull it off the fire    [Arrows] Tend it',
   },
+  Brewing: {
+    // `hard` is the tier and `labels` are what goes in, both off the recipe; see
+    // optionsFor in src/craft.js.
+    make: (scene, layout, opts) => new BrewEngine(scene, {
+      ...TUNING.brew, ...brewTier(opts.hard), labels: opts.labels, layout,
+    }),
+    hint: '[Space] Stop the shape inside the outline',
+  },
 };
 
 export function hasEngine(name) {
   return !!(name && ENGINES[name]);
 }
 
-export function engineFor(name, scene, layout) {
-  return ENGINES[name].make(scene, layout);
+// `opts` is whatever the work itself has to say about how it is played — a brew's tier and
+// its ingredients. Work that has nothing to say passes nothing, which is every node on the
+// road: an engine reached from the crawl is the same engine at the same difficulty.
+export function engineFor(name, scene, layout, opts = {}) {
+  return ENGINES[name].make(scene, layout, opts);
 }
 
 export function hintFor(name) {
   return ENGINES[name]?.hint || '';
+}
+
+// What a tier amounts to, in the one sentence a bench can put in front of the player
+// before they commit the ingredients. Only the pot has tiers, so this is the pot's
+// sentence; everything else has none and says nothing.
+export function hardLine(name, hard) {
+  if (name !== 'Brewing' || !hard) return '';
+  const t = brewTier(hard);
+  const secs = (ms) => `${Math.round(ms / 100) / 10}s`;
+  return `${hard} — ${t.shapes} shapes, ${secs(t.periodMs[0])} to ${secs(t.periodMs[1])} apiece`;
 }
 
 // Every judgment an engine handed back, averaged into one 0..1. What each judgment is
