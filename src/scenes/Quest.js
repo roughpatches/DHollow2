@@ -695,7 +695,12 @@ export default class Quest extends Phaser.Scene {
 
     if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
-    else if (r.phase === 'choose' && !this.approaching) this.hint('[Up/Down] Choose    [Enter] Work it    [Esc] Turn back');
+    else if (r.phase === 'choose' && !this.approaching) {
+      // one thing to do here is not a question, so it is not asked as one
+      this.hint(r.nodes[r.at].worked.length > 1
+        ? '[Up/Down] Choose    [Enter] Work it    [Esc] Turn back'
+        : '[Enter] Get to work    [Esc] Turn back');
+    }
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.activityOf(r.nodes[r.at])) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
       this.hint(r.nodes[r.at].beat.choose
@@ -1048,12 +1053,12 @@ export default class Quest extends Phaser.Scene {
       if (con) out.push([con, TUNING.questBodySize, COLORS.menuMapFolk]);
       return out;
     }
-    const doing = run.activityOf(n);
-    if (doing) {
-      out.push([`${doing} — waiting on that engine. For now the party works it out and moves on.`,
-        TUNING.questHintSize, COLORS.menuDim]);
-    }
-    for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
+    // How the work went, in the words written for it. A node whose account was read on the
+    // way in does not say it again here; one that was not — an authored scene, played out
+    // in its beats — still does.
+    const done = run.doneLine(n);
+    if (done) out.push([done, TUNING.questBodySize, COLORS.menuText]);
+    if (!n.shown) for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
     if (n.check) {
       out.push([run.checkLine(n.check), TUNING.questBodySize, n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk]);
       // a beat node's roll was said in the beats; it carries no line of its own
@@ -1069,6 +1074,14 @@ export default class Quest extends Phaser.Scene {
     for (const line of run.leftLines(n)) out.push([line, TUNING.questHintSize, COLORS.menuMapFolk]);
     const con = run.conLines(n);
     if (con) out.push([con, TUNING.questBodySize, n.con >= 0 ? COLORS.menuMapMark : COLORS.menuMapFolk]);
+    // Last, and in the small type, because it is a note to the workshop rather than to the
+    // party: what was written for this node is what the player came here to read, and a
+    // line about an engine that has not landed does not go in front of it.
+    const doing = run.activityOf(n);
+    if (doing && !hasEngine(doing)) {
+      out.push([`${doing} — waiting on that engine. For now the party works it out and moves on.`,
+        TUNING.questHintSize, COLORS.menuDim]);
+    }
     return out;
   }
 
@@ -1119,27 +1132,35 @@ export default class Quest extends Phaser.Scene {
     return out;
   }
 
-  // What is standing here that could be worked, and what the party is worth at each. The
-  // node's own account is not on this card — it is on the tally afterwards, and saying it
-  // twice would make the question harder to find, not easier.
+  // What they have walked up to, and what can be done about it. The node's own account is
+  // on this card and not on the tally afterwards, because a description of a place is
+  // read on arriving at it and not on leaving.
   workLines(r) {
-    const hs = r.nodes[r.at].harvests;
+    const n = r.nodes[r.at];
+    const hs = n.harvests;
     // the cursor never rests on work nobody can do, including on the first draw
     if (!hs[this.row] || !hs[this.row].score) {
       this.row = Math.max(0, hs.findIndex((h) => h.score));
     }
-    return hs.flatMap((h, i) => {
+    const out = run.kindOf(n.kind).body.map((para) => [para, TUNING.questBodySize, COLORS.menuDim]);
+    hs.forEach((h, i) => {
       const on = i === this.row;
       const shut = !h.score;
-      return [
-        [`${shut ? '·' : on ? '>' : ' '} ${h.activity} — ${h.skill.name}`, TUNING.questBodySize,
-          shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim],
-        [shut
-          ? `    Nobody walking this has a point of ${h.skill.name}.`
-          : `    ${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more off it.`,
-        TUNING.questHintSize, shut ? COLORS.menuRule : on ? COLORS.menuText : COLORS.menuRule],
-      ];
+      // The way itself, as it was written. A kind with nothing written for it falls back
+      // to naming the work, which is what every one of them read like before there was
+      // anything else to say.
+      out.push([`${shut ? '·' : on ? '>' : ' '} ${h.text || `${h.activity} — ${h.skill.name}`}`,
+        TUNING.questBodySize, shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
+      if (h.offer) {
+        out.push([`    ${h.offer}`, TUNING.questHintSize,
+          shut ? COLORS.menuRule : on ? COLORS.menuText : COLORS.menuRule]);
+      }
+      out.push([shut
+        ? `    ${h.activity} — nobody walking this has a point of ${h.skill.name}.`
+        : `    ${h.activity} — ${h.skill.name} ${h.score} between you, ${Math.round(h.more * 100)}% more off it.`,
+      TUNING.questHintSize, shut ? COLORS.menuRule : COLORS.menuDim]);
     });
+    return out;
   }
 
   forkLines(r) {

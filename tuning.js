@@ -222,6 +222,10 @@ export const TUNING = {
   activityConBest: 2, // a quality above activityConGood puts this much constitution back
   activityConGood: 0.8,
   activityConWorst: -3, // and a botched one costs this
+  // Which of the three lines written for a piece of work is said afterwards. At or above
+  // this it went well, under it middling, and a botched activity says the third whatever
+  // the number. See `done` in content/nodes.js.
+  workWellAt: 0.75,
 
   questPipSize: 32, // a node on the trail; they spread across the band and close up at this
   questPipGap: 18, // the least road left between two of them before they start to shrink

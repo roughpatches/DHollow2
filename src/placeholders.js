@@ -50,6 +50,15 @@ function proseSlots(e) {
 function encounterSlots(e) {
   const slots = proseSlots(e);
   if (e.read) slots.push(['fork line', e.read.line]);
+  // A harvest with nothing written for it reads as the placeholder, because a line that
+  // is missing wants writing exactly as much as one that says so.
+  for (const h of e.harvests || []) {
+    slots.push([`${h.activity} way`, h.text || PLACEHOLDER],
+      [`${h.activity} offer`, h.offer || PLACEHOLDER]);
+    for (const how of ['well', 'middling', 'botched']) {
+      slots.push([`${h.activity} ${how}`, (h.done && h.done[how]) || PLACEHOLDER]);
+    }
+  }
   if (e.check) slots.push(['held', e.check.held], ['lost', e.check.lost]);
   for (const b of e.beats || []) {
     (b.text || []).forEach((p, i) => slots.push([`${b.id} ${i + 1}`,

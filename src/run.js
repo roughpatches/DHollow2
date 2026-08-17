@@ -677,10 +677,13 @@ function resolve(node) {
     return;
   }
 
-  // Two things here they could work and light enough for one of them, so they say which
-  // before anything is cut, cast for or dug. One thing, or one they can do, is not a
-  // question and is not asked.
-  if (node.worked.length > 1) {
+  // The party stops in front of it and reads it before anything is cut, cast for or dug.
+  // Where two things here can be worked and there is light for one, that card is the
+  // question; where there is only one, it is the account of what they have walked up to
+  // and a key to get on with it. Either way the node is described before it is worked,
+  // which is the only order the writing makes sense in.
+  if (node.worked.length) {
+    node.shown = true; // its account was read on the way in, so the tally does not repeat it
     run.phase = 'choose';
     return;
   }
@@ -933,6 +936,18 @@ export function groundLine(q, ids, where) {
   return score
     ? `${ground} — ${named} ${score} between you, and ${groundCon(ids, terrain)} constitution for it.`
     : `${ground} — nobody coming has a point of ${named}, and it is worth ${TUNING.conPerTerrainPoint} apiece out there.`;
+}
+
+// How the work went, in the words written for it. An engine hands back a quality and the
+// band in tuning.js says which of the three lines that is; a node whose engine has not
+// landed yet was never played, so it reads as the work going well — which is what the
+// spoils it has just paid already said.
+export function doneLine(node) {
+  const said = node.took && node.took.done;
+  if (!said || node.passed) return null;
+  if (node.failed) return said.botched;
+  if (node.quality === undefined) return said.well;
+  return node.quality >= TUNING.workWellAt ? said.well : said.middling;
 }
 
 // What the work they chose was worth to them, in the one line that says why they chose it
