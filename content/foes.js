@@ -42,7 +42,8 @@
 // The lines are picked from at random, so write two or three of each and the same fight
 // does not read the same twice.
 //
-// A MOVE:
+// A MOVE. These are the party's, and only the party's: a foe throws its one blow with the
+// numbers on its own block, and picking a move the way the party does is not written yet.
 //   id     — how src/combat.js refers to it.
 //   name   — shown on the card.
 //   play   — the activity the move is, from src/activity.js. Taking it hands the player
