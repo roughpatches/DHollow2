@@ -166,11 +166,11 @@ export const SKILLS = [
     id: 'woodcutting',
     name: 'Woodcutting',
     group: 'gathering',
-    activities: ['Felling', 'Sawing', 'Shaping'],
+    activities: ['Felling', 'Shaping'],
     draws: ['forest', 'timber'],
     unlocks: [
       'Drop a tree where you said it would go, with a crowd watching.',
-      'Keep a saw out of the bind on the last third of a cut.',
+      'Cut a fallen trunk clean through without once striking the ground.',
     ],
     body: [
       'The ability to identify, fell, and shape wood.',
@@ -196,7 +196,7 @@ export const SKILLS = [
     id: 'mining',
     name: 'Mining',
     group: 'gathering',
-    activities: ['Quarrying', 'Prospecting', 'Panning'],
+    activities: ['Mining'],
     draws: ['ruin', 'mountain'],
     unlocks: [
       'Sound a face and say what is behind it before it is opened.',

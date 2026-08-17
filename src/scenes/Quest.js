@@ -1155,9 +1155,12 @@ export default class Quest extends Phaser.Scene {
         out.push([`    ${h.offer}`, TUNING.questHintSize,
           shut ? COLORS.menuRule : on ? COLORS.menuText : COLORS.menuRule]);
       }
+      // The work and the skill it is done with, unless they are the same word — Mining is
+      // mined and there is no sense in saying so twice.
+      const named = h.activity === h.skill.name ? '' : `${h.activity} — `;
       out.push([shut
-        ? `    ${h.activity} — nobody walking this has a point of ${h.skill.name}.`
-        : `    ${h.activity} — ${h.skill.name} ${h.score} between you, ${Math.round(h.more * 100)}% more off it.`,
+        ? `    ${named}nobody walking this has a point of ${h.skill.name}.`
+        : `    ${named}${h.skill.name} ${h.score} between you, ${Math.round(h.more * 100)}% more off it.`,
       TUNING.questHintSize, shut ? COLORS.menuRule : COLORS.menuDim]);
     });
     return out;

@@ -22,7 +22,7 @@ const ENGINES = {
     // one key does all three phases; each of them says on screen what it wants of it
     hint: '[Hold Space] Cast, and hold the line    [Space] Set the hook',
   },
-  Quarrying: {
+  Mining: {
     make: (scene, layout) => new QuarryEngine(scene, { ...TUNING.quarry, layout }),
     hint: '[Space] Take a sounding    [Hold Space] Swing    [Left/Right] Shallow or deep',
   },
