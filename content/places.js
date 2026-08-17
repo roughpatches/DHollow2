@@ -34,7 +34,7 @@ export const PLACES = [
   {
     label: 'Dreadhollow',
     note: 'Open ground',
-    map: 'village',
+    map: 'harbourroad',
     body: [
       'Dying grass over most of it, a granite pavement in the middle laid for more people than are left to stand on it, and a bank of packed earth running down the east side to the water.',
       'It reads west to east like a tide going out — or in. The wood is at your back, the sea is in front of you, and everything anybody ever built here is on the ground between.',
@@ -43,8 +43,8 @@ export const PLACES = [
   {
     label: 'The paving',
     note: 'Open ground',
-    map: 'village',
-    at: [25],
+    map: 'quay',
+    at: [20],
     body: [
       'Imperial setts, laid wide enough for a market and a road out of it, going green in the joints a course at a time.',
       'It is the only part of town that was ever finished.',
@@ -53,8 +53,8 @@ export const PLACES = [
   {
     label: 'The chapel',
     note: 'Ruin',
-    map: 'village',
-    at: [20],
+    map: 'woodend',
+    at: [37],
     building: 'chapel',
     body: [
       'It shuts off the north end of the paving, and it is the tallest thing left standing in Dreadhollow even with its roof in the nave.',
@@ -66,8 +66,8 @@ export const PLACES = [
     terrain: 'water',
     label: 'The foreshore',
     note: 'Shore',
-    map: 'village',
-    at: [29],
+    map: 'quay',
+    at: [34],
     body: [
       'The bank runs out into a broad muddy flat and the flat runs out into deep water. There is nothing built on any of it.',
       'A harbour was worth cutting here once. You can see where from the shape of the ground.',
@@ -106,7 +106,7 @@ export const PLACES = [
     // The panel west. The town is painted a panel at a time; this is the far end of it.
     label: 'The west end',
     note: 'Open ground',
-    map: 'inn',
+    map: 'woodend',
     body: [
       'A clock that stopped, the Sea Hag under it, and the burnt-out shell of something older leaning on the end of the row.',
       'West of here the cobbles give out and the road is just road.',
@@ -116,7 +116,7 @@ export const PLACES = [
     // The next panel east. The town is painted a panel at a time; this is the second.
     label: 'The wharf',
     note: 'Open ground',
-    map: 'wharf',
+    map: 'quay',
     body: [
       'Timber-framed shops leaning over the cobbles, a jetty going out over the mud, and a boat pulled up on it that nobody has had out in a long while.',
       'The road stops being a road here and starts being a way down to the water.',

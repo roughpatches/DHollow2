@@ -23,8 +23,8 @@ export const BUILDINGS = [
   {
     id: 'tavern',
     name: 'The Sea Hag',
-    map: 'inn',
-    site: [14], // the arched door under the clock, measured off the painting
+    map: 'harbourroad',
+    site: [16], // the doorway under the sign, measured off the painting
     enter: 'tavern',
     level: 0,
     stages: [
@@ -39,8 +39,8 @@ export const BUILDINGS = [
     // nothing inside a burnt chapel but weather.
     id: 'chapel',
     name: 'The chapel',
-    map: 'village',
-    site: [20],
+    map: 'woodend',
+    site: [37], // among the graves, at the east end of the burying ground
     enter: 'chapel',
     level: 0,
     stages: [

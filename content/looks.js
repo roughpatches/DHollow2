@@ -257,7 +257,7 @@ export const EDGES = [
 ];
 
 export const STRUCTURES = [
-  // The Sea Hag has no entry: it is painted into the west panel, under the clock, and a
+  // The Sea Hag has no entry: it is painted into the harbour road, sign and all, and a
   // building that is already in the picture does not want a second one standing on it.
   // The export it used to be drawn from is still in art/seahag if it is wanted elsewhere.
   {
@@ -265,7 +265,7 @@ export const STRUCTURES = [
     // then roofed and lit. 128 pixels of picture over the chapel's seven rows of tiles.
     id: 'chapel',
     path: 'art/chapel',
-    at: [19.75],
+    at: [37], // standing in the burying ground painted along the back of the wood end
     under: 'stone', // it stands on the paving, so what its picture clears is paving
     stages: [
       'base/rotations/unknown.png',

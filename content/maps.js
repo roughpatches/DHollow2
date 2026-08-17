@@ -102,7 +102,7 @@ export const MAPS = {
       '#________________#',
       '########D#########',
     ],
-    doors: [{ x: 8, y: 11, to: 'village', spawn: [7] }],
+    doors: [{ x: 8, y: 11, to: 'searow', spawn: [17] }],
   },
 
   // Where the game opens: the point, north up the coast from the town. The tide put the
@@ -129,16 +129,16 @@ export const MAPS = {
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
       'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
     ],
-    doors: [{ x: 17, y: 15, to: 'wharf', spawn: [29] }],
+    doors: [{ x: 17, y: 15, to: 'quay', spawn: [39] }],
   },
 
-  // Dreadhollow itself: one street, seen from the side. The painting is the town behind —
-  // the terraces, the hills and the ruined quay are in it, not standing on it — and the
-  // cobbles in front are what is walked. Everything below is in tiles along that street.
-  // The gap in the terrace was a painted church; it was taken out so the chapel that is
-  // repaired could stand there instead of in front of one that never changes. The painting
-  // wraps, so it was also rolled three tiles sideways to put its cut in the trees at the
-  // east end rather than through the house at the west.
+  // Dreadhollow itself, seen from the side: five painted panels laid west to east, walked
+  // along rather than around. The painting is the town — the terraces, the fields, the
+  // burying ground and the ruined quay are in it, not standing on it — and the cobbles
+  // across the bottom of each are what is walked. They are the DH export, laid the way the
+  // designer numbered them: DH5 is the far west end and DH1 the far east, and each is 688
+  // by 384 with its own sky painted into it, so none of them has a horizon and nothing is
+  // drawn behind them.
   //   art     — the painted town, drawn at 1:1 and laid end to end `repeats` times, every
   //             other copy flipped so the row of houses does not visibly restart.
   //   size    — how much of that painting the town is, in pixels: its width, and its height
@@ -147,76 +147,116 @@ export const MAPS = {
   //   ground  — how far down the painting the walking line sits. Measured off the image: it
   //             is what stands somebody on the cobbles rather than up against the doors.
   //   sill    — and how far down a building stands, which is not the same line: the town is
-  //             built along the back of the pavement and walked along the cobbles in front
-  //             of it. A building dropped in stands on this, so it sits in the row rather
-  //             than out in the road. Left out, it is the walking line.
+  //             built along the back of the road and walked along the cobbles in front of
+  //             it. A building dropped in stands on this, so it sits in the row rather than
+  //             out in the road. Left out, it is the walking line.
   //   horizon — how far down the panel the sea meets the sky, behind everything painted.
   //             A panel that has one is outdoors and gets weather drawn behind it; one
-  //             without is indoors and gets a flat wall instead. See src/street.js.
+  //             without is indoors, or painted with a sky of its own, and gets a flat wall
+  //             instead. See src/street.js.
   //   body    — how tall a person standing in this panel is drawn, feet to head. A town
   //             painted down the length of a road and a room painted from across it are
   //             not at the same scale, and a person is whatever size that panel says.
-  //             Left out, it is streetBodyPx from tuning.js, which is the town's.
-  //   edges   — what lies off each end: { right: 'wharf', left: 'village' }. A street is a
-  //             panel, not a stretch of something longer — walk into the end of one and the
-  //             next is what is on the screen, standing you at its far end. Painted towns
-  //             are painted a panel at a time and are not the same size as each other, so
-  //             this is how one is put beside another rather than joined to it.
+  //             Left out, it is streetBodyPx from tuning.js, which is the town's. These
+  //             five are painted at the town's own scale — a door in them is a little
+  //             over a person tall — so none of them says otherwise.
+  //   edges   — what lies off each end: { right: 'quay', left: 'harbourroad' }. A street is
+  //             a panel, not a stretch of something longer — walk into the end of one and
+  //             the next is what is on the screen, standing you at its far end. Painted
+  //             towns are painted a panel at a time and are not the same size as each
+  //             other, so this is how one is put beside another rather than joined to it.
   // A door on a street has an x and nothing else, and is opened with [E] rather than
   // walked onto: on a street you would cross every doorway in town going to the tavern.
   // A door into a building (see content/buildings.js) is not listed here — the building
   // is its own door, and its repair state is what decides whether it opens.
-  village: {
-    name: 'Dreadhollow',
-    street: {
-      art: 'art/town/backdrop.png',
-      size: [688, 338], // the painting is 384 tall; below 338 it is empty
-      ground: 328, // the cobbles, a little in front of the kerb
-      sill: 272, // and the back of the pavement, where the terrace stands
-      horizon: 205, // the hills stand in front of most of it here
-      repeats: 1, // one composed scene; laid twice it would be the same town twice
-      edges: { left: 'inn', right: 'wharf' },
-    },
-    spawn: [21],
-    doors: [
-      { x: 7, to: 'hut', label: 'Aldis Rooke\'s house' },
-    ],
-  },
 
-  // The panel west: the Seaside Inn under its clock, a stone ruin at the end of the row,
-  // and the last of the town before the road runs out of it.
-  inn: {
-    name: 'The Seaside Inn',
+  // DH5, the far west end: the road comes out of the Greywood between the trunks, a
+  // scarecrow stands in what is left of a field, and the burying ground runs the length of
+  // the panel behind a derelict farmhouse. The chapel stands among the graves at the east
+  // end of it; see STRUCTURES in content/looks.js.
+  woodend: {
+    name: 'The wood end',
     street: {
-      art: 'art/town/inn.png',
-      size: [512, 288],
-      ground: 282, // the cobbles here are a shallow strip; there is not much road in front
-      sill: 257,
-      horizon: 212, // the water shows through the gap in the row
+      art: 'art/DH/DH5.png',
+      size: [688, 384],
+      ground: 352, // the middle of the cobbles
+      sill: 325, // the kerb, where the ground the town stands on begins
       repeats: 1,
-      edges: { right: 'village' },
+      edges: { right: 'fieldroad' },
     },
-    spawn: [2],
+    spawn: [4],
     doors: [],
   },
 
-  // The next panel east: timber-framed shops, a jetty, and a boat nobody has taken out in
-  // a while. Painted smaller than the west end and at the same scale, so it is its own
-  // panel rather than more of the same street.
-  wharf: {
-    name: 'The wharf',
+  // DH4: derelict houses either side and a dirt gap between them where a track climbs out
+  // of the town to the stubble fields. The last shopfront in Dreadhollow is at the east
+  // end of it, with its sign worn past reading.
+  fieldroad: {
+    name: 'The field road',
     street: {
-      art: 'art/town/wharf.png',
-      size: [512, 288],
-      ground: 278,
-      sill: 238,
-      horizon: 205, // behind the jetty, which is what you see it through
+      art: 'art/DH/DH4.png',
+      size: [688, 384],
+      ground: 352,
+      sill: 327,
       repeats: 1,
-      edges: { left: 'village' },
+      edges: { left: 'woodend', right: 'harbourroad' },
     },
-    spawn: [2],
+    spawn: [4],
+    doors: [],
+  },
+
+  // DH3, the middle of the town and the one street anybody still walks: the tavern with
+  // its sign, a house with its windows out, a well, and the nets nobody has mended. The
+  // Sea Hag's door is the tavern's; see content/buildings.js.
+  harbourroad: {
+    name: 'The harbour road',
+    street: {
+      art: 'art/DH/DH3.png',
+      size: [688, 384],
+      ground: 354,
+      sill: 328,
+      repeats: 1,
+      edges: { left: 'fieldroad', right: 'searow' },
+    },
+    spawn: [16],
+    doors: [],
+  },
+
+  // DH2: stone cottages with the sea behind them, a fenced patch of ground gone to seed,
+  // and the weather coming in off the water. Aldis Rooke's house is the big one at the
+  // west end — the harbour is below it, which is what the morning after looks out on.
+  searow: {
+    name: 'The sea row',
+    street: {
+      art: 'art/DH/DH2.png',
+      size: [688, 384],
+      ground: 340, // the cobbles run out into rough grass in front; this keeps you on stone
+      sill: 318,
+      repeats: 1,
+      edges: { left: 'harbourroad', right: 'quay' },
+    },
+    spawn: [17],
     doors: [
-      { x: 30, to: 'shore', spawn: [17, 14], label: 'The track north' },
+      { x: 17, to: 'hut', label: 'Aldis Rooke\'s house' },
+    ],
+  },
+
+  // DH1, the far east end: the imperial paving, a mooring bollard, and the jetty going out
+  // over the water with the harbour beyond it. The road stops being a road here. The track
+  // north up the coast leaves from the end of the quay.
+  quay: {
+    name: 'The quay',
+    street: {
+      art: 'art/DH/DH1.png',
+      size: [688, 384],
+      ground: 345, // the paving is drawn in perspective; this is the line across it
+      sill: 300, // and the far side of it, where the quay wall stands
+      repeats: 1,
+      edges: { left: 'searow' },
+    },
+    spawn: [4],
+    doors: [
+      { x: 39, to: 'shore', spawn: [17, 14], label: 'The track north' },
     ],
   },
 
@@ -247,7 +287,7 @@ export const MAPS = {
       // the left edge, and the right is floor and tables with the wall carrying on past the
       // frame. You come in at that end and walk the length of the tables to reach him.
       // Not on the last tile — the name written over your head wants room to be read.
-      { x: 36, to: 'inn', spawn: [14], label: 'Out to the street' },
+      { x: 36, to: 'harbourroad', spawn: [16], label: 'Out to the street' },
     ],
   },
 
@@ -273,6 +313,6 @@ export const MAPS = {
       '#++++++++++++++++++++#',
       '##########D###########',
     ],
-    doors: [{ x: 10, y: 14, to: 'village', spawn: [20] }],
+    doors: [{ x: 10, y: 14, to: 'woodend', spawn: [37] }],
   },
 };
