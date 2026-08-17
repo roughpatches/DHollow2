@@ -1,0 +1,82 @@
+{
+  "group_id": "a0b34db5-a394-47f4-8672-725ba5306a16",
+  "objects": [
+    {
+      "id": "971ec81c-3277-41f0-b8ec-682a1bcc41f3",
+      "name": "base",
+      "prompt": "A unlit campfire, showing ashes and charred branches from the previous fire",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_unlit_campfire_showing_ashe.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "a2a2e836-3b04-4df7-a655-f1331370f162",
+      "name": "A stack of firewood",
+      "prompt": "A unlit campfire, showing ashes and charred branches from the previous fire",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_stack_of_firewood.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "3bf73522-cbdd-4f74-9a37-95511c253d7e",
+      "name": "Four figures crowded",
+      "prompt": "A unlit campfire, showing ashes and charred branches from the previous fire",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Four_figures_crowded.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "8fcd5a9f-6292-46b8-8eef-5fa0d911a8e6",
+      "name": "Racks of drying leav",
+      "prompt": "A unlit campfire, showing ashes and charred branches from the previous fire",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Racks_of_drying_leav.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "a7df63a7-c812-4879-baa2-6faaa2a409c4",
+      "name": "A dilapidated stone",
+      "prompt": "A unlit campfire, showing ashes and charred branches from the previous fire",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_dilapidated_stone.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T17:34:12.869246"
+}

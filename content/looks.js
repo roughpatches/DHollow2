@@ -366,6 +366,15 @@ const HERON = {
   },
 };
 
+// One dead fire in a ring of stones, dressed four ways: with the wood nobody burned beside
+// it, with four people crowded round it, with a tent and racks behind it, and with a bread
+// oven standing over it. Every state registers differently because the dressing is what
+// decides how far up the frame the paint stops, so each is measured off its own art.
+const camp = (name, ground) => ({
+  path: 'art/fire',
+  stands: { still: `${name}/rotations/${name}.png`, ground },
+});
+
 // One boulder, painted four times: as it stands, with a block split off it, with water
 // coming out of it, and with somebody's stack of flat stones against its side. The vein is
 // in all four, which is why the same rock can be the ore, the spring and the marker. Every
@@ -421,4 +430,8 @@ export const NODE_ART = {
   seam: boulder('Split'), // A boulder split in two, the vein open on both walls of the gap
   adit: boulder('Shaft'), // A hole under the boulder somebody made
   cutting: boulder('Troll'), // A troll, and the rock in the path
+  fire: camp('A_stack_of_firewood', 9), // A fire, and what you carry
+  camp: camp('Four_figures_crowded', 32), // A fire that is not yours
+  burner: camp('Racks_of_drying_leav', 11), // A man camped alone, and his racks
+  bakehouse: camp('A_dilapidated_stone', 7), // A bread oven standing in nothing
 };

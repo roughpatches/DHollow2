@@ -751,18 +751,18 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 2, night: 4 }, // mostly a thing done after dark, when it is wanted most
-    read: { skill: 'woodcraft', line: 'There is dry wood under that overhang, and it is the last of it for a mile.' },
+    read: { skill: 'woodcraft', line: 'Somebody laid a fire on that ground, and did not come back for the wood they left beside it.' },
     xp: [8, 14],
     con: [1, 2], // the stopping itself, before anybody has done anything with it
     body: [
-      'An overhang with dry ground under it and dry wood stacked against the back wall by nobody in particular. It is the last dry anything for a mile in the direction you are going.',
+      'A ring of stones with a dead fire in the middle of it, ashes and charred sticks gone cold, and beside it a stack of split wood that whoever was here last did not burn. It is dry, and it is stacked up off the ground, which is more than anything else on this side of the wood can say.',
     ],
     ways: [
       {
         text: 'Build it so it will still be burning in an hour.',
         skill: 'woodcraft',
         dc: 11,
-        tried: 'Standing deadwood, split small, and a wall of packs on the weather side of it.',
+        tried: 'The dry stuff off the stack, split smaller, and a wall of packs on the weather side of it.',
         held: 'It takes first time and it stays taken. Everybody gets dry.',
         lost: 'It smokes for twenty minutes and then it does not do that either.',
         con: 3,
@@ -1287,15 +1287,15 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'burner',
-    name: 'A charcoal burner, and his stack',
+    name: 'A man camped alone, and his racks',
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 3, night: 2 },
-    read: { skill: 'persuasion', line: 'That is a working stack, and a working stack has somebody sitting up with it.' },
+    read: { skill: 'persuasion', line: 'That is a tent and a set of racks, and somebody has been sitting with them a long while.' },
     xp: [12, 18],
     con: [-1, 0],
     body: [
-      'A turf-covered stack smoking evenly in a clearing somebody has kept clear on purpose, and a lean-to beside it with a man sitting in the mouth of it.',
+      'A tent pitched in a clearing somebody has kept clear on purpose, a fire ring in front of it, and two racks of leaves drying where the light gets at them. There is an old man sitting on his pack beside it who has watched you come the whole way in.',
     ],
     ways: [
       {
@@ -1312,9 +1312,9 @@ export const ENCOUNTER_NODES = [
         text: 'Read the camp rather than the man.',
         skill: 'investigation',
         dc: 13,
-        tried: 'How many bowls, how much bedding, and how far the wood has been dragged.',
-        held: 'He is not out here alone and he is not out here for charcoal.',
-        lost: 'A man, a stack, and nine days of firewood. Nothing that is not what it looks like.',
+        tried: 'How many bowls, how much bedding, and how much of what is on those racks is one man\'s work.',
+        held: 'He is not out here alone, and he is not out here for what is drying on the racks.',
+        lost: 'A man, a tent and nine days of firewood. Nothing that is not what it looks like.',
         spoils: { nails: [1, 3] },
         lostCon: 1,
       },
@@ -1336,15 +1336,15 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 2, night: 4 },
-    read: { skill: 'persuasion', line: 'There is a light through the trees and it is sitting still.' },
+    read: { skill: 'persuasion', line: 'There are people sitting up there, and there is no light on them.' },
     xp: [10, 16],
     con: [0, 1],
     body: [
-      'A light through the trees that is sitting still, and close to, four people round a fire that is not going to last the night.',
+      'Four of them crowded round a ring of stones, close in the way people get when there is nothing in the ring but cold ash. It went out a while ago, and there is nothing beside them left to put on it.',
     ],
     ways: [
       {
-        text: 'Ask to sit at it.',
+        text: 'Ask to sit with them.',
         skill: 'persuasion',
         dc: 12,
         tried: 'Hands out, walking slowly, and asking from further off than you have to.',
@@ -1358,7 +1358,7 @@ export const ENCOUNTER_NODES = [
         skill: 'woodcutting',
         dc: 11,
         tried: 'An armful of standing deadwood, split, before anybody has been asked anything.',
-        held: 'A fire that would have died at midnight burns to morning, and everybody sleeps at it.',
+        held: 'A fire that had gone out is going again inside ten minutes, and it burns to morning, and everybody sleeps at it.',
         lost: 'What you bring is green and it smokes them out of their own camp.',
         con: 2,
         spoils: { timber: [0, 1] },
@@ -1709,11 +1709,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'investigation', line: 'That is the last wall of a holding, and the only part of it anybody built properly.' },
+    read: { skill: 'investigation', line: 'That is the last of a holding, and the only part of it anybody built properly.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A bread oven and the wall it is set into, and nothing else — no floor, no roof, no other wall. It is the only part of whatever this was that anybody built to last.',
+      'A bread oven, domed and squat and built of cut stone, standing by itself with a cold fire ring in front of it. No floor, no roof, no wall, nothing at all to say what stood here. It is the only part of whatever this was that anybody built to last.',
     ],
     ways: [
       {
