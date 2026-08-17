@@ -3,10 +3,10 @@
 // Both end up under the same texture keys, so nothing downstream knows the difference.
 
 import { TUNING } from '../tuning.js';
-import { LOOKS, NODE_ART, STRUCTURES, GROUND, PROPS, EDGES } from '../content/looks.js';
+import { LOOKS, NODE_ART, STRUCTURES, PROPS } from '../content/looks.js';
 import { PLACES } from '../content/places.js';
 import { MAPS } from '../content/maps.js';
-import { actorFrame, walkAnim, proneKey, portraitKey, TILE_INDEX, TILE_NAMES } from './textures.js';
+import { actorFrame, walkAnim, proneKey, portraitKey } from './textures.js';
 import { buildingOf, levelOf } from './town.js';
 import { DEPTH, atTile } from './street.js';
 
@@ -94,9 +94,6 @@ export function preloadArt(scene) {
       const k = stageKey(s, i);
       if (!scene.textures.exists(k)) scene.load.image(k, `${s.path}/${path}`);
     });
-  }
-  for (const g of [...GROUND, ...EDGES]) {
-    if (!scene.textures.exists(g.sheet)) scene.load.image(g.sheet, g.sheet);
   }
   for (const p of PROPS) {
     if (!scene.textures.exists(propKey(p.art))) {
@@ -367,116 +364,9 @@ export function bodyOf(palette) {
   return look.foot / look.size / TUNING.questArtScale;
 }
 
-// --- ground ----------------------------------------------------------------
-// One strip of tiles for the map to draw from, at tilePx a tile: the generated ones
-// blown up to that size, and painted ground cut in over the top of them. A painted tile
-// gets four patches rather than one, laid two by two across the map, so a field does
-// not repeat every step.
-
-const SLOT = {};
-const SEAM = {}; // 'grass|dirt' -> { high: Set, codes: { 0: slot, ... } }
-
-function seamKey(a, b) {
-  return [a, b].sort().join('|');
-}
-
-// The baked tiles are laid out in rows rather than one long strip: a strip of every tile
-// the town needs is wider than a graphics card will take as one texture, and an oversized
-// texture does not fail loudly — it draws black.
-export const TILE_COLS = 16;
-
-export function bakeTiles(scene) {
-  if (scene.textures.exists('tiles')) return;
-  const P = TUNING.tilePx;
-  const extra = GROUND.reduce((n, g) => n + g.cells.length - 1, 0)
-    + EDGES.reduce((n, e) => n + Object.keys(e.cells).length, 0);
-  const rows = Math.ceil((TILE_NAMES.length + extra) / TILE_COLS);
-  const tex = scene.textures.createCanvas('tiles', TILE_COLS * P, rows * P);
-  const ctx = tex.getContext();
-  ctx.imageSmoothingEnabled = false;
-
-  // where a tile index sits in the baked grid
-  const px = (slot) => (slot % TILE_COLS) * P;
-  const py = (slot) => Math.floor(slot / TILE_COLS) * P;
-
-  const drawn = scene.textures.get('tiles16').getSourceImage();
-  const TS = TUNING.tileSize;
-  TILE_NAMES.forEach((name, i) => ctx.drawImage(drawn, i * TS, 0, TS, TS, px(i), py(i), P, P));
-
-  let next = TILE_NAMES.length;
-  for (const g of GROUND) {
-    const sheet = scene.textures.get(g.sheet).getSourceImage();
-    SLOT[g.tile] = g.cells.map(([sx, sy], i) => {
-      const slot = i === 0 ? TILE_INDEX[g.tile] : next++;
-      ctx.drawImage(sheet, sx, sy, P, P, px(slot), py(slot), P, P);
-      // A sheet painted lighter than the world wants it is multiplied down here rather
-      // than repainted: the seawater keeps its swell and stops reading as pale stone.
-      if (g.shade) {
-        ctx.globalCompositeOperation = 'multiply';
-        ctx.fillStyle = `#${g.shade.toString(16).padStart(6, '0')}`;
-        ctx.fillRect(px(slot), py(slot), P, P);
-        ctx.globalCompositeOperation = 'source-over';
-      }
-      return slot;
-    });
-  }
-
-  // Seam tiles. A seam holds both grounds at once, so it cannot be shaded with one
-  // multiply the way a plain patch is: each side is tinted by its own shade, and which
-  // side a pixel belongs to is read off its hue.
-  for (const e of EDGES) {
-    const sheet = scene.textures.get(e.sheet).getSourceImage();
-    const codes = {};
-    for (const [code, [sx, sy]] of Object.entries(e.cells)) {
-      const slot = next++;
-      codes[code] = slot;
-      ctx.drawImage(sheet, sx, sy, P, P, px(slot), py(slot), P, P);
-      if (!e.low.shade && !e.high.shade) continue;
-      const img = ctx.getImageData(px(slot), py(slot), P, P);
-      const d = img.data;
-      const [c0, c1] = { rg: [0, 1], gb: [1, 2], rb: [0, 2] }[e.split.channels];
-      for (let i = 0; i < d.length; i += 4) {
-        const side = d[i + c0] - d[i + c1] > e.split.over ? e.high : e.low;
-        if (!side.shade) continue;
-        d[i] = (d[i] * ((side.shade >> 16) & 0xff)) / 255;
-        d[i + 1] = (d[i + 1] * ((side.shade >> 8) & 0xff)) / 255;
-        d[i + 2] = (d[i + 2] * (side.shade & 0xff)) / 255;
-      }
-      ctx.putImageData(img, px(slot), py(slot));
-    }
-    for (const a of e.low.tiles) {
-      for (const b of e.high.tiles) SEAM[seamKey(a, b)] = { high: new Set(e.high.tiles), codes };
-    }
-  }
-  tex.refresh();
-}
-
-// which patch of a tile belongs at this square
-export function slotFor(name, x, y) {
-  const slots = SLOT[name];
-  if (!slots) return TILE_INDEX[name];
-  return slots[((x % 2) + (y % 2) * 2) % slots.length];
-}
-
-// The tile for the corner four squares share, given what ground each of them is: the one
-// painted with both materials meeting the way these four do. -1 where there is nothing to
-// draw — one ground, more than two, a pair no sheet was painted for, or one of the two
-// diagonals no sheet paints.
-export function seamFor(nw, ne, sw, se) {
-  const names = [nw, ne, sw, se];
-  const both = [...new Set(names)];
-  if (both.length !== 2) return -1;
-  const seam = SEAM[seamKey(both[0], both[1])];
-  if (!seam) return -1;
-  const code = names.reduce((n, name, i) => n | (seam.high.has(name) ? 1 << i : 0), 0);
-  const slot = seam.codes[code];
-  return slot === undefined ? -1 : slot;
-}
-
 // --- buildings -------------------------------------------------------------
-// A building is one picture per stage of repair, hung over the tiles the map already
-// has. Nothing about walking into it changes: the tiles are still what stops you. It
-// sorts by the bottom of its picture, like anyone else, so you pass behind its roof.
+// A building is one picture per stage of repair, standing where the panel says it stands.
+// Repairing it changes the picture and nothing else.
 
 function stageKey(s, i) {
   return `built_${s.id}_${i}`;
@@ -520,59 +410,30 @@ export function raiseStructures(scene, mapKey) {
   for (const s of STRUCTURES) {
     const b = buildingOf(s.id);
     if (!b || b.map !== mapKey) continue;
-    // On a street the picture stands along the back of the pavement, in the row with the
-    // painted terrace rather than out in the road, at the building's own place along it.
-    // There are no tiles under it to clear: the painting is already the town.
-    const img = scene.street
-      ? scene.add.image(atTile(s.at[0]), scene.sillY, stageKey(s, 0))
-        .setOrigin(0.5, 1).setDepth(DEPTH.structure)
-      : scene.add.image(s.at[0] * TUNING.tileSize, s.at[1] * TUNING.tileSize, stageKey(s, 0))
-        .setOrigin(0, 0);
-    if (!scene.street) img.setDepth(img.y + img.height);
-    out[s.id] = { spec: s, img, scene, sill: scene.street ? scene.sillY : undefined };
+    // The picture stands along the back of the ground, in the row with whatever is painted
+    // there rather than out in the road, at the building's own place along it. There is
+    // nothing under it to clear: the painting is already the town.
+    const img = scene.add.image(atTile(s.at[0]), scene.sillY, stageKey(s, 0))
+      .setOrigin(0.5, 1).setDepth(DEPTH.structure);
+    out[s.id] = { spec: s, img, scene, sill: scene.sillY };
     restate(out, s.id);
-    if (!scene.street) clearUnder(scene, s, img);
   }
   return out;
 }
 
-// The tiles the picture stands on give up their own drawing and keep their collision:
-// the walls are still what stops you, but nothing of the placeholder building shows
-// past the edges of the art.
-function clearUnder(scene, spec, img) {
-  const TS = TUNING.tileSize;
-  const x0 = Math.floor(img.x / TS);
-  const y0 = Math.floor(img.y / TS);
-  for (let y = y0; y < Math.ceil((img.y + img.height) / TS); y++) {
-    for (let x = x0; x < Math.ceil((img.x + img.width) / TS); x++) {
-      const tile = scene.ground.getTileAt(x, y);
-      if (!tile) continue;
-      const solid = tile.collides;
-      scene.ground.putTileAt(slotFor(spec.under || 'grass', x, y), x, y).setCollision(solid);
-    }
-  }
-}
-
 // --- props -----------------------------------------------------------------
-// A crate, a cask, a lamp post. One picture, centred on the tile it stands on and
-// standing on the bottom of it, sorted by its feet like an actor — so you walk behind a
-// stack of crates and in front of the next one down the quay. The tile underneath is
-// what stops you; nothing here touches collision.
+// A crate, a cask, a lamp post: one picture standing on the line, at its own place along
+// it. Nothing here stops you — a panel has no collision, and a prop is only a picture.
 
 function propKey(art) {
   return `prop_${art}`;
 }
 
 export function raiseProps(scene, mapKey) {
-  const TS = TUNING.tileSize;
+  // a panel has one line to stand on, so a prop only says how far along it is
   for (const p of PROPS.filter((q) => q.map === mapKey)) {
-    // a street has one line to stand on, so a prop on one only says how far along it is
-    const img = scene.street
-      ? scene.add.image(atTile(p.at[0]), scene.groundY, propKey(p.art))
-        .setOrigin(0.5, 1).setDepth(DEPTH.prop)
-      : scene.add.image(p.at[0] * TS + TS / 2, (p.at[1] + 1) * TS, propKey(p.art))
-        .setOrigin(0.5, 1);
-    if (!scene.street) img.setDepth(img.y);
+    scene.add.image(atTile(p.at[0]), scene.groundY, propKey(p.art))
+      .setOrigin(0.5, 1).setDepth(DEPTH.prop);
   }
 }
 

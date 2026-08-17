@@ -1,6 +1,7 @@
 // Placeholder art, generated at boot for everyone content/looks.js has no drawn art
-// for. A character named there loads their frames from disk under these same key
-// names instead — see src/art.js — so nothing downstream cares which they are.
+// for: a body, a face, and the shape they are laid out in. A character named there loads
+// their frames from disk under these same key names instead — see src/art.js — so nothing
+// downstream cares which they are.
 
 import { TUNING, COLORS, PALETTES } from '../tuning.js';
 import { LOOKS } from '../content/looks.js';
@@ -11,20 +12,9 @@ import { buildUiAtlas } from './uiatlas.js';
 // a generated walk cycle would be the animation the drawn one never gets to replace.
 const DRAWN = Object.fromEntries(LOOKS.map((l) => [l.id, l]));
 
-const TS = TUNING.tileSize;
 const AW = 16; // actor frame width
 const AH = 22; // actor frame height
 export const PORTRAIT_PX = 40; // portrait art is square and drawn once per palette
-
-// Tile index in the generated strip == position in this list.
-export const TILE_NAMES = [
-  'grass', 'path', 'dirt', 'water', 'tree', 'wall', 'roof', 'door', 'wood', 'stone',
-  'well', 'grave', 'bar', 'forge', 'shelf', 'altar', 'pew', 'crate', 'hearth', 'rug',
-  'treetop', 'sand', 'flotsam', 'spar', 'bed',
-  'deck', 'rot', 'piling', 'wreck', 'post', 'rubble', 'scrub', 'bramble', 'stump', 'fence',
-];
-
-export const TILE_INDEX = Object.fromEntries(TILE_NAMES.map((n, i) => [n, i]));
 
 const DIRS = ['down', 'up', 'left', 'right'];
 
@@ -32,213 +22,6 @@ function fill(g, c, x, y, w, h, a = 1) {
   g.fillStyle(c, a);
   g.fillRect(x, y, w, h);
 }
-
-function base(g, ox, c) {
-  fill(g, c, ox, 0, TS, TS);
-}
-
-function specks(g, ox, c, pts, w = 2, h = 1) {
-  g.fillStyle(c, 1);
-  for (const [x, y] of pts) g.fillRect(ox + x, y, w, h);
-}
-
-function stripes(g, ox, c, ys, h = 1) {
-  g.fillStyle(c, 1);
-  for (const y of ys) g.fillRect(ox, y, TS, h);
-}
-
-const TILE_DRAW = {
-  grass: (g, o) => {
-    base(g, o, COLORS.grass[0]);
-    specks(g, o, COLORS.grass[1], [[2, 3], [9, 5], [5, 10], [12, 12], [7, 14], [13, 2]]);
-  },
-  path: (g, o) => {
-    base(g, o, COLORS.path[0]);
-    specks(g, o, COLORS.path[1], [[1, 2], [8, 4], [4, 9], [11, 11], [2, 13]], 4, 2);
-  },
-  dirt: (g, o) => {
-    base(g, o, COLORS.dirt[0]);
-    specks(g, o, COLORS.dirt[1], [[3, 2], [10, 6], [6, 11], [13, 13]]);
-  },
-  water: (g, o) => {
-    base(g, o, COLORS.water[0]);
-    specks(g, o, COLORS.water[1], [[2, 4], [9, 9], [5, 13]], 5, 1);
-  },
-  tree: (g, o) => {
-    base(g, o, COLORS.grass[0]);
-    fill(g, COLORS.tree[1], o + 7, 10, 2, 6);
-    fill(g, COLORS.tree[0], o + 2, 1, 12, 10);
-    fill(g, COLORS.tree[0], o + 1, 3, 14, 7);
-    specks(g, o, COLORS.grass[1], [[4, 3], [10, 6], [6, 8]]);
-  },
-  wall: (g, o) => {
-    base(g, o, COLORS.wall[0]);
-    stripes(g, o, COLORS.wall[1], [5, 11]);
-    g.fillStyle(COLORS.wall[1], 1);
-    g.fillRect(o + 4, 0, 1, 5);
-    g.fillRect(o + 11, 6, 1, 5);
-    g.fillRect(o + 4, 12, 1, 4);
-  },
-  roof: (g, o) => {
-    base(g, o, COLORS.roof[0]);
-    stripes(g, o, COLORS.roof[1], [4, 9, 14]);
-    specks(g, o, COLORS.roof[1], [[3, 6], [11, 11]], 3, 2);
-  },
-  door: (g, o) => {
-    base(g, o, COLORS.wall[0]);
-    fill(g, COLORS.door[0], o + 3, 2, 10, 14);
-    fill(g, COLORS.door[1], o + 10, 8, 2, 2);
-    fill(g, COLORS.door[1], o + 3, 5, 10, 1);
-  },
-  wood: (g, o) => {
-    base(g, o, COLORS.wood[0]);
-    stripes(g, o, COLORS.wood[1], [5, 11]);
-  },
-  stone: (g, o) => {
-    base(g, o, COLORS.stone[0]);
-    specks(g, o, COLORS.stone[1], [[0, 7], [8, 3], [8, 12]], 8, 1);
-  },
-  well: (g, o) => {
-    base(g, o, COLORS.grass[0]);
-    fill(g, COLORS.well[0], o + 1, 1, 14, 14);
-    fill(g, COLORS.well[1], o + 4, 4, 8, 8);
-  },
-  grave: (g, o) => {
-    base(g, o, COLORS.grass[0]);
-    fill(g, COLORS.grave[1], o + 4, 12, 8, 2);
-    fill(g, COLORS.grave[0], o + 5, 3, 6, 10);
-  },
-  bar: (g, o) => {
-    base(g, o, COLORS.bar[0]);
-    fill(g, COLORS.bar[1], o, 0, TS, 5);
-  },
-  forge: (g, o) => {
-    base(g, o, COLORS.stone[0]);
-    fill(g, COLORS.forge[0], o + 2, 3, 12, 13);
-    fill(g, COLORS.forge[1], o + 5, 6, 6, 4);
-  },
-  shelf: (g, o) => {
-    base(g, o, COLORS.wood[0]);
-    fill(g, COLORS.shelf[0], o + 1, 1, 14, 14);
-    specks(g, o, COLORS.shelf[1], [[2, 3], [6, 3], [10, 3], [2, 9], [6, 9], [10, 9]], 3, 4);
-  },
-  altar: (g, o) => {
-    base(g, o, COLORS.stone[0]);
-    fill(g, COLORS.altar[0], o + 3, 4, 10, 12);
-    fill(g, COLORS.altar[1], o + 1, 2, 14, 3);
-  },
-  pew: (g, o) => {
-    base(g, o, COLORS.wood[0]);
-    fill(g, COLORS.pew[1], o, 3, TS, 2);
-    fill(g, COLORS.pew[0], o, 6, TS, 6);
-  },
-  crate: (g, o) => {
-    base(g, o, COLORS.wood[0]);
-    fill(g, COLORS.crate[0], o + 2, 3, 12, 12);
-    g.fillStyle(COLORS.crate[1], 1);
-    g.fillRect(o + 2, 8, 12, 1);
-    g.fillRect(o + 7, 3, 1, 12);
-  },
-  hearth: (g, o) => {
-    base(g, o, COLORS.stone[0]);
-    fill(g, COLORS.hearth[0], o + 1, 1, 14, 14);
-    fill(g, COLORS.hearth[1], o + 5, 7, 6, 6);
-  },
-  rug: (g, o) => {
-    base(g, o, COLORS.wood[0]);
-    fill(g, COLORS.rug[0], o + 1, 2, 14, 12);
-    fill(g, COLORS.rug[1], o + 4, 5, 8, 6);
-  },
-  bed: (g, o) => {
-    base(g, o, COLORS.wood[0]);
-    fill(g, COLORS.bed[0], o + 1, 2, 14, 13);
-    fill(g, COLORS.bed[1], o + 2, 3, 12, 4);
-  },
-  sand: (g, o) => {
-    base(g, o, COLORS.sand[0]);
-    specks(g, o, COLORS.sand[1], [[2, 4], [9, 2], [5, 11], [12, 9], [7, 14]], 3, 1);
-  },
-  flotsam: (g, o) => {
-    base(g, o, COLORS.sand[0]);
-    specks(g, o, COLORS.sand[1], [[11, 3], [3, 13]], 3, 1);
-    fill(g, COLORS.flotsam[1], o + 2, 6, 11, 2);
-    fill(g, COLORS.flotsam[1], o + 6, 10, 8, 2);
-    fill(g, COLORS.wood[0], o + 4, 2, 5, 2);
-  },
-  spar: (g, o) => {
-    base(g, o, COLORS.sand[0]);
-    fill(g, COLORS.spar[0], o + 1, 4, 14, 8);
-    fill(g, COLORS.spar[1], o + 1, 6, 14, 1);
-    fill(g, COLORS.spar[1], o + 1, 10, 14, 1);
-  },
-  // --- the harbour ---------------------------------------------------------
-  deck: (g, o) => {
-    base(g, o, COLORS.deck[0]);
-    stripes(g, o, COLORS.deck[1], [1, 6, 11]);
-    fill(g, COLORS.rot[1], o + 7, 0, 1, TS); // the seam between two runs of planking
-  },
-  // decking with the sea showing through it, so it is drawn over water rather than over
-  // planking: what is left is the beams, not the deck
-  rot: (g, o) => {
-    base(g, o, COLORS.water[0]);
-    fill(g, COLORS.rot[0], o, 1, TS, 4);
-    fill(g, COLORS.rot[0], o, 9, TS, 3);
-    fill(g, COLORS.deck[0], o + 2, 1, 6, 1);
-    fill(g, COLORS.deck[0], o + 9, 9, 5, 1);
-    fill(g, COLORS.rot[1], o + 5, 1, 2, 4); // and the gaps in those
-    fill(g, COLORS.rot[1], o + 11, 9, 2, 3);
-  },
-  piling: (g, o) => {
-    base(g, o, COLORS.water[0]);
-    fill(g, COLORS.piling[1], o + 4, 6, 8, 7); // the shadow it throws on the water
-    fill(g, COLORS.piling[0], o + 5, 4, 6, 7);
-    fill(g, COLORS.deck[0], o + 6, 5, 4, 3); // the sawn top, salt-bleached
-  },
-  wreck: (g, o) => {
-    base(g, o, COLORS.water[0]);
-    fill(g, COLORS.wreck[0], o + 1, 4, 14, 10);
-    fill(g, COLORS.wreck[1], o + 1, 4, 14, 2); // what is still above the waterline
-    specks(g, o, COLORS.wreck[1], [[3, 8], [10, 11]], 3, 1);
-  },
-  post: (g, o) => {
-    base(g, o, COLORS.stone[0]);
-    fill(g, COLORS.post[0], o + 6, 2, 4, 13);
-    fill(g, COLORS.post[1], o + 5, 13, 6, 2); // the flange at the foot
-  },
-  // --- and what is taking the town back ------------------------------------
-  rubble: (g, o) => {
-    base(g, o, COLORS.dirt[0]);
-    specks(g, o, COLORS.rubble[0], [[1, 3], [8, 2], [4, 8], [10, 9], [2, 12]], 5, 4);
-    specks(g, o, COLORS.rubble[1], [[2, 4], [9, 3], [5, 9]], 3, 2);
-  },
-  scrub: (g, o) => {
-    base(g, o, COLORS.grass[0]);
-    specks(g, o, COLORS.grass[1], [[1, 6], [11, 2], [6, 13]], 4, 2);
-    specks(g, o, COLORS.scrub[1], [[3, 2], [8, 5], [13, 8], [5, 10], [10, 13]], 2, 3);
-  },
-  bramble: (g, o) => {
-    base(g, o, COLORS.bramble[0]);
-    specks(g, o, COLORS.bramble[1], [[2, 3], [7, 6], [11, 4], [4, 10], [9, 12]], 4, 2);
-    specks(g, o, COLORS.scrub[1], [[6, 2], [12, 11]], 2, 2);
-  },
-  stump: (g, o) => {
-    base(g, o, COLORS.grass[0]);
-    fill(g, COLORS.stump[0], o + 3, 5, 10, 9);
-    fill(g, COLORS.stump[1], o + 4, 4, 8, 4); // the sawn face, weathering pale
-  },
-  fence: (g, o) => {
-    base(g, o, COLORS.grass[0]);
-    fill(g, COLORS.fence[1], o, 9, TS, 2); // the rail
-    for (const x of [1, 6, 11]) fill(g, COLORS.fence[0], o + x, 2, 3, 13);
-  },
-  // the slice of a tree that draws over actors: crown only, so someone standing
-  // below the treeline loses their head to the leaves and not their whole body
-  treetop: (g, o) => {
-    fill(g, COLORS.tree[0], o + 2, 1, 12, 7);
-    fill(g, COLORS.tree[0], o + 1, 3, 14, 5);
-    specks(g, o, COLORS.grass[1], [[4, 3], [10, 6]]);
-  },
-};
 
 function drawActor(g, p, dir, frame) {
   const lift = frame === 1 ? 1 : 0;
@@ -442,14 +225,7 @@ export function buildTextures(scene) {
   // the minigame kit's atlas is drawn here too, so an imported activity engine works
   // without any wiring of its own
   buildUiAtlas(scene);
-  if (scene.textures.exists('tiles16')) return;
-
-  // the generated strip, at the size it is drawn at. src/art.js blows it up to tilePx
-  // and paints real ground over whichever tiles have any.
-  const g = scene.make.graphics({ x: 0, y: 0 }, false);
-  TILE_NAMES.forEach((name, i) => TILE_DRAW[name](g, i * TS));
-  g.generateTexture('tiles16', TILE_NAMES.length * TS, TS);
-  g.destroy();
+  if (scene.textures.exists(portraitKey('player'))) return;
 
   for (const name of Object.keys(PALETTES)) {
     const look = DRAWN[name];

@@ -1,92 +1,10 @@
-// Every place in the game is a panel now: a painting with a line drawn across it to walk
-// along, and everything standing on it — a door, a building, somebody waiting — placed by
-// how far along it stands and nothing else. See `street` below and src/street.js.
-//
-// A map with `rows` instead is the other kind: a character grid walked around rather than
-// along, every row the same length and every character in LEGEND. Nothing is one any more.
-// The machinery is still here and still works; the tiles, the seams and the painted ground
-// sheets go with it.
+// Every place in the game: a painting with a line drawn across it to walk along, and
+// everything standing on it — a door, a building, somebody waiting — placed by how far
+// along it stands and nothing else. See `street` below and src/street.js.
 //
 // `indoors: true` on a map says it is a room rather than the open air: anybody with a
 // second look painted for indoors is drawn from that one on it. See content/looks.js.
 //
-// solid: blocks movement. above: a second tile drawn over actors standing here.
-export const TILES = {
-  grass: {},
-  path: {},
-  dirt: {},
-  wood: {},
-  stone: {},
-  rug: {},
-  door: {},
-  water: { solid: true },
-  tree: { solid: true, above: 'treetop' },
-  wall: { solid: true },
-  roof: { solid: true },
-  well: { solid: true },
-  grave: { solid: true },
-  bar: { solid: true },
-  forge: { solid: true },
-  shelf: { solid: true },
-  altar: { solid: true },
-  pew: { solid: true },
-  crate: { solid: true },
-  hearth: { solid: true },
-  bed: {}, // you can lie on it
-  sand: {},
-  flotsam: {}, // small wreckage; you walk over it
-  spar: { solid: true }, // ship timber; you walk around it
-  // the harbour
-  deck: {}, // dock planking, sound enough to walk out on
-  rot: {}, // planking that is mostly still there. You would not run on it
-  piling: { solid: true }, // a post where a dock used to be
-  wreck: { solid: true }, // a hull, half under
-  post: { solid: true }, // a harbour lamp or a mooring bollard
-  // the town, and what is taking it back
-  rubble: { solid: true }, // a wall that came down
-  scrub: {}, // dying grass, bracken, dead leaves
-  bramble: { solid: true }, // thicket you go round
-  stump: { solid: true },
-  fence: { solid: true },
-};
-
-export const LEGEND = {
-  '.': 'grass',
-  ',': 'path',
-  ':': 'dirt',
-  '~': 'water',
-  T: 'tree',
-  '#': 'wall',
-  '=': 'roof',
-  D: 'door',
-  _: 'wood',
-  '+': 'stone',
-  o: 'well',
-  x: 'grave',
-  b: 'bar',
-  f: 'forge',
-  s: 'shelf',
-  a: 'altar',
-  p: 'pew',
-  c: 'crate',
-  h: 'hearth',
-  r: 'rug',
-  B: 'bed',
-  S: 'sand',
-  w: 'flotsam',
-  W: 'spar',
-  '-': 'deck',
-  ';': 'rot',
-  i: 'piling',
-  V: 'wreck',
-  l: 'post',
-  R: 'rubble',
-  '"': 'scrub',
-  '%': 'bramble',
-  n: 'stump',
-  '|': 'fence',
-};
-
 export const MAPS = {
   // Where the player wakes up the morning after. Aldis carried them here.
   // A room walked along rather than around, like the Sea Hag: the same panel, the same

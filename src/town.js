@@ -108,26 +108,6 @@ export function contribute(id) {
   return { taken, levelled };
 }
 
-// every tile the current state of the town puts on a map, lowest stage first so a
-// later stage can overwrite an earlier one
-export function patchesFor(mapKey) {
-  const out = [];
-  for (const b of BUILDINGS.filter((x) => x.map === mapKey)) {
-    for (let i = 0; i <= levelOf(b.id); i++) {
-      if (b.stages[i].patch) out.push(...b.stages[i].patch);
-    }
-  }
-  return out;
-}
-
-export function patchOf(id, lvl) {
-  return buildingOf(id).stages[lvl].patch || [];
-}
-
-export function siteAt(mapKey, x, y) {
-  return BUILDINGS.find((b) => b.map === mapKey && b.site[0] === x && b.site[1] === y);
-}
-
 // --- text -----------------------------------------------------------------
 // Flat and mechanical on purpose: this is a readout, not a voice. Rewrite freely.
 

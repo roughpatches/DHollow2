@@ -20,9 +20,9 @@
 //              A skill that reads that ground is worth constitution to everyone who sets
 //              out here; see `terrain` in content/skills.js and conPerTerrainPoint in
 //              tuning.js. A place with no terrain gives nobody anything.
-//   map      — which grid in content/maps.js to draw. Required; an entry without it is a list row.
-//   at       — optional tile to ring on that map, for a landmark inside a larger place.
-//              [x, y] on a grid; one number on a street, which is how far along it stands.
+//   map      — which panel in content/maps.js to draw. Required; an entry without it is a list row.
+//   at       — optional place to mark on that map, for a landmark inside a larger place:
+//              one number, how far along the panel it stands.
 //   quest    — optional id from content/quests.js. The entry becomes somewhere you set
 //              out for: its state is read live, and Enter starts the job when it can be.
 //   building — optional id from content/buildings.js. The building's repair state and what

@@ -4,25 +4,9 @@ import { atTile } from './street.js';
 
 const TS = TUNING.tileSize;
 
-// On a grid everyone is stood up to the same height as well, and that height is the
-// generated placeholder's own: a room is built of 16-pixel tiles and drawn art comes back
-// at 60 or 64, which is four tiles of hunter standing in a hut with a two-tile bed in it.
-export function spawnActor(scene, palette, tx, ty, facing = 'down') {
-  const s = scene.physics.add.sprite(tx * TS + TS / 2, ty * TS + TS, faceFrame(palette, facing)[0]);
-  s.setOrigin(0.5, footOf(palette));
-  s.setScale(TUNING.gridBodyPx / (s.frame.height * bodyOf(palette)));
-  fitBody(s, 10, 8);
-  s.palette = palette;
-  s.facing = facing;
-  stand(s, palette, facing);
-  return s;
-}
-
-// The same actor on a street: placed by how far along it stands, and standing on the one
-// line the street has instead of on a tile.
-// A street is painted at the size the drawn characters are drawn at, not at a tile's size,
-// so everyone is stood up to the same height from the feet in their own frames — a
-// 16-pixel placeholder and a 60-pixel export are the same person tall, as in the crawl.
+// An actor on a panel: placed by how far along it stands, and standing on the one line the
+// panel has. Everyone is stood up to the same height from the feet in their own frames — a
+// 16-pixel placeholder and a 128-pixel export are the same person tall, as in the crawl.
 // How tall that is belongs to the panel and not to the person: a painted town seen down
 // the length of a road and a room seen from across it are not painted at the same scale,
 // so a panel that says so says it in `body` (see content/maps.js).
@@ -34,12 +18,6 @@ export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left', b
   s.palette = palette;
   s.facing = facing;
   stand(s, palette, facing);
-  return s;
-}
-
-export function createPlayer(scene, tx, ty, palette = 'player') {
-  const s = spawnActor(scene, palette, tx, ty, 'down');
-  s.setCollideWorldBounds(true);
   return s;
 }
 
@@ -70,36 +48,6 @@ export function updateStreetPlayer(player, keys) {
     return;
   }
   player.facing = vx < 0 ? 'left' : 'right';
-  walking(player, player.palette, player.facing);
-}
-
-export function updatePlayer(player, keys) {
-  const speed = TUNING.walkSpeed;
-  let vx = 0;
-  let vy = 0;
-
-  if (keys.left.isDown || keys.a.isDown) vx -= 1;
-  if (keys.right.isDown || keys.d.isDown) vx += 1;
-  if (keys.up.isDown || keys.w.isDown) vy -= 1;
-  if (keys.down.isDown || keys.s.isDown) vy += 1;
-
-  if (vx !== 0 && vy !== 0) {
-    vx *= Math.SQRT1_2;
-    vy *= Math.SQRT1_2;
-  }
-  player.body.setVelocity(vx * speed, vy * speed);
-
-  if (vx === 0 && vy === 0) {
-    haltPlayer(player);
-    return;
-  }
-
-  // horizontal wins ties, so walking diagonally reads as sideways
-  if (vx < 0) player.facing = 'left';
-  else if (vx > 0) player.facing = 'right';
-  else if (vy < 0) player.facing = 'up';
-  else player.facing = 'down';
-
   walking(player, player.palette, player.facing);
 }
 

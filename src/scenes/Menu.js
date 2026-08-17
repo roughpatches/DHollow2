@@ -1,5 +1,5 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
-import { MAPS, LEGEND } from '../../content/maps.js';
+import { MAPS } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
 import { CHARACTER, EQUIPMENT, INVENTORY, COMPANIONS } from '../../content/character.js';
 import { BESTIARY, QUESTS } from '../../content/codex.js';
@@ -353,7 +353,7 @@ export default class Menu extends Phaser.Scene {
       this.text(this.detailX, 0, fill(p), TUNING.menuBodySize, COLORS.menuText, this.detailW));
     const proseH = paras.reduce((h, t) => h + t.height + 14, 0);
 
-    if (entry.map) y = this.miniMap(entry, y, this.box.y + this.box.h - 44 - proseH - y) + 16;
+    if (entry.map) y = this.miniMap(entry, y) + 16;
     if (entry.options) y = this.choices(entry, y) + 20;
 
     for (const t of paras) {
@@ -477,59 +477,12 @@ export default class Menu extends Phaser.Scene {
     return y + TUNING.menuFactRow;
   }
 
-  // The map is the world's own grid at a smaller size, drawn in the same tile colours,
-  // so retinting tuning.js retints the map with it. Pins come from the live world rather
-  // than from content/places.js: move an NPC or a door and the map follows on its own.
-  miniMap(entry, y, room) {
+  // A panel has nothing to draw a grid of: it is one line, and the map of it is that line
+  // with everything on it marked by how far along it stands. Pins come from the live world
+  // rather than from content/places.js: move an NPC or a door and the map follows on its
+  // own.
+  miniMap(entry, y) {
     const map = MAPS[entry.map];
-    if (map.street) return this.miniStreet(entry, y, map);
-    const cols = map.rows[0].length;
-    const rows = map.rows.length;
-    const cell = Math.max(
-      2,
-      Math.min(
-        TUNING.menuMapCell,
-        Math.floor(this.detailW / cols),
-        Math.floor(TUNING.menuMapHeight / rows),
-        Math.floor((room - 22) / rows), // 22 leaves the key its line
-      ),
-    );
-    const x0 = this.detailX;
-
-    const g = this.add.graphics();
-    for (let ty = 0; ty < rows; ty++) {
-      for (let tx = 0; tx < cols; tx++) {
-        g.fillStyle(COLORS[LEGEND[map.rows[ty][tx]]][0], 1);
-        g.fillRect(x0 + tx * cell, y + ty * cell, cell, cell);
-      }
-    }
-    g.lineStyle(1, this.ink(COLORS.menuRule), 1);
-    g.strokeRect(x0 - 1, y - 1, cols * cell + 2, rows * cell + 2);
-
-    // grown pins read at a cell size of a few pixels, where a single tile does not
-    const pin = (tx, ty, color, grow) => {
-      g.fillStyle(this.ink(color), 1);
-      g.fillRect(x0 + tx * cell - grow, y + ty * cell - grow, cell + grow * 2, cell + grow * 2);
-    };
-
-    const pins = setting('pins');
-    if (pins !== 'none') for (const d of map.doors) pin(d.x, d.y, COLORS.menuMapDoor, 0);
-    if (pins === 'all') for (const n of NPCS) if (n.map === entry.map) pin(n.x, n.y, COLORS.menuMapFolk, 0);
-    if (entry.at) pin(entry.at[0], entry.at[1], COLORS.menuMapMark, 1);
-
-    const world = this.scene.get('World');
-    if (world.mapKey === entry.map) {
-      const TS = TUNING.tileSize;
-      pin(Math.floor(world.player.x / TS), Math.floor((world.player.y - 1) / TS), COLORS.menuMapYou, 1);
-    }
-    this.layer.add(g);
-
-    return y + rows * cell + 8 + this.key(x0, y + rows * cell + 8, entry).height;
-  }
-
-  // A street has nothing to draw a grid of: it is one line, and the map of it is that line
-  // with everything on it marked by how far along it stands. Same pins, same key.
-  miniStreet(entry, y, map) {
     const tiles = (map.street.size[0] * map.street.repeats) / TUNING.tileSize;
     const cell = this.detailW / tiles;
     const h = 16;
