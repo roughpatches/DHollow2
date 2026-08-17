@@ -193,6 +193,56 @@ export const TUNING = {
     },
   },
 
+  // Gem Cutting (src/minigames/GemEngine.js): a rough stone, the shape it is meant to
+  // become laid over it, and a counted number of cuts to bring one down onto the other.
+  // Everything above the tiers is the wheel and is the same whatever is on it.
+  gem: {
+    segments: 72, // how finely the rim is measured; the stone and the shape are both this
+    nodes: 24, // and how many places round it a cut can be made. Divides by every `sides`
+    // below, so every face of every shape has a node dead in the middle of it — finding
+    // that node is the skill, and the roll on the bite is what stops it being a routine.
+    radius: 88, // how big the stone is drawn, in pixels
+    inset: 0.97, // how far inside the tightest point of the stone the shape is set
+    gougeWeight: 2.5, // material cut from under the shape counts this much worse than
+    // material left standing proud: one is work not done and the other cannot be undone
+    fitSpan: 0.3, // the error at which the fit readout reads nothing
+    cutGouge: 0.09, // a cut that took this much from under the line is called a bad one
+    cutTook: 0.05, // and one that took this much excess off is called a good one
+    settleMs: 900, // how long the finished stone is left on the wheel to be looked at
+    // What makes one stone harder than another. A recipe names one in `hard`.
+    //   sides   — the shape it is cut to, and so how many faces it is scored on.
+    //   cuts    — how many cuts there are. Never quite enough to be careful with them all.
+    //   rough   — how lumpy the stone comes out of the ground.
+    //   shallow / deep — the two bites. `nodes` is how much of the rim the wheel takes,
+    //             rolled, and `over` is how far past the line it always goes: a wheel
+    //             leaned on takes a little of the stone every time whatever you do, and a
+    //             wheel touched to it barely does. That is the trade — deep clears a face
+    //             in one and costs a little of it, shallow costs nothing and costs cuts.
+    //   facePerfect / faceGood — how near a face has to sit to the shape to be called
+    //             clean, and to be called a face at all. A brilliant is read harder than a
+    //             cabochon: it is the same wheel and a different standard.
+    tiers: {
+      basic: {
+        sides: 8, cuts: 18, rough: 0.26,
+        shallow: { nodes: [1, 2], over: 0.004 },
+        deep: { nodes: [2, 3], over: 0.02 },
+        facePerfect: 0.03, faceGood: 0.095,
+      },
+      fine: {
+        sides: 6, cuts: 18, rough: 0.32,
+        shallow: { nodes: [1, 2], over: 0.005 },
+        deep: { nodes: [2, 4], over: 0.026 },
+        facePerfect: 0.022, faceGood: 0.07,
+      },
+      master: {
+        sides: 12, cuts: 22, rough: 0.34,
+        shallow: { nodes: [1, 2], over: 0.004 },
+        deep: { nodes: [2, 3], over: 0.022 },
+        facePerfect: 0.013, faceGood: 0.045,
+      },
+    },
+  },
+
   // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
   // is. Every number the axe answers to lives here.
   fell: {

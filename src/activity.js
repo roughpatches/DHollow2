@@ -11,13 +11,16 @@ import { FishEngine } from './minigames/FishEngine.js';
 import { QuarryEngine } from './minigames/QuarryEngine.js';
 import { MealEngine } from './minigames/MealEngine.js';
 import { BrewEngine } from './minigames/BrewEngine.js';
+import { GemEngine } from './minigames/GemEngine.js';
 
-// A brew is the one activity whose difficulty is written on the work rather than on the
-// engine: a recipe names a tier in tuning.js and that is what makes one potion harder than
-// another. Anything reaching the pot without saying — a node on the road, a recipe that
-// leaves it out — gets the first tier written.
-function brewTier(name) {
-  return TUNING.brew.tiers[name] || Object.values(TUNING.brew.tiers)[0];
+// Some work is harder than other work of the same kind, and where it is, the difficulty is
+// written on the work rather than on the engine: a recipe names one of the tiers in
+// tuning.js and that is the whole of what makes one potion or one stone harder than the
+// next. An engine with `tiers` below reads it; anything arriving without one — a node on
+// the road, a recipe that leaves it out — gets the first tier written.
+function tierOf(name, hard) {
+  const tiers = ENGINES[name] && ENGINES[name].tiers;
+  return tiers ? (tiers[hard] || Object.values(tiers)[0]) : {};
 }
 
 const ENGINES = {
@@ -43,11 +46,23 @@ const ENGINES = {
     // `hard` is the tier and `labels` are what goes in, both off the recipe; see
     // optionsFor in src/craft.js.
     make: (scene, layout, opts) => new BrewEngine(scene, {
-      ...TUNING.brew, ...brewTier(opts.hard), labels: opts.labels, layout,
+      ...TUNING.brew, ...tierOf('Brewing', opts.hard), labels: opts.labels, layout,
     }),
     hint: '[Space] Stop the shape inside the outline',
+    tiers: TUNING.brew.tiers,
+    says: (t) => `${t.shapes} shapes, ${sec(t.periodMs[0])} to ${sec(t.periodMs[1])} apiece`,
+  },
+  Cutting: {
+    make: (scene, layout, opts) => new GemEngine(scene, {
+      ...TUNING.gem, ...tierOf('Cutting', opts.hard), layout,
+    }),
+    hint: '[Left/Right] Round the stone    [Up/Down] Deep or shallow    [Space] Cut',
+    tiers: TUNING.gem.tiers,
+    says: (t) => `${t.sides} faces, ${t.cuts} cuts, ${t.deep.nodes[0]} to ${t.deep.nodes[1]} nodes a deep one`,
   },
 };
+
+const sec = (ms) => `${Math.round(ms / 100) / 10}s`;
 
 export function hasEngine(name) {
   return !!(name && ENGINES[name]);
@@ -64,14 +79,12 @@ export function hintFor(name) {
   return ENGINES[name]?.hint || '';
 }
 
-// What a tier amounts to, in the one sentence a bench can put in front of the player
-// before they commit the ingredients. Only the pot has tiers, so this is the pot's
-// sentence; everything else has none and says nothing.
+// What a tier amounts to, in the one sentence a bench puts in front of the player before
+// they commit the materials. Work with no tiers says nothing, which is most of it.
 export function hardLine(name, hard) {
-  if (name !== 'Brewing' || !hard) return '';
-  const t = brewTier(hard);
-  const secs = (ms) => `${Math.round(ms / 100) / 10}s`;
-  return `${hard} — ${t.shapes} shapes, ${secs(t.periodMs[0])} to ${secs(t.periodMs[1])} apiece`;
+  const e = ENGINES[name];
+  if (!e || !e.says || !hard) return '';
+  return `${hard} — ${e.says(tierOf(name, hard))}`;
 }
 
 // Every judgment an engine handed back, averaged into one 0..1. What each judgment is

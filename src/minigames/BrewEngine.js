@@ -49,6 +49,7 @@ export class BrewEngine {
     this.at = 0; // which shape is in the pot
     this.startedAt = null;
     this.resolving = false;
+    this.armed = true; // one measure to a press: a key held down is not a run of them
 
     // Every shape rolled before the first one is drawn, so the run of them is one thing
     // the player is being handed rather than a series of surprises.
@@ -76,13 +77,16 @@ export class BrewEngine {
   // SPACE — stop it where it stands. One press to a shape; the second is the next
   // ingredient's, and it does not come until this one has been read.
   chargeStart() {
-    if (this.completed || this.resolving || this.startedAt === null) return;
+    if (this.completed || this.resolving || !this.armed || this.startedAt === null) return;
+    this.armed = false;
     this._resolve(this._pulse());
   }
 
-  // the release and the arrows are nothing to a pot; the contract asks for them, so they
-  // are here and they do nothing
-  strike() {}
+  // the key came up, so the next press is a new measure. The arrows are nothing to a pot;
+  // the contract asks for them, so it is here and does nothing
+  strike() {
+    this.armed = true;
+  }
 
   setSide() {}
 

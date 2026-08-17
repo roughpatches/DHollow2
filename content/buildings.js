@@ -82,7 +82,7 @@ export const BUILDINGS = [
       },
       {
         name: 'Hearth lit',
-        note: 'Sheeted over, the hearth swept, and the bellows patched enough to blow.',
+        note: 'Sheeted over, the hearth swept, the bellows patched, and the treadle wheel turning again in the corner.',
         craft: true,
         cost: { stone: 18, ironbar: 4, pitch: 4 },
       },

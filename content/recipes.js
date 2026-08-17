@@ -101,6 +101,65 @@ export const RECIPES = [
     ],
   },
 
+  // --- the wheel, in the corner of the smithy --------------------------------
+  // A rough stone comes off a mining node about one time in eight, so every one of these
+  // is a stone the player walked a long way for and gets one go at. Three shapes and three
+  // tiers; what the stone is worth is how near it ends up to the shape it was given.
+  {
+    id: 'cabochon',
+    name: 'Grind a cabochon',
+    at: 'forge',
+    stage: 1,
+    level: 2,
+    skill: 'gemcutting',
+    rank: 1,
+    activity: 'Cutting',
+    hard: 'basic',
+    costs: { roughgem: 1 },
+    makes: { cabochon: 1 },
+    xp: 18,
+    body: [
+      'No facets to speak of — eight flats worked round until the light stops catching on the corners.',
+      'The shape a stone is given when nobody is sure yet what is inside it.',
+    ],
+  },
+  {
+    id: 'tablegem',
+    name: 'Cut a table stone',
+    at: 'forge',
+    stage: 2,
+    level: 4,
+    skill: 'gemcutting',
+    rank: 2,
+    activity: 'Cutting',
+    hard: 'fine',
+    costs: { roughgem: 1, charcoal: 1 },
+    makes: { tablegem: 1 },
+    xp: 32,
+    body: [
+      'Six faces, worked wide and taken down flat, with the top left broad enough to look into.',
+      'Six faces means six corners, and a wheel that runs past one of them has taken it.',
+    ],
+  },
+  {
+    id: 'brilliant',
+    name: 'Cut a brilliant',
+    at: 'forge',
+    stage: 2,
+    level: 7,
+    skill: 'gemcutting',
+    rank: 3,
+    activity: 'Cutting',
+    hard: 'master',
+    costs: { roughgem: 2, charcoal: 2 },
+    makes: { brilliant: 1 },
+    xp: 60,
+    body: [
+      'Twelve faces, none of them wide, every one of them wanted.',
+      'Two stones go on the wheel because one of them is expected not to come off it.',
+    ],
+  },
+
   // --- the still room --------------------------------------------------------
   // Three potions and three tiers, which is what the pot is for: the same hands at three
   // difficulties, so what a tier costs the player is a thing that can be felt rather than

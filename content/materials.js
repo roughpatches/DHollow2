@@ -61,6 +61,33 @@ export const MATERIALS = [
     ],
   },
   {
+    id: 'cabochon',
+    name: 'Cabochon',
+    start: 0,
+    body: [
+      'A domed stone worked to eight soft flats, polished until it holds the light rather than throwing it.',
+      'Worth having. Not worth what the same stone would have been in better hands.',
+    ],
+  },
+  {
+    id: 'tablegem',
+    name: 'Table-Cut Stone',
+    start: 0,
+    body: [
+      'Six faces and a broad flat top, cut to be looked into rather than looked at.',
+      'The first thing off that wheel in a generation that anybody would call a gem.',
+    ],
+  },
+  {
+    id: 'brilliant',
+    name: 'Brilliant',
+    start: 0,
+    body: [
+      'Twelve faces, and every one of them doing something to the light on its way back out.',
+      'Somebody who can cut one of these does not stay in a town like this. That is the usual order of it.',
+    ],
+  },
+  {
     id: 'tonic',
     name: 'Steeped Tonic',
     start: 0,
