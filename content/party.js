@@ -17,10 +17,17 @@
 //              those on the die alone.
 //   fears    — ids from content/fears.js. A quest carrying one of these as a tag needs
 //              a deeper bond before they will walk out on it.
-//   combat   — true if they can fight. Every night job needs one of them on it, because
-//              after dark the road puts up things that have to be fought rather than
-//              worked around. Nothing else marks a fighter: no skill, no score, this line.
-//              Nobody below carries it yet, so night work is blocked until somebody does.
+//   combat   — the numbers they fight on, and carrying the line at all is what makes them
+//              a fighter. Every night job needs one of them on it, because after dark the
+//              road puts up things that have to be fought rather than worked around.
+//              No skill and no score marks a fighter: this line does.
+//                hp    — hit points, their own bar, full at the gate of every run and
+//                        spent down by whatever they trade blows with. At zero they are
+//                        out of that run. Levels add combat.hpPerLevel from tuning.js.
+//                hit   — what they add to their own d20 when they swing.
+//                guard — what a blow at them has to beat.
+//                harm  — what one of their blows takes off, [least, most].
+//              Leave any of the four out and it is the fighter default in tuning.js.
 //   needs    — a story flag they are not recruitable before. See src/story.js.
 //   bond     — how well they know you at the start, in points. A band is bondPerBand
 //              points, so 0 is a stranger and 9 is sworn. See tuning.js.
@@ -28,7 +35,7 @@
 // Level, XP and the bond as it stands now live in src/party.js; the constitution a run
 // has left lives on the run, in src/run.js. This file is only what a character starts as.
 //
-// Aldis is the only recruit for now: the rest of the cast is being written. Everyone
+// Aldis and Ivo are the recruits for now: the rest of the cast is being written. Everyone
 // still standing around town in content/npcs.js is somebody to talk to, not somebody to
 // take — a character becomes recruitable by getting a block here.
 
@@ -60,6 +67,23 @@ export const PARTY = [
     // no combat: he knows the Greywood, he does not fight it. The first job is day work
     // for that reason.
     bond: 9,
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // The one person in Dreadhollow who will walk out after dark, and the only reason a
+    // night job can be crewed at all. Name, look and body are placeholders: what is real
+    // here is the `combat` line and the four numbers on it.
+    id: 'ivo',
+    name: 'Ivo Marchant',
+    palette: 'warden',
+    con: 11,
+    // Three skills, six points, like everybody else. Nothing here is what makes them a
+    // fighter — the line below is — but they are the second pair of eyes on the road at
+    // night, which is what a night job's own roll usually asks for.
+    skills: { intimidation: 3, fording: 2, investigation: 1 },
+    combat: { hp: 24, hit: 2, guard: 12, harm: [3, 6] },
+    needs: 'firstday-done', // they turn up once the first job is walked, and so does night work
+    bond: 3, // acquainted: enough to come out on ordinary work without being courted first
     body: ['[Placeholder Text]'],
   },
 ];

@@ -13,7 +13,7 @@ import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
 import { DRAWN_KINDS } from './nodes.js';
 import {
-  roster, charOf, award, levelOf, raiseBond, conOf, conTotal,
+  roster, charOf, award, levelOf, raiseBond, conOf, conTotal, combatOf,
   rankOf, scoreOf, check, bestAt, skillOf, skillForActivity, walking, fighters, YOU,
   nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
@@ -21,6 +21,7 @@ import { give, nameOf } from './town.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
+import { begin, take, foeOf, MOVES } from './combat.js';
 
 // Everything a node can turn out to be: the ones a quest names by hand, and the ones the
 // road draws. They are one shape and one lookup, so nothing downstream has to know which
@@ -129,6 +130,14 @@ for (const [i, a] of gathering.entries()) {
   for (const b of gathering.slice(i + 1)) {
     if (!pairings.has([a, b].sort().join('+'))) console.warn(`No resource node pairs ${a} with ${b}.`);
   }
+}
+
+// A combat node with nothing to fight is a node that reads as a fight and then is not
+// one, and a foe nobody wrote is a fight that cannot start. Both are content mistakes and
+// both are cheap to say here.
+for (const e of KINDS) {
+  if (e.foe && !foeOf(e.foe)) console.warn(`${e.name}: no such foe — ${e.foe}`);
+  if (e.nature === 'combat' && !e.foe) console.warn(`${e.name}: a combat node with nothing to fight.`);
 }
 
 // Somewhere to set out for has to have something to walk. A zone open for work with
@@ -389,6 +398,11 @@ export function start(id, when, party, choice = {}) {
     quest, size, where, when: at, party: who, nodes, at: -1, state: 'running',
     used: new Set(), // the kinds this run has had that it is only allowed one of
     spoils: {}, xp: 0, con, conMax: con,
+    // Hit points are the fighters' own and are not pooled: the party shares a
+    // constitution and nobody shares a rib. Full at the gate, spent down by whatever
+    // they trade blows with, and forgotten when the run ends — the same as the pool.
+    hp: Object.fromEntries(fighters(who).map((id) => [id, combatOf(id).hp])),
+    fight: null, // the one going on right now, and null the rest of the time
   };
   step();
   return run;
@@ -707,6 +721,9 @@ function toBeat(node, id) {
     return;
   }
   story.set(b.flag);
+  // The beat the fight starts at. `true` is a beat that fights whatever the node names;
+  // src/nodes.js writes the fuller form, with what the way through was worth to it.
+  if (b.fight) node.fight = b.fight === true ? { foe: KIND[node.kind].foe } : b.fight;
   if (b.con) node.conBeat += b.con;
   if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
   if (b.draw) node.beatDraw = b.draw; // the beat walked into decides which table, if any
@@ -735,15 +752,115 @@ export function advance() {
   return run;
 }
 
-// The end of the beats is the end of the node — unless the encounter also names an
-// activity, in which case the beats were the walk up to it and the player takes the
-// controls now. That is how a node gets words in front of its minigame.
+// The end of the beats is the end of the node — unless the way the party took walked
+// them into a fight, or the encounter also names an activity, in which case the beats
+// were the walk up to it and the player takes the controls now. That is how a node gets
+// words in front of its minigame, and words in front of whatever is standing in the road.
 function outOfBeats(node) {
+  if (!node.passed && node.fight) {
+    toFight(node);
+    return;
+  }
   if (!node.passed && hasEngine(activityOf(node))) {
     run.phase = 'activity';
     return;
   }
   settle(null);
+}
+
+// --- fighting ---------------------------------------------------------------
+// A fight is 1v1: one combat character is up and the rest of the party stands off it.
+// The rules are in src/combat.js and what is fought is in content/foes.js; this is only
+// what a run does with the result. Hit points are the fighter's own — the pool hears
+// about a fight when somebody goes down, and not before.
+
+// who on the run can fight and is still on their feet
+export function standing() {
+  return run ? fighters(run.party).filter((id) => run.hp[id] > 0) : [];
+}
+
+export function hpOf(id) {
+  return run && run.hp[id] !== undefined ? run.hp[id] : 0;
+}
+
+export function hpMaxOf(id) {
+  const c = combatOf(id);
+  return c ? c.hp : 0;
+}
+
+export function fightingAt() {
+  return run ? run.fight : null;
+}
+
+// The party has walked up to something that has to be fought. Where more than one of them
+// fights, which one steps up is the player's call — it is the only choice they get about
+// a fight before it starts, and it is the whole of what a second fighter is for.
+function toFight(node) {
+  const up = standing();
+  if (!foeOf(node.fight.foe)) { settle(null); return; } // said at boot; the run walks on
+  if (!up.length) { rout(); return; }
+  if (up.length === 1) stepUp(up[0]);
+  else run.phase = 'fighter';
+}
+
+export function stepUp(id) {
+  if (!run || !standing().includes(id)) return run;
+  const node = run.nodes[run.at];
+  run.fight = begin(id, foeOf(node.fight.foe), {
+    pool: run.hp, weaken: node.fight.weaken || 0, ambush: !!node.fight.ambush,
+  });
+  run.phase = 'fight';
+  return afterTurn(node);
+}
+
+export function fightMove(i) {
+  if (!run || run.phase !== 'fight' || !run.fight || run.fight.over) return run;
+  take(run.fight, MOVES[i].id);
+  return afterTurn(run.nodes[run.at]);
+}
+
+// Whatever the turn came to. The fight is only over two ways: the thing goes down, or
+// the fighter does.
+function afterTurn(node) {
+  const f = run.fight;
+  if (!f || !f.over) return run;
+  if (f.over === 'won') {
+    node.won = { foe: f.foe.name, who: f.who, rounds: f.round, taken: f.taken };
+    // what is taken off it once it is down, paid the way a beat's spoils are
+    node.beatSpoils = { ...(node.beatSpoils || {}), ...(f.foe.spoils || {}) };
+    run.fight = null;
+    settle(null);
+    return run;
+  }
+  faint(f.who);
+  return run;
+}
+
+// A fighter at nothing is carried, and a body being carried is not a body walking: their
+// constitution comes off the pool with them. Somebody else who fights steps up; nobody
+// left who fights and the party is finished out here whatever the pool still says.
+function faint(id) {
+  const node = run.nodes[run.at];
+  const f = run.fight;
+  // Whoever steps up next steps into the fight that is already happening, not a new one:
+  // what the one being carried took off it stays off it, and nobody is ambushed twice.
+  node.fight = { ...node.fight, weaken: Math.max(0, f.foeMax - f.foeHp), ambush: false };
+  run.fight = null;
+  const lost = Math.round(conOf(id) * TUNING.combat.faintCon);
+  run.conMax = Math.max(0, run.conMax - lost);
+  run.con = Math.max(0, Math.min(run.conMax, run.con - lost));
+  node.fainted = [...(node.fainted || []), { who: whoIs(id), con: lost }];
+  if (!standing().length) { rout(); return; }
+  if (run.con <= 0) { spend(); return; }
+  run.phase = 'fighter'; // the thing is still standing there and somebody has to
+}
+
+// Nobody left who fights, with something in the road that has to be. They break off and
+// come home from where they stand, the same as a party with nothing left in the pool.
+function rout() {
+  run.routed = true;
+  run.fight = null;
+  spend();
 }
 
 // A way through a scene that names work nobody on the run knows is a way the party
@@ -977,6 +1094,22 @@ export function passedLine(node) {
   const named = (node.harvests || []).map((h) => h.skill.name);
   const skill = named.length ? named.join(' or ') : 'this work';
   return `Nobody walking this knows ${skill}. The party looks at it a while and goes on.`;
+}
+
+// What the fight came to, on the tally afterwards: what went down, how long it took, and
+// what it cost the one who was up. Null at a node where nothing was fought.
+export function wonLine(node) {
+  const w = node.won;
+  if (!w) return null;
+  const rounds = `${w.rounds} ${w.rounds === 1 ? 'round' : 'rounds'}`;
+  return w.taken
+    ? `${w.foe} is down. ${rounds}, and ${w.taken} hit points off ${w.who === YOU ? 'you' : whoIs(w.who)}.`
+    : `${w.foe} is down in ${rounds}, and it never laid a hand on ${w.who === YOU ? 'you' : whoIs(w.who)}.`;
+}
+
+// and who was carried out of it, and what the pool lost with them
+export function faintLines(node) {
+  return (node.fainted || []).map((f) => `${f.who} is carried. ${f.con} constitution off the pool.`);
 }
 
 // who is walking it and what each of them is worth to the pool — the readout under the

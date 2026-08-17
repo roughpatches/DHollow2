@@ -26,16 +26,38 @@ function fromResource(n) {
 // carrying `choose` already is. The cards are laid out here so the content file does not
 // have to spell out seven of them to ask one question: the way in, the attempt, and the
 // two ends of each way. The body is spent on the first card, so the node keeps none.
+// A node carrying a foe fights it at the end of whichever way was taken, unless that
+// way was one that avoids it. A beat carrying `fight` is where the fight starts, and how
+// it starts is what the way was worth: held and the foe may come on weakened, lost and it
+// has the first blow. A node with no foe never writes one of these and nothing changes.
 function fromEncounter(n) {
+  const fight = (extra) => (n.foe ? { foe: n.foe, ...extra } : null);
   const beats = [{
     id: 'in',
     text: n.body,
-    choose: n.ways.map((w, i) => ({ text: w.text, skill: w.skill, dc: w.dc, then: `try${i}` })),
+    // a way naming no skill is not rolled: it walks straight into whatever is standing there
+    choose: n.ways.map((w, i) => ({
+      text: w.text, skill: w.skill, dc: w.dc, then: w.skill ? `try${i}` : `met${i}`,
+    })),
   }];
   n.ways.forEach((w, i) => {
+    if (!w.skill) {
+      beats.push({
+        id: `met${i}`, text: [w.met], spoils: w.spoils || {}, con: w.con || 0, fight: fight(),
+      });
+      return;
+    }
     beats.push({ id: `try${i}`, text: [w.tried], result: { hit: `held${i}`, miss: `lost${i}` } });
-    beats.push({ id: `held${i}`, text: [w.held], spoils: w.spoils || {}, con: w.con || 0 });
-    beats.push({ id: `lost${i}`, text: [w.lost], con: -(w.lostCon || 0) });
+    beats.push({
+      id: `held${i}`,
+      text: [w.held],
+      spoils: w.spoils || {},
+      con: w.con || 0,
+      fight: w.avoids ? null : fight({ weaken: w.weakens || 0 }),
+    });
+    beats.push({
+      id: `lost${i}`, text: [w.lost], con: -(w.lostCon || 0), fight: fight({ ambush: true }),
+    });
   });
   return {
     ...n, harvest: null, check: null, spoils: {}, draw: null, activity: null, body: [], beats,

@@ -273,6 +273,22 @@ export const TUNING = {
   skillOddsPerPoint: 0.06,
   skillOddsMost: 0.6, // and this is as flat as any table gets, at any score
 
+  // Fighting. What is fought and what it takes to fight it is in content/foes.js; these
+  // are the numbers the system itself runs on, and they are the same for every fight.
+  combat: {
+    // What a character marked `combat` in content/party.js is worth, where their own
+    // block does not say. A block naming none of these is a fighter of exactly this size.
+    fighter: { hp: 24, hit: 2, guard: 12, harm: [3, 6] },
+    hpPerLevel: 4, // added to a fighter's hit points for every level past the first
+    ambushHit: 3, // what a foe adds to its opening blow at a fight walked into blind
+    // A fighter at zero hit points is out of the run: their own constitution comes off
+    // the party's pool, because a body being carried is not a body walking. Somebody else
+    // who fights steps up; nobody left who fights and the party turns for home.
+    faintCon: 1, // what fraction of their constitution the pool loses. One is all of it.
+  },
+
+  questHpHeight: 10, // the slim bar under the constitution, one per fighter on the run
+
   // Skill checks. A die, plus the skill, against a DC written on the encounter or the
   // job. The best in the party rolls it. A natural top always holds and a natural 1
   // never does, so no DC is a wall and none is a formality.
@@ -375,6 +391,14 @@ export const COLORS = {
   conRivet: 0x9aa0a6,
   conFull: 0xd1943c,
   conLow: 0xa8341f,
+
+  // The slim bars under it: a fighter's own hit points, and — while a fight is on — what
+  // is left of the thing they are fighting. The party's runs green to the same red the
+  // constitution goes to; the foe's is its own colour, so the two are never confused.
+  hpFull: 0x7f9f5a,
+  hpLow: 0xa8341f,
+  foeFull: 0x8a4a5e,
+  foeLow: 0x3a2028,
 
   // What is behind the town. The paintings carry no sky — it is transparent in them, so
   // the weather is the game's to draw — and where a panel has a hole in it you are looking

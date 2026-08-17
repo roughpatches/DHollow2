@@ -59,6 +59,23 @@ export function fighters(ids) {
   return ids.filter((id) => isCombat(id));
 }
 
+// What a fighter is worth in a fight, at the level they have reached. Their own block
+// says whatever it wants to say and tuning.js says the rest, so a character written as
+// `combat: {}` is a fighter of exactly the default size. Nobody else has any of this:
+// a character who cannot fight has no hit points, which is why a night job needs one.
+export function combatOf(id) {
+  const c = charOf(id);
+  if (!c || !c.combat) return null;
+  const d = TUNING.combat.fighter;
+  const own = c.combat === true ? {} : c.combat;
+  return {
+    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1),
+    hit: own.hit ?? d.hit,
+    guard: own.guard ?? d.guard,
+    harm: own.harm || d.harm,
+  };
+}
+
 // The player is nobody's recruit: they are on every run without being asked, and are
 // left out of every list of who might come. This is the only place that knows which
 // character they are.

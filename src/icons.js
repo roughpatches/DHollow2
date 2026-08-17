@@ -249,6 +249,7 @@ const ICONS = {
   heronfeather: ['feather', 'ash'],
   eggshell: ['shell', 'shell'],
   greyarrow: ['arrows', 'ash'],
+  bone: ['shard', 'bone'],
   ironore: ['grain', 'iron'],
   roughgem: ['shard', 'glass'],
   bread: ['loaf', 'food'],
