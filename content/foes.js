@@ -22,6 +22,12 @@
 //   harm   — what one of its blows takes off a fighter, [least, most].
 //   spoils — what is taken off it once it is down, [least, most] each. A fight that pays
 //            nothing is a fight nobody had a reason to pick, so everything here pays.
+//   pulls  — true if it will break off out of the front when it is badly hurt and there
+//            is something fresher behind it, rather than standing there and dying. It
+//            costs them the blow they were going to throw and hands the party an opening,
+//            and what pulled back comes forward again later as hurt as it went. Leave it
+//            out for anything that does not know how to do that, or will not: it is what
+//            separates men and dogs working together from a thing that simply comes on.
 //   body   — what it is, said once when it comes on.
 //   lands  — what it looks like when its blow goes in.
 //   misses — and when it does not.
@@ -102,6 +108,7 @@ export const FOES = [
     hit: 3,
     guard: 12,
     harm: [3, 5],
+    pulls: true, // he has done this before, and he did not get old out here by standing still
     // the fletching from the heron and the stag, on the man who has been leaving it
     spoils: { greyarrow: [2, 5], nails: [1, 2] },
     body: [
@@ -128,6 +135,7 @@ export const FOES = [
     hit: 4,
     guard: 13,
     harm: [2, 4],
+    pulls: true, // it is worked to a whistle, and the whistle knows what a hurt dog is worth
     spoils: { canvas: [0, 1], bone: [1, 2] },
     body: [
       'A long grey dog comes off the picket at the edge of the firelight, low and silent, and it was silent the whole time you were walking up.',

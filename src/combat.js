@@ -32,6 +32,12 @@ export function saidCount(n) {
   return SAID[n] || `${n}`;
 }
 
+// A foe's name is written as a title — The thing that was following — and a title dropped
+// into the middle of a sentence reads as a shout. This is the same name said mid-line.
+function named(foe) {
+  return foe.name.replace(/^The /, 'the ');
+}
+
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
@@ -78,7 +84,9 @@ export function begin(who, foes, { pool, weaken = 0, ambush = false }) {
   const fight = {
     who, // whoever is standing in front of it, and null while nobody is
     foe, // and whoever is standing in front of them
-    rest, // the ones behind it, in the order they come on
+    // The ones behind it, in the order they come on, each carrying what it has left:
+    // one that pulled back wounded comes forward again wounded.
+    rest: rest.map((f) => ({ foe: f, hp: f.hp, max: f.hp })),
     felled: [], // and the ones already put down, for what is taken off them
     pool,
     foeMax: foe.hp,
@@ -86,6 +94,7 @@ export function begin(who, foes, { pool, weaken = 0, ambush = false }) {
     weakened: weaken,
     round: 1,
     steady: 0, // what a turn spent guarding is worth to the next swing
+    opening: 0, // and what their own changeover is worth to it
     hurt: {}, // what it has taken off each of them, for the tally afterwards
     over: null, // 'won' once they are all down, 'down' once whoever is up is
     log: [],
@@ -129,12 +138,40 @@ function nextUp(fight) {
     fight.over = 'won';
     return false;
   }
-  fight.foe = fight.rest.shift();
-  fight.foeMax = fight.foe.hp;
-  fight.foeHp = fight.foe.hp;
+  comeForward(fight);
   fight.log.push([fight.rest.length
     ? `Another comes forward, and there are ${saidCount(fight.rest.length + 1)} of them left.`
     : 'The last of them comes forward.', 'them']);
+  return true;
+}
+
+// the next one out of the queue, with whatever it has left, standing in front
+function comeForward(fight) {
+  const next = fight.rest.shift();
+  fight.foe = next.foe;
+  fight.foeMax = next.max;
+  fight.foeHp = next.hp;
+}
+
+// Their own changeover. A band written to work as one pulls its hurt one out from the
+// front rather than letting you finish it, and something fresher takes its place — but
+// it costs them the blow they were going to throw, and a changeover is an opening
+// whoever is facing it can use, the same as it is when the party does it.
+function pullsBack(fight) {
+  const foe = fight.foe;
+  if (!foe.pulls || !fight.rest.length) return false;
+  if (fight.foeHp / fight.foeMax > TUNING.combat.foePullsAt) return false;
+  const fresher = fight.rest.some((f) => f.hp / f.max > fight.foeHp / fight.foeMax);
+  if (!fresher) return false;
+  // it goes to the back as hurt as it is, and the freshest of them comes across
+  fight.rest.sort((a, b) => b.hp / b.max - a.hp / a.max);
+  fight.rest.push({ foe, hp: fight.foeHp, max: fight.foeMax });
+  comeForward(fight);
+  // where the one coming across is the same kind of thing, it is another of them rather
+  // than a second reading of the same name
+  const across = fight.foe.name === foe.name ? 'another of them' : named(fight.foe);
+  fight.log.push([`${foe.name} breaks off out of your reach, and ${across} comes across in front of it.`, 'them']);
+  fight.opening = TUNING.combat.swapOpens;
   return true;
 }
 
@@ -147,7 +184,7 @@ export function take(fight, moveId) {
   const me = combatOf(fight.who);
 
   if (move.harm > 0) {
-    const s = swing(me.hit + move.hit + fight.steady, fight.foe.guard);
+    const s = swing(me.hit + move.hit + fight.steady + fight.opening, fight.foe.guard);
     const hurt = s.lands ? Math.max(1, Math.round(roll(me.harm) * move.harm)) : 0;
     fight.log.push([swingLine(nameOf(fight.who), s, hurt, 'it'), 'us']);
     fight.foeHp = Math.max(0, fight.foeHp - hurt);
@@ -155,14 +192,16 @@ export function take(fight, moveId) {
   } else {
     fight.log.push([`${nameOf(fight.who)} takes the turn to cover up and find their feet.`, 'us']);
   }
+  fight.opening = 0; // taken, or let go: either way the moment was this turn
 
   if (fight.foeHp <= 0) {
     fight.log.push([pick(fight.foe.felled), 'said']);
-    if (!nextUp(fight)) return fight;
+    nextUp(fight);
     return fight;
   }
 
-  answer(fight, move.opens, move.keep);
+  // They may change over instead of answering, which costs them the blow
+  if (!pullsBack(fight)) answer(fight, move.opens, move.keep);
   fight.steady = move.steady || fight.steady;
   fight.round += 1;
   return fight;
@@ -177,6 +216,7 @@ export function swapTo(fight, id) {
   fight.log = [[`${nameOf(id)} comes across and ${nameOf(out)} falls back out of it, and the changeover is the turn.`, 'us']];
   fight.who = id;
   fight.steady = 0; // whatever the last one had found their feet on, they took with them
+  fight.opening = 0; // and any opening left standing was not taken
   answer(fight, TUNING.combat.swapOpens, 1);
   fight.round += 1;
   return fight;
@@ -190,6 +230,7 @@ export function stepIn(fight, id) {
   fight.who = id;
   fight.over = null; // the fighter was finished; the fight was not
   fight.steady = 0;
+  fight.opening = 0;
   fight.log = [[`${nameOf(id)} steps over them and takes the front.`, 'us']];
   return fight;
 }
@@ -221,7 +262,7 @@ export function moveLine(move, fight) {
   if (move.harm > 0) {
     const harm = me ? `${Math.round(me.harm[0] * move.harm)}–${Math.round(me.harm[1] * move.harm)}` : 'harm';
     bits.push(`${harm} harm`);
-    const hit = move.hit + (fight ? fight.steady : 0);
+    const hit = move.hit + (fight ? fight.steady + fight.opening : 0);
     if (hit) bits.push(`${hit > 0 ? '+' : ''}${hit} to hit`);
   } else bits.push('no swing');
   if (move.opens) bits.push(`it answers at +${move.opens}`);

@@ -290,6 +290,11 @@ export const TUNING = {
     // in takes what the foe makes of the gap. Somebody stepping in over a fighter who is
     // already down pays neither: the blow that put the last one down was that turn.
     swapOpens: 2,
+    // The other side changes over too, where the band is written to. One that is this far
+    // down pulls back behind a fresher one rather than dying in front of you — it costs
+    // them the blow they would have thrown, and the changeover is an opening your way at
+    // the same swapOpens. What comes back later comes back as hurt as it went.
+    foePullsAt: 0.3,
     // A fighter at zero hit points is out of the run: their own constitution comes off
     // the party's pool, because a body being carried is not a body walking. Somebody else
     // who fights steps up; nobody left who fights and the party turns for home.
