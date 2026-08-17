@@ -614,7 +614,7 @@ export const ENCOUNTER_NODES = [
     xp: [12, 20],
     con: [-2, 0],
     body: [
-      'There are men standing off the path where the light does not reach, and they have been standing there long enough to have trodden the ground flat. Nobody is out here after dark without a lamp by accident.',
+      'There are two of them standing off the path where the light does not reach, close enough together to be one shape until they are not. They have been there long enough to have trodden the ground flat. Nobody is out here after dark without a lamp by accident.',
     ],
     ways: [
       {
@@ -1469,7 +1469,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'There are people on the path ahead who have stopped walking to watch you come. They are carrying nothing, and they have been carrying nothing a while.',
+      'Two of them on the path ahead who have stopped walking to watch you come. Barefoot, worn through, and carrying nothing — and they have been carrying nothing a while.',
     ],
     ways: [
       {
@@ -1477,8 +1477,8 @@ export const ENCOUNTER_NODES = [
         skill: 'cooking',
         dc: 12,
         tried: 'More water, more salt, and everything in the packs that will swell.',
-        held: 'It goes round nine where it was made for four, and it is still worth eating.',
-        lost: 'It goes round nine. It is not worth eating and there is none of it left.',
+        held: 'It goes round six where it was made for four, and it is still worth eating.',
+        lost: 'It goes round six. It is not worth eating and there is none of it left.',
         con: 2,
         spoils: { nails: [0, 2] },
         lostCon: 2,

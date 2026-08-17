@@ -1,0 +1,37 @@
+{
+  "group_id": "f28ea1cc-deb0-4d4c-8303-095da0aae682",
+  "objects": [
+    {
+      "id": "10d8754c-6e4d-49bb-8bc7-ff95b4511600",
+      "name": "base",
+      "prompt": "Two bedraggled travelers, in worn traveling clothes, one of them with a hand out talking",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Two_bedraggled_travelers_in_w.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "f92966aa-88c2-48ae-832c-b0616fa223f0",
+      "name": "Traveler's with pack",
+      "prompt": "Two bedraggled travelers, in worn traveling clothes, one of them with a hand out talking",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Traveler_s_with_pack.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T23:51:43.265849"
+}

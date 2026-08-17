@@ -1,0 +1,37 @@
+{
+  "group_id": "e79f53ce-ba5f-4426-98c3-0cc973256aef",
+  "objects": [
+    {
+      "id": "c7307224-6ab9-4c82-97b7-97ad66bb2b81",
+      "name": "base",
+      "prompt": "Two bedraggled travelers, in worn traveling clothes, one of them with a hand out talking",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Two_bedraggled_travelers_in_w.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "73f36fe6-3b53-40d0-aec6-1d680ec80d89",
+      "name": "Two people, heavily",
+      "prompt": "Two bedraggled travelers, in worn traveling clothes, one of them with a hand out talking",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Two_people_heavily.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T23:51:47.451827"
+}

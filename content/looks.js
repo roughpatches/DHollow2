@@ -366,6 +366,20 @@ const HERON = {
   },
 };
 
+// The same two travellers, met three ways. Two of them with packs and stopping to talk;
+// the same two with the packs off and nothing in their hands; and two more standing in the
+// dark with no light on them, which is a second generation of the one prompt rather than a
+// dressing of the first. Nobody here has a hard edge, so nothing is feathered.
+const traveller = (name) => ({
+  path: 'art/travellers',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 22 },
+});
+
+const STRANGERS = {
+  path: 'art/strangers',
+  stands: { still: 'Two_people_heavily/rotations/Two_people_heavily.png', ground: 29 },
+};
+
 // Soggy ground, and the same soggy ground with a dozen mounds risen out of it. A band
 // rather than a thing, running off both sides of its frame, so it is feathered on the two
 // sides and the top; the bottom is the road. Warm enough as painted to want no shade.
@@ -525,4 +539,7 @@ export const NODE_ART = {
   hazard: marsh('A_stretch_of_marshy_soggy_gro'), // Bad ground
   mire: marsh('A_stretch_of_marshy_soggy_gro'), // and The ground gives, the same stretch
   unquiet: marsh('A_number_of_dark_ea'), // Out of the ground
+  folk: traveller('Traveler_s_with_pack'), // Folk on the road
+  hungry: traveller('Two_bedraggled_travelers_in_w'), // and the same two with the packs off
+  strangers: STRANGERS, // Strangers, and no lamp
 };
