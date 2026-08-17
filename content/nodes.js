@@ -238,21 +238,21 @@ export const RESOURCE_NODES = [
     // Woodcutting and Mining in one place: the slope took the trees down with it and left
     // the face they were standing on open behind them.
     id: 'slip',
-    name: 'Where the hillside came away',
+    name: 'Where the ground gave way',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'woodcraft', line: 'Half the trees on that slope are lying the wrong way, and the ground they were in is not there any more.' },
+    read: { skill: 'woodcraft', line: 'Half the trees on that side are lying in a hole that was not there last year, and the ground they were in is not there any more.' },
     harvests: [
       {
         skill: 'woodcutting',
         activity: 'Felling',
-        text: 'Cut the trees out of the slip.',
+        text: 'Cut the trees out of the hollow.',
         offer: 'Every one of them is under tension and not one is lying flat.',
         done: {
-          well: 'You read which way each one wants to go before you put the axe in it, and every one goes that way. Nothing comes down the slope behind you.',
+          well: 'You read which way each one wants to go before you put the axe in it, and every one goes that way. Nothing comes down the sides behind you.',
           middling: 'The first two go where you expect. The third comes round on you, and you spend the rest of the light digging the axe out of the ground.',
-          botched: 'You cut one that was holding two others. All three go, and a good deal of the slope with them. You get clear with what was already cut.',
+          botched: 'You cut one that was holding two others. All three go, and a good deal of the side with them. You get clear with what was already cut.',
         },
         spoils: { timber: [1, 3] },
         draw: { count: [1, 2], odds: { oaklog: 40, oakbranch: 45 } },
@@ -274,8 +274,8 @@ export const RESOURCE_NODES = [
     xp: [10, 16],
     con: [-2, 0],
     body: [
-      'The hillside has come off in one piece and gone down, and the trees went with it — lying now the wrong way up, roots in the air, crowns in the mud at the bottom.',
-      'Where they were standing there is a raw face of open rock and cut earth, still shedding. Nothing on this slope has finished moving.',
+      'The ground has gone out from under a stretch of the wood and taken what was standing on it down with it. There is a hollow the width of a barn where there was none, and the trees that were on top of it are lying across it now with their roots hanging out of the cut sides.',
+      'The sides are raw earth and open rock the whole way down, still shedding, with roots coming out of them at every level. There is stone in the bottom that has not been rained on yet. Nothing here has finished moving.',
     ],
   },
   {
@@ -998,15 +998,15 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'rockfall',
-    name: 'The path is under the hill',
+    name: 'The path is under the stone',
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
-    read: { skill: 'woodcraft', line: 'Half that slope is lying across the path and the trees above it are leaning after it.' },
+    read: { skill: 'woodcraft', line: 'The path stops where the ground did, and the trees on both sides of it are leaning in after it.' },
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'The path is under a slope that came down and stopped, and stopped is as much as anybody can say for it. The trees above the scar are leaning after it.',
+      'The path runs to the edge of a hollow and does not come out the far side of it. The ground gave way here and everything above it came down into the hole after — trees across the top, and under them stone, packed in and settled and filled to the brim. It came down and stopped, and stopped is as much as anybody can say for it.',
     ],
     ways: [
       {
@@ -1015,7 +1015,7 @@ export const ENCOUNTER_NODES = [
         dc: 12,
         tried: 'The big ones first, split where they want to split, and rolled rather than lifted.',
         held: 'It comes apart along its own lines and goes over the edge in an hour.',
-        lost: 'The wrong one goes first and takes the rest of the slope down onto the path behind it.',
+        lost: 'The wrong one goes first and takes the rest of the side down onto the path behind it.',
         spoils: { stone: [2, 3] },
         lostCon: 3,
       },

@@ -366,6 +366,15 @@ const HERON = {
   },
 };
 
+// A hollow where the ground has given way, and the same hollow filled with what came down
+// into it afterwards. Painted as a full square of ground like the stream, so it is
+// feathered on the three sides that show; unlike the stream it came back warm, so nothing
+// is multiplied — a shade here only dulls the green on the banks and buys nothing.
+const hollow = (name) => ({
+  path: 'art/hollow',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 0, fade: [34, 34, 34, 0] },
+});
+
 // The two beasts, one export each. The wolf stands on its own ground and needs nothing
 // doing to it. The boar's turned earth runs off both sides of its frame — the animal stops
 // well inside it, at 159 — so only the earth is feathered, and only far enough out to stop
@@ -488,4 +497,6 @@ export const NODE_ART = {
   animal: WOLF, // A wolf, and what it has killed
   boar: BOAR, // A boar, in the ground you wanted
   nest: EMPTYNEST, // Something emptied a nest here
+  slip: hollow('boulders_and_trees_collapsed_i'), // Where the ground gave way
+  rockfall: hollow('Covered_in_stone_and'), // The path is under the stone
 };
