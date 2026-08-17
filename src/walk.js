@@ -8,7 +8,7 @@
 
 import { TUNING, COLORS } from '../tuning.js';
 import { BAND, actorFrame, walkAnim, markKey } from './textures.js';
-import { footOf, nodeArtFor, nodeFrame, nodeAnim } from './art.js';
+import { bodyOf, footOf, nodeArtFor, nodeFrame, nodeAnim } from './art.js';
 import { charOf } from './party.js';
 
 const LAYERS = ['far', 'mid', 'near'];
@@ -84,10 +84,9 @@ export function createWalk(scene, rect, party, when, backdrop) {
     const foot = footOf(palette);
     const sp = scene.add.sprite(rect.x + 90 + i * 34, ground + 4, actorFrame(palette, 'right', 0));
     sp.setOrigin(0.5, foot);
-    // a placeholder fills its frame and drawn art does not, so drawn art is lifted to
-    // stand the same height as the rest of the party
-    const drawn = foot < 1 ? TUNING.questArtScale : 1;
-    sp.setScale((TUNING.questBodyPx / (sp.frame.height * foot)) * drawn);
+    // a placeholder fills its frame and drawn art does not, so everyone is stood up by how
+    // much of their frame is them rather than by the frame itself
+    sp.setScale(TUNING.questBodyPx / (sp.frame.height * bodyOf(palette)));
     sp.setDepth(party.length - i); // whoever is in front overlaps whoever is behind
     if (night) sp.setTint(COLORS.questNightTint);
     layer.add(sp);

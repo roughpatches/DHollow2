@@ -43,12 +43,25 @@ export function createStreet(scene, def) {
   if (def.horizon) {
     scene.add.image(0, 0, weatherFor(scene, width, h, def.horizon))
       .setOrigin(0, 0).setDepth(DEPTH.weather);
+    // The weather is sky and water and nothing else, so the ground the panel is walked on
+    // is laid over the bottom of it, from the line where the water gives out. A painting
+    // covers both; without one this is a shore rather than a man standing on the sea.
+    if (def.sill && def.sill < h) {
+      const g = scene.add.graphics().setDepth(DEPTH.weather + 1);
+      g.fillStyle(COLORS.sand[0], 1);
+      g.fillRect(0, def.sill, width, h - def.sill);
+    }
   } else {
+    // A panel with no horizon is a room, or a town painted with a sky of its own. Either
+    // way what goes behind it is a wall down to where the wall meets the floor and boards
+    // below that — which a painting covers completely, and which is the whole of a room
+    // that has not been painted yet.
+    const sill = def.sill ?? def.ground;
     const g = scene.add.graphics().setDepth(DEPTH.weather);
-    g.fillStyle(COLORS.questSkyDay, 1);
-    g.fillRect(0, 0, width, def.ground);
-    g.fillStyle(COLORS.path[0], 1);
-    g.fillRect(0, def.ground, width, h - def.ground);
+    g.fillStyle(COLORS.wall[0], 1);
+    g.fillRect(0, 0, width, sill);
+    g.fillStyle(COLORS.wood[0], 1);
+    g.fillRect(0, sill, width, h - sill);
   }
 
   // missing until its file is in, so this asks: without it the street is the bands alone,
@@ -60,7 +73,28 @@ export function createStreet(scene, def) {
     }
   }
 
-  return { width, height: h, ground: def.ground, sill: def.sill ?? def.ground };
+  return {
+    width,
+    height: h,
+    ground: def.ground,
+    sill: def.sill ?? def.ground,
+    body: def.body ?? TUNING.streetBodyPx,
+  };
+}
+
+// A mug painted into the room, taken off it. The painting cannot be moved and nothing can
+// be lifted out of it, so what is lifted is the eye: a patch of bare counter is cut from
+// somewhere else along the same bar and laid over where the mug stands, at the same rows,
+// so the shadow, the lit top and the lip all line up and only the mug goes. Whoever is
+// holding it is drawn over the top of it, which is the point.
+export function coverPatch(scene, art, take) {
+  const [x, y, w, h] = take.mug;
+  const [sx, sy] = take.counter;
+  const name = `bare_${sx}_${sy}_${w}_${h}`;
+  const tex = scene.textures.get(art);
+  if (!tex.has(name)) tex.add(name, 0, sx, sy, w, h);
+  return scene.add.image(x, y, art, name)
+    .setOrigin(0, 0).setDepth(DEPTH.town + 1).setVisible(false);
 }
 
 // One sky and one sea, baked once per size and horizon and kept, since two panels the same
@@ -116,11 +150,13 @@ function weatherFor(scene, w, h, horizon) {
 }
 
 // What the player is standing at: the nearest building or door within reach, or nothing.
+// Reach is the panel's, the way it is for people: a doorway across a room painted from
+// across it is further off in pixels than one across a street. See findTarget.
 // A building with a door of its own is not in the map's door list — it answers for itself,
 // because whether it opens is a question about its repair rather than about the street.
-export function focusNear(mapKey, px) {
+export function focusNear(mapKey, px, scale = 1) {
   let best = null;
-  let bestDist = TUNING.streetReach;
+  let bestDist = TUNING.streetReach * scale;
 
   const consider = (tx, item) => {
     const d = Math.abs(atTile(tx) - px);

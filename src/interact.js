@@ -9,13 +9,17 @@ const FACING = {
 
 // Nearest NPC to a probe point placed just ahead of the player's face. That is the
 // whole interaction system; there are no trigger volumes to keep in sync with the map.
-export function findTarget(player, npcs) {
+// How far ahead that probe sits is the panel's business: reaching somebody is a matter of
+// arms and shoulders, so in a room painted from across it — where a person is five times
+// the height they are out in the town — everything about reaching them is five times as
+// far. `scale` is that ratio; a panel drawn at the town's own size passes 1.
+export function findTarget(player, npcs, scale = 1) {
   const [dx, dy] = FACING[player.facing];
-  const px = player.x + dx * TUNING.interactReach;
-  const py = player.y - 8 + dy * TUNING.interactReach;
+  const px = player.x + dx * TUNING.interactReach * scale;
+  const py = player.y - 8 + dy * TUNING.interactReach * scale;
 
   let best = null;
-  let bestDist = TUNING.interactRange;
+  let bestDist = TUNING.interactRange * scale;
   for (const npc of npcs) {
     const d = Math.hypot(px - npc.x, py - (npc.y - 8));
     if (d < bestDist) {

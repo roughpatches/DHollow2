@@ -1,9 +1,8 @@
 // Every building in town, and what it takes to bring it back into working condition.
 //   id      — how src/town.js and content/places.js refer to it.
 //   map     — the map the building stands on.
-//   site    — where the building is. On a grid, the tile you stand on or face to work
-//             on it, usually its door. On a street (see content/maps.js) one number: how
-//             far along it stands. Standing there and pressing [E] is how it is reached.
+//   site    — where the building is: one number, how far along the panel it stands.
+//             Standing there and pressing [E] is how it is reached.
 //   enter   — the interior map its door leads to, if it has one. Omit for a site
 //             with no inside, like the docks.
 //   level   — the stage it starts at. Index into stages.
@@ -12,8 +11,6 @@
 //       note  — one line on what the state means. Mechanical; rewrite freely.
 //       open  — whether the door works at this level.
 //       cost  — materials to reach the NEXT stage. The last stage has none.
-//       patch — tiles this stage puts on the map, [x, y, legend character]. Stages
-//               are applied lowest to current, so a later one can undo an earlier one.
 //   body    — what the place is, in the world's voice. Yours to write.
 // A building whose id is also in STRUCTURES in content/looks.js has a picture per stage,
 // and repairing it changes the picture where it stands.
@@ -23,8 +20,8 @@ export const BUILDINGS = [
   {
     id: 'tavern',
     name: 'The Sea Hag',
-    map: 'inn',
-    site: [14], // the arched door under the clock, measured off the painting
+    map: 'harbourroad',
+    site: [16], // the doorway under the sign, measured off the painting
     enter: 'tavern',
     level: 0,
     stages: [
@@ -39,8 +36,8 @@ export const BUILDINGS = [
     // nothing inside a burnt chapel but weather.
     id: 'chapel',
     name: 'The chapel',
-    map: 'village',
-    site: [20],
+    map: 'woodend',
+    site: [37], // among the graves, at the east end of the burying ground
     enter: 'chapel',
     level: 0,
     stages: [

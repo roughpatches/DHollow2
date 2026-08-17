@@ -100,7 +100,7 @@ export const SCENES = [
       },
       { fade: 'out', ms: 120 }, // hard cut to black
       { wait: 2000 },
-      { go: 'hut', spawn: [8, 10] },
+      { go: 'hut', spawn: [8] },
     ],
   },
   {
@@ -219,14 +219,14 @@ export const SCENES = [
         lines: ['Be inside by dark.'],
       },
       { fade: 'out', ms: 1100 },
-      { go: 'village', spawn: [7] }, // out his own front door, onto the shore road
+      { go: 'searow', spawn: [17] }, // out his own front door, onto the sea row
     ],
   },
   {
     // Outside Aldis's cabin. Grey light, wet stone, the harbour below. No dialogue: the
     // scene exists to fade the town in and hand the player their feet.
     id: 'dreadhollow',
-    map: 'village',
+    map: 'searow',
     steps: [
       { fade: 'in', ms: 1600 },
     ],
@@ -342,4 +342,4 @@ export const SCENES = [
 
 // Where the game begins, when nothing else says. It was the opening's own map; with the
 // opening on hold it is the street the opening would have left the player standing on.
-export const START = { map: 'village', spawn: [7] };
+export const START = { map: 'searow', spawn: [17] };

@@ -11,11 +11,20 @@ export const TUNING = {
   // The town seen from the side (see `street` in content/maps.js). It is drawn further
   // back than a grid map because a painted street is 384 pixels tall and a room is not:
   // at the grid's own zoom you would never see a roofline.
+  gridBodyPx: 34, // how tall anybody standing on a grid map is drawn, feet to head. The
+  // same height as the town's, so a room and the street outside it are the same world;
+  // the generated placeholders are drawn at 22 and come up to meet it.
+
   streetZoom: 2,
   streetBodyPx: 34, // how tall anybody standing on a street is drawn, feet to head
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
+  // The breath under anybody standing still between one thing and the next: how far they
+  // rise, and how long a breath takes. A pixel is a breath at this size; two is a man who
+  // has just run up the road.
+  streetBreathPx: 1,
+  streetBreathMs: 3400,
 
   // Every word in the game is set in this. The face itself is declared in index.html
   // and loaded before the game starts, because a line of text is baked to a texture the

@@ -7,9 +7,26 @@
 //   size     — the side of one frame in pixels. Every frame in a set is square.
 //   foot     — how far down the frame the ground is. Measured once off the art: it is
 //              what stands the character on the tile rather than floating over it.
-//   walk     — folder of the walk cycle, and how many frames each direction has.
+//   head     — and how far down it the top of their head is. Given, they are drawn the
+//              height they are asked for exactly; left out, the air over the head is
+//              taken to be the quarter of the frame the crawl's art usually carries.
+//   walk     — folder of the walk cycle, and how many frames each direction has. Leave
+//              it out for somebody who stands where they are put and never walks; a
+//              direction with no cycle behind it is walked in the standing frame.
+//   indoors  — the look this one becomes on a map that says it is indoors (see
+//              content/maps.js). Somebody painted twice — once small for the road, once
+//              at the size a room is painted at — is one person with two looks.
 //   idle     — the same for standing still. Frame 0 is what they wear when nothing is
-//              happening to them.
+//              happening to them. `yoyo` runs it out and back rather than round: a loop
+//              that ends somewhere else than it started pops when it repeats. `every` is
+//              [least, most] milliseconds of standing still between one run of it and the
+//              next, for an idle that is something somebody does now and then rather than
+//              a loop they are always in; they breathe on frame 0 in between, and the
+//              wait is counted from the end of one run rather than the start of it.
+//   still    — the folder of painted rotations somebody stands on when they have no idle
+//              loop of their own. Used instead of `idle`; the walk cycle is unaffected.
+//   sides    — art painted from one side only. Its east is loaded and flipped for west,
+//              and its south does for anything facing away; nothing else is asked for.
 //   down     — one image, for when they are laid out on the floor. Leave it out for
 //              anyone the game never puts on the floor; nothing else asks for it.
 //   portrait — the face shown while they speak.
@@ -19,14 +36,49 @@
 
 export const LOOKS = [
   {
-    id: 'aldis',
-    path: 'art/aldis',
-    size: 60,
-    foot: 47,
-    walk: { folder: 'Walking/animations/Walking', frames: 6 },
-    idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
-    down: 'Collapsed_in_a_heap/rotations/south.png',
+    // You: the wanderer in the poncho and the wide hat, everywhere in Dreadhollow — the
+    // road, the town and every room in it. One export at the size a room is painted at,
+    // walked all four ways, with a face of its own. There is no idle loop in it and a
+    // standing figure does not need one, so the painted rotations are what you stand in.
+    id: 'player',
+    path: 'art/player',
+    size: 128,
+    foot: 125, // the boots, three rows up from the bottom of the frame
+    head: 4, // and the crown of the hat
+    walk: { folder: 'Idle/animations/Walk', frames: 6 },
+    still: 'Idle/rotations',
     portrait: 'Idle/portrait.png',
+  },
+  {
+    // Aldis, the hooded hunter with the bow, out on the road. His own export carries no
+    // face and nothing to lay him out on the floor with, so the face is the indoor
+    // export's hooded one — he is hooded out here — and the fall is still the oldest
+    // export's. Those are the only two things in this list that reach outside their own
+    // folder.
+    id: 'aldis',
+    path: 'art/aldis-hunter',
+    size: 64,
+    foot: 63,
+    head: 1,
+    walk: { folder: 'Idle/animations/Walk', frames: 6 },
+    still: 'Idle/rotations',
+    down: '../aldis/Collapsed_in_a_heap/rotations/south.png',
+    portrait: '../aldis-indoors/Idle/portrait.png',
+    indoors: 'aldis-indoors',
+  },
+  {
+    // And indoors, at the size a room is painted at: the hood down, arms crossed and the
+    // bow on his back, which is a hunter in somebody's house rather than one in the wood.
+    // The export's other state — hood up, bow in hand — is in the same folder if a scene
+    // ever wants him ready indoors.
+    id: 'aldis-indoors',
+    path: 'art/aldis-indoors',
+    size: 128,
+    foot: 125,
+    head: 2,
+    still: 'Arms_crossed_bow_on/rotations',
+    portrait: 'Arms_crossed_bow_on/portrait.png',
+    down: '../aldis/Collapsed_in_a_heap/rotations/south.png',
   },
   {
     id: 'gregorious',
@@ -36,6 +88,26 @@ export const LOOKS = [
     walk: { folder: 'Walking/animations/Walk', frames: 6 },
     idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
     portrait: 'Idle/portrait.png',
+    indoors: 'gregorious-bar', // behind his own bar he is painted at the room's size
+  },
+  {
+    // The same man behind his own bar, at the size the room is painted at: he unfolds his
+    // arms, takes up a glass and polishes it, and folds them again. Painted from the side,
+    // so his west is his east flipped. He keeps the face above for talking — this export
+    // has none, and a landlord does not need two.
+    id: 'gregorious-bar',
+    path: 'art/gregorious-bar',
+    size: 168,
+    foot: 143, // the boards; the animation frames carry 22 pixels of air all round
+    head: 26, // and the top of his head, so he is drawn the height he is asked for
+    sides: true,
+    idle: {
+      folder: 'Idle/animations/The_barkeep_stands_with_a_steady_posture_his_arms',
+      frames: 9,
+      yoyo: true, // he ends holding the glass and starts with folded arms; run it back
+      every: [8000, 12000], // and he does it now and then, not for ever: a man polishing
+      // one glass without stopping is a man with something wrong with him
+    },
   },
 ];
 
@@ -48,186 +120,10 @@ export const LOOKS = [
 //   at     — where the picture sits, in tiles. On a grid, its top-left corner; on a
 //            street, one number — how far along it stands, with its feet on the walking
 //            line. Fractions are fine: it is placed by eye against what it stands on.
-//   under  — the tile drawn under the picture, in place of whatever the map had there.
-//            Defaults to grass. The tiles keep their collision either way: the walls
-//            still stop you, they just stop drawing themselves.
 //   stages — one image per stage of repair, lowest first. A stage past the end of the
 //            list keeps the last picture.
-// Ground drawn from a painted sheet instead of the tile generator in src/textures.js.
-// The sheets are painted at tilePx (see tuning.js) to a tile — four times the size of a
-// tile in the world — and the ground is drawn at that resolution and scaled down, so
-// the grass keeps its blades instead of turning to soup.
-//   tile  — the tile name from the LEGEND in content/maps.js.
-//   sheet — the painted sheet under art/.
-//   cells — [x, y] of each patch to cut, in sheet pixels. Four of them, laid out two by
-//           two across the map, so a field of grass does not repeat every tile. Cut
-//           from parts of the sheet that are all one material.
-//   shade — optional colour multiplied over the patches, for a sheet painted lighter than
-//           the world wants it. Darkens and tints without flattening the paint.
-export const GROUND = [
-  // The seven grounds of the designer's map export, each a seamless 64-pixel tile painted
-  // for the terrain it is. One patch apiece and no need for more: seamless art laid over a
-  // field does not repeat the way four hand-cut windows of a larger sheet do. The seam
-  // tiles in EDGES below are painted from these same terrains, so a field and the edge
-  // that leaves it are the same paint.
-  {
-    tile: 'grass', // patchy dying autumn grass: most of the town stands on it
-    sheet: 'art/ground/autumn-grass.png',
-    cells: [[0, 0]],
-    shade: 0x8e9c8c, // cool, and darker than the sheet: this town is not having a good year
-  },
-  {
-    tile: 'scrub', // the same grass, kept warm and dry: ground nobody walks any more
-    sheet: 'art/ground/autumn-grass.png',
-    cells: [[0, 0]],
-    shade: 0xb2a37e,
-  },
-  {
-    tile: 'dirt', // packed damp earth, and the bank down to the water
-    sheet: 'art/ground/earth.png',
-    cells: [[0, 0]],
-    shade: 0xb0a89c,
-  },
-  {
-    tile: 'path', // worn granite setts, wet after rain
-    sheet: 'art/ground/street.png',
-    cells: [[0, 0]],
-  },
-  {
-    tile: 'stone', // the same granite, for a quay or a forecourt
-    sheet: 'art/ground/street.png',
-    cells: [[0, 0]],
-  },
-  {
-    tile: 'sand', // tan-grey muddy seashore, at the tide line
-    sheet: 'art/ground/shore.png',
-    cells: [[0, 0]],
-    shade: 0xbdb4a6,
-  },
-  {
-    // Grey-green seawater, painted the value of a bright afternoon and shaded down to
-    // harbour water: undarkened it reads as pale stone against a granite quay.
-    tile: 'water',
-    sheet: 'art/ground/sea.png',
-    cells: [[0, 0]],
-    shade: 0x5c7796,
-  },
-];
-
-// Where two grounds meet, the tile drawn over the seam, laid half a tile up and left of
-// the square it belongs to so it straddles the four squares whose corners it is drawn from.
-// Most of these are 4x4 wang sets — sixteen cells, one per way two grounds can meet at the
-// four corners of a tile — and their coordinates and corner meanings come from the map
-// export's own tileset descriptors. The rest are windows found by searching a larger sheet
-// that carries no wang layout.
-//   low / high — the two sides. `tiles` are the ground names on that side: several where
-//                they are the same paint, since the street and the square are one granite.
-//                `shade` is that side's shade, exactly as in GROUND above.
-//   split      — how the sheet's own pixels are told apart. `channels` is which two to
-//                subtract, and a pixel over `over` belongs to the high side. Hue, not
-//                brightness: shading in the paint must not read as the other material.
-//   cells      — [x, y] per corner code. The code's bits are northwest, northeast,
-//                southwest and southeast, and a set bit means the high side is there.
-//                6 and 9 are the two diagonals; no sheet paints them, and a seam that
-//                wants one is left hard. So is any seam where more than two grounds meet.
-// Add a pair by adding a block. A pair with no block is a hard edge, which is right where
-// somebody built the edge — a quay wall, a dock, a kerb — and wrong where nothing did.
-export const EDGES = [
-  {
-    // Off the map export, and the cells and corner meanings are the tileset descriptor's
-    // own: a bit set in a code is the seashore side, because that is the set's upper
-    // terrain. Sixteen cells, one per way two grounds meet at a tile's four corners.
-    low: { tiles: ['water'], shade: 0x5c7796 },
-    high: { tiles: ['sand'], shade: 0xbdb4a6 },
-    sheet: 'art/ground/wang-water-and-sand.png',
-    split: { channels: 'rg', over: 3 },
-    cells: {
-      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
-      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
-      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
-    },
-  },
-  {
-    // The same, for grass against earth. The bit set is the earth side: it is this set's
-    // upper terrain, which is not something to be guessed at — the names in the descriptor
-    // do not follow the codes.
-    low: { tiles: ['grass'], shade: 0x8e9c8c },
-    high: { tiles: ['dirt'], shade: 0xb0a89c },
-    sheet: 'art/ground/wang-grass-and-dirt.png',
-    split: { channels: 'gb', over: 14 },
-    cells: {
-      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
-      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
-      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
-    },
-  },
-  {
-    low: { tiles: ['scrub'], shade: 0xb2a37e },
-    high: { tiles: ['dirt'], shade: 0xb0a89c },
-    sheet: 'art/ground/wang-grass-and-dirt.png',
-    split: { channels: 'gb', over: 14 },
-    cells: {
-      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
-      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
-      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
-    },
-  },
-  {
-    // The street keeps windows out of the larger sheet. The export's own grass-against-
-    // street set is the one the designer's map uses, and its table is exact, but only three
-    // of its sixteen cells have any granite painted into them — so it cannot be drawn from
-    // until it is generated again.
-    low: { tiles: ['path', 'stone'] }, // worn granite, unshaded
-    high: { tiles: ['grass'], shade: 0x8e9c8c },
-    sheet: 'art/ground/grass-and-granite.png',
-    split: { channels: 'rg', over: 0 },
-    cells: {
-      0: [732, 64], 1: [1372, 228], 2: [1238, 210], 3: [1284, 224], 4: [1366, 88],
-      5: [480, 0], 7: [1040, 42], 8: [1244, 100], 10: [992, 0], 11: [1436, 22],
-      12: [1284, 96], 13: [490, 44], 14: [1434, 430], 15: [96, 0],
-    },
-  },
-  {
-    low: { tiles: ['path', 'stone'] },
-    high: { tiles: ['scrub'], shade: 0xb2a37e },
-    sheet: 'art/ground/grass-and-granite.png',
-    split: { channels: 'rg', over: 0 },
-    cells: {
-      0: [732, 64], 1: [1372, 228], 2: [1238, 210], 3: [1284, 224], 4: [1366, 88],
-      5: [480, 0], 7: [1040, 42], 8: [1244, 100], 10: [992, 0], 11: [1436, 22],
-      12: [1284, 96], 13: [490, 44], 14: [1434, 430], 15: [96, 0],
-    },
-  },
-  {
-    low: { tiles: ['path', 'stone'] },
-    high: { tiles: ['dirt'], shade: 0xb0a89c },
-    sheet: 'art/ground/dirt-and-granite.png',
-    split: { channels: 'rg', over: 0 },
-    cells: {
-      0: [1152, 60], 1: [1376, 228], 2: [1238, 214], 3: [1432, 2], 4: [512, 86],
-      5: [1024, 196], 7: [124, 12], 8: [1240, 102], 10: [64, 282], 11: [430, 376],
-      12: [210, 330], 13: [134, 334], 14: [68, 324], 15: [1302, 132],
-    },
-  },
-  {
-    // Seashore against earth, off the export: a wang set, exact. Both sides take the one
-    // shade because they are the same value of brown — telling them apart by hue, the way
-    // the other seams are shaded, is not something these two allow, and at the same shade
-    // it makes no difference which side a pixel is called.
-    low: { tiles: ['sand'], shade: 0xb6aea1 },
-    high: { tiles: ['dirt'], shade: 0xb6aea1 },
-    sheet: 'art/ground/wang-sand-and-dirt.png',
-    split: { channels: 'rb', over: 28 },
-    cells: {
-      0: [128, 64], 1: [64, 64], 2: [128, 0], 3: [192, 0], 4: [128, 128], 5: [64, 0],
-      6: [0, 64], 7: [64, 192], 8: [192, 64], 9: [128, 192], 10: [192, 128], 11: [0, 0],
-      12: [64, 128], 13: [0, 128], 14: [192, 192], 15: [0, 192],
-    },
-  },
-];
-
 export const STRUCTURES = [
-  // The Sea Hag has no entry: it is painted into the west panel, under the clock, and a
+  // The Sea Hag has no entry: it is painted into the harbour road, sign and all, and a
   // building that is already in the picture does not want a second one standing on it.
   // The export it used to be drawn from is still in art/seahag if it is wanted elsewhere.
   {
@@ -235,7 +131,7 @@ export const STRUCTURES = [
     // then roofed and lit. 128 pixels of picture over the chapel's seven rows of tiles.
     id: 'chapel',
     path: 'art/chapel',
-    at: [19.75],
+    at: [37], // standing in the burying ground painted along the back of the wood end
     under: 'stone', // it stands on the paving, so what its picture clears is paving
     stages: [
       'base/rotations/unknown.png',

@@ -12,6 +12,9 @@
 // appear on more than one map — it is the same person, standing somewhere else.
 // `says` replaces `lines` with a list of answers, each with its own `needs` / `not`;
 // the first one whose conditions hold is what they say, and its `sets` is raised.
+// `behind` stands somebody on the far side of something painted — a bar, a counter, a
+// wall — and is how far down the panel that thing's top edge is. They stand at the back
+// of the room and nothing of them below the line is drawn. On a street only.
 
 export const NPCS = [
   {
@@ -20,8 +23,7 @@ export const NPCS = [
     id: 'aldis',
     name: 'Aldis Rooke',
     map: 'shore',
-    x: 31,
-    y: 8,
+    x: 31, // up the strand from the track, which is the end the player washes up at
     facing: 'left',
     palette: 'aldis', // real art; see content/looks.js
     until: 'washedup', // he is only out there while the opening is unplayed
@@ -36,8 +38,7 @@ export const NPCS = [
     id: 'aldis',
     name: 'Aldis Rooke',
     map: 'hut',
-    x: 5,
-    y: 4,
+    x: 26, // down the room from the door, which is at the west end of it
     facing: 'left',
     palette: 'aldis', // real art; see content/looks.js
     says: [
@@ -66,9 +67,18 @@ export const NPCS = [
     id: 'gregorious',
     name: 'Gregorious',
     map: 'tavern',
-    x: 18, // at the bar, about under the taps; the way in is the far end of the room
-    facing: 'right',
-    palette: 'gregorious', // real art; see content/looks.js
+    x: 11, // behind the bar, with the pewter tankard on the counter at his right hand
+    facing: 'right', // down the room, at whoever has just come in
+    palette: 'gregorious', // and indoors that is the standing barkeep; see content/looks.js
+    // `behind` puts somebody on the far side of something painted: they stand at the back
+    // of the room and nothing of them below this line is drawn. 245 is the bar top, which
+    // takes him at the waist.
+    behind: 245,
+    // The glass he polishes is not one he brought with him: it is the pewter tankard
+    // painted on the counter beside him. `mug` is where it stands in the painting,
+    // `counter` the bare stretch of the same bar laid over it while he has it, and
+    // `from` the frame of his idle he takes it on.
+    takes: { mug: [210, 229, 21, 24], counter: [231, 229], from: 2 },
     quests: true,
     lines: ['Fancy a drink, or looking to make a little coin?'],
   },
