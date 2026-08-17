@@ -104,6 +104,17 @@ for (const z of PLACES.filter((p) => p.skills)) {
     if (!SKILL_IDS.has(id)) console.warn(`${z.label}: no such skill — ${id}`);
   }
 }
+// A zone's shares and a zone's skills have to be the same list of gathering work, or one
+// of them is a share of nothing and the other is work that never comes up.
+for (const z of PLACES.filter((p) => p.gather)) {
+  const wanted = (z.skills || [...GATHERING]).filter((id) => GATHERING.has(id));
+  for (const id of Object.keys(z.gather)) {
+    if (!wanted.includes(id)) console.warn(`${z.label}: a share of ${id}, which is not gathered here.`);
+  }
+  for (const id of wanted) {
+    if (!z.gather[id]) console.warn(`${z.label}: ${id} is gathered here and has no share.`);
+  }
+}
 // The resource table is meant to be full: a node for each gathering skill on its own, and
 // a node for each pairing of two. That is what makes a point in any of them buy work
 // nobody else can reach and a second specialist a question rather than dead weight. Add a
@@ -435,7 +446,7 @@ function branches(pick) {
     const ways = Math.min(roll(TUNING.questForkWays), readable.length);
     drew = [];
     for (let i = 0; drew.length < ways && i < 40; i++) {
-      const e = weighted(readable);
+      const e = drawNode(readable);
       if (!drew.includes(e)) drew.push(e);
     }
   }
@@ -471,7 +482,7 @@ export function choose(i) {
   return run;
 }
 
-function weighted(from = drawableAt(run.when, run.where)) {
+function weighted(from) {
   const of = (e) => e.weight[run.when];
   let r = Math.random() * from.reduce((n, e) => n + of(e), 0);
   for (const e of from) {
@@ -479,6 +490,47 @@ function weighted(from = drawableAt(run.when, run.where)) {
     if (r <= 0) return e;
   }
   return from[from.length - 1];
+}
+
+// Which work the party finds, out of the shares the zone was written with, counting only
+// work something still drawable actually offers — a share spent on a node this run has
+// already had would be a share spent on nothing.
+function whichWork(table, from) {
+  const live = Object.entries(table)
+    .filter(([id]) => from.some((e) => e.harvests.some((h) => h.skill === id)));
+  if (!live.length) return null;
+  let r = Math.random() * live.reduce((n, [, w]) => n + w, 0);
+  for (const [id, w] of live) {
+    r -= w;
+    if (r <= 0) return id;
+  }
+  return live[live.length - 1][0];
+}
+
+// What the road puts up next. Whether it is work or something in the way is the nodes'
+// own weights, the same as everything else, so the mix a zone reads out before the party
+// sets out is what they walk.
+//
+// Which work, though, is the zone's to say: the `gather` table in content/places.js is
+// the shares a place is made of, and where there is one a resource node is drawn in two
+// steps — the work first, then which of the nodes offering that work it turns out to be.
+// The shares are shares of the work and not of the nodes, because a node with two
+// harvests in it is two kinds of work standing in one place: it is reached by either of
+// its rolls, so a wood that is two parts timber to one part fish puts up more mixed
+// stands than a straight reading of the table would. That is the mixed stand doing its
+// job. A zone with no table draws its resource nodes on their own weights, as before.
+function drawNode(from) {
+  const gather = (ZONE[run.where] || {}).gather;
+  const digging = gather ? from.filter((e) => e.harvests) : [];
+  if (!digging.length) return weighted(from);
+  const rest = from.filter((e) => !e.harvests);
+  const of = (e) => e.weight[run.when];
+  const all = from.reduce((n, e) => n + of(e), 0);
+  const work = digging.reduce((n, e) => n + of(e), 0);
+  if (rest.length && Math.random() * all >= work) return weighted(rest);
+  const skill = whichWork(gather, digging);
+  const offering = digging.filter((e) => e.harvests.some((h) => h.skill === skill));
+  return weighted(offering.length ? offering : digging);
 }
 
 // The work a node has in it, and what the party's points are worth at each piece of it:
@@ -558,7 +610,7 @@ function isScene(e) {
 }
 
 function resolve(node) {
-  const e = node.only ? KIND[node.only] : weighted();
+  const e = node.only ? KIND[node.only] : drawNode(drawableAt(run.when, run.where));
 
   node.kind = e.id;
   node.conBefore = run.con;

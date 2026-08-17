@@ -15,6 +15,16 @@
 //              reads it at a fork. Take a skill off the list and every node that leans on
 //              it leaves this zone's pool, still written and still waiting for the zone
 //              that wants it. A place with no list draws everything zoned to it.
+//   gather   — how much of this place is each kind of gathering work, as shares read
+//              against each other. A resource node here is drawn in two steps: which work
+//              the party finds, on these shares, and then which of the nodes offering that
+//              work it is. The shares are shares of the work, not of the nodes, so a node
+//              with two harvests is reached by either of its two rolls and turns up more
+//              often than one share alone would put it — which is a mixed stand behaving
+//              like a mixed stand. Retune the wood by editing these four numbers and
+//              nothing else. A place with no table draws its resource nodes on their own
+//              weights, and how often work comes up at all against something in the way is
+//              always the nodes' own weights in content/nodes.js.
 //   environment — what it is like to stand in, a word apiece, shown as a row of icons
 //              along the bottom of the tab. A word with no icon of its own gets the blank
 //              square until there is art for it; see src/icons.js.
@@ -115,6 +125,10 @@ export const PLACES = [
       'woodcutting', 'fishing', 'mining', 'herblore',
       'cooking',
     ],
+    // What the wood is mostly made of, in the work rather than in the nodes: two parts
+    // timber to one and a half of herb, one of fish and half of stone. Read against each
+    // other like every other table of odds here, so they need not add up to a hundred.
+    gather: { woodcutting: 40, herblore: 30, fishing: 20, mining: 10 },
     terrain: 'forest',
     backdrop: { image: 'art/greywood/backdrop.png', ground: 350 },
     label: 'The Greywood',
