@@ -60,8 +60,53 @@
         "unknown": "rotations/A_cairn_of_piled_sto.png"
       },
       "animations": {}
+    },
+    {
+      "id": "0af64702-8aec-4bdf-a08f-e41650438cba",
+      "name": "Split",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Split.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "76e668e5-ce5f-4305-946c-76dbe07ffb69",
+      "name": "Shaft",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Shaft.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "d18fedb2-96c7-4a8e-9ac2-7b9809872963",
+      "name": "Troll",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Troll.png"
+      },
+      "animations": {}
     }
   ],
   "export_version": "1.1",
-  "export_date": "2026-08-17T16:37:00.568216"
+  "export_date": "2026-08-17T17:07:37.504834"
 }

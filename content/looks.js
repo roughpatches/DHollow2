@@ -418,4 +418,7 @@ export const NODE_ART = {
   },
   spring: boulder('Water_Spring'), // Water coming out of the rock
   cairn: boulder('A_cairn_of_piled_sto'), // A cairn nobody has added to
+  seam: boulder('Split'), // A boulder split in two, the vein open on both walls of the gap
+  adit: boulder('Shaft'), // A hole under the boulder somebody made
+  cutting: boulder('Troll'), // A troll, and the rock in the path
 };
