@@ -22,7 +22,7 @@ import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
 import {
-  begin, take, swapTo, stepIn, muster, hurtOf, spoilsOf, saidCount, foeOf,
+  begin, take, swapTo, stepIn, flee, canFlee, muster, hurtOf, spoilsOf, saidCount, foeOf,
 } from './combat.js';
 
 // Everything a node can turn out to be: the ones a quest names by hand, and the ones the
@@ -850,20 +850,41 @@ export function fightMove(moveId) {
   return afterTurn(run.nodes[run.at]);
 }
 
+// Breaking off the whole thing, which is only on the card once whoever is up is badly
+// hurt. It costs the turn and it is not promised; see flee in src/combat.js.
+export function canBreakOff() {
+  return canFlee(run && run.fight);
+}
+
+export function fightFlee() {
+  if (!run || run.phase !== 'fight' || !canBreakOff()) return run;
+  flee(run.fight);
+  return afterTurn(run.nodes[run.at]);
+}
+
 // Whatever the turn came to. The fight is only over two ways: the thing goes down, or
 // the fighter does.
 function afterTurn(node) {
   const f = run.fight;
   if (!f || !f.over) return run;
-  if (f.over === 'won') {
-    node.won = { foe: f.foe.name, felled: f.felled.length, rounds: f.round, hurt: hurtOf(f) };
-    // what is taken off them once they are down, paid the way a beat's spoils are
-    node.beatSpoils = { ...(node.beatSpoils || {}), ...spoilsOf(f) };
-    run.fight = null;
-    settle(null);
-    return run;
-  }
-  faint(f.who);
+  if (f.over === 'down') { faint(f.who); return run; }
+
+  // Everything else is the fight being over: they are down, they ran, or the party did.
+  // Whatever was felled along the way still pays — what got away does not.
+  node.won = {
+    foe: f.foe.name,
+    felled: f.felled.length,
+    broke: f.over === 'broke',
+    fled: f.over === 'fled',
+    rounds: f.round,
+    hurt: hurtOf(f),
+  };
+  node.beatSpoils = { ...(node.beatSpoils || {}), ...spoilsOf(f) };
+  // The party ran. They keep what they had already taken off it and pay for the running:
+  // a party that came back down the road at a dead sprint is a party that is spent.
+  if (f.over === 'fled') node.conBeat -= TUNING.combat.fleeCon;
+  run.fight = null;
+  settle(null);
   return run;
 }
 
@@ -1129,10 +1150,17 @@ export function wonLine(node) {
   const w = node.won;
   if (!w) return null;
   const rounds = `${w.rounds} ${w.rounds === 1 ? 'round' : 'rounds'}`;
-  // one thing, or a band of them, and the last one standing is the one that gets named
-  const down = w.felled > 1
-    ? `${w.felled === 2 ? 'Both' : `All ${saidCount(w.felled)}`} of them are down, ${w.foe} last`
-    : `${w.foe} is down`;
+  // How it ended: the party ran, the last of them ran, or everything that was standing
+  // there is down. What got away is named as got away, because it is still out there.
+  const felled = w.felled === 1 ? 'one of them down'
+    : `${saidCount(w.felled)} of them down`;
+  const down = w.fled
+    ? `You broke off and left it standing${w.felled ? `, with ${felled}` : ''}`
+    : w.broke
+      ? `The last of them breaks and goes${w.felled ? `, with ${felled} behind it` : ''}`
+      : w.felled > 1
+        ? `${w.felled === 2 ? 'Both' : `All ${saidCount(w.felled)}`} of them are down, ${w.foe} last`
+        : `${w.foe} is down`;
   if (!w.hurt.length) return `${down}, in ${rounds}, and nothing laid a hand on anybody.`;
   const total = w.hurt.reduce((n, [, v]) => n + v, 0);
   const off = w.hurt.length > 1

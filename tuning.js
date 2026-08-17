@@ -290,11 +290,17 @@ export const TUNING = {
     // in takes what the foe makes of the gap. Somebody stepping in over a fighter who is
     // already down pays neither: the blow that put the last one down was that turn.
     swapOpens: 2,
-    // The other side changes over too, where the band is written to. One that is this far
-    // down pulls back behind a fresher one rather than dying in front of you — it costs
-    // them the blow they would have thrown, and the changeover is an opening your way at
-    // the same swapOpens. What comes back later comes back as hurt as it went.
-    foePullsAt: 0.3,
+    // Badly hurt: this far down and a side has decisions to make. A foe written to look
+    // after itself pulls back behind a fresher one rather than dying in front of you —
+    // costing them the blow they would have thrown, and handing your next swing the same
+    // swapOpens their side pays. What comes back later comes back as hurt as it went.
+    // It is also the point at which either side may try to leave the fight altogether.
+    badlyHurt: 0.3,
+    // Breaking off. It costs the turn whether or not it works — no swing, and the other
+    // side takes the opening — and it is a bare d20 against this, because running is not
+    // a thing anybody here is trained at.
+    fleeDC: 11,
+    fleeCon: 3, // and what getting away costs the pool: they came back at a run
     // A fighter at zero hit points is out of the run: their own constitution comes off
     // the party's pool, because a body being carried is not a body walking. Somebody else
     // who fights steps up; nobody left who fights and the party turns for home.

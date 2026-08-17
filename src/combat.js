@@ -160,7 +160,7 @@ function comeForward(fight) {
 function pullsBack(fight) {
   const foe = fight.foe;
   if (!foe.pulls || !fight.rest.length) return false;
-  if (fight.foeHp / fight.foeMax > TUNING.combat.foePullsAt) return false;
+  if (fight.foeHp / fight.foeMax > TUNING.combat.badlyHurt) return false;
   const fresher = fight.rest.some((f) => f.hp / f.max > fight.foeHp / fight.foeMax);
   if (!fresher) return false;
   // it goes to the back as hurt as it is, and the freshest of them comes across
@@ -171,6 +171,64 @@ function pullsBack(fight) {
   // than a second reading of the same name
   const across = fight.foe.name === foe.name ? 'another of them' : named(fight.foe);
   fight.log.push([`${foe.name} breaks off out of your reach, and ${across} comes across in front of it.`, 'them']);
+  fight.opening = TUNING.combat.swapOpens;
+  return true;
+}
+
+// A bare d20 against the flee DC. Nothing adds to it: getting away from something in the
+// dark is not a skill anybody in Dreadhollow has, and a side that tries has already spent
+// the turn either way.
+function getsAway() {
+  return 1 + Math.floor(Math.random() * TUNING.checkDie) >= TUNING.combat.fleeDC;
+}
+
+// Whether the one in front of the party is far enough down to be thinking about it. The
+// same line for both sides: see badlyHurt in tuning.js.
+function beaten(hp, max) {
+  return max > 0 && hp / max <= TUNING.combat.badlyHurt;
+}
+
+export function canFlee(fight) {
+  if (!fight || fight.over || !fight.who) return false;
+  const me = combatOf(fight.who);
+  return beaten(fight.pool[fight.who], me.hp);
+}
+
+// The party breaking off. It costs the turn: no swing, and if they do not get clear the
+// thing in front of them takes the opening a turned back is. Getting away ends the fight
+// and leaves whatever is standing there standing — the node pays what the walk up to it
+// paid and nothing else.
+export function flee(fight) {
+  if (!canFlee(fight)) return fight;
+  fight.log = [[`${nameOf(fight.who)} turns to break off.`, 'us']];
+  fight.opening = 0;
+  if (getsAway()) {
+    fight.over = 'fled';
+    fight.log.push(['They are into the trees before it has finished deciding, and it does not follow far.', 'us']);
+    return fight;
+  }
+  fight.log.push(['Not far enough, and not fast enough.', 'us']);
+  answer(fight, TUNING.combat.swapOpens, 1);
+  fight.round += 1;
+  return fight;
+}
+
+// And the other side breaking off: the one in front is beaten, has nobody fresher to hide
+// behind, and is the sort that looks after itself. Same cost — it does not throw a blow
+// this turn — and the same opening handed over if it does not get clear.
+function foeFlees(fight) {
+  if (!fight.foe.pulls || !beaten(fight.foeHp, fight.foeMax)) return false;
+  if (getsAway()) {
+    fight.log.push([`${fight.foe.name} breaks and goes, and it does not look back.`, 'them']);
+    if (fight.rest.length) {
+      comeForward(fight);
+      fight.log.push([`${saidCount(fight.rest.length + 1)} of them still standing.`, 'them']);
+    } else {
+      fight.over = 'broke';
+    }
+    return true;
+  }
+  fight.log.push([`${fight.foe.name} turns to go and thinks better of it, and the turn is gone either way.`, 'them']);
   fight.opening = TUNING.combat.swapOpens;
   return true;
 }
@@ -200,8 +258,9 @@ export function take(fight, moveId) {
     return fight;
   }
 
-  // They may change over instead of answering, which costs them the blow
-  if (!pullsBack(fight)) answer(fight, move.opens, move.keep);
+  // Their turn: change over behind a fresher one, break off altogether, or answer. The
+  // first two cost them the blow, which is what makes either of them a decision.
+  if (!pullsBack(fight) && !foeFlees(fight)) answer(fight, move.opens, move.keep);
   fight.steady = move.steady || fight.steady;
   fight.round += 1;
   return fight;

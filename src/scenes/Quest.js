@@ -257,6 +257,7 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'enter' || k === ' ' || k === 'e') {
         const way = ways[this.row];
         if (way.move) run.fightMove(way.move.id);
+        else if (way.flee) run.fightFlee();
         else run.swapIn(way.swap);
         this.row = 0; // whoever is up next is asked from the top of their own list
       } else if (k === 'escape') run.abandon();
@@ -1213,6 +1214,9 @@ export default class Quest extends Phaser.Scene {
     return [
       ...MOVES.map((move) => ({ move })),
       ...run.standing().filter((id) => id !== f.who).map((swap) => ({ swap })),
+      // last, and only once whoever is up is badly hurt, so the rows above it do not
+      // move under the cursor the turn it appears
+      ...(run.canBreakOff() ? [{ flee: true }] : []),
     ];
   }
 
@@ -1229,17 +1233,28 @@ export default class Quest extends Phaser.Scene {
     const ways = this.fightWays();
     if (this.row >= ways.length) this.row = 0;
     const tone = { us: COLORS.menuText, them: COLORS.menuMapFolk, said: COLORS.menuDim };
-    const out = f.log.map(([line, side]) => [line, TUNING.questBodySize, tone[side]]);
+    // The last exchange and no further back. A fight with a band in it and a changeover
+    // in the middle of it can put six lines on the card, and the card is over the road.
+    const out = f.log.slice(-4).map(([line, side]) => [line, TUNING.questBodySize, tone[side]]);
+    // What each way costs is written under the one the cursor is on rather than under all
+    // of them: there are five rows here when the party is beaten and has somewhere to send
+    // for, and five rows with a line each is a card taller than the road it hangs over.
     ways.forEach((way, i) => {
       const on = i === this.row;
-      const head = way.move ? way.move.name : `Send in ${nameOf(way.swap)}`;
-      const said = way.move
-        ? `${way.move.line}  (${moveLine(way.move, f)})`
-        // what they have left is on the bar above; what it costs is the whole of the news
-        : `They come across, you come out.  (the turn, and it answers at +${TUNING.combat.swapOpens})`;
+      const head = way.move ? way.move.name
+        : way.flee ? 'Break off' : `Send in ${nameOf(way.swap)}`;
       out.push([`${on ? '>' : ' '} ${head}`, TUNING.questBodySize,
         on ? COLORS.menuAccent : COLORS.menuDim]);
-      out.push([`    ${said}`, TUNING.questHintSize, on ? COLORS.menuText : COLORS.menuRule]);
+      if (!on) return;
+      const said = way.move
+        ? `${way.move.line}  (${moveLine(way.move, f)})`
+        : way.flee
+          ? 'Leave it standing and go, if you can.  '
+            + `(the turn, a d20 against ${TUNING.combat.fleeDC}, `
+            + `and it answers at +${TUNING.combat.swapOpens} if you do not get clear)`
+        // what they have left is on the bar above; what it costs is the whole of the news
+          : `They come across, you come out.  (the turn, and it answers at +${TUNING.combat.swapOpens})`;
+      out.push([`    ${said}`, TUNING.questHintSize, COLORS.menuText]);
     });
     return out;
   }

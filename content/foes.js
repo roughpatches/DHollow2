@@ -13,6 +13,10 @@
 // of three weak things is not three times the fight — it is three times as long, and
 // length is what a fighter's hit points are actually spent on.
 //
+// Either side can leave. Badly hurt, the party can try to break off and so can anything
+// written to look after itself: it costs whoever tries it the turn, it is a bare d20, and
+// a fight walked away from pays only for what was put down before the running started.
+//
 // A FOE:
 //   id     — how content/nodes.js names it, on the node that fights it.
 //   name   — shown over its side of the fight.
@@ -22,12 +26,15 @@
 //   harm   — what one of its blows takes off a fighter, [least, most].
 //   spoils — what is taken off it once it is down, [least, most] each. A fight that pays
 //            nothing is a fight nobody had a reason to pick, so everything here pays.
-//   pulls  — true if it will break off out of the front when it is badly hurt and there
-//            is something fresher behind it, rather than standing there and dying. It
-//            costs them the blow they were going to throw and hands the party an opening,
-//            and what pulled back comes forward again later as hurt as it went. Leave it
-//            out for anything that does not know how to do that, or will not: it is what
-//            separates men and dogs working together from a thing that simply comes on.
+//   pulls  — true if it looks after itself. Badly hurt, it pulls back out of the front
+//            behind something fresher; badly hurt with nothing to hide behind, it tries
+//            to leave the fight altogether. Either costs them the blow they were going to
+//            throw and hands the party an opening, and going is not guaranteed — see
+//            badlyHurt and fleeDC in tuning.js. What pulled back comes forward again later
+//            as hurt as it went; what got away is gone, and pays nothing. Leave it out for
+//            anything that does not know how to do that, or will not: it is the whole
+//            difference between men and dogs working together and a thing that comes on
+//            until it stops.
 //   body   — what it is, said once when it comes on.
 //   lands  — what it looks like when its blow goes in.
 //   misses — and when it does not.
