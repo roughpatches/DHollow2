@@ -59,6 +59,10 @@ export function preloadArt(scene) {
       if (!scene.textures.exists(k)) scene.load.image(k, `${look.path}/${path}`);
     };
     for (const [dir, folder] of dirsOf(look)) {
+      // Somebody with no idle loop of their own stands on the painted rotation for the way
+      // they are facing, out of the export's own rotations folder. It goes under the same
+      // key frame 0 of an idle would, so nothing downstream knows the difference.
+      if (look.still) add(actorFrame(look.id, dir, 0), `${look.still}/${folder}.png`);
       for (const [set, spec] of setsOf(look)) {
         for (let i = 0; i < spec.frames; i++) {
           add(key(look, set, dir, i), `${spec.folder}/${folder}/frame_${String(i).padStart(3, '0')}.png`);
@@ -288,7 +292,7 @@ export function stand(sprite, palette, dir) {
   const [frame, flip, use] = faceFrame(palette, dir);
   sprite.setFlipX(flip);
   const look = LOOK[palette];
-  if (look && !(look.idle && look.idle.every)) {
+  if (look && look.idle && !look.idle.every) {
     sprite.anims.play(idleAnim(palette, use), true);
     return;
   }

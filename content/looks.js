@@ -19,6 +19,8 @@
 //              next, for an idle that is something somebody does now and then rather than
 //              a loop they are always in; they breathe on frame 0 in between, and the
 //              wait is counted from the end of one run rather than the start of it.
+//   still    — the folder of painted rotations somebody stands on when they have no idle
+//              loop of their own. Used instead of `idle`; the walk cycle is unaffected.
 //   sides    — art painted from one side only. Its east is loaded and flipped for west,
 //              and its south does for anything facing away; nothing else is asked for.
 //   down     — one image, for when they are laid out on the floor. Leave it out for
@@ -30,14 +32,31 @@
 
 export const LOOKS = [
   {
-    id: 'aldis',
-    path: 'art/aldis',
-    size: 60,
-    foot: 47,
-    walk: { folder: 'Walking/animations/Walking', frames: 6 },
-    idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
-    down: 'Collapsed_in_a_heap/rotations/south.png',
+    // You: the wanderer in the poncho and the wide hat, walking the town and the road.
+    // Six frames a direction and a painted rotation to stand on, which is all the export
+    // carries — there is no idle loop in it, and a standing figure does not need one.
+    id: 'player',
+    path: 'art/player',
+    size: 64,
+    foot: 63, // the boots, all but the bottom row of the frame
+    head: 1, // and the crown of the hat
+    walk: { folder: 'Idle/animations/Walk', frames: 6 },
+    still: 'Idle/rotations',
     portrait: 'Idle/portrait.png',
+  },
+  {
+    // Aldis, the hooded hunter with the bow. The export has no face and nothing to lay him
+    // out on the floor with, so both are still taken off the older one in art/aldis — the
+    // only two things in this list that reach outside their own folder.
+    id: 'aldis',
+    path: 'art/aldis-hunter',
+    size: 64,
+    foot: 63,
+    head: 1,
+    walk: { folder: 'Idle/animations/Walk', frames: 6 },
+    still: 'Idle/rotations',
+    down: '../aldis/Collapsed_in_a_heap/rotations/south.png',
+    portrait: '../aldis/Idle/portrait.png',
   },
   {
     id: 'gregorious',

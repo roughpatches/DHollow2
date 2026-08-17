@@ -278,7 +278,8 @@ export const MAPS = {
       size: [688, 384], // the whole painting; unlike the town panel its floor runs to the edge
       ground: 362, // the aisle, a stride in front of the stools
       sill: 352, // where the stool legs and the bar front meet the boards
-      body: 183, // and a man standing on them, waist to the bar top
+      body: 186, // and a man standing on them, waist to the bar top: three times the 62
+      // pixels the drawn art is, so the room's own pixels and a person's are the same size
       repeats: 1, // one room; a room laid twice is two bars and one landlord
     },
     spawn: [33],

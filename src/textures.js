@@ -3,7 +3,13 @@
 // names instead — see src/art.js — so nothing downstream cares which they are.
 
 import { TUNING, COLORS, PALETTES } from '../tuning.js';
+import { LOOKS } from '../content/looks.js';
 import { buildUiAtlas } from './uiatlas.js';
+
+// A palette can have drawn art under the same name — the player does. What the export
+// carries is not generated for it: a generated frame cannot be laid over a loaded one, and
+// a generated walk cycle would be the animation the drawn one never gets to replace.
+const DRAWN = Object.fromEntries(LOOKS.map((l) => [l.id, l]));
 
 const TS = TUNING.tileSize;
 const AW = 16; // actor frame width
@@ -446,15 +452,22 @@ export function buildTextures(scene) {
   g.destroy();
 
   for (const name of Object.keys(PALETTES)) {
-    const pg = scene.make.graphics({ x: 0, y: 0 }, false);
-    drawPortrait(pg, PALETTES[name]);
-    pg.generateTexture(portraitKey(name), PORTRAIT_PX, PORTRAIT_PX);
-    pg.destroy();
-
-    const lg = scene.make.graphics({ x: 0, y: 0 }, false);
-    drawProne(lg, PALETTES[name]);
-    lg.generateTexture(proneKey(name), AW, AH);
-    lg.destroy();
+    const look = DRAWN[name];
+    // an export with no face in it still gets one, and so does anyone the game may lay on
+    // the floor without art for it
+    if (!look || !look.portrait) {
+      const pg = scene.make.graphics({ x: 0, y: 0 }, false);
+      drawPortrait(pg, PALETTES[name]);
+      pg.generateTexture(portraitKey(name), PORTRAIT_PX, PORTRAIT_PX);
+      pg.destroy();
+    }
+    if (!look || !look.down) {
+      const lg = scene.make.graphics({ x: 0, y: 0 }, false);
+      drawProne(lg, PALETTES[name]);
+      lg.generateTexture(proneKey(name), AW, AH);
+      lg.destroy();
+    }
+    if (look && (look.walk || look.idle || look.still)) continue; // the body is drawn
 
     for (const dir of DIRS) {
       for (const frame of [0, 1]) {

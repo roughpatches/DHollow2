@@ -5,9 +5,13 @@ import { atTile } from './street.js';
 
 const TS = TUNING.tileSize;
 
+// On a grid everyone is stood up to the same height as well, and that height is the
+// generated placeholder's own: a room is built of 16-pixel tiles and drawn art comes back
+// at 60 or 64, which is four tiles of hunter standing in a hut with a two-tile bed in it.
 export function spawnActor(scene, palette, tx, ty, facing = 'down') {
   const s = scene.physics.add.sprite(tx * TS + TS / 2, ty * TS + TS, faceFrame(palette, facing)[0]);
   s.setOrigin(0.5, footOf(palette));
+  s.setScale(TUNING.gridBodyPx / (s.frame.height * bodyOf(palette)));
   fitBody(s, 10, 8);
   s.palette = palette;
   s.facing = facing;
