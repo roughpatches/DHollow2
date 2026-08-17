@@ -76,18 +76,23 @@ export class PhaseSequenceEngine {
     if (!this.current) return;
     if (this._isHold(this.currentType)) this.current.setHolding(true);
     else if (this.currentType === 'hook-set') this.current.set(now);
-    else if (this.currentType === 'axe-fell') this.current.chargeStart();
+    else if (this.currentType === 'prospect') this.current.sample();
+    else if (this.currentType === 'prep') this.current.cut();
+    else if (this.currentType === 'cook') this.current.pull();
+    else if (this.currentType === 'axe-fell' || this.currentType === 'mine') this.current.chargeStart();
   }
 
   onRelease() {
     if (!this.current) return;
     if (this._isHold(this.currentType)) this.current.setHolding(false);
-    else if (this.currentType === 'axe-fell') this.current.strike();
+    else if (this.currentType === 'axe-fell' || this.currentType === 'mine') this.current.strike();
   }
 
   onDirection(dir) {
     if (!this.current) return;
     if (this.currentType === 'axe-fell') this.current.setSide(dir);
+    else if (this.currentType === 'mine') this.current.setGear(dir);
+    else if (this.currentType === 'cook') this.current.answerCue(dir);
   }
 
   _isHold(type) {

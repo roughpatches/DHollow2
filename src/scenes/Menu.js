@@ -10,10 +10,11 @@ import { SCRIPT } from '../placeholders.js';
 import { partyRows, skillRows, fill } from '../party.js';
 import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
-import { questRows, placeLines, canStart } from '../run.js';
+import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
 const PANEL = 'parchment'; // the menu is opened standing in the town, so it is the town's paper
+const PLATE = 'plate'; // and a picture on it is set in the square off the same sheet
 
 // Gregorious's jobs carry live run state, so they are rebuilt on every draw and sit
 // above the log of everything else the village has told you it wants.
@@ -22,6 +23,11 @@ const questLog = () => [...questRows(), ...QUESTS];
 // What the party is carrying comes off town.js as it changes, and sits above the kit
 // the character started the game with. One list, two sources.
 const inventory = () => [...carriedRows(), ...INVENTORY];
+
+// The Map tab is where the party can go, not everywhere they have stood: a place with an
+// id is a zone a job is walked in, and everything else in content/places.js is town
+// scenery the tab used to list. Drop the filter to have them all back.
+const locations = () => PLACES.filter((p) => p.id);
 
 // Runs alongside World, hidden until M. Every tab is the same list-and-detail view
 // over the same {label, note, body} shape, so adding a tab is one line here and one
@@ -44,7 +50,7 @@ const TABS = [
   // one word each: at eleven tabs the spacing is tighter than a space inside a name,
   // and 'Quest Log' read as two tabs
   ['Quests', questLog],
-  ['Map', PLACES],
+  ['Map', locations],
   ['Script', SCRIPT],
   ['Settings', SETTINGS],
 ];
@@ -330,6 +336,11 @@ export default class Menu extends Phaser.Scene {
     this.layer.add(g);
     y += 18;
 
+    // A zone is a painting and what is in it rather than a page of prose: what it looks
+    // like to stand in, what is said about it, and along the bottom what it is made of
+    // and what comes off it.
+    if (entry.backdrop) return this.location(entry, y);
+
     // a building's state is read live rather than written into the entry, so repairing
     // it in the world changes what this page says about it
     let body = entry.body;
@@ -369,6 +380,101 @@ export default class Menu extends Phaser.Scene {
       bottom = y + t.height + 8;
     }
     return bottom;
+  }
+
+  hang(name, rect) {
+    for (const o of framed(this, name, rect)) this.layer.add(o);
+  }
+
+  // A zone: its own painted landscape at the top, whatever the job there has to say and
+  // the flavour under that, and the two rows of icons stood on the foot of the panel.
+  location(entry, y) {
+    // The two rows are laid out first, because where they end up is where the prose above
+    // them has to stop. They are stood on the foot of the panel, so their own height is
+    // what decides that.
+    const rows = [['Environment', entry.environment], ['Resources', entry.resources]]
+      .filter(([, list]) => list && list.length)
+      .map(([name, list]) => this.factRow(name, list));
+    const tall = rows.reduce((n, r) => n + r.lines * TUNING.menuFactRow, 0);
+    const footer = this.box.y + this.box.h - TUNING.menuPad - 26 - tall;
+
+    // To the width of the page and no further, and no taller than its share of it: the
+    // painting is wider than it is tall, and squashing it to a box would stop it being a
+    // landscape. Centred, because what is left over is a margin and not a gap. The frame
+    // it is set in takes its own edge off both, so the picture keeps its shape inside it.
+    const edge = TUNING.menuPortraitEdge;
+    const place = this.add.image(0, 0, entry.backdrop.image).setOrigin(0, 0);
+    place.setScale(Math.min(1,
+      (this.detailW - edge * 2) / place.width,
+      (TUNING.menuPortraitHeight - edge * 2) / place.height));
+    const w = place.displayWidth;
+    const h = place.displayHeight;
+    const x = this.detailX + (this.detailW - w) / 2;
+    // the square off the town's own sheet, the one a speaker's face is set in — hung
+    // first, so the painting sits inside its rails rather than over them
+    this.hang(PLATE, { x: x - edge, y, w: w + edge * 2, h: h + edge * 2 });
+    place.setPosition(x, y + edge);
+    this.layer.add(place);
+    y += h + edge * 2 + 14;
+
+    // What the place is, and then one line on whether the party can go there — the job
+    // itself is written out on the Quests tab, and this page is the place rather than the
+    // work. A job that cannot be walked says the first thing standing in the way.
+    const state = entry.quest
+      ? (canStart(entry.quest) ? ['Ready. [Enter] to set out.'] : blockers(entry.quest).slice(0, 2))
+      : [];
+    for (const line of [...entry.body, ...state]) {
+      if (y > footer - 20) break; // the rows below own the rest of the page
+      y += this.text(this.detailX, y, fill(line), TUNING.menuBodySize, COLORS.menuText, this.detailW).height + 8;
+    }
+
+    let ry = footer;
+    for (const row of rows) ry = this.drawFactRow(row, ry);
+  }
+
+  // What one of those rows is made of, measured before anything is drawn: the label, and
+  // every thing on it with its icon and its word, wrapped to the width of the page.
+  factRow(name, list) {
+    const scratch = this.add.text(0, 0, '', { fontFamily: TUNING.font, fontSize: `${TUNING.menuHintSize}px` });
+    const label = `${name}:`;
+    scratch.setFontSize(TUNING.menuBodySize);
+    scratch.setText(label);
+    const indent = scratch.width + 12;
+    scratch.setFontSize(TUNING.menuHintSize);
+    const items = list.map((thing) => {
+      scratch.setText(thing);
+      return { thing, w: TUNING.menuFactIcon + 6 + scratch.width + 16 };
+    });
+    scratch.destroy();
+
+    // how many lines it takes, wrapping under the label rather than under the icons
+    let lines = 1;
+    let x = indent;
+    for (const it of items) {
+      if (x + it.w > this.detailW && x > indent) { lines += 1; x = indent; }
+      x += it.w;
+    }
+    return { label, indent, items, lines };
+  }
+
+  drawFactRow(row, top) {
+    this.text(this.detailX, top + 6, row.label, TUNING.menuBodySize, COLORS.menuDim);
+    let x = this.detailX + row.indent;
+    let y = top;
+    for (const it of row.items) {
+      if (x + it.w > this.detailX + this.detailW && x > this.detailX + row.indent) {
+        y += TUNING.menuFactRow;
+        x = this.detailX + row.indent;
+      }
+      const icon = this.add.image(x, y + TUNING.menuFactRow / 2, iconKeyFor(it.thing)).setOrigin(0, 0.5);
+      icon.setDisplaySize(TUNING.menuFactIcon, TUNING.menuFactIcon);
+      this.layer.add(icon);
+      // the word beside its icon: most of these are a blank square until there is art for
+      // them, and a row of blank squares says nothing on its own
+      this.text(x + TUNING.menuFactIcon + 6, y + 8, it.thing, TUNING.menuHintSize, COLORS.menuText);
+      x += it.w;
+    }
+    return y + TUNING.menuFactRow;
   }
 
   // The map is the world's own grid at a smaller size, drawn in the same tile colours,
