@@ -103,14 +103,16 @@ export const PLACES = [
     // `quest` makes the entry somewhere you set out for — Enter starts the job.
     id: 'greywood',
     work: true, // and it is somewhere standing work can be taken for; see content/quests.js
-    // What the wood is made of. Sailing, Mountaineering, Fording, Mining, Alchemy,
-    // Smithing and Gem Cutting are deliberately off it: there is no tide, no face and no
-    // forge in the Greywood, and the nodes that want them are written and waiting for
-    // somewhere that has them. Put one back on this line and its nodes come back with it.
+    // What the wood is made of. All four gathering skills are on it, so the wood draws the
+    // whole of that table: a node for each of them alone and a node for each pairing of
+    // two. Sailing, Mountaineering, Fording, Alchemy, Smithing and Gem Cutting are
+    // deliberately off it — there is no tide, no marsh and no forge in the Greywood, and
+    // the nodes that want them are written and waiting for somewhere that has them. Put
+    // one back on this line and its nodes come back with it.
     skills: [
       'woodcraft',
       'intimidation', 'persuasion', 'investigation', 'insight',
-      'woodcutting', 'fishing', 'herblore',
+      'woodcutting', 'fishing', 'mining', 'herblore',
       'cooking',
     ],
     terrain: 'forest',

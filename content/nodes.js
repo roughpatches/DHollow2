@@ -17,6 +17,12 @@
 //   Herblore — and its activity is the StarScape engine that work is. src/run.js says so
 //   at boot if a harvest names anything outside that group. Herblore's engine is still
 //   being built, so a Foraging node names it, pays out and moves on until it lands.
+//   The resource table is kept full: every gathering skill has a node that is only that
+//   skill, and a node shared with each of the others. Four skills is four solo nodes and
+//   six pairings, which is the ten below. A point spent on any of them buys work nobody
+//   else's points can reach, and a second specialist in the party is always a question
+//   at some node rather than dead weight. src/run.js counts the table at boot and says
+//   which solo or which pairing is missing, so a fifth gathering skill names its own gap.
 //   A way through an encounter names ANY skill, gathering included. It is a roll against
 //   a DC and not a piece of work, so nothing has to have an engine behind it.
 //
@@ -88,6 +94,9 @@ export const RESOURCE_NODES = [
     body: ['[Placeholder Text]'],
   },
   {
+    // Woodcutting's own node. It came down last week: nothing has had time to grow on it
+    // and nothing else is standing here, so the whole of it is one job and the party
+    // either brought somebody who can do that job or turns round.
     id: 'deadfall',
     name: 'A beech gone over in the wind',
     zones: ['greywood'],
@@ -98,13 +107,8 @@ export const RESOURCE_NODES = [
       {
         skill: 'woodcutting',
         activity: 'Sawing',
-        spoils: { timber: [1, 3] },
-        draw: { count: [1, 2], odds: { oaklog: 40, oakbranch: 40 } },
-      },
-      {
-        skill: 'herblore',
-        activity: 'Foraging',
-        draw: { count: [1, 3], odds: { oystermushroom: 50, blacktrumpet: 25 } },
+        spoils: { timber: [2, 4] },
+        draw: { count: [2, 3], odds: { oaklog: 45, oakbranch: 40, heartwood: 10 } },
       },
     ],
     xp: [8, 14],
@@ -134,6 +138,55 @@ export const RESOURCE_NODES = [
     ],
     xp: [10, 16],
     con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // Fishing's own node. Deep, slow and overhung — there is nothing on the bank worth
+    // stopping for and no bottom worth turning over, so the water is the whole of it.
+    id: 'pool',
+    name: 'A deep pool under the bank',
+    zones: ['greywood'],
+    nature: 'gather',
+    weight: { day: 4, night: 2 },
+    read: { skill: 'fishing', line: 'The water goes dark and stops moving under that bank. Whatever is in this stream is in there.' },
+    harvests: [
+      {
+        skill: 'fishing',
+        activity: 'Casting',
+        // the big ones are down here and the small ones are not, which is the whole
+        // difference between this and the shallows
+        draw: { count: [2, 4], odds: { brooktrout: 45, perch: 40, bluegill: 15 } },
+      },
+    ],
+    xp: [10, 16],
+    con: [-1, 0],
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // Woodcutting and Mining in one place: the slope took the trees down with it and left
+    // the face they were standing on open behind them.
+    id: 'slip',
+    name: 'Where the hillside came away',
+    zones: ['greywood'],
+    nature: 'gather',
+    weight: { day: 3, night: 2 },
+    read: { skill: 'woodcraft', line: 'Half the trees on that slope are lying the wrong way, and the ground they were in is not there any more.' },
+    harvests: [
+      {
+        skill: 'woodcutting',
+        activity: 'Sawing',
+        spoils: { timber: [1, 3] },
+        draw: { count: [1, 2], odds: { oaklog: 40, oakbranch: 45 } },
+      },
+      {
+        skill: 'mining',
+        activity: 'Quarrying',
+        spoils: { stone: [1, 3] },
+        draw: { count: [0, 2], odds: { ironore: 45, roughgem: 7 } },
+      },
+    ],
+    xp: [10, 16],
+    con: [-2, 0],
     body: ['[Placeholder Text]'],
   },
   {

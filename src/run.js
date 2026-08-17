@@ -104,6 +104,22 @@ for (const z of PLACES.filter((p) => p.skills)) {
     if (!SKILL_IDS.has(id)) console.warn(`${z.label}: no such skill — ${id}`);
   }
 }
+// The resource table is meant to be full: a node for each gathering skill on its own, and
+// a node for each pairing of two. That is what makes a point in any of them buy work
+// nobody else can reach and a second specialist a question rather than dead weight. Add a
+// gathering skill and this is what names the nodes it still wants; see content/nodes.js.
+const pairings = new Set();
+for (const e of KINDS) {
+  if (e.harvests) pairings.add([...new Set(e.harvests.map((h) => h.skill))].sort().join('+'));
+}
+const gathering = [...GATHERING];
+for (const [i, a] of gathering.entries()) {
+  if (!pairings.has(a)) console.warn(`No resource node is ${a} alone.`);
+  for (const b of gathering.slice(i + 1)) {
+    if (!pairings.has([a, b].sort().join('+'))) console.warn(`No resource node pairs ${a} with ${b}.`);
+  }
+}
+
 // Somewhere to set out for has to have something to walk. A zone open for work with
 // nothing drawable in it by day is an empty run, and this is where that is cheap to say.
 for (const z of PLACES.filter((p) => p.work)) {
