@@ -366,6 +366,16 @@ const HERON = {
   },
 };
 
+// Soggy ground, and the same soggy ground with a dozen mounds risen out of it. A band
+// rather than a thing, running off both sides of its frame, so it is feathered on the two
+// sides and the top; the bottom is the road. Warm enough as painted to want no shade.
+// Two nodes share the plain one: bad ground and the ground giving way are the same
+// stretch of marsh, met by two parties asking it two different questions.
+const marsh = (name) => ({
+  path: 'art/marsh',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 34, fade: [30, 30, 20, 0] },
+});
+
 // A derelict holding, painted at 80 and stood at twice that so a hut with a doorway in it
 // reads as something a person could have walked out of. It carries its own footing — the
 // stone courses at the base are the ground it stands on — so nothing is feathered.
@@ -512,4 +522,7 @@ export const NODE_ART = {
   slip: hollow('boulders_and_trees_collapsed_i'), // Where the ground gave way
   rockfall: hollow('Covered_in_stone_and'), // The path is under the stone
   find: COTTAGE, // Left behind
+  hazard: marsh('A_stretch_of_marshy_soggy_gro'), // Bad ground
+  mire: marsh('A_stretch_of_marshy_soggy_gro'), // and The ground gives, the same stretch
+  unquiet: marsh('A_number_of_dark_ea'), // Out of the ground
 };

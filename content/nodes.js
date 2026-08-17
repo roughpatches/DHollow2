@@ -478,7 +478,7 @@ export const ENCOUNTER_NODES = [
     xp: [4, 8],
     con: [-1, 0],
     body: [
-      'The path goes on ahead of you and the ground either side of it does not look any different, but the path is holding water and the ground is not. Somewhere under it there is nothing to stand on.',
+      'The way ahead goes into standing water and reed, and the reed is growing in it rather than beside it. The ground either side does not look any different from the ground under all that. Somewhere under it there is nothing to stand on.',
     ],
     ways: [
       {
@@ -542,11 +542,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
-    read: { skill: 'woodcraft', line: 'Nothing is growing across that stretch, and everything either side of it is.' },
+    read: { skill: 'woodcraft', line: 'Nothing that grows on dry ground is growing across that stretch, and everything either side of it is.' },
     xp: [6, 12],
     con: [-1, 0],
     body: [
-      'A stretch of open ground thirty yards across with nothing growing on it, ringed the whole way round by everything that would not grow there. The first boot in goes to the ankle and keeps going a while after that.',
+      'A stretch of soft ground thirty yards across — reed and root and standing water, with everything that wants a dry footing keeping to the edge of it. The first boot in goes to the ankle and keeps going a while after that.',
     ],
     ways: [
       {
@@ -681,7 +681,7 @@ export const ENCOUNTER_NODES = [
     xp: [16, 24],
     con: [-2, -1],
     body: [
-      'The ground here is turned in low mounds, a dozen of them, and the earth on top of each is darker than the earth around it. It has come up. It has not been put down.',
+      'The ground here is soft and standing in water, and out of it rise a dozen low mounds, the earth on top of each of them darker and drier than the wet it is sitting in. It has come up. It has not been put down.',
     ],
     ways: [
       {

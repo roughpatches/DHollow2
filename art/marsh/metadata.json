@@ -1,0 +1,37 @@
+{
+  "group_id": "7c1419dd-24d3-4c4e-8ca6-c9d6ce85ec27",
+  "objects": [
+    {
+      "id": "4e07c779-3045-4700-88c0-547e6d514fa5",
+      "name": "base",
+      "prompt": "A stretch of marshy, soggy ground",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_stretch_of_marshy_soggy_gro.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "756a0d7c-a055-4232-9322-e4b0cebfd8b9",
+      "name": "A number of dark, ea",
+      "prompt": "A stretch of marshy, soggy ground",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_number_of_dark_ea.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T23:38:02.129278"
+}
