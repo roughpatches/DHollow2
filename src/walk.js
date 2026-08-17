@@ -107,13 +107,17 @@ export function createWalk(scene, rect, party, when, backdrop) {
   let arriving = null; // { until, total, onArrive }
   let standing = null; // the encounter whose own art is on the road, if it has any
 
-  // Painted art is drawn at the size it was painted and stood on the road by its own
-  // floor line, which every state has its own measure of: the oak's roots run to the
-  // bottom of its frame and the trunk it becomes sits well up inside its own.
+  // Painted art is stood on the road by its own floor line, which every state has its own
+  // measure of: the oak's roots run to the bottom of its frame and the trunk it becomes
+  // sits well up inside its own. It is drawn at the size it was painted unless the state
+  // asks for a whole multiple of that — the road has art painted at more than one size on
+  // it, and a thicket painted at 80 is knee-high beside an oak painted at 256. The origin
+  // is a fraction of the frame, so scaling turns the art about its floor line and what is
+  // standing on the road stays standing on it.
   function wear(id, state) {
     const spec = nodeArtFor(id)[state];
     mark.setTexture(nodeFrame(id, state, 0));
-    mark.setScale(1).setOrigin(0.5, 1 - spec.ground / mark.frame.height);
+    mark.setScale(spec.scale || 1).setOrigin(0.5, 1 - spec.ground / mark.frame.height);
     mark.anims.play(nodeAnim(id, state), true);
   }
 

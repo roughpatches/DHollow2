@@ -282,6 +282,12 @@ export const SKILL_ART = {
 //   done   — the same for once the party has finished with it. Played once and held, so
 //            a tree that has come down stays down. Leave it out for anything the party
 //            does not change by working it: water is water afterwards.
+//   still  — a state's single export, out of its rotations folder, instead of `folder` and
+//            `frames`. What a thing that does nothing while you stand at it comes back as.
+//   scale  — a whole multiple to draw the art at, for art painted smaller than the road it
+//            has to stand on. Everything here is painted at whatever size it was asked for
+//            and a thicket painted at 80 is knee-high beside an oak painted at 256. Keep it
+//            whole: pixel art scaled by a fraction stops being pixel art.
 //   turn   — quarter turns clockwise to give the art before it is used, for a thing
 //            painted lying one way and wanted the other. A brook painted as a channel
 //            running across the frame is a brook running down the screen once it has been
@@ -360,6 +366,15 @@ const HERON = {
   },
 };
 
+// Thin deciduous trees, painted at 80 and stood up to three times that so a stand reads as
+// a stand beside an oak. Two exports of the one prompt, each carrying its own second half:
+// the leafy wall and the leafy wall half cut, the bare stand and the bare stand with one
+// tree still in leaf. What is left of each export is the half nobody asked a node for.
+const thicket = (path, name, ground) => ({
+  path,
+  stands: { still: `${name}/rotations/${name}.png`, ground, scale: 3 },
+});
+
 // The rest of the oaks: the same tree dressed four ways, each painted once rather than
 // looped, because none of them does anything while the party is standing at it. `still` is
 // a state that is one picture instead of a folder of frames; see src/art.js. `ground` is
@@ -380,4 +395,10 @@ export const NODE_ART = {
   mushrooms: oak('Mushrooms', 43), // The mushroom copse, the same trunk gone over with them
   offering: oak('Offering', 7), // Somebody has left something at the foot of that tree
   sap: oak('Sap', 7), // A tree that is bleeding, the stripe painted down its trunk
+  // The thicket, the wall of it across the road
+  thorn: thicket('art/thicket', 'A_thicket_of_dense_thin_deci', 6),
+  // Somebody is cutting here: the same wall, half of it down and the cut stacked
+  claim: thicket('art/thicket', 'Half_the_trees_cut_d', 3),
+  // Something has gone through this stand: bare the wrong month, one tree still in leaf
+  blight: thicket('art/blight', 'A_single_tree_in_ful', 6),
 };

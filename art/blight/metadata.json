@@ -1,0 +1,37 @@
+{
+  "group_id": "06cac8f6-c547-4b21-a941-a2226bcbdf47",
+  "objects": [
+    {
+      "id": "9bf7e617-d9f9-4467-a9e0-008395d2a4d0",
+      "name": "base",
+      "prompt": "A thicket of dense, thin, deciduous trees",
+      "size": {
+        "width": 80,
+        "height": 80
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_thicket_of_dense_thin_deci.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "071ccd02-39c8-4a42-b052-2508af4942a9",
+      "name": "A single tree in ful",
+      "prompt": "A thicket of dense, thin, deciduous trees",
+      "size": {
+        "width": 80,
+        "height": 80
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_single_tree_in_ful.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T15:22:34.994451"
+}
