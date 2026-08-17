@@ -1638,11 +1638,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'woodcutting', line: 'There is a pine on that side running down its own trunk, and it has been running a while.' },
+    read: { skill: 'woodcutting', line: 'There is an oak on that side running down its own trunk, and it has been running a while.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A pine on that side running down its own trunk, a stripe of it from a wound at head height all the way to the roots. It has been running long enough for the ground under it to be sticky.',
+      'An oak on that side running down its own trunk, a stripe of it from a wound at head height all the way to the roots. It has been running long enough for the ground under it to be sticky.',
     ],
     ways: [
       {
@@ -1660,9 +1660,9 @@ export const ENCOUNTER_NODES = [
         skill: 'woodcutting',
         dc: 12,
         tried: 'The bad wood cut back to sound wood, which is further in than it looks.',
-        held: 'The rot comes out in one piece and what is under it is pitch-soaked and worth carrying.',
+        held: 'The rot comes out in one piece and what is under it is dark and dry and sound.',
         lost: 'The rot goes further than the axe does, and the tree will be down by spring.',
-        spoils: { pitch: [1, 2], timber: [1, 2] },
+        spoils: { timber: [1, 2], heartwood: [0, 1] },
         lostCon: 1,
       },
     ],
