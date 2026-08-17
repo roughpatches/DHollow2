@@ -249,12 +249,17 @@ export default class Quest extends Phaser.Scene {
       this.draw();
       return;
     }
-    // And the fight: three moves, one of them every turn, until one of them is down.
+    // And the fight: one thing off the card every turn, until one of them is down.
     if (r.phase === 'fight') {
-      if (k === 'arrowup' || k === 'w') this.row = (this.row + MOVES.length - 1) % MOVES.length;
-      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % MOVES.length;
-      else if (k === 'enter' || k === ' ' || k === 'e') run.fightMove(this.row);
-      else if (k === 'escape') run.abandon();
+      const ways = this.fightWays();
+      if (k === 'arrowup' || k === 'w') this.row = (this.row + ways.length - 1) % ways.length;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % ways.length;
+      else if (k === 'enter' || k === ' ' || k === 'e') {
+        const way = ways[this.row];
+        if (way.move) run.fightMove(way.move.id);
+        else run.swapIn(way.swap);
+        this.row = 0; // whoever is up next is asked from the top of their own list
+      } else if (k === 'escape') run.abandon();
       this.draw();
       return;
     }
@@ -1194,19 +1199,35 @@ export default class Quest extends Phaser.Scene {
     return out;
   }
 
-  // The fight itself: what the last exchange came to, and the three things that can be
-  // done about the next one. Never paged — the question and the answers are one card.
+  // Everything that can be done with a turn: the three moves, and — where somebody else
+  // on the run fights and is still up — changing over to them, which costs the whole of it.
+  fightWays() {
+    const f = run.fightingAt();
+    if (!f) return [];
+    return [
+      ...MOVES.map((move) => ({ move })),
+      ...run.standing().filter((id) => id !== f.who).map((swap) => ({ swap })),
+    ];
+  }
+
+  // The fight itself: what the last exchange came to, and what can be done about the next
+  // one. Never paged — the question and the answers are one card.
   fightLines(r) {
     const f = run.fightingAt();
-    if (this.row >= MOVES.length) this.row = 0;
+    const ways = this.fightWays();
+    if (this.row >= ways.length) this.row = 0;
     const tone = { us: COLORS.menuText, them: COLORS.menuMapFolk, said: COLORS.menuDim };
     const out = f.log.map(([line, side]) => [line, TUNING.questBodySize, tone[side]]);
-    MOVES.forEach((m, i) => {
+    ways.forEach((way, i) => {
       const on = i === this.row;
-      out.push([`${on ? '>' : ' '} ${m.name}`, TUNING.questBodySize,
+      const head = way.move ? way.move.name : `Send in ${nameOf(way.swap)}`;
+      const said = way.move
+        ? `${way.move.line}  (${moveLine(way.move, f)})`
+        // what they have left is on the bar above; what it costs is the whole of the news
+        : `They come across, you come out.  (the turn, and it answers at +${TUNING.combat.swapOpens})`;
+      out.push([`${on ? '>' : ' '} ${head}`, TUNING.questBodySize,
         on ? COLORS.menuAccent : COLORS.menuDim]);
-      out.push([`    ${m.line}  (${moveLine(m, f)})`, TUNING.questHintSize,
-        on ? COLORS.menuText : COLORS.menuRule]);
+      out.push([`    ${said}`, TUNING.questHintSize, on ? COLORS.menuText : COLORS.menuRule]);
     });
     return out;
   }

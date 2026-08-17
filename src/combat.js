@@ -47,7 +47,7 @@ function swingLine(who, s, harm, onto) {
 // their wounds to the next one; the fight only ever writes the one who is up.
 export function begin(who, foe, { pool, weaken = 0, ambush = false }) {
   const fight = {
-    who,
+    who, // whoever is standing in front of it, and null while nobody is
     foe,
     pool,
     foeMax: foe.hp,
@@ -55,8 +55,8 @@ export function begin(who, foe, { pool, weaken = 0, ambush = false }) {
     weakened: weaken,
     round: 1,
     steady: 0, // what a turn spent guarding is worth to the next swing
-    taken: 0, // what this fighter has lost to it, for the tally afterwards
-    over: null, // 'won' once it is down, 'down' once the fighter is
+    hurt: {}, // what it has taken off each of them, for the tally afterwards
+    over: null, // 'won' once it is down, 'down' once whoever is up is
     log: [],
   };
   fight.log.push([foe.body[0], 'them']);
@@ -79,7 +79,7 @@ function answer(fight, opens, keep) {
   fight.log.push([pick(s.lands ? fight.foe.lands : fight.foe.misses), 'said']);
   if (!hurt) return;
   fight.pool[fight.who] = Math.max(0, fight.pool[fight.who] - hurt);
-  fight.taken += hurt;
+  fight.hurt[fight.who] = (fight.hurt[fight.who] || 0) + hurt;
   if (fight.pool[fight.who] <= 0) {
     fight.over = 'down';
     fight.log.push([`${nameOf(fight.who)} goes down and does not get back up.`, 'us']);
@@ -114,6 +114,37 @@ export function take(fight, moveId) {
   fight.steady = move.steady || fight.steady;
   fight.round += 1;
   return fight;
+}
+
+// Somebody else takes the front, in the middle of the fight, on purpose. It costs the
+// whole turn — nobody swings — and the one coming in is the one who wears whatever the
+// foe makes of the changeover. What a second fighter buys is somewhere to put the damage.
+export function swapTo(fight, id) {
+  if (!fight || fight.over || id === fight.who) return fight;
+  const out = fight.who;
+  fight.log = [[`${nameOf(id)} comes across and ${nameOf(out)} falls back out of it, and the changeover is the turn.`, 'us']];
+  fight.who = id;
+  fight.steady = 0; // whatever the last one had found their feet on, they took with them
+  answer(fight, TUNING.combat.swapOpens, 1);
+  fight.round += 1;
+  return fight;
+}
+
+// And somebody stepping over one who is already down. The blow that put the last one
+// there was that turn, so this one costs nothing: the fight is simply carried on, and it
+// is carried on where it stood — the foe keeps every wound the one being carried put in.
+export function stepIn(fight, id) {
+  if (!fight || fight.over === 'won') return fight;
+  fight.who = id;
+  fight.over = null; // the fighter was finished; the fight was not
+  fight.steady = 0;
+  fight.log = [[`${nameOf(id)} steps over them and takes the front.`, 'us']];
+  return fight;
+}
+
+// what it has taken out of the party over the whole fight, and off whom
+export function hurtOf(fight) {
+  return Object.entries(fight.hurt).filter(([, n]) => n > 0);
 }
 
 // What a move is worth, in the numbers rather than the words — printed under it so the

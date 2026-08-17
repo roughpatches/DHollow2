@@ -281,6 +281,10 @@ export const TUNING = {
     fighter: { hp: 24, hit: 2, guard: 12, harm: [3, 6] },
     hpPerLevel: 4, // added to a fighter's hit points for every level past the first
     ambushHit: 3, // what a foe adds to its opening blow at a fight walked into blind
+    // Changing over mid-fight costs the whole turn — nobody swings — and the one coming
+    // in takes what the foe makes of the gap. Somebody stepping in over a fighter who is
+    // already down pays neither: the blow that put the last one down was that turn.
+    swapOpens: 2,
     // A fighter at zero hit points is out of the run: their own constitution comes off
     // the party's pool, because a body being carried is not a body walking. Somebody else
     // who fights steps up; nobody left who fights and the party turns for home.

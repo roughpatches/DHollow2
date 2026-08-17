@@ -38,6 +38,9 @@
 // Three moves is the whole list on purpose: a fight is a question asked eight times, and
 // a question with three answers is one a player can hold in their head. Add a fourth when
 // a foe is written that makes one of these three the wrong answer.
+// A fourth row turns up under them on its own where the run has another fighter still on
+// their feet: changing over to them. It is not written here because it is not a move — it
+// is the turn spent on somebody else taking the front. See swapOpens in tuning.js.
 
 export const FOES = [
   {

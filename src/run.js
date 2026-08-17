@@ -21,7 +21,7 @@ import { give, nameOf } from './town.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
-import { begin, take, foeOf, MOVES } from './combat.js';
+import { begin, take, swapTo, stepIn, hurtOf, foeOf } from './combat.js';
 
 // Everything a node can turn out to be: the ones a quest names by hand, and the ones the
 // road draws. They are one shape and one lookup, so nothing downstream has to know which
@@ -803,19 +803,34 @@ function toFight(node) {
   else run.phase = 'fighter';
 }
 
+// Sending somebody to the front: the first one, or the one who steps over them when they
+// go down. There is one fight and it is the same fight all the way through, so a fighter
+// carried out of it leaves the thing standing there as wounded as they left it.
 export function stepUp(id) {
   if (!run || !standing().includes(id)) return run;
   const node = run.nodes[run.at];
-  run.fight = begin(id, foeOf(node.fight.foe), {
-    pool: run.hp, weaken: node.fight.weaken || 0, ambush: !!node.fight.ambush,
-  });
+  if (run.fight) stepIn(run.fight, id);
+  else {
+    run.fight = begin(id, foeOf(node.fight.foe), {
+      pool: run.hp, weaken: node.fight.weaken || 0, ambush: !!node.fight.ambush,
+    });
+  }
   run.phase = 'fight';
   return afterTurn(node);
 }
 
-export function fightMove(i) {
+// And changing over mid-fight because you would rather the other one wore the next few.
+// It costs the turn; see swapTo in src/combat.js.
+export function swapIn(id) {
   if (!run || run.phase !== 'fight' || !run.fight || run.fight.over) return run;
-  take(run.fight, MOVES[i].id);
+  if (id === run.fight.who || !standing().includes(id)) return run;
+  swapTo(run.fight, id);
+  return afterTurn(run.nodes[run.at]);
+}
+
+export function fightMove(moveId) {
+  if (!run || run.phase !== 'fight' || !run.fight || run.fight.over) return run;
+  take(run.fight, moveId);
   return afterTurn(run.nodes[run.at]);
 }
 
@@ -825,7 +840,7 @@ function afterTurn(node) {
   const f = run.fight;
   if (!f || !f.over) return run;
   if (f.over === 'won') {
-    node.won = { foe: f.foe.name, who: f.who, rounds: f.round, taken: f.taken };
+    node.won = { foe: f.foe.name, rounds: f.round, hurt: hurtOf(f) };
     // what is taken off it once it is down, paid the way a beat's spoils are
     node.beatSpoils = { ...(node.beatSpoils || {}), ...(f.foe.spoils || {}) };
     run.fight = null;
@@ -841,17 +856,13 @@ function afterTurn(node) {
 // left who fights and the party is finished out here whatever the pool still says.
 function faint(id) {
   const node = run.nodes[run.at];
-  const f = run.fight;
-  // Whoever steps up next steps into the fight that is already happening, not a new one:
-  // what the one being carried took off it stays off it, and nobody is ambushed twice.
-  node.fight = { ...node.fight, weaken: Math.max(0, f.foeMax - f.foeHp), ambush: false };
-  run.fight = null;
+  run.fight.who = null; // nothing standing in front of it, and the fight still going on
   const lost = Math.round(conOf(id) * TUNING.combat.faintCon);
   run.conMax = Math.max(0, run.conMax - lost);
   run.con = Math.max(0, Math.min(run.conMax, run.con - lost));
   node.fainted = [...(node.fainted || []), { who: whoIs(id), con: lost }];
   if (!standing().length) { rout(); return; }
-  if (run.con <= 0) { spend(); return; }
+  if (run.con <= 0) { run.fight = null; spend(); return; }
   run.phase = 'fighter'; // the thing is still standing there and somebody has to
 }
 
@@ -1102,9 +1113,12 @@ export function wonLine(node) {
   const w = node.won;
   if (!w) return null;
   const rounds = `${w.rounds} ${w.rounds === 1 ? 'round' : 'rounds'}`;
-  return w.taken
-    ? `${w.foe} is down. ${rounds}, and ${w.taken} hit points off ${w.who === YOU ? 'you' : whoIs(w.who)}.`
-    : `${w.foe} is down in ${rounds}, and it never laid a hand on ${w.who === YOU ? 'you' : whoIs(w.who)}.`;
+  if (!w.hurt.length) return `${w.foe} is down in ${rounds}, and it never laid a hand on anybody.`;
+  const total = w.hurt.reduce((n, [, v]) => n + v, 0);
+  const off = w.hurt.length > 1
+    ? `between ${w.hurt.map(([id]) => whoIs(id)).join(' and ')}`
+    : `off ${whoIs(w.hurt[0][0])}`;
+  return `${w.foe} is down. ${rounds}, and ${total} hit points ${off}.`;
 }
 
 // and who was carried out of it, and what the pool lost with them
