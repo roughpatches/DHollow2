@@ -6,7 +6,7 @@ import {
   roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf,
   isCombat, nameOf, fill, YOU,
 } from '../party.js';
-import { MOVES, moveLine } from '../combat.js';
+import { MOVES, moveLine, saidCount } from '../combat.js';
 import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf, hangOf } from '../frames.js';
@@ -334,7 +334,9 @@ export default class Quest extends Phaser.Scene {
     // after dark a fighter is taken before anybody else, because the job will not go
     // without one and the default crew should not have to be corrected by hand
     if (run.needsFighter(when)) rest.sort((a, b) => isCombat(b) - isCombat(a));
-    this.taking = [...must, ...rest].slice(0, Math.max(must.length, this.job.party - 1));
+    // you are one of the four, so the most anybody else can be is three
+    this.taking = [...must, ...rest]
+      .slice(0, Math.min(TUNING.partyMax - 1, Math.max(must.length, this.job.party - 1)));
     this.mode = 'party';
     this.row = 0;
   }
@@ -352,6 +354,7 @@ export default class Quest extends Phaser.Scene {
   toggleWalker(id) {
     if ((this.job.must || []).includes(id)) return; // the job does not go without them
     if (this.taking.includes(id)) this.taking = this.taking.filter((x) => x !== id);
+    else if (this.crew().length >= TUNING.partyMax) return; // four walk out and no more
     else if (recruit.asked(id, this.job, this.when_).willing) this.taking.push(id);
   }
 
@@ -614,9 +617,10 @@ export default class Quest extends Phaser.Scene {
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
     const others = this.taking.length === 1 ? 'one other' : `${this.taking.length} others`;
     const coming = this.taking.length ? `You and ${others} coming` : 'You, and nobody else';
+    const full = this.crew().length >= TUNING.partyMax;
     y += this.text(this.left, y,
       short > 0 ? `Needs ${this.job.party}. ${coming} — ${short} short.`
-        : `Needs ${this.job.party}. ${coming}.`,
+        : `Needs ${this.job.party}. ${coming}.${full ? `  ${TUNING.partyMax} is the most that walk out.` : ''}`,
       TUNING.questBodySize, short > 0 ? COLORS.menuMapFolk : COLORS.menuText).height + 10;
     // the night rule is said on the screen where the crew is picked, because that is
     // the only screen where it can be answered
@@ -718,7 +722,7 @@ export default class Quest extends Phaser.Scene {
     this.trail(r, band.trail);
 
     if (r.state === 'running' && r.phase === 'fighter') this.card(band.walk, this.fighterLines(r), this.nodeHead(r));
-    else if (r.state === 'running' && r.phase === 'fight') this.card(band.walk, this.fightLines(r), run.fightingAt().foe.name);
+    else if (r.state === 'running' && r.phase === 'fight') this.card(band.walk, this.fightLines(r), this.fightHead());
     else if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
     else if (r.state === 'running' && r.phase === 'choose' && !this.approaching) {
       this.card(band.walk, this.workLines(r), this.nodeHead(r));
@@ -846,7 +850,9 @@ export default class Quest extends Phaser.Scene {
         COLORS.hpLow, COLORS.hpFull, !now);
     });
     if (fight) {
-      bar(who.length, `${fight.foe.name} ${fight.foeHp}/${fight.foeMax}`,
+      // the one in front, and how many are still behind it waiting their turn
+      const more = fight.rest.length ? ` +${fight.rest.length}` : '';
+      bar(who.length, `${fight.foe.name}${more} ${fight.foeHp}/${fight.foeMax}`,
         fight.foeMax ? fight.foeHp / fight.foeMax : 0, COLORS.foeLow, COLORS.foeFull);
     }
   }
@@ -1208,6 +1214,12 @@ export default class Quest extends Phaser.Scene {
       ...MOVES.map((move) => ({ move })),
       ...run.standing().filter((id) => id !== f.who).map((swap) => ({ swap })),
     ];
+  }
+
+  // Whoever is in front of the party right now, and how much of the band is behind it
+  fightHead() {
+    const f = run.fightingAt();
+    return f.rest.length ? `${f.foe.name}, and ${saidCount(f.rest.length)} behind it` : f.foe.name;
   }
 
   // The fight itself: what the last exchange came to, and what can be done about the next

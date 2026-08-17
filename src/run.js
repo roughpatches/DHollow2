@@ -21,7 +21,9 @@ import { give, nameOf } from './town.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
-import { begin, take, swapTo, stepIn, hurtOf, foeOf } from './combat.js';
+import {
+  begin, take, swapTo, stepIn, muster, hurtOf, spoilsOf, saidCount, foeOf,
+} from './combat.js';
 
 // Everything a node can turn out to be: the ones a quest names by hand, and the ones the
 // road draws. They are one shape and one lookup, so nothing downstream has to know which
@@ -136,8 +138,18 @@ for (const [i, a] of gathering.entries()) {
 // one, and a foe nobody wrote is a fight that cannot start. Both are content mistakes and
 // both are cheap to say here.
 for (const e of KINDS) {
-  if (e.foe && !foeOf(e.foe)) console.warn(`${e.name}: no such foe — ${e.foe}`);
-  if (e.nature === 'combat' && !e.foe) console.warn(`${e.name}: a combat node with nothing to fight.`);
+  const band = e.foes || (e.foe ? [e.foe] : []);
+  for (const entry of band) {
+    const id = typeof entry === 'string' ? entry : entry.id;
+    if (!foeOf(id)) console.warn(`${e.name}: no such foe — ${id}`);
+  }
+  if (e.nature === 'combat' && !band.length) console.warn(`${e.name}: a combat node with nothing to fight.`);
+}
+
+// Four a side. A job that asks for more than that is a job that cannot be crewed, and
+// this is where that is cheap to say rather than found on the screen where they are picked.
+for (const q of QUESTS) {
+  if (q.party > TUNING.partyMax) console.warn(`${q.label}: asks for ${q.party}; ${TUNING.partyMax} is the most that walk out.`);
 }
 
 // Somewhere to set out for has to have something to walk. A zone open for work with
@@ -390,7 +402,8 @@ export function start(id, when, party, choice = {}) {
   // and are the only ones who can read anything at a fork. The player is on it whoever
   // else is, so their three skills are the three the party always has.
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
-    .filter((id, i, all) => all.indexOf(id) === i);
+    .filter((id, i, all) => all.indexOf(id) === i)
+    .slice(0, TUNING.partyMax); // four walk out and no more, however they were picked
   const nodes = quest.line ? authored(quest.line) : drawn(size);
   // everyone's own constitution, and what knowing this ground adds to it
   const con = conTotal(who) + groundCon(who, terrainOf(quest, where));
@@ -796,8 +809,11 @@ export function fightingAt() {
 // fights, which one steps up is the player's call — it is the only choice they get about
 // a fight before it starts, and it is the whole of what a second fighter is for.
 function toFight(node) {
+  // What is standing there is rolled once, here, and the same band is what the whole
+  // fight is against however many of the party have to be fed into it.
+  node.band = node.band || muster(node.fight.band, node.fight.thin || 0);
+  if (!node.band.length) { settle(null); return; } // said at boot; the run walks on
   const up = standing();
-  if (!foeOf(node.fight.foe)) { settle(null); return; } // said at boot; the run walks on
   if (!up.length) { rout(); return; }
   if (up.length === 1) stepUp(up[0]);
   else run.phase = 'fighter';
@@ -811,7 +827,7 @@ export function stepUp(id) {
   const node = run.nodes[run.at];
   if (run.fight) stepIn(run.fight, id);
   else {
-    run.fight = begin(id, foeOf(node.fight.foe), {
+    run.fight = begin(id, node.band, {
       pool: run.hp, weaken: node.fight.weaken || 0, ambush: !!node.fight.ambush,
     });
   }
@@ -840,9 +856,9 @@ function afterTurn(node) {
   const f = run.fight;
   if (!f || !f.over) return run;
   if (f.over === 'won') {
-    node.won = { foe: f.foe.name, rounds: f.round, hurt: hurtOf(f) };
-    // what is taken off it once it is down, paid the way a beat's spoils are
-    node.beatSpoils = { ...(node.beatSpoils || {}), ...(f.foe.spoils || {}) };
+    node.won = { foe: f.foe.name, felled: f.felled.length, rounds: f.round, hurt: hurtOf(f) };
+    // what is taken off them once they are down, paid the way a beat's spoils are
+    node.beatSpoils = { ...(node.beatSpoils || {}), ...spoilsOf(f) };
     run.fight = null;
     settle(null);
     return run;
@@ -1113,12 +1129,16 @@ export function wonLine(node) {
   const w = node.won;
   if (!w) return null;
   const rounds = `${w.rounds} ${w.rounds === 1 ? 'round' : 'rounds'}`;
-  if (!w.hurt.length) return `${w.foe} is down in ${rounds}, and it never laid a hand on anybody.`;
+  // one thing, or a band of them, and the last one standing is the one that gets named
+  const down = w.felled > 1
+    ? `${w.felled === 2 ? 'Both' : `All ${saidCount(w.felled)}`} of them are down, ${w.foe} last`
+    : `${w.foe} is down`;
+  if (!w.hurt.length) return `${down}, in ${rounds}, and nothing laid a hand on anybody.`;
   const total = w.hurt.reduce((n, [, v]) => n + v, 0);
   const off = w.hurt.length > 1
     ? `between ${w.hurt.map(([id]) => whoIs(id)).join(' and ')}`
     : `off ${whoIs(w.hurt[0][0])}`;
-  return `${w.foe} is down. ${rounds}, and ${total} hit points ${off}.`;
+  return `${down}. ${rounds}, and ${total} hit points ${off}.`;
 }
 
 // and who was carried out of it, and what the pool lost with them

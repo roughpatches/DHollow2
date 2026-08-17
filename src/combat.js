@@ -1,4 +1,6 @@
-// One fight: one fighter, one foe, and blows traded until one of them is down.
+// One fight: one fighter, one foe, and blows traded until one of them is down. Where
+// there is a band of them, it is still one at a time — theirs send the next one forward
+// the moment the one in front goes down, the same way yours do.
 //
 // Nothing here knows about runs, nodes or constitution — src/run.js walks a fight up to
 // this and reads back what happened. What is fought and what a move is worth is in
@@ -20,6 +22,14 @@ export function foeOf(id) {
 
 function roll([lo, hi]) {
   return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+// A count, said rather than printed. Nothing on either side of a fight is ever more than
+// partyMax, so the list is short and anything past it falls back to the figure.
+const SAID = ['no', 'one', 'two', 'three', 'four', 'five', 'six'];
+
+export function saidCount(n) {
+  return SAID[n] || `${n}`;
 }
 
 function pick(list) {
@@ -45,10 +55,31 @@ function swingLine(who, s, harm, onto) {
 // The state of a fight, handed back to whoever started it. `pool` is the hit points of
 // everybody on the run who can fight, kept outside the fight because a fighter carries
 // their wounds to the next one; the fight only ever writes the one who is up.
-export function begin(who, foe, { pool, weaken = 0, ambush = false }) {
+// What is actually standing there, out of what the node named. An entry is a foe id, or
+// an id with how many of it turn up — rolled here, when the party walks into it, so the
+// same node is not the same band twice. Never more than a party's worth of them.
+export function muster(band, thin = 0) {
+  const out = [];
+  for (const entry of band) {
+    const foe = FOE[typeof entry === 'string' ? entry : entry.id];
+    if (!foe) continue;
+    const many = typeof entry === 'string' ? 1 : roll(entry.many || [1, 1]);
+    for (let i = 0; i < many; i++) out.push(foe);
+  }
+  const most = Math.max(1, Math.min(TUNING.partyMax, out.length - thin));
+  return out.slice(0, most);
+}
+
+// `foes` is everything standing there, in the order it comes on. The one in front is the
+// fight; the rest are waiting, and what the ways in were worth lands on the one in front
+// — the party never sees the back of the band until they have got through what is ahead.
+export function begin(who, foes, { pool, weaken = 0, ambush = false }) {
+  const [foe, ...rest] = foes;
   const fight = {
     who, // whoever is standing in front of it, and null while nobody is
-    foe,
+    foe, // and whoever is standing in front of them
+    rest, // the ones behind it, in the order they come on
+    felled: [], // and the ones already put down, for what is taken off them
     pool,
     foeMax: foe.hp,
     foeHp: Math.max(1, foe.hp - weaken),
@@ -56,10 +87,13 @@ export function begin(who, foe, { pool, weaken = 0, ambush = false }) {
     round: 1,
     steady: 0, // what a turn spent guarding is worth to the next swing
     hurt: {}, // what it has taken off each of them, for the tally afterwards
-    over: null, // 'won' once it is down, 'down' once whoever is up is
+    over: null, // 'won' once they are all down, 'down' once whoever is up is
     log: [],
   };
   fight.log.push([foe.body[0], 'them']);
+  if (rest.length) {
+    fight.log.push([`There are ${saidCount(rest.length + 1)} of them.`, 'them']);
+  }
   if (weaken) fight.log.push([`It comes on ${weaken} the worse for it.`, 'us']);
   // Walked into blind: it has the first blow and it does not have to earn the opening.
   if (ambush) {
@@ -86,6 +120,24 @@ function answer(fight, opens, keep) {
   }
 }
 
+// One of them is down. The next comes forward if there is one, which costs neither side
+// a turn — the blow that put the last one down was that turn. Returns whether the fight
+// is still going, and ends it where nothing is left standing.
+function nextUp(fight) {
+  fight.felled.push(fight.foe);
+  if (!fight.rest.length) {
+    fight.over = 'won';
+    return false;
+  }
+  fight.foe = fight.rest.shift();
+  fight.foeMax = fight.foe.hp;
+  fight.foeHp = fight.foe.hp;
+  fight.log.push([fight.rest.length
+    ? `Another comes forward, and there are ${saidCount(fight.rest.length + 1)} of them left.`
+    : 'The last of them comes forward.', 'them']);
+  return true;
+}
+
 // One turn: the move the player took, and the foe's answer to it. A move that does not
 // swing is a move that takes the weight of what comes back and steadies the next one.
 export function take(fight, moveId) {
@@ -105,8 +157,8 @@ export function take(fight, moveId) {
   }
 
   if (fight.foeHp <= 0) {
-    fight.over = 'won';
     fight.log.push([pick(fight.foe.felled), 'said']);
+    if (!nextUp(fight)) return fight;
     return fight;
   }
 
@@ -145,6 +197,20 @@ export function stepIn(fight, id) {
 // what it has taken out of the party over the whole fight, and off whom
 export function hurtOf(fight) {
   return Object.entries(fight.hurt).filter(([, n]) => n > 0);
+}
+
+// And what is taken off them: every one of them pays what it was written to pay, so a
+// band of three hands over three of everything. Ranges are added rather than rolled here,
+// because the node rolls its spoils in one place and this is one more range to roll.
+export function spoilsOf(fight) {
+  const out = {};
+  for (const foe of fight.felled) {
+    for (const [m, [lo, hi]] of Object.entries(foe.spoils || {})) {
+      const [a, b] = out[m] || [0, 0];
+      out[m] = [a + lo, b + hi];
+    }
+  }
+  return out;
 }
 
 // What a move is worth, in the numbers rather than the words — printed under it so the

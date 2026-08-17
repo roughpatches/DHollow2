@@ -225,19 +225,23 @@ export function buildTextures(scene) {
   // the minigame kit's atlas is drawn here too, so an imported activity engine works
   // without any wiring of its own
   buildUiAtlas(scene);
-  if (scene.textures.exists(portraitKey('player'))) return;
 
+  // Every palette that is not already painted gets a body drawn for it. Each piece is
+  // asked for by its own key rather than the whole pass being skipped on one of them:
+  // the player has real art and their portrait exists from the first boot, and a single
+  // guard on that used to turn the whole generator off — which is only noticed the day
+  // somebody walks out of Dreadhollow with nothing painted for them yet.
   for (const name of Object.keys(PALETTES)) {
     const look = DRAWN[name];
     // an export with no face in it still gets one, and so does anyone the game may lay on
     // the floor without art for it
-    if (!look || !look.portrait) {
+    if ((!look || !look.portrait) && !scene.textures.exists(portraitKey(name))) {
       const pg = scene.make.graphics({ x: 0, y: 0 }, false);
       drawPortrait(pg, PALETTES[name]);
       pg.generateTexture(portraitKey(name), PORTRAIT_PX, PORTRAIT_PX);
       pg.destroy();
     }
-    if (!look || !look.down) {
+    if ((!look || !look.down) && !scene.textures.exists(proneKey(name))) {
       const lg = scene.make.graphics({ x: 0, y: 0 }, false);
       drawProne(lg, PALETTES[name]);
       lg.generateTexture(proneKey(name), AW, AH);
@@ -247,6 +251,7 @@ export function buildTextures(scene) {
 
     for (const dir of DIRS) {
       for (const frame of [0, 1]) {
+        if (scene.textures.exists(actorFrame(name, dir, frame))) continue;
         const a = scene.make.graphics({ x: 0, y: 0 }, false);
         drawActor(a, PALETTES[name], dir, frame);
         a.generateTexture(actorFrame(name, dir, frame), AW, AH);

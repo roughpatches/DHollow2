@@ -39,6 +39,11 @@ export const TUNING = {
   interactReach: 12,
   interactRange: 20,
 
+  // Four a side and no more. The most that walk out of Dreadhollow on one job, and the
+  // most that can be standing on the other side of a fight — one number because it is
+  // one rule, and because a card that holds four rows holds four rows either way.
+  partyMax: 4,
+
   // A run is a line of nodes with a fork before some of them. Node counts are
   // [least, most] and are rolled once the length is chosen.
   questNodes: { short: [4, 8], medium: [8, 12], long: [12, 16] },

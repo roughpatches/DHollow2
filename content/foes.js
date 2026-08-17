@@ -7,6 +7,12 @@
 // against what the other one's guard is. A natural 20 always lands and a natural 1 never
 // does, so no guard is a wall and none is a formality.
 //
+// Where a node names a band rather than one thing, it is still 1v1: theirs come forward
+// one at a time and send the next up the moment the one in front goes down, the same way
+// yours do. Four a side is the most either side can be; see partyMax in tuning.js. A band
+// of three weak things is not three times the fight — it is three times as long, and
+// length is what a fighter's hit points are actually spent on.
+//
 // A FOE:
 //   id     — how content/nodes.js names it, on the node that fights it.
 //   name   — shown over its side of the fight.
@@ -69,7 +75,7 @@ export const FOES = [
   {
     id: 'unquiet',
     name: 'What came up out of the ground',
-    hp: 26, // slow, and it takes a lot of putting back down
+    hp: 15, // slow and hard to hurt, and there is rarely only one
     hit: 2,
     guard: 10,
     harm: [2, 5],
@@ -111,6 +117,31 @@ export const FOES = [
     ],
     felled: [
       'He sits down hard against the trunk behind him, and after a moment he stops holding the knife.',
+    ],
+  },
+  {
+    // What the poachers keep, and the reason a fire out here is not one man on his own.
+    // Quick, hard to catch and made of paper: the fight it makes is the turns it costs.
+    id: 'lurcher',
+    name: 'The lurcher',
+    hp: 8,
+    hit: 4,
+    guard: 13,
+    harm: [2, 4],
+    spoils: { canvas: [0, 1], bone: [1, 2] },
+    body: [
+      'A long grey dog comes off the picket at the edge of the firelight, low and silent, and it was silent the whole time you were walking up.',
+    ],
+    lands: [
+      'It has the forearm and it does not shake — it just leans back and puts its weight into keeping it.',
+      'It comes in under the swing and off again, and you are bleeding before you have finished turning.',
+    ],
+    misses: [
+      'It breaks off short of you, circles wide, and comes back the other way.',
+      'It feints in and out again, and it is only ever where you are not.',
+    ],
+    felled: [
+      'It goes down in the leaf litter and lies still, and something about the quiet of it is worse than the noise was.',
     ],
   },
 ];

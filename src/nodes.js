@@ -31,7 +31,11 @@ function fromResource(n) {
 // it starts is what the way was worth: held and the foe may come on weakened, lost and it
 // has the first blow. A node with no foe never writes one of these and nothing changes.
 function fromEncounter(n) {
-  const fight = (extra) => (n.foe ? { foe: n.foe, ...extra } : null);
+  // What is standing there, normalised: a node names one `foe` or a `foes` band, and the
+  // beats carry the band either way. How many of each turn up is rolled when the party
+  // walks into it; see muster in src/combat.js.
+  const band = n.foes || (n.foe ? [n.foe] : null);
+  const fight = (extra) => (band ? { band, ...extra } : null);
   const beats = [{
     id: 'in',
     text: n.body,
@@ -53,7 +57,7 @@ function fromEncounter(n) {
       text: [w.held],
       spoils: w.spoils || {},
       con: w.con || 0,
-      fight: w.avoids ? null : fight({ weaken: w.weakens || 0 }),
+      fight: w.avoids ? null : fight({ weaken: w.weakens || 0, thin: w.thins || 0 }),
     });
     beats.push({
       id: `lost${i}`, text: [w.lost], con: -(w.lostCon || 0), fight: fight({ ambush: true }),
