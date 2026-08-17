@@ -40,6 +40,15 @@ export function lookIn(palette, indoors) {
   return indoors && look && look.indoors ? look.indoors : palette;
 }
 
+// Whose face somebody speaks with. Their own look's, where the export it came from has a
+// face in it; the look they were painted from where it has not, because an export can be a
+// body and nothing else — the landlord behind his bar is one.
+export function faceFor(palette, base) {
+  const look = LOOK[palette];
+  if (look && !look.portrait && LOOK[base] && LOOK[base].portrait) return base;
+  return palette;
+}
+
 // The texture a character wears facing this way: the frame, whether it is drawn flipped,
 // and the direction their art actually calls it. Everything that stands somebody up or
 // turns them goes through here, so one-sided art is turned in one place.

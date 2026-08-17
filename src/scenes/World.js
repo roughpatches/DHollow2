@@ -8,7 +8,7 @@ import {
 } from '../player.js';
 import {
   preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
-  raiseProps, restate, occasionalIdle, lookIn,
+  raiseProps, restate, occasionalIdle, lookIn, faceFor,
 } from '../art.js';
 import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
 import { preloadFrames, buildFrames } from '../frames.js';
@@ -162,6 +162,7 @@ export default class World extends Phaser.Scene {
     this.groundY = street.ground; // where a person walks
     this.sillY = street.sill; // and where a building stands, which is further back
     this.bodyPx = street.body; // and how tall a person is drawn, which is the panel's own
+    this.reachScale = street.body / TUNING.streetBodyPx; // and so how far an arm reaches
     this.worldW = street.width;
     this.worldH = street.height;
     this.physics.world.setBounds(0, 0, street.width, street.height);
@@ -184,6 +185,8 @@ export default class World extends Phaser.Scene {
 
   buildGrid(map) {
     this.hint = null; // nothing is written over anybody's head on a grid
+    this.bodyPx = TUNING.gridBodyPx;
+    this.reachScale = TUNING.gridBodyPx / TUNING.streetBodyPx;
     const w = map.rows[0].length;
     const h = map.rows.length;
 
@@ -296,8 +299,8 @@ export default class World extends Phaser.Scene {
       this.hint.setVisible(false);
       return;
     }
-    const npc = findTarget(this.player, this.npcs);
-    const focus = npc ? null : focusNear(this.mapKey, this.player.x);
+    const npc = findTarget(this.player, this.npcs, this.reachScale);
+    const focus = npc ? null : focusNear(this.mapKey, this.player.x, this.reachScale);
     const name = npc ? npc.def.name : (focus && focus.name);
     this.hint.setVisible(!!name);
     if (!name) return;
@@ -343,7 +346,7 @@ export default class World extends Phaser.Scene {
 
   tryTalk() {
     if (this.frozen) return;
-    const npc = findTarget(this.player, this.npcs);
+    const npc = findTarget(this.player, this.npcs, this.reachScale);
     if (npc) {
       npc.facing = faceToward(npc, this.player);
       stand(npc, npc.palette, npc.facing);
@@ -354,12 +357,13 @@ export default class World extends Phaser.Scene {
       const answer = (npc.def.says || []).find((a) => story.ok(a));
       if (answer) story.set(answer.sets);
       const lines = answer ? answer.lines : linesOf(npc.def);
-      // a face of their own if the def names one, otherwise the palette they walk in
-      this.say(npc.def.name, lines, npc.def.portrait || npc.def.palette);
+      // a face of their own if the def names one, otherwise the look they are wearing
+      // here — which indoors is the indoor one, and its own face with it
+      this.say(npc.def.name, lines, npc.def.portrait || faceFor(npc.palette, npc.def.palette));
       return;
     }
     if (this.street) {
-      const focus = focusNear(this.mapKey, this.player.x);
+      const focus = focusNear(this.mapKey, this.player.x, this.reachScale);
       if (focus) this.reach(focus);
       return;
     }

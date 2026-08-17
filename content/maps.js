@@ -88,25 +88,24 @@ export const LEGEND = {
 
 export const MAPS = {
   // Where the player wakes up the morning after. Aldis carried them here.
+  // A room walked along rather than around, like the Sea Hag: the same panel, the same
+  // lines and the same size a person is drawn at, so a painting of this room exported the
+  // way the Sea Hag's was drops into `art` and needs nothing else. Until there is one it
+  // is the two flat bands — the wall down to the sill, boards below it — which is enough
+  // to walk in and to stand somebody in.
   hut: {
     name: 'Aldis Rooke\'s house',
     indoors: true, // and so everyone in it is drawn from their indoor art; see content/looks.js
-    spawn: [8, 10],
-    rows: [
-      '##################',
-      '#hh______________#',
-      '#hh______________#',
-      '#________________#',
-      '#BBB_____cc______#',
-      '#________cc______#',
-      '#________________#',
-      '#___ss___________#',
-      '#______rrrr______#',
-      '#______rrrr______#',
-      '#________________#',
-      '########D#########',
-    ],
-    doors: [{ x: 8, y: 11, to: 'searow', spawn: [17] }],
+    street: {
+      size: [688, 384],
+      ground: 362, // the floor, a stride in front of the wall
+      sill: 300, // and where the wall meets the boards, which is behind whoever is stood
+      // on it: a painting of this room will say where both lines really are
+      body: 183, // a room is painted from across it: see the Sea Hag below
+      repeats: 1,
+    },
+    spawn: [8],
+    doors: [{ x: 4, to: 'searow', spawn: [17], label: 'Out to the street' }],
   },
 
   // Where the game opens: the point, north up the coast from the town. The tide put the
@@ -241,7 +240,7 @@ export const MAPS = {
     },
     spawn: [17],
     doors: [
-      { x: 17, to: 'hut', label: 'Aldis Rooke\'s house' },
+      { x: 17, to: 'hut', spawn: [8], label: 'Aldis Rooke\'s house' },
     ],
   },
 
@@ -297,28 +296,19 @@ export const MAPS = {
   },
 
   // Inside the chapel. The door is shut until the roof is back on, so this is what the
-  // last stage of the repair opens: swept flags, the pews that survived, and the altar.
+  // last stage of the repair opens. Walked along like the rest of the rooms; the swept
+  // flags, the pews that survived and the altar are the painting's when there is one.
   chapel: {
     name: 'The chapel',
     indoors: true,
-    spawn: [10, 13],
-    rows: [
-      '######################',
-      '#++++++++++++++++++++#',
-      '#+++++++++aa+++++++++#',
-      '#++++++++++++++++++++#',
-      '#++++pppp++pppp++++++#',
-      '#++++pppp++pppp++++++#',
-      '#++++++++++++++++++++#',
-      '#++++pppp++pppp++++++#',
-      '#++++pppp++pppp++++++#',
-      '#++++++++++++++++++++#',
-      '#++++pppp++pppp++++++#',
-      '#++++pppp++pppp++++++#',
-      '#++++++++++++++++++++#',
-      '#++++++++++++++++++++#',
-      '##########D###########',
-    ],
-    doors: [{ x: 10, y: 14, to: 'woodend', spawn: [37] }],
+    street: {
+      size: [688, 384],
+      ground: 362,
+      sill: 300,
+      body: 183,
+      repeats: 1,
+    },
+    spawn: [8],
+    doors: [{ x: 4, to: 'woodend', spawn: [37], label: 'Out to the burying ground' }],
   },
 };

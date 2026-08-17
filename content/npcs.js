@@ -39,8 +39,7 @@ export const NPCS = [
     id: 'aldis',
     name: 'Aldis Rooke',
     map: 'hut',
-    x: 5,
-    y: 4,
+    x: 26, // down the room from the door, which is at the west end of it
     facing: 'left',
     palette: 'aldis', // real art; see content/looks.js
     says: [

@@ -100,7 +100,7 @@ export const SCENES = [
       },
       { fade: 'out', ms: 120 }, // hard cut to black
       { wait: 2000 },
-      { go: 'hut', spawn: [8, 10] },
+      { go: 'hut', spawn: [8] },
     ],
   },
   {
