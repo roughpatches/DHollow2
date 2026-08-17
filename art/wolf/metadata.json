@@ -1,0 +1,22 @@
+{
+  "group_id": "b8a17ab5-cd73-4bc0-a925-0de2b450becf",
+  "objects": [
+    {
+      "id": "418443c0-978a-428d-bfe8-13b5070a0924",
+      "name": "base",
+      "prompt": "A dark shadow of a wild beast, hunched over a dead animal",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_dark_shadow_of_a_wild_beast.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T23:02:04.723944"
+}

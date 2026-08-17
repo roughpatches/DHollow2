@@ -1,0 +1,22 @@
+{
+  "group_id": "9327bc43-027e-488e-b305-4c4fbab1ef45",
+  "objects": [
+    {
+      "id": "20e1586a-3438-481f-9b18-79024d431c6f",
+      "name": "base",
+      "prompt": "A large boar, standing in the middle of uprooted and overturned earth",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_large_boar_standing_in_the.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T23:02:03.302146"
+}

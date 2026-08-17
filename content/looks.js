@@ -366,6 +366,24 @@ const HERON = {
   },
 };
 
+// The two beasts, one export each. The wolf stands on its own ground and needs nothing
+// doing to it. The boar's turned earth runs off both sides of its frame — the animal stops
+// well inside it, at 159 — so only the earth is feathered, and only far enough out to stop
+// it ending in a straight line, which turned ground never does.
+const WOLF = {
+  path: 'art/wolf',
+  stands: { still: 'A_dark_shadow_of_a_wild_beast/rotations/A_dark_shadow_of_a_wild_beast.png', ground: 22 },
+};
+
+const BOAR = {
+  path: 'art/boar',
+  stands: {
+    still: 'A_large_boar_standing_in_the/rotations/A_large_boar_standing_in_the.png',
+    ground: 0,
+    fade: [16, 8, 0, 0],
+  },
+};
+
 // A stretch of stream, dressed nine ways. Unlike everything else standing on the road this
 // is painted as a full square of ground rather than as a thing with air round it, so every
 // state needs the two corrections the brook needs and for the same reasons: feathered at
@@ -459,4 +477,6 @@ export const NODE_ART = {
   barrels: stream('Barrels'), // Barrels in the shallows
   panners: stream('Goblins_Panning'), // Two goblins, working the water
   ferry: stream('Footbridge'), // A troll, a bridge, and a price
+  animal: WOLF, // A wolf, and what it has killed
+  boar: BOAR, // A boar, in the ground you wanted
 };

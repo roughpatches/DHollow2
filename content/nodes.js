@@ -708,7 +708,7 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'animal',
-    name: 'Something living',
+    name: 'A wolf, and what it has killed',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 4, night: 3 },
@@ -716,7 +716,7 @@ export const ENCOUNTER_NODES = [
     xp: [12, 20],
     con: [-2, 0],
     body: [
-      'Something big is standing in the open forty yards off with its head down, and it has not decided about you yet. Whatever it is standing over, it was not the one that killed it.',
+      'A wolf standing over a dead deer in the open forty yards off, black against the leaf litter, head down and muzzle red. It has stopped eating. It is looking at you, and it has not decided about you yet.',
     ],
     ways: [
       {
@@ -1426,7 +1426,7 @@ export const ENCOUNTER_NODES = [
 
   {
     id: 'boar',
-    name: 'Something is rooting where you wanted to dig',
+    name: 'A boar, in the ground you wanted',
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
@@ -1434,7 +1434,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'The best ground on this side has been turned over end to end, and the thing that turned it is still standing in the middle of what is left of it.',
+      'The best ground on this side has been turned over end to end, roots up and clods thrown, and the boar that turned it is still standing in the middle of what is left of it.',
     ],
     ways: [
       {
