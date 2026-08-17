@@ -133,7 +133,7 @@ export const RESOURCE_NODES = [
     // and nothing else is standing here, so the whole of it is one job and the party
     // either brought somebody who can do that job or turns round.
     id: 'deadfall',
-    name: 'A beech gone over in the wind',
+    name: 'An oak gone over in the wind',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 4, night: 2 },
@@ -145,7 +145,7 @@ export const RESOURCE_NODES = [
         text: 'Cut the trunk into lengths.',
         offer: 'It is up off the ground its whole length. You will not be cutting dirt.',
         done: {
-          well: 'It cuts white the whole way through and every length comes away clean. There is no rot in it anywhere.',
+          well: 'It cuts pale and dry the whole way through and every length comes away clean. There is no rot in it anywhere.',
           middling: 'The trunk rolls twice while you are in it and the axe glances off both times. You get your lengths, shorter than you wanted them.',
           botched: 'You are a foot into it when the weight shifts and the whole trunk settles onto the blade. You get the axe back out. You take what was already off.',
         },
@@ -156,7 +156,7 @@ export const RESOURCE_NODES = [
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'A beech, roots and all, lying across its own crown. The plate of earth it brought up with it is still wet on the underside.',
+      'An oak, roots and all, lying across its own crown. The plate of earth it brought up with it is still wet on the underside.',
       'The bark has not lifted anywhere. Nothing has bored into it and nothing has come up out of it. It went over inside the week.',
     ],
   },
