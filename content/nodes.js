@@ -142,12 +142,12 @@ export const RESOURCE_NODES = [
       {
         skill: 'woodcutting',
         activity: 'Felling',
-        text: 'Saw the trunk into lengths.',
+        text: 'Cut the trunk into lengths.',
         offer: 'It is up off the ground its whole length. You will not be cutting dirt.',
         done: {
-          well: 'It cuts white the whole way through and every length comes off square. There is no rot in it anywhere.',
-          middling: 'The trunk rolls twice while you are in it and the saw binds both times. You get your lengths, shorter than you wanted them.',
-          botched: 'You are a foot into it when the weight shifts and the whole trunk settles onto the blade. You get the saw back out. You take what was already off.',
+          well: 'It cuts white the whole way through and every length comes away clean. There is no rot in it anywhere.',
+          middling: 'The trunk rolls twice while you are in it and the axe glances off both times. You get your lengths, shorter than you wanted them.',
+          botched: 'You are a foot into it when the weight shifts and the whole trunk settles onto the blade. You get the axe back out. You take what was already off.',
         },
         spoils: { timber: [2, 4] },
         draw: { count: [2, 3], odds: { oaklog: 45, oakbranch: 40, heartwood: 10 } },
@@ -223,8 +223,8 @@ export const RESOURCE_NODES = [
         text: 'Cut the trees out of the slip.',
         offer: 'Every one of them is under tension and not one is lying flat.',
         done: {
-          well: 'You read which way each one wants to go before you put the saw in it, and every one goes that way. Nothing comes down the slope behind you.',
-          middling: 'The first two go where you expect. The third comes round on you, and you spend the rest of the light digging the saw out of the ground.',
+          well: 'You read which way each one wants to go before you put the axe in it, and every one goes that way. Nothing comes down the slope behind you.',
+          middling: 'The first two go where you expect. The third comes round on you, and you spend the rest of the light digging the axe out of the ground.',
           botched: 'You cut one that was holding two others. All three go, and a good deal of the slope with them. You get clear with what was already cut.',
         },
         spoils: { timber: [1, 3] },
@@ -316,7 +316,7 @@ export const RESOURCE_NODES = [
         done: {
           well: 'It comes apart in the order you cut it. By the time the wood is stacked on the bank the pool has drained out from under the fish.',
           middling: 'It lets go while you are still standing in it. You get out. Half of what you cut goes downstream ahead of you.',
-          botched: 'Wrong log first. The whole face of it goes at once and takes the saw with it. The narrows are clear and you have nothing to show for them.',
+          botched: 'Wrong log first. The whole face of it goes at once and takes the axe with it. The narrows are clear and you have nothing to show for them.',
         },
         spoils: { timber: [2, 4] },
         draw: { count: [1, 2], odds: { oaklog: 45, oakbranch: 35 } },

@@ -170,7 +170,7 @@ export const SKILLS = [
     draws: ['forest', 'timber'],
     unlocks: [
       'Drop a tree where you said it would go, with a crowd watching.',
-      'Keep a saw out of the bind on the last third of a cut.',
+      'Cut a fallen trunk clean through without once striking the ground.',
     ],
     body: [
       'The ability to identify, fell, and shape wood.',
