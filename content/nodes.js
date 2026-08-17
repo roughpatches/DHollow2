@@ -171,6 +171,13 @@ export const RESOURCE_NODES = [
       {
         skill: 'fishing',
         activity: 'Casting',
+        text: 'Fish the lane.',
+        offer: 'Whatever is feeding is feeding in one line across that water.',
+        done: {
+          well: 'You put it in the lane on the third cast and the lane does the rest. They come up one after another until it goes quiet.',
+          middling: 'You find the lane late. It has moved twice by then, and you get what is left of it.',
+          botched: 'You work the whole width of it and never once find the line. The water is exactly as it was when you got here.',
+        },
         draw: { count: [1, 3], odds: { bluegill: 50, perch: 30, brooktrout: 20 } },
       },
       {
@@ -178,12 +185,22 @@ export const RESOURCE_NODES = [
         // ground never dries out.
         skill: 'herblore',
         activity: 'Foraging',
+        text: 'Take the bank instead.',
+        offer: 'Black trumpets in the shade under the lip, where it never dries.',
+        done: {
+          well: 'They are in a run along the whole lip once you know to look at the underside of it. You come away with your hands full and your boots ruined.',
+          middling: 'You clear what is on the top of the lip. Whatever is under it stays there, and you are not going in after it.',
+          botched: 'The lip gives while you are standing on it. You come out of the mud with less than you went in with.',
+        },
         draw: { count: [1, 2], odds: { blacktrumpet: 45, oystermushroom: 20 } },
       },
     ],
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Where the stream widens it stops being a stream and becomes something slower, brown and flat and going nowhere in a hurry. Rings come up on it and spread and are gone before you have found what made them.',
+      'The bank on the near side never gets the sun and never dries. What grows on it grows in the dark, and comes away from the mud with a sound.',
+    ],
   },
   {
     // Fishing's own node. Deep, slow and overhung — there is nothing on the bank worth
@@ -200,12 +217,22 @@ export const RESOURCE_NODES = [
         activity: 'Casting',
         // the big ones are down here and the small ones are not, which is the whole
         // difference between this and the shallows
+        text: 'Fish the undercut.',
+        offer: 'Nothing shows on the top of it. What is worth taking is against the bank and under it.',
+        done: {
+          well: 'You get it in tight against the cut and hold it there, and what comes up is the biggest thing anybody has had out of this stream.',
+          middling: 'You take two off the edge of it. The dark part stays dark, and you never reach whatever is holding in there.',
+          botched: 'You put the line into the roots on the first cast and spend the rest of it getting the line back. Whatever was under there is further under now.',
+        },
         draw: { count: [2, 4], odds: { brooktrout: 45, perch: 40, bluegill: 15 } },
       },
     ],
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The stream turns hard against the bank and has cut in under it, and what it has cut is deep. The water goes from brown to black in the length of a stride.',
+      'Nothing on the surface. Nothing rising. Everything that lives in this stream is down there and none of it is in a hurry to say so.',
+    ],
   },
   {
     // Woodcutting and Mining in one place: the slope took the trees down with it and left
@@ -262,19 +289,36 @@ export const RESOURCE_NODES = [
       {
         skill: 'fishing',
         activity: 'Casting',
+        text: 'Take the run at the head of the bar.',
+        offer: 'Everything moving up this water has to stack below the fast part before it can go through.',
+        done: {
+          well: 'They are holding in the seam below the run, nose into it, and they take everything you drift over them.',
+          middling: 'You take a couple off the tail of it. The rest go up through the fast water and do not come back.',
+          botched: 'You wade in above them for a better angle and put the whole bar down. Nothing in it moves again for an hour.',
+        },
         draw: { count: [1, 3], odds: { brooktrout: 50, perch: 25 } },
       },
       {
         // The same gravel, read the other way: what a stream has been carrying down off
-        // whatever it comes out of.
+        // whatever it comes out of, and the ledge it has been carrying it off.
         skill: 'mining',
         activity: 'Mining',
+        text: 'Break the ledge under the gravel.',
+        offer: 'The gravel is only what has already come off it. What is worth taking is still in the rock.',
+        done: {
+          well: 'It opens along the seam and comes away in the water, and you take it out of the stream by hand as it goes.',
+          middling: 'You get down through the gravel and into the ledge and it does not want to come. You take what breaks off the top of it.',
+          botched: 'You are working in a foot of moving water and it carries the spoil off as fast as you free it. Most of what you break goes downstream.',
+        },
         draw: { count: [1, 3], odds: { ironore: 40, stone: 35, roughgem: 6 } },
       },
     ],
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The stream runs out thin over a bar of grey gravel, ankle deep and quick, and you hear it from further off than you see it. Everything moving through this water has to come through here.',
+      'Under the gravel there is ledge. It shows in two places where the water has cut across it, and the bands in it are not the colour of the stone around them.',
+    ],
   },
   {
     // Herblore's own node, the way the narrows are Woodcutting's and the water is
@@ -291,12 +335,22 @@ export const RESOURCE_NODES = [
       {
         skill: 'herblore',
         activity: 'Foraging',
+        text: 'Work the stand.',
+        offer: 'An hour in the bracken on your knees, going by smell as much as by eye.',
+        done: {
+          well: 'You go through it in lines and miss nothing. Half of what comes out of it would not be recognised by anybody who walked past.',
+          middling: 'You take the obvious. What is under the bracken proper stays under it, and you know that while you are walking away.',
+          botched: 'You go through it fast and take everything that looked right. Sorting it afterwards, most of it is the wrong thing, and one of them is worse than wrong.',
+        },
         draw: { count: [2, 4], odds: { blacktrumpet: 45, oystermushroom: 40 } },
       },
     ],
     xp: [8, 14],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Bracken to the waist under the last of the trees, where the canopy thins and the light comes in sideways for an hour a day. It has grown here uninterrupted long enough to have layers to it.',
+      'There is more than bracken in it. Two or three things standing in there are worth a name, and one of them is worth carrying home.',
+    ],
   },
   {
     // The one node the crew you can actually put together at the start is asked a real
@@ -353,13 +407,23 @@ export const RESOURCE_NODES = [
       {
         skill: 'mining',
         activity: 'Mining',
+        text: 'Open the face.',
+        offer: 'Sound it first. It will come away in blocks or it will come away in rubble.',
+        done: {
+          well: 'It rings sound the whole width of it and comes off in blocks a man can carry. There is ore in the third one down.',
+          middling: 'It rings hollow in two places and you work round them. What you get is good, and there is not much of it.',
+          botched: 'You strike where it rang wrong and the whole face comes down at once. It is all rubble, and half of it is on the ground you were standing on.',
+        },
         spoils: { stone: [2, 4] },
         draw: { count: [0, 2], odds: { ironore: 40, roughgem: 8 } },
       },
     ],
     xp: [8, 14],
     con: [-2, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'An outcrop standing out of the slope with one whole side gone, taken off clean at some point and not recently. The break is grey where it is old and paler where it is not.',
+      'It has come away square before. There is a line up the middle of the fresh face that says it will do it again, if anybody asks it properly.',
+    ],
   },
   {
     id: 'seam',
@@ -372,17 +436,34 @@ export const RESOURCE_NODES = [
       {
         skill: 'mining',
         activity: 'Mining',
+        text: 'Follow the seam in.',
+        offer: 'It runs level and it runs back. How far back is the question.',
+        done: {
+          well: 'It holds its thickness the whole way in and comes out clean of the clay round it. You stop because you have enough, not because it did.',
+          middling: 'It thins a stride in and you are chasing it through clay after that. You come out with some of it and a good deal of the bank.',
+          botched: 'The roof of it comes down while you are under it. Nobody is hurt. Everything you had loosened is under everything that was above it.',
+        },
         draw: { count: [1, 3], odds: { ironore: 50, stone: 30, roughgem: 10 } },
       },
       {
         skill: 'herblore',
         activity: 'Foraging',
+        text: 'Work the shelf the slump left.',
+        offer: 'Two years of ground nothing has walked on, with the light straight onto it.',
+        done: {
+          well: 'Nothing has been at it since it came away. You take the whole shelf, and it is the cleanest stuff anybody has seen this side of the wood.',
+          middling: 'You take what is on the front of the shelf. The rest is back under the overhang, and you are not going under that.',
+          botched: 'The shelf is only the slump not finished slumping. It goes while you are on it and takes what you had picked with it.',
+        },
         draw: { count: [1, 2], odds: { blacktrumpet: 35, oystermushroom: 25 } },
       },
     ],
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The bank has slumped and taken its own face off, and what is behind it is not more bank. A band of something darker runs through it, level, a hand thick, going back further than the light does.',
+      'Where the slump came away it has left a shelf, and things have taken root on the shelf in the year or two since.',
+    ],
   },
 ];
 
