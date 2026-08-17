@@ -1,0 +1,142 @@
+{
+  "group_id": "b1869784-e809-44c0-839a-9251ca1ff78f",
+  "objects": [
+    {
+      "id": "f623cc7c-5a22-4542-99d0-7da7655ec786",
+      "name": "base",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_stretch_of_stream_rocky_and.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "eb98b2a3-c420-4279-b873-3e6d3e6fdc54",
+      "name": "Pool",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Pool.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "a2df92cf-a855-42f7-bc37-1f77dbae6662",
+      "name": "Gravel Shallows",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Gravel_Shallows.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "f3156226-868e-46ed-8727-f9a3f5550326",
+      "name": "Overrun",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Overrun.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "0f24f67f-f434-471d-b329-da91721a27d1",
+      "name": "Logjam",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Logjam.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "2c01d954-ebcc-466e-9cab-6cf5469cae83",
+      "name": "Fishing Debris",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Fishing_Debris.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "2ba80c10-49bc-4131-8aa3-a53ddf6a4521",
+      "name": "Barrels",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Barrels.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "89df8ea8-b7eb-4728-8b6c-678b24b21fcc",
+      "name": "Goblins Panning",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Goblins_Panning.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "fb21328e-d9cc-4773-992d-0966d1f3a36d",
+      "name": "Footbridge",
+      "prompt": "A stretch of stream, rocky and colored dark blue/brown, drawn diagonally",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Footbridge.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T22:46:58.385237"
+}

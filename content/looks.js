@@ -366,6 +366,22 @@ const HERON = {
   },
 };
 
+// A stretch of stream, dressed nine ways. Unlike everything else standing on the road this
+// is painted as a full square of ground rather than as a thing with air round it, so every
+// state needs the two corrections the brook needs and for the same reasons: feathered at
+// the edges so it does not sit on the landscape as a rectangle, and multiplied toward the
+// wood's light, which is warm where this was painted cold. The bottom is not feathered
+// because the bottom is the road, and nothing of that edge is ever seen.
+const stream = (name) => ({
+  path: 'art/stream',
+  stands: {
+    still: `${name}/rotations/${name}.png`,
+    ground: 1,
+    shade: 0xffd2a8,
+    fade: [26, 26, 26, 0],
+  },
+});
+
 // One dead fire in a ring of stones, dressed four ways: with the wood nobody burned beside
 // it, with four people crowded round it, with a tent and racks behind it, and with a bread
 // oven standing over it. Every state registers differently because the dressing is what
@@ -434,4 +450,13 @@ export const NODE_ART = {
   camp: camp('Four_figures_crowded', 32), // A fire that is not yours
   burner: camp('Racks_of_drying_leav', 11), // A man camped alone, and his racks
   bakehouse: camp('A_dilapidated_stone', 7), // A bread oven standing in nothing
+  deadwater: stream('A_stretch_of_stream_rocky_and'), // the stream with nothing in it
+  pool: stream('Pool'), // A deep pool under the bank
+  shallows: stream('Gravel_Shallows'), // Gravel shallows
+  flood: stream('Overrun'), // The path is under water for a hundred yards
+  logjam: stream('Logjam'), // A jam in the narrows
+  nets: stream('Fishing_Debris'), // Somebody's nets, and nobody's boat
+  barrels: stream('Barrels'), // Barrels in the shallows
+  panners: stream('Goblins_Panning'), // Two goblins, working the water
+  ferry: stream('Footbridge'), // A troll, a bridge, and a price
 };

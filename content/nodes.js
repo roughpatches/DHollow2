@@ -210,7 +210,7 @@ export const RESOURCE_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 4, night: 2 },
-    read: { skill: 'fishing', line: 'The water goes dark and stops moving under that bank. Whatever is in this stream is in there.' },
+    read: { skill: 'fishing', line: 'The water goes dark and stops moving in the middle of that stretch. Whatever is in this stream is in there.' },
     harvests: [
       {
         skill: 'fishing',
@@ -230,7 +230,7 @@ export const RESOURCE_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'The stream turns hard against the bank and has cut in under it, and what it has cut is deep. The water goes from brown to black in the length of a stride.',
+      'The bed drops away in the middle of the stretch and what it drops into is deep. The water goes from brown to black in the length of a stride.',
       'Nothing on the surface. Nothing rising. Everything that lives in this stream is down there and none of it is in a hurry to say so.',
     ],
   },
@@ -317,7 +317,7 @@ export const RESOURCE_NODES = [
     con: [-1, 0],
     body: [
       'The stream runs out thin over a bar of grey gravel, ankle deep and quick, and you hear it from further off than you see it. Everything moving through this water has to come through here.',
-      'Under the gravel there is ledge. It shows in two places where the water has cut across it, and the bands in it are not the colour of the stone around them.',
+      'Under the gravel there is ledge. The water has scoured down to it in the fast part, and what it has laid bare is not the colour of the stone lying on top of it.',
     ],
   },
   {
@@ -932,15 +932,15 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'fishing', line: 'There is a line of floats across that pool and none of them is drifting.' },
+    read: { skill: 'fishing', line: 'There is netting in that water and none of it is fishing. It is just in there.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A line of floats across the pool, set square to the current and anchored at both ends, with no boat on the bank and no path down to it. Whoever put it there put it there properly.',
+      'Net in the water, hung up through the rocks and going nowhere, with floats scattered down the length of it and a bobber sitting where nothing is going to take it. No boat on the bank and no path down to it. Somebody set this properly once, and nothing has lifted it since.',
     ],
     ways: [
       {
-        text: 'Read the set, and lift what is in it.',
+        text: 'Work out how it was set, and lift what is still in it.',
         skill: 'fishing',
         dc: 12,
         tried: 'How it is anchored, which way it faces, and how long it has been down.',
@@ -1109,24 +1109,24 @@ export const ENCOUNTER_NODES = [
 
   {
     id: 'ferry',
-    name: 'A man with a punt, and a price',
+    name: 'A troll, a bridge, and a price',
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 3, night: 2 },
-    read: { skill: 'persuasion', line: 'There is somebody sitting on the far bank who has been watching you since the treeline.' },
+    read: { skill: 'persuasion', line: 'There is something sitting at the far end of that bridge, and it has been watching you since the treeline.' },
     xp: [12, 18],
     con: [-1, 0],
     body: [
-      'The stream is too wide here to jump and too deep to want to wade. There is a man on the far bank sitting on a punt, and he has been watching you come since the treeline.',
+      'The stream is too wide here to jump and too deep to want to wade, and somebody has laid a plank footbridge over it. There is a troll sitting at the far end of the bridge with its feet in the water, and it has watched you come the whole way from the treeline.',
     ],
     ways: [
       {
-        text: 'Agree a price and be carried.',
+        text: 'Agree a price and be let across.',
         skill: 'persuasion',
         dc: 12,
-        tried: 'He names a number. Nobody takes the first number.',
-        held: 'Three crossings for the price of one, and he poles it himself.',
-        lost: 'One crossing for the price of three, and everybody gets wet anyway.',
+        tried: 'It names a number. Nobody takes the first number.',
+        held: 'Three crossings for the price of one, and it moves its feet out of the way.',
+        lost: 'One crossing for the price of three, and it counts you over one at a time.',
         con: 1,
         lostCon: 2,
       },
@@ -1135,7 +1135,7 @@ export const ENCOUNTER_NODES = [
         skill: 'fishing',
         dc: 12,
         tried: 'Where the surface breaks and where it does not, walked out to a knee first.',
-        held: 'Gravel the whole way and no deeper than a thigh. He watches you do it.',
+        held: 'Gravel the whole way and no deeper than a thigh. It watches you do it.',
         lost: 'It is thin where you are looking and it is not thin where you are walking.',
         spoils: { perch: [0, 1] },
         lostCon: 3,
@@ -1242,7 +1242,7 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'panners',
-    name: 'Somebody is working this water',
+    name: 'Two goblins, working the water',
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 3, night: 2 },
@@ -1250,7 +1250,7 @@ export const ENCOUNTER_NODES = [
     xp: [12, 18],
     con: [-1, 0],
     body: [
-      'Round the bend there are four of them standing in the shallows with pans, and the whole stream below them is running brown. They see you in the same moment you see them.',
+      'Round the bend there are two goblins squatting in the shallows with pans, working them steady and unhurried, and the whole stream below them is running brown. They see you in the same moment you see them.',
     ],
     ways: [
       {
@@ -1386,7 +1386,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'Three barrels lying on their sides in the shallows, one of them staved in and empty. Nothing square gets into a stream by itself.',
+      'Three barrels in the shallows — one standing as though somebody set it there, one on its side in the current, one staved in and empty. Nothing square gets into a stream by itself.',
     ],
     ways: [
       {
