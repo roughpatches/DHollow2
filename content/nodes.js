@@ -477,7 +477,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'The path ahead is holding water it has no business holding.' },
     xp: [4, 8],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The path goes on ahead of you and the ground either side of it does not look any different, but the path is holding water and the ground is not. Somewhere under it there is nothing to stand on.',
+    ],
     ways: [
       {
         text: 'Call the halt and sound it before anybody crosses.',
@@ -509,7 +511,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'Bramble across the whole of that side, and it is older than the path is.' },
     xp: [6, 10],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Bramble across the whole of that side, chest high and older than the path, with canes in it as thick as a thumb. Whatever way through there is, it was not made by anything walking upright.',
+    ],
     ways: [
       {
         text: 'Cut a way through it.',
@@ -541,7 +545,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'Nothing is growing across that stretch, and everything either side of it is.' },
     xp: [6, 12],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A stretch of open ground thirty yards across with nothing growing on it, ringed the whole way round by everything that would not grow there. The first boot in goes to the ankle and keeps going a while after that.',
+    ],
     ways: [
       {
         text: 'Find where something heavy has been across it before.',
@@ -572,7 +578,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'persuasion', line: 'Somebody has walked this recently and stopped to talk while they did.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Two of them coming the other way with packs on, and they have seen you in the same moment you have seen them. Neither party has anywhere to be that is worth not stopping for.',
+    ],
     ways: [
       {
         text: 'Trade with them.',
@@ -605,7 +613,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'insight', line: 'Somebody stood here a while and did not want to be seen doing it.' },
     xp: [12, 20],
     con: [-2, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'There are men standing off the path where the light does not reach, and they have been standing there long enough to have trodden the ground flat. Nobody is out here after dark without a lamp by accident.',
+    ],
     ways: [
       {
         text: 'Talk past them.',
@@ -637,7 +647,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'Everything that should be making noise on that side has stopped.' },
     xp: [18, 28],
     con: [-2, -1],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The wood on that side has gone quiet in a way that spreads, one thing at a time, keeping pace with you. It has been keeping pace for longer than anybody wants to say out loud.',
+    ],
     ways: [
       {
         text: 'Find it before it decides.',
@@ -668,7 +680,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'That earth has been turned, and it was turned from underneath.' },
     xp: [16, 24],
     con: [-2, -1],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The ground here is turned in low mounds, a dozen of them, and the earth on top of each is darker than the earth around it. It has come up. It has not been put down.',
+    ],
     ways: [
       {
         text: 'Notice it while it is still only turned earth.',
@@ -701,7 +715,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'Tracks. Something came through here on four legs and was not hurrying.' },
     xp: [12, 20],
     con: [-2, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Something big is standing in the open forty yards off with its head down, and it has not decided about you yet. Whatever it is standing over, it was not the one that killed it.',
+    ],
     ways: [
       {
         text: 'Get near enough without it bolting.',
@@ -738,7 +754,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'There is dry wood under that overhang, and it is the last of it for a mile.' },
     xp: [8, 14],
     con: [1, 2], // the stopping itself, before anybody has done anything with it
-    body: ['[Placeholder Text]'],
+    body: [
+      'An overhang with dry ground under it and dry wood stacked against the back wall by nobody in particular. It is the last dry anything for a mile in the direction you are going.',
+    ],
     ways: [
       {
         text: 'Build it so it will still be burning in an hour.',
@@ -771,7 +789,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'Something is stacked too neatly on that side to have got there by weather.' },
     xp: [6, 10],
     con: [0, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A pile at the side of the path with a canvas over it and stones set on the corners of the canvas. It has been rained on a great many times and nobody has come back for it.',
+    ],
     ways: [
       {
         text: 'Go through it properly.',
@@ -804,7 +824,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'There is grey down caught along that whole branch line, and none of it fell.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Grey down caught along a whole branch line forty feet up, and the wreck of a nest at the top of it. What is on the ground underneath came off that tree in one go.',
+    ],
     ways: [
       {
         text: 'Read what is under it.',
@@ -837,7 +859,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A cart axle in the ditch with the wheels still on it and the bed still over it, tipped and left where it went. It went in loaded, and nobody ever came back with a horse.',
+    ],
     ways: [
       {
         text: 'Take the bed off it while the bed is still wood.',
@@ -876,7 +900,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'fishing', line: 'There is nothing rising on that water and there is nothing on the bottom of it either.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The water here looks like water and moves like water and has nothing in it at all — no rise, no weed, nothing on the bottom but stones. It goes on like that as far up as you can see.',
+    ],
     ways: [
       {
         text: 'Work upstream until the water is alive again.',
@@ -909,7 +935,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'fishing', line: 'There is a line of floats across that pool and none of them is drifting.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A line of floats across the pool, set square to the current and anchored at both ends, with no boat on the bank and no path down to it. Whoever put it there put it there properly.',
+    ],
     ways: [
       {
         text: 'Read the set, and lift what is in it.',
@@ -942,7 +970,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'mining', line: 'That is not a cave. Somebody cut that, and they cut it square.' },
     xp: [12, 18],
     con: [-2, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A square-cut mouth in the hillside with a spoil heap outside it gone over with grass. The dark inside goes back further than the light does.',
+    ],
     ways: [
       {
         text: 'Sound the roof and go in as far as it holds.',
@@ -975,7 +1005,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'Half that slope is lying across the path and the trees above it are leaning after it.' },
     xp: [8, 14],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The path is under a slope that came down and stopped, and stopped is as much as anybody can say for it. The trees above the scar are leaning after it.',
+    ],
     ways: [
       {
         text: 'Break it up and move it.',
@@ -1008,7 +1040,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'Every tree on that side is bare and it is the wrong month to be bare.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Every tree on that side is bare and it is the wrong month to be bare. The edge of it is sharp — one trunk in full leaf, the next one along it not.',
+    ],
     ways: [
       {
         text: 'Name it, and cut round what it has taken.',
@@ -1041,7 +1075,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'insight', line: 'Somebody has not said anything for a mile, and it is not the somebody who never does.' },
     xp: [10, 16],
     con: [-2, -1],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Somebody has been walking at the back for an hour without saying anything, and it is not the one who never does. They are grey around the mouth and they are not admitting to it.',
+    ],
     ways: [
       {
         text: 'Treat it.',
@@ -1080,7 +1116,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'persuasion', line: 'There is somebody sitting on the far bank who has been watching you since the treeline.' },
     xp: [12, 18],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The stream is too wide here to jump and too deep to want to wade. There is a man on the far bank sitting on a punt, and he has been watching you come since the treeline.',
+    ],
     ways: [
       {
         text: 'Agree a price and be carried.',
@@ -1122,7 +1160,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcraft', line: 'There are three ways off that clearing and somebody once thought it was worth saying which.' },
     xp: [8, 14],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Three ways off one clearing, and a cairn standing waist high where they part. Nothing on top of it, and nothing added to it in years.',
+    ],
     ways: [
       {
         text: 'Read the stone. None of it came from here.',
@@ -1164,7 +1204,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'insight', line: 'That is a saw, and whoever is on the end of it stopped when they heard you.' },
     xp: [12, 20],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A stand half worked, with the cut wood stacked square and a saw going somewhere behind it. The saw stops the moment they hear you.',
+    ],
     ways: [
       {
         text: 'Tell them to put the saw down.',
@@ -1207,7 +1249,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'mining', line: 'The stream is running brown a mile below anything that should be making it run brown.' },
     xp: [12, 18],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Round the bend there are four of them standing in the shallows with pans, and the whole stream below them is running brown. They see you in the same moment you see them.',
+    ],
     ways: [
       {
         text: 'Move them off it.',
@@ -1250,7 +1294,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'persuasion', line: 'That is a working stack, and a working stack has somebody sitting up with it.' },
     xp: [12, 18],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A turf-covered stack smoking evenly in a clearing somebody has kept clear on purpose, and a lean-to beside it with a man sitting in the mouth of it.',
+    ],
     ways: [
       {
         text: 'Get him talking.',
@@ -1293,7 +1339,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'persuasion', line: 'There is a light through the trees and it is sitting still.' },
     xp: [10, 16],
     con: [0, 1],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A light through the trees that is sitting still, and close to, four people round a fire that is not going to last the night.',
+    ],
     ways: [
       {
         text: 'Ask to sit at it.',
@@ -1337,7 +1385,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'There is something square in that water and nothing square gets into a stream by itself.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Three barrels lying on their sides in the shallows, one of them staved in and empty. Nothing square gets into a stream by itself.',
+    ],
     ways: [
       {
         text: 'Work out what came off, and where from.',
@@ -1383,7 +1433,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'herblore', line: 'The best ground on this side has been turned over by something that was not looking for what you are.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The best ground on this side has been turned over end to end, and the thing that turned it is still standing in the middle of what is left of it.',
+    ],
     ways: [
       {
         text: 'Take what is left round the edges of it.',
@@ -1416,7 +1468,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'insight', line: 'There are people on that path and they have stopped walking to watch you come.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'There are people on the path ahead who have stopped walking to watch you come. They are carrying nothing, and they have been carrying nothing a while.',
+    ],
     ways: [
       {
         text: 'Stretch the pot to cover them.',
@@ -1449,7 +1503,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'mining', line: 'Somebody cut that bank square once, and the bank has been putting itself back ever since.' },
     xp: [8, 14],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The path drops into a cutting somebody squared off a long time ago, and the bank has been putting itself back into it ever since. There is a gang in there now shifting it, and they have been at it since dawn.',
+    ],
     ways: [
       {
         text: 'Get in and shift it, which is quicker than waiting.',
@@ -1481,7 +1537,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'There is a bundle at the root of that oak and it was put there, not dropped.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A bundle at the root of an oak, tied in cloth and set upright against the trunk. Nobody drops a thing and leaves it standing.',
+    ],
     ways: [
       {
         text: 'Name what is in the bundle.',
@@ -1514,7 +1572,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'cooking', line: 'Something in one of the packs has been smelling wrong since noon and nobody has said so.' },
     xp: [8, 14],
     con: [-2, -1],
-    body: ['[Placeholder Text]'],
+    body: [
+      "Something in one of the packs has been smelling wrong since noon, and everybody has quietly decided it is somebody else's pack. It will not get better between here and the gate.",
+    ],
     ways: [
       {
         text: 'Salvage what will salvage.',
@@ -1547,7 +1607,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'fishing', line: 'The stream is over its bank and it is over the path with it.' },
     xp: [8, 14],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The stream has come over its bank and taken the path with it for a hundred yards. There is no telling from this end where under all that the path actually runs.',
+    ],
     ways: [
       {
         text: 'Read it for where it is shallow enough to wade.',
@@ -1579,7 +1641,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'woodcutting', line: 'There is a pine on that side running down its own trunk, and it has been running a while.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A pine on that side running down its own trunk, a stripe of it from a wound at head height all the way to the roots. It has been running long enough for the ground under it to be sticky.',
+    ],
     ways: [
       {
         text: 'Tap it properly.',
@@ -1612,7 +1676,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'mining', line: 'There is water coming out of that face and it is coming out clear.' },
     xp: [8, 14],
     con: [1, 2],
-    body: ['[Placeholder Text]'],
+    body: [
+      'Water coming straight out of the face of the rock, clear, cold enough to ache, running off into moss that has been there a long time.',
+    ],
     ways: [
       {
         text: 'Tell whether it is worth drinking.',
@@ -1646,7 +1712,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'investigation', line: 'That is the last wall of a holding, and the only part of it anybody built properly.' },
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A bread oven and the wall it is set into, and nothing else — no floor, no roof, no other wall. It is the only part of whatever this was that anybody built to last.',
+    ],
     ways: [
       {
         text: 'Light it, and use it.',
@@ -1682,7 +1750,9 @@ export const ENCOUNTER_NODES = [
     read: { skill: 'sailing', line: 'The water runs wrong ahead. Something is aground on that side.' },
     xp: [10, 18],
     con: [-2, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A hull on its side on the mud with the tide out and the water going round it. She is far enough up the flat that somebody put her there, or the sea did it hard.',
+    ],
     ways: [
       {
         text: 'Judge how long she will hold and strip her for that long.',
