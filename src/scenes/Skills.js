@@ -1,5 +1,5 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
-import { SKILLS } from '../../content/skills.js';
+import { SKILLS, SKILL_GROUPS, GROUP_NAMES } from '../../content/skills.js';
 import { setSkills, worthOf, YOU } from '../party.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
@@ -109,24 +109,46 @@ export default class Skills extends Phaser.Scene {
     this.rule(y);
     y += 14;
 
-    SKILLS.forEach((t, i) => {
-      const on = i === this.row;
-      const rank = this.taken[t.id];
-      const has = rank !== undefined;
-      const mark = has ? `[${rank}]` : '[ ]';
-      const colour = has ? COLORS.menuAccent : COLORS.menuText;
-      this.text(this.left + this.wide, y + 2,
-        has ? `+${worthOf(rank)} to ${t.activities.join(', ')}` : t.activities.join(', '),
-        TUNING.questHintSize, on ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
-      y += this.text(this.left, y, `${on ? '>' : ' '} ${mark} ${t.name}`,
-        TUNING.questBodySize, on ? colour : (has ? COLORS.menuAccent : COLORS.menuDim)).height + 6;
+    // Sixteen skills in four groups, two groups to a column. The cursor runs the list in
+    // the order it is written, so down off the foot of one column is the top of the next
+    // — the same list, folded, rather than a grid with its own rules.
+    const half = Math.ceil(SKILL_GROUPS.length / 2);
+    const colW = this.wide / 2;
+    const top = y;
+    let column = top;
+    SKILL_GROUPS.forEach((group, g) => {
+      const x = this.left + (g < half ? 0 : colW);
+      if (g === half) { column = y; y = top; } // over to the second column and back to the top
+      y += this.text(x, y, GROUP_NAMES[group] || group,
+        TUNING.questHintSize, COLORS.menuMapMark).height + 4;
+      for (const t of SKILLS) {
+        if (t.group !== group) continue;
+        const i = SKILLS.indexOf(t);
+        const on = i === this.row;
+        const rank = this.taken[t.id];
+        const has = rank !== undefined;
+        const colour = has ? COLORS.menuAccent : COLORS.menuText;
+        y += this.text(x, y, `${on ? '>' : ' '} ${has ? `[${rank}]` : '[ ]'} ${t.name}`,
+          TUNING.questBodySize, on ? colour : (has ? COLORS.menuAccent : COLORS.menuDim)).height + 4;
+      }
+      y += 8;
     });
+    y = Math.max(y, column);
 
-    // what the skill under the cursor would let you do, so the choice is made on something
-    y += 10;
+    // What the skill under the cursor is for and what it would let you do, so the choice
+    // is made on something. It is under the list rather than beside each row, because a
+    // row in a column has no room beside it.
+    const t = SKILLS[this.row];
+    y += 4;
     this.rule(y);
     y += 14;
-    for (const u of SKILLS[this.row].unlocks) {
+    const rank = this.taken[t.id];
+    const worth = t.activities.length
+      ? `${t.activities.join(', ')}${rank !== undefined ? ` — +${worthOf(rank)} to each` : ''}`
+      : 'Rolled against a difficulty rather than played.';
+    y += this.text(this.left, y, `${t.name} — ${worth}`,
+      TUNING.questHintSize, COLORS.menuDim, this.wide).height + 8;
+    for (const u of t.unlocks) {
       y += this.text(this.left, y, `— ${u}`, TUNING.questBodySize, COLORS.menuText, this.wide).height + 6;
     }
 

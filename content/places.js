@@ -4,8 +4,32 @@
 // and is kept — it is off the tab, not deleted, and one line in src/scenes/Menu.js puts
 // it back.
 // Same label/note/body as the other tabs, plus the fields it alone reads:
-//   id       — how a quest's `at` names this place. Only a zone a job is walked in needs
-//              one, and having one is what puts the place on the Map tab.
+//   id       — how a quest's `at` names this place, and how content/nodes.js says which
+//              nodes belong here. Only a zone a job is walked in needs one, and having
+//              one is what puts the place on the Map tab.
+//   work     — true if standing work off Gregorious's board can be taken for this zone.
+//              A zone without it is somewhere written jobs go and nothing else.
+//   skills   — what this zone is made of, as skill ids from content/skills.js. A node in
+//              content/nodes.js is drawn here only if everything it asks of the party is
+//              on the list: the work in it, both ways through it, and the skill that
+//              reads it at a fork. Take a skill off the list and every node that leans on
+//              it leaves this zone's pool, still written and still waiting for the zone
+//              that wants it. A place with no list draws everything zoned to it.
+//   gather   — how much of this place is each kind of gathering work, as shares read
+//              against each other. A resource node here is drawn in two steps: which work
+//              the party finds, on these shares, and then which of the nodes offering that
+//              work it is. The shares are shares of the work, not of the nodes, so a node
+//              with two harvests is reached by either of its two rolls and turns up more
+//              often than one share alone would put it — which is a mixed stand behaving
+//              like a mixed stand. Retune the wood by editing these four numbers and
+//              nothing else. A place with no table draws its resource nodes on their own
+//              weights.
+//   trouble  — how much of the road here is something in the way rather than work, per
+//              hundred, by the hour. One number and it stays put however many encounter
+//              nodes get written: node weights then only decide which trouble the party
+//              meets, never how much of it there is. A place with no `trouble` falls back
+//              to the nodes' own weights against each other, where writing another
+//              encounter moved the shape of every run a little.
 //   environment — what it is like to stand in, a word apiece, shown as a row of icons
 //              along the bottom of the tab. A word with no icon of its own gets the blank
 //              square until there is art for it; see src/icons.js.
@@ -93,6 +117,26 @@ export const PLACES = [
     // No walkable map: the Greywood is where a run happens, not somewhere you stroll.
     // `quest` makes the entry somewhere you set out for — Enter starts the job.
     id: 'greywood',
+    work: true, // and it is somewhere standing work can be taken for; see content/quests.js
+    // What the wood is made of. All four gathering skills are on it, so the wood draws the
+    // whole of that table: a node for each of them alone and a node for each pairing of
+    // two. Sailing, Mountaineering, Fording, Alchemy, Smithing and Gem Cutting are
+    // deliberately off it — there is no tide, no marsh and no forge in the Greywood, and
+    // the nodes that want them are written and waiting for somewhere that has them. Put
+    // one back on this line and its nodes come back with it.
+    skills: [
+      'woodcraft',
+      'intimidation', 'persuasion', 'investigation', 'insight',
+      'woodcutting', 'fishing', 'mining', 'herblore',
+      'cooking',
+    ],
+    // What the wood is mostly made of, in the work rather than in the nodes: two parts
+    // timber to one and a half of herb, one of fish and half of stone. Read against each
+    // other like every other table of odds here, so they need not add up to a hundred.
+    gather: { woodcutting: 40, herblore: 30, fishing: 20, mining: 10 },
+    // And how much of the road is something in the way rather than work. After dark more
+    // of it is, because after dark there is more out there to be in the way.
+    trouble: { day: 40, night: 55 },
     terrain: 'forest',
     backdrop: { image: 'art/greywood/backdrop.png', ground: 350 },
     label: 'The Greywood',
