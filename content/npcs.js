@@ -23,8 +23,7 @@ export const NPCS = [
     id: 'aldis',
     name: 'Aldis Rooke',
     map: 'shore',
-    x: 31,
-    y: 8,
+    x: 31, // up the strand from the track, which is the end the player washes up at
     facing: 'left',
     palette: 'aldis', // real art; see content/looks.js
     until: 'washedup', // he is only out there while the opening is unplayed

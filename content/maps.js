@@ -1,14 +1,15 @@
-// Maps are character grids. Editing the world means typing over characters.
-// Every row of a map must be the same length and every character must be in LEGEND.
+// Every place in the game is a panel now: a painting with a line drawn across it to walk
+// along, and everything standing on it — a door, a building, somebody waiting — placed by
+// how far along it stands and nothing else. See `street` below and src/street.js.
+//
+// A map with `rows` instead is the other kind: a character grid walked around rather than
+// along, every row the same length and every character in LEGEND. Nothing is one any more.
+// The machinery is still here and still works; the tiles, the seams and the painted ground
+// sheets go with it.
 //
 // `indoors: true` on a map says it is a room rather than the open air: anybody with a
 // second look painted for indoors is drawn from that one on it. See content/looks.js.
 //
-// A map with `street` instead of `rows` is not a grid at all: it is Dreadhollow seen from
-// the side, one painted town with a line across it to walk along. Everything standing on a
-// street — a door, a building, somebody waiting — is placed by how far along it stands and
-// nothing else. See src/street.js.
-
 // solid: blocks movement. above: a second tile drawn over actors standing here.
 export const TILES = {
   grass: {},
@@ -109,30 +110,22 @@ export const MAPS = {
   },
 
   // Where the game opens: the point, north up the coast from the town. The tide put the
-  // player here and the storm put everything else; the track south runs down the beach
-  // into the northeast corner of Dreadhollow.
+  // player here and the storm put everything else; the track south runs off the near end
+  // of the strand and comes out on the quay.
+  // The last of the outdoor panels with no painting behind it, so it is the only place the
+  // drawn weather still shows: dusk over a steely sea down to the tideline, and the strand
+  // under it. A painting of the point drops into `art` and covers the lot.
   shore: {
     name: 'The point',
-    spawn: [16, 8],
-    rows: [
-      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~',
-      'SS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SS',
-      'SSSSS~~~~~~~~~~~~~~~~~~~~~~~~SSSSS',
-      'SSSSSSSSwSSS~~~~~~~~~~~SSSSSSSSSSS',
-      'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-      'SSSwSSSSSSSSSSSSSSSSSSWSSSwSSSSSSS',
-      'SSSSSSSSSSWSSSSSSSSSSSSSSSSSSSSSSS',
-      'SSSSwSSSSSSSSSSSwSSSSSSSSSSSWSSSSS',
-      'SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',
-      '..SSSSSS..SSSS....SSSS..SSSSSS....',
-      '.................,................',
-      'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
-      'TTTTTTTTTTTTTTTTT,TTTTTTTTTTTTTTTT',
-    ],
-    doors: [{ x: 17, y: 15, to: 'quay', spawn: [39] }],
+    street: {
+      size: [688, 384],
+      horizon: 205, // where the sea meets the sky, and so where the weather is drawn to
+      ground: 352, // the walking line, up the strand from the water
+      sill: 300, // and the tideline, where the sea gives out and the sand starts
+      repeats: 1,
+    },
+    spawn: [10],
+    doors: [{ x: 4, to: 'quay', spawn: [37], label: 'The track south' }],
   },
 
   // Dreadhollow itself, seen from the side: five painted panels laid west to east, walked
@@ -259,7 +252,7 @@ export const MAPS = {
     },
     spawn: [4],
     doors: [
-      { x: 39, to: 'shore', spawn: [17, 14], label: 'The track north' },
+      { x: 39, to: 'shore', spawn: [10], label: 'The track north' },
     ],
   },
 

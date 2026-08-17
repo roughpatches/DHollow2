@@ -43,6 +43,14 @@ export function createStreet(scene, def) {
   if (def.horizon) {
     scene.add.image(0, 0, weatherFor(scene, width, h, def.horizon))
       .setOrigin(0, 0).setDepth(DEPTH.weather);
+    // The weather is sky and water and nothing else, so the ground the panel is walked on
+    // is laid over the bottom of it, from the line where the water gives out. A painting
+    // covers both; without one this is a shore rather than a man standing on the sea.
+    if (def.sill && def.sill < h) {
+      const g = scene.add.graphics().setDepth(DEPTH.weather + 1);
+      g.fillStyle(COLORS.sand[0], 1);
+      g.fillRect(0, def.sill, width, h - def.sill);
+    }
   } else {
     // A panel with no horizon is a room, or a town painted with a sky of its own. Either
     // way what goes behind it is a wall down to where the wall meets the floor and boards
