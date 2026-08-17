@@ -289,6 +289,10 @@ export const TUNING = {
   maxLevel: 10,
   conPerLevel: 3, // added to a character's own constitution for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
+  // Experience is only ever spent on the level. What a level buys is points, and the
+  // points are spent on skills by hand — the player's on the Skills tab, everyone else's
+  // as they are earned. Nothing else in the game raises a skill.
+  skillPointsPerLevel: 2,
 
   nameMaxLength: 16, // what fits in the dialogue box beside a portrait
   nameCaretBlinkMs: 450,

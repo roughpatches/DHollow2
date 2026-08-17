@@ -4,12 +4,14 @@ import Dialogue from './scenes/Dialogue.js';
 import Menu from './scenes/Menu.js';
 import Quest from './scenes/Quest.js';
 import Skills from './scenes/Skills.js';
+import Craft from './scenes/Craft.js';
 import Name from './scenes/Name.js';
 import { report } from './placeholders.js';
 import * as party from './party.js';
 import * as town from './town.js';
 import * as run from './run.js';
 import * as story from './story.js';
+import * as craft from './craft.js';
 
 // so a character can be levelled from the browser console while there is no content that
 // does it yet: party.award('aldis', 40)
@@ -20,6 +22,8 @@ window.town = town;
 window.run = run;
 // and so the story can be inspected or pushed along: story.set('firstday-done')
 window.story = story;
+// and so a workstation can be stood at without walking to it: craft.recipesAt('forge')
+window.craft = craft;
 
 // unwritten text is announced on every boot, so it can't quietly accumulate
 console.info(report());
@@ -37,5 +41,5 @@ window.game = new Phaser.Game({
   backgroundColor: COLORS.bg,
   pixelArt: true,
   physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
-  scene: [World, Dialogue, Menu, Quest, Skills, Name],
+  scene: [World, Dialogue, Menu, Quest, Skills, Craft, Name],
 });

@@ -17,6 +17,7 @@ import { linesOf } from '../placeholders.js';
 import {
   isOpen, contribute, contributeLines, statusLines, remaining,
 } from '../town.js';
+import { worksAt } from '../craft.js';
 import { applyToWorld } from '../settings.js';
 import { SCENES, START } from '../../content/scenes.js';
 import { play, hasPlayed, holdBack } from '../script.js';
@@ -104,6 +105,7 @@ export default class World extends Phaser.Scene {
     if (!this.scene.isActive('Menu')) this.scene.launch('Menu');
     if (!this.scene.isActive('Quest')) this.scene.launch('Quest');
     if (!this.scene.isActive('Skills')) this.scene.launch('Skills');
+    if (!this.scene.isActive('Craft')) this.scene.launch('Craft');
     if (!this.scene.isActive('Name')) this.scene.launch('Name');
 
     this.frozen = false;
@@ -118,6 +120,7 @@ export default class World extends Phaser.Scene {
       this.frozen = true;
       haltPlayer(this.player);
     };
+    const built = (id) => restate(this.built, id);
     const afterDialogue = () => {
       unfreeze();
       if (this.scripted) return;
@@ -130,6 +133,15 @@ export default class World extends Phaser.Scene {
     this.game.events.on('menu:close', unfreeze);
     this.game.events.on('quest:open', freeze);
     this.game.events.on('quest:close', unfreeze);
+    this.game.events.on('craft:close', unfreeze);
+    // the character sheet, whether it is being filled in for the first time or a level's
+    // points are being put somewhere
+    this.game.events.on('skills:choose', freeze);
+    this.game.events.on('skills:spend', freeze);
+    this.game.events.on('skills:done', unfreeze);
+    // a stage paid off at the bench changes the picture standing on the street, the same
+    // as one paid off at the door
+    this.game.events.on('craft:built', built, this);
 
     // the scenes still in the game play themselves the first time their map is walked
     // into, and never again
@@ -142,6 +154,11 @@ export default class World extends Phaser.Scene {
       this.game.events.off('menu:close', unfreeze);
       this.game.events.off('quest:open', freeze);
       this.game.events.off('quest:close', unfreeze);
+      this.game.events.off('craft:close', unfreeze);
+      this.game.events.off('skills:choose', freeze);
+      this.game.events.off('skills:spend', freeze);
+      this.game.events.off('skills:done', unfreeze);
+      this.game.events.off('craft:built', built, this);
     });
   }
 
@@ -288,12 +305,25 @@ export default class World extends Phaser.Scene {
       return;
     }
     const b = focus.building;
+    // A workstation rebuilt far enough to work is a bench: standing at it opens what can
+    // be made there, and whatever the stage above still wants is the first row on that
+    // list. Everything else in town is repaired where it stands.
+    if (worksAt(b.id)) {
+      this.atBench(b);
+      return;
+    }
     if (remaining(b.id)) {
       this.workOn(b);
       return;
     }
     if (b.enter && isOpen(b.id)) this.enter(b.enter);
     else this.say(b.name, statusLines(b.id), null);
+  }
+
+  atBench(b) {
+    haltPlayer(this.player);
+    this.frozen = true;
+    this.game.events.emit('craft:open', b.id);
   }
 
   enter(to, spawn) {

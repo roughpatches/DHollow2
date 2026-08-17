@@ -39,6 +39,54 @@ export const MATERIALS = [
   // Everything above is what a building is repaired with, and comes off the road's own
   // encounters. Everything below is what a node of the first job hands over by name.
 
+  // --- what comes off a bench ------------------------------------------------
+  // Nothing on the road pays these out: they are made in town, at a workstation, out of
+  // what a run brought home. See content/recipes.js.
+  {
+    id: 'charcoal',
+    name: 'Charcoal',
+    start: 0,
+    body: [
+      'Light, black, and ringing when two pieces knock together — wood with everything but the burning taken out of it.',
+      'It is half the weight of what went into the clamp and four times the heat.',
+    ],
+  },
+  {
+    id: 'ironbar',
+    name: 'Iron Bar',
+    start: 0,
+    body: [
+      'A hand\'s length of worked iron, square in section, with the hammer still legible along it.',
+      'This is the first iron anybody has drawn in Dreadhollow since the smithy went cold.',
+    ],
+  },
+  {
+    id: 'friedfish',
+    name: 'Fried Fish',
+    start: 0,
+    body: [
+      'Crisped on the skin side, folded onto a board, and eaten standing up before it stops being hot.',
+    ],
+  },
+  {
+    id: 'woodstew',
+    name: 'Forager\'s Stew',
+    start: 0,
+    body: [
+      'Fish and fungus cooked down together until neither is arguing with the other.',
+      'Thin, dark, and the best-smelling thing to come out of that kitchen in years.',
+    ],
+  },
+  {
+    id: 'smokedfish',
+    name: 'Smoked Trout',
+    start: 0,
+    body: [
+      'Stiff, mahogany-dark, and dry enough to carry in a pocket for a week.',
+      'Food that keeps is the difference between a day out and a night out.',
+    ],
+  },
+
   // --- the stream -----------------------------------------------------------
   {
     id: 'brooktrout',
