@@ -279,7 +279,10 @@ export function take(fight, moveId, played = null) {
   // number, covered badly it is most of the blow anyway.
   const kept = 1 - (1 - move.keep) * well;
   if (!pullsBack(fight) && !foeFlees(fight)) answer(fight, move.opens, kept);
-  fight.steady = Math.round((move.steady || 0) * well) || fight.steady;
+  // A move that steadies sets what it is worth and a move that does not leaves it alone.
+  // Said as two cases rather than one, so a move written to steady by one point does not
+  // round to nothing and quietly inherit whatever the last turn left behind.
+  if (move.steady) fight.steady = Math.max(0, Math.round(move.steady * well));
   fight.round += 1;
   return fight;
 }

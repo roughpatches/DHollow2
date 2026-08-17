@@ -312,7 +312,10 @@ export const TUNING = {
     // not named here, so a label added to an engine turns up in its trade's language
     // until somebody writes the fighting one.
     swing: {
-      cutPerSwing: 5, // one axe swing ends it, however badly it went
+      // One swing ends it however badly it went, which is a floor and not a preference:
+      // a glancing blow adds a fifth of this and a wild one three tenths, so anything
+      // under five would quietly make a bad swing take two turns to throw.
+      cutPerSwing: 6,
       words: {
         cut: 'Blow',
         lean: 'Footing  (keep your weight in the band)',
@@ -326,7 +329,7 @@ export const TUNING = {
       },
     },
     drive: {
-      fracturePerStrike: 5, // and one blow of the pick, the same way
+      fracturePerStrike: 5, // and the pick, whose worst blow is a quarter: four or more
       words: {
         fracture: 'Blow',
         shock: 'Exposure  (every wind-up is time it can see you)',

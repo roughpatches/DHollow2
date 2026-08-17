@@ -27,7 +27,9 @@
 //                hit   — what they add to their own d20 when they swing.
 //                guard — what a blow at them has to beat.
 //                harm  — what one of their blows takes off, [least, most].
-//              Leave any of the four out and it is the fighter default in tuning.js.
+//              Leave any of the four out and it is the fighter default in tuning.js, so
+//              `combat: true` is a fighter of exactly that size — and one the default can
+//              still be retuned from, which a block repeating those numbers would not be.
 //   needs    — a story flag they are not recruitable before. See src/story.js.
 //   bond     — how well they know you at the start, in points. A band is bondPerBand
 //              points, so 0 is a stranger and 9 is sworn. See tuning.js.
@@ -81,7 +83,10 @@ export const PARTY = [
     // fighter — the line below is — but they are the second pair of eyes on the road at
     // night, which is what a night job's own roll usually asks for.
     skills: { intimidation: 3, fording: 2, investigation: 1 },
-    combat: { hp: 24, hit: 2, guard: 12, harm: [3, 6] },
+    // A fighter at the size tuning.js says a fighter is. Written this way and not as the
+    // four numbers over again, because the only fighter in the game repeating the
+    // defaults would mean the defaults could never be retuned from.
+    combat: true,
     needs: 'firstday-done', // they turn up once the first job is walked, and so does night work
     bond: 3, // acquainted: enough to come out on ordinary work without being courted first
     body: ['[Placeholder Text]'],
