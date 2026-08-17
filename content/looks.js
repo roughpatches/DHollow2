@@ -11,7 +11,12 @@
 //              height they are asked for exactly; left out, the air over the head is
 //              taken to be the quarter of the frame the crawl's art usually carries.
 //   walk     — folder of the walk cycle, and how many frames each direction has. Leave
-//              it out for somebody who stands where they are put and never walks.
+//              it out for somebody who stands where they are put and never walks. `dirs`
+//              names the ways it was actually painted, for art that only has some of
+//              them; a direction it does not cover is walked in the standing frame.
+//   indoors  — the look this one becomes on a map that says it is indoors (see
+//              content/maps.js). Somebody painted twice — once small for the road, once
+//              at the size a room is painted at — is one person with two looks.
 //   idle     — the same for standing still. Frame 0 is what they wear when nothing is
 //              happening to them. `yoyo` runs it out and back rather than round: a loop
 //              that ends somewhere else than it started pops when it repeats. `every` is
@@ -43,11 +48,28 @@ export const LOOKS = [
     walk: { folder: 'Idle/animations/Walk', frames: 6 },
     still: 'Idle/rotations',
     portrait: 'Idle/portrait.png',
+    indoors: 'player-indoors',
   },
   {
-    // Aldis, the hooded hunter with the bow. The export has no face and nothing to lay him
-    // out on the floor with, so both are still taken off the older one in art/aldis — the
-    // only two things in this list that reach outside their own folder.
+    // The same wanderer painted for a room: twice the size, and painted from the side,
+    // which is how a room is painted. The export walks one way only — south, which is the
+    // way you walk towards somebody across a floor — so every other way is walked in the
+    // standing frame until there is art for it.
+    id: 'player-indoors',
+    path: 'art/player-indoors',
+    size: 128,
+    foot: 125,
+    head: 4,
+    walk: { folder: 'Idle/animations/Walk', frames: 6, dirs: ['down'] },
+    still: 'Idle/rotations',
+    portrait: 'Idle/portrait.png',
+  },
+  {
+    // Aldis, the hooded hunter with the bow, out on the road. His own export carries no
+    // face and nothing to lay him out on the floor with, so the face is the indoor
+    // export's hooded one — he is hooded out here — and the fall is still the oldest
+    // export's. Those are the only two things in this list that reach outside their own
+    // folder.
     id: 'aldis',
     path: 'art/aldis-hunter',
     size: 64,
@@ -56,7 +78,22 @@ export const LOOKS = [
     walk: { folder: 'Idle/animations/Walk', frames: 6 },
     still: 'Idle/rotations',
     down: '../aldis/Collapsed_in_a_heap/rotations/south.png',
-    portrait: '../aldis/Idle/portrait.png',
+    portrait: '../aldis-indoors/Idle/portrait.png',
+    indoors: 'aldis-indoors',
+  },
+  {
+    // And indoors, at the size a room is painted at: the hood down, arms crossed and the
+    // bow on his back, which is a hunter in somebody's house rather than one in the wood.
+    // The export's other state — hood up, bow in hand — is in the same folder if a scene
+    // ever wants him ready indoors.
+    id: 'aldis-indoors',
+    path: 'art/aldis-indoors',
+    size: 128,
+    foot: 125,
+    head: 2,
+    still: 'Arms_crossed_bow_on/rotations',
+    portrait: 'Arms_crossed_bow_on/portrait.png',
+    down: '../aldis/Collapsed_in_a_heap/rotations/south.png',
   },
   {
     id: 'gregorious',
@@ -66,6 +103,7 @@ export const LOOKS = [
     walk: { folder: 'Walking/animations/Walk', frames: 6 },
     idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
     portrait: 'Idle/portrait.png',
+    indoors: 'gregorious-bar', // behind his own bar he is painted at the room's size
   },
   {
     // The same man behind his own bar, at the size the room is painted at: he unfolds his

@@ -4,8 +4,8 @@
 
 import { TUNING } from '../tuning.js';
 import { NPCS } from '../content/npcs.js';
-import { walkAnim, proneKey } from './textures.js';
-import { stand } from './art.js';
+import { proneKey } from './textures.js';
+import { stand, walking } from './art.js';
 import * as story from './story.js';
 
 const TS = TUNING.tileSize;
@@ -112,7 +112,7 @@ function walk(scene, actor, [tx, ty], done) {
       ? (toX < actor.x ? 'left' : 'right')
       : (toY < actor.y ? 'up' : 'down');
     actor.facing = dir;
-    actor.anims.play(walkAnim(actor.palette, dir), true);
+    walking(actor, actor.palette, dir);
     scene.tweens.add({
       targets: actor,
       x: toX,

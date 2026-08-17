@@ -1,0 +1,52 @@
+{
+  "group_id": "2bf9e1bc-7be5-4769-81fe-09f959ef47e0",
+  "states": [
+    {
+      "character": {
+        "id": "cf557878-b980-47b9-ab99-feb9a7df1561",
+        "name": "Idle",
+        "prompt": "A full-body depiction of a wanderer standing in a relaxed side profile, draped in a textured, earth-toned wool poncho with frayed edges, wearing a weathered wide-brimmed hat pulled low, sturdy leather boots, and a simple linen tunic underneath, hands tucked into the folds of the poncho, focused expression.",
+        "size": {
+          "width": 128,
+          "height": 128
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-08-16T22:51:23.417369+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {
+          "Walk": {
+            "south": [
+              "Idle/animations/Walk/south/frame_000.png",
+              "Idle/animations/Walk/south/frame_001.png",
+              "Idle/animations/Walk/south/frame_002.png",
+              "Idle/animations/Walk/south/frame_003.png",
+              "Idle/animations/Walk/south/frame_004.png",
+              "Idle/animations/Walk/south/frame_005.png"
+            ]
+          }
+        }
+      },
+      "portrait": {
+        "path": "Idle/portrait.png",
+        "size": 128,
+        "generated_at": "2026-08-17T00:19:27.340904"
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-17T01:04:10.645520"
+}

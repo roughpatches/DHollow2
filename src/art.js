@@ -28,8 +28,17 @@ function dirsOf(look) {
 }
 
 // and the loops they have: everyone stands still, and only somebody who goes anywhere walks
-function setsOf(look) {
-  return [['idle', look.idle], ['walk', look.walk]].filter(([, spec]) => spec);
+function setsOf(look, dir) {
+  return [['idle', look.idle], ['walk', look.walk]]
+    .filter(([, spec]) => spec && (!dir || !spec.dirs || spec.dirs.includes(dir)));
+}
+
+// Somebody painted twice is one person with two looks: a map that says it is indoors gets
+// the room-sized one. Everything downstream is handed the id this returns and never knows
+// there was a choice.
+export function lookIn(palette, indoors) {
+  const look = LOOK[palette];
+  return indoors && look && look.indoors ? look.indoors : palette;
 }
 
 // The texture a character wears facing this way: the frame, whether it is drawn flipped,
@@ -63,7 +72,7 @@ export function preloadArt(scene) {
       // they are facing, out of the export's own rotations folder. It goes under the same
       // key frame 0 of an idle would, so nothing downstream knows the difference.
       if (look.still) add(actorFrame(look.id, dir, 0), `${look.still}/${folder}.png`);
-      for (const [set, spec] of setsOf(look)) {
+      for (const [set, spec] of setsOf(look, dir)) {
         for (let i = 0; i < spec.frames; i++) {
           add(key(look, set, dir, i), `${spec.folder}/${folder}/frame_${String(i).padStart(3, '0')}.png`);
         }
@@ -117,7 +126,7 @@ export function buildArt(scene) {
   buildNodeArt(scene);
   for (const look of LOOKS) {
     for (const [dir] of dirsOf(look)) {
-      for (const [set, spec] of setsOf(look)) {
+      for (const [set, spec] of setsOf(look, dir)) {
         const k = set === 'idle' ? idleAnim(look.id, dir) : walkAnim(look.id, dir);
         if (scene.anims.exists(k)) continue;
         scene.anims.create({
@@ -294,6 +303,21 @@ export function stand(sprite, palette, dir) {
   const look = LOOK[palette];
   if (look && look.idle && !look.idle.every) {
     sprite.anims.play(idleAnim(palette, use), true);
+    return;
+  }
+  sprite.anims.stop();
+  sprite.setTexture(frame);
+}
+
+// Walking: the cycle for whoever has one this way, and the standing frame for anyone who
+// does not — art painted for a room may only have been walked the one way anybody walks
+// in it, and a direction it was never painted for still has to go somewhere.
+export function walking(sprite, palette, dir) {
+  const [frame, flip, use] = faceFrame(palette, dir);
+  sprite.setFlipX(flip);
+  const key = walkAnim(palette, use);
+  if (sprite.scene.anims.exists(key)) {
+    sprite.anims.play(key, true);
     return;
   }
   sprite.anims.stop();

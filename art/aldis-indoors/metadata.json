@@ -1,0 +1,75 @@
+{
+  "group_id": "08a41a40-4758-4be3-8fc6-bd73fb77c7a8",
+  "states": [
+    {
+      "character": {
+        "id": "2a3d5d1a-e41e-4f46-9962-53ed34048f0b",
+        "name": "Idle",
+        "prompt": "A young hunter standing in a grounded, ready stance, wearing a hooded leather cloak over a fitted tunic and rugged trousers. He has tousled curly brown hair visible beneath the hood and an alert, focused expression. He holds a recurve bow in one hand and has a quiver of feathered arrows strapped across his back. The attire features textured leather straps, brass buckles, and layered fabric, rendered with a crisp black outline and a naturalistic, earthy color palette of forest green, deep brown, and tan.",
+        "size": {
+          "width": 128,
+          "height": 128
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-08-16T22:41:17.423036+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      },
+      "portrait": {
+        "path": "Idle/portrait.png",
+        "size": 128,
+        "generated_at": "2026-08-16T23:57:15.723830"
+      }
+    },
+    {
+      "character": {
+        "id": "3e62bee8-9e64-4c03-a305-c87934e9618e",
+        "name": "Arms crossed, bow on",
+        "prompt": "A young hunter standing in a grounded, ready stance, wearing a hooded leather cloak over a fitted tunic and rugged trousers. He has tousled curly brown hair visible beneath the hood and an alert, focused expression. He holds a recurve bow in one hand and has a quiver of feathered arrows strapped across his back. The attire features textured leather straps, brass buckles, and layered fabric, rendered with a crisp black outline and a naturalistic, earthy color palette of forest green, deep brown, and tan.",
+        "size": {
+          "width": 128,
+          "height": 128
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-08-16T23:59:23.237141+00:00"
+      },
+      "folder": "Arms_crossed_bow_on",
+      "frames": {
+        "rotations": {
+          "south": "Arms_crossed_bow_on/rotations/south.png",
+          "south-east": "Arms_crossed_bow_on/rotations/south-east.png",
+          "east": "Arms_crossed_bow_on/rotations/east.png",
+          "north-east": "Arms_crossed_bow_on/rotations/north-east.png",
+          "north": "Arms_crossed_bow_on/rotations/north.png",
+          "north-west": "Arms_crossed_bow_on/rotations/north-west.png",
+          "west": "Arms_crossed_bow_on/rotations/west.png",
+          "south-west": "Arms_crossed_bow_on/rotations/south-west.png"
+        },
+        "animations": {}
+      },
+      "portrait": {
+        "path": "Arms_crossed_bow_on/portrait.png",
+        "size": 128,
+        "generated_at": "2026-08-17T00:04:24.991170"
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-17T01:04:13.886211"
+}

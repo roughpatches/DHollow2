@@ -1,6 +1,9 @@
 // Maps are character grids. Editing the world means typing over characters.
 // Every row of a map must be the same length and every character must be in LEGEND.
 //
+// `indoors: true` on a map says it is a room rather than the open air: anybody with a
+// second look painted for indoors is drawn from that one on it. See content/looks.js.
+//
 // A map with `street` instead of `rows` is not a grid at all: it is Dreadhollow seen from
 // the side, one painted town with a line across it to walk along. Everything standing on a
 // street — a door, a building, somebody waiting — is placed by how far along it stands and
@@ -87,6 +90,7 @@ export const MAPS = {
   // Where the player wakes up the morning after. Aldis carried them here.
   hut: {
     name: 'Aldis Rooke\'s house',
+    indoors: true, // and so everyone in it is drawn from their indoor art; see content/looks.js
     spawn: [8, 10],
     rows: [
       '##################',
@@ -273,13 +277,13 @@ export const MAPS = {
   // the bar 105 to its top, which is a hundred pixels to the metre and a man at 183.
   tavern: {
     name: 'The Sea Hag',
+    indoors: true,
     street: {
       art: 'art/town/seahag-inside.png',
       size: [688, 384], // the whole painting; unlike the town panel its floor runs to the edge
       ground: 362, // the aisle, a stride in front of the stools
       sill: 352, // where the stool legs and the bar front meet the boards
-      body: 186, // and a man standing on them, waist to the bar top: three times the 62
-      // pixels the drawn art is, so the room's own pixels and a person's are the same size
+      body: 183, // and a man standing on them, waist to the bar top
       repeats: 1, // one room; a room laid twice is two bars and one landlord
     },
     spawn: [33],
@@ -296,6 +300,7 @@ export const MAPS = {
   // last stage of the repair opens: swept flags, the pews that survived, and the altar.
   chapel: {
     name: 'The chapel',
+    indoors: true,
     spawn: [10, 13],
     rows: [
       '######################',

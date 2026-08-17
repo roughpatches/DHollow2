@@ -8,7 +8,7 @@ import {
 } from '../player.js';
 import {
   preloadArt, buildArt, bakeTiles, slotFor, seamFor, fitBody, stand, raiseStructures,
-  raiseProps, restate, occasionalIdle,
+  raiseProps, restate, occasionalIdle, lookIn,
 } from '../art.js';
 import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
 import { preloadFrames, buildFrames } from '../frames.js';
@@ -73,10 +73,11 @@ export default class World extends Phaser.Scene {
     for (const def of here) {
       // somebody behind the bar is standing at the back of the room rather than out in
       // the aisle, and what shows of them is cut at the line they are standing behind
+      const palette = lookIn(def.palette, map.indoors);
       const npc = this.street
-        ? spawnStreetActor(this, def.palette, def.x,
+        ? spawnStreetActor(this, palette, def.x,
           def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx)
-        : spawnActor(this, def.palette, def.x, def.y, def.facing || 'down');
+        : spawnActor(this, palette, def.x, def.y, def.facing || 'down');
       if (def.behind) cutBelow(npc, def.behind);
       // reaches further past the feet than the player's box, so you stop beside someone
       // rather than inside them
@@ -89,7 +90,7 @@ export default class World extends Phaser.Scene {
         this.taken.push({ npc, from: def.takes.from, patch: coverPatch(this, this.street.art, def.takes) });
       }
       // somebody whose idle is something they do now and then stands about between times
-      if (this.street && occasionalIdle(def.palette, npc.facing)) {
+      if (this.street && occasionalIdle(palette, npc.facing)) {
         this.waiting.push({ npc, y: npc.y, cut: def.behind, next: 0 });
       }
       // A street has one line on it and standing on that line is not a reason nobody can
@@ -165,7 +166,8 @@ export default class World extends Phaser.Scene {
     this.worldH = street.height;
     this.physics.world.setBounds(0, 0, street.width, street.height);
 
-    this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body);
+    this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body,
+      lookIn('player', map.indoors));
     this.player.setDepth(DEPTH.player);
 
     this.built = raiseStructures(this, this.mapKey);
@@ -227,7 +229,8 @@ export default class World extends Phaser.Scene {
     this.worldW = w * TS;
     this.worldH = h * TS;
 
-    this.player = createPlayer(this, this.spawnTile[0], this.spawnTile[1]);
+    this.player = createPlayer(this, this.spawnTile[0], this.spawnTile[1],
+      lookIn('player', map.indoors));
     this.physics.add.collider(this.player, this.ground);
 
     // buildings with art stand over their tiles before anyone walks in front of them

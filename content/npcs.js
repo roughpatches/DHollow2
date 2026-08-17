@@ -71,8 +71,7 @@ export const NPCS = [
     map: 'tavern',
     x: 11, // behind the bar, with the pewter tankard on the counter at his right hand
     facing: 'right', // down the room, at whoever has just come in
-    palette: 'gregorious-bar', // the standing barkeep; see content/looks.js
-    portrait: 'gregorious', // that export has no face, so he talks with the one that has
+    palette: 'gregorious', // and indoors that is the standing barkeep; see content/looks.js
     // `behind` puts somebody on the far side of something painted: they stand at the back
     // of the room and nothing of them below this line is drawn. 245 is the bar top, which
     // takes him at the waist.

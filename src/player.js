@@ -1,6 +1,5 @@
 import { TUNING } from '../tuning.js';
-import { walkAnim } from './textures.js';
-import { bodyOf, faceFrame, fitBody, footOf, stand } from './art.js';
+import { bodyOf, faceFrame, fitBody, footOf, stand, walking } from './art.js';
 import { atTile } from './street.js';
 
 const TS = TUNING.tileSize;
@@ -38,14 +37,14 @@ export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left', b
   return s;
 }
 
-export function createPlayer(scene, tx, ty) {
-  const s = spawnActor(scene, 'player', tx, ty, 'down');
+export function createPlayer(scene, tx, ty, palette = 'player') {
+  const s = spawnActor(scene, palette, tx, ty, 'down');
   s.setCollideWorldBounds(true);
   return s;
 }
 
-export function createStreetPlayer(scene, tx, groundY, bodyPx) {
-  const s = spawnStreetActor(scene, 'player', tx, groundY, 'right', bodyPx);
+export function createStreetPlayer(scene, tx, groundY, bodyPx, palette = 'player') {
+  const s = spawnStreetActor(scene, palette, tx, groundY, 'right', bodyPx);
   s.setCollideWorldBounds(true);
   return s;
 }
@@ -71,7 +70,7 @@ export function updateStreetPlayer(player, keys) {
     return;
   }
   player.facing = vx < 0 ? 'left' : 'right';
-  player.anims.play(walkAnim(player.palette, player.facing), true);
+  walking(player, player.palette, player.facing);
 }
 
 export function updatePlayer(player, keys) {
@@ -101,7 +100,7 @@ export function updatePlayer(player, keys) {
   else if (vy < 0) player.facing = 'up';
   else player.facing = 'down';
 
-  player.anims.play(walkAnim(player.palette, player.facing), true);
+  walking(player, player.palette, player.facing);
 }
 
 export function haltPlayer(player) {
