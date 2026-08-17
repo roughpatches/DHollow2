@@ -301,6 +301,7 @@ export const TUNING = {
     // a thing anybody here is trained at.
     fleeDC: 11,
     fleeCon: 3, // and what getting away costs the pool: they came back at a run
+    fleeXp: 0.5, // and what a node run away from is worth: half of it, for half a job
     // A fighter at zero hit points is out of the run: their own constitution comes off
     // the party's pool, because a body being carried is not a body walking. Somebody else
     // who fights steps up; nobody left who fights and the party turns for home.

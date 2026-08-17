@@ -998,7 +998,10 @@ export function settle(played) {
   }
   node.xp = node.passed ? 0 : Math.round(roll(e.xp)
     * (night ? TUNING.questNightXp : 1)
-    * (node.check && node.check.pass ? TUNING.checkPassXp : 1));
+    * (node.check && node.check.pass ? TUNING.checkPassXp : 1)
+    // half a fight is half a job: what you learn from a thing you ran from is what you
+    // learned before you ran
+    * (node.won && node.won.fled ? TUNING.combat.fleeXp : 1));
   run.xp += node.xp;
   // who the node's experience took to a new level, so the tally at the node can say so
   // where it happened rather than leaving it to be noticed on the crew screen later
