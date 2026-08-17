@@ -28,9 +28,8 @@ function dirsOf(look) {
 }
 
 // and the loops they have: everyone stands still, and only somebody who goes anywhere walks
-function setsOf(look, dir) {
-  return [['idle', look.idle], ['walk', look.walk]]
-    .filter(([, spec]) => spec && (!dir || !spec.dirs || spec.dirs.includes(dir)));
+function setsOf(look) {
+  return [['idle', look.idle], ['walk', look.walk]].filter(([, spec]) => spec);
 }
 
 // Somebody painted twice is one person with two looks: a map that says it is indoors gets
@@ -72,7 +71,7 @@ export function preloadArt(scene) {
       // they are facing, out of the export's own rotations folder. It goes under the same
       // key frame 0 of an idle would, so nothing downstream knows the difference.
       if (look.still) add(actorFrame(look.id, dir, 0), `${look.still}/${folder}.png`);
-      for (const [set, spec] of setsOf(look, dir)) {
+      for (const [set, spec] of setsOf(look)) {
         for (let i = 0; i < spec.frames; i++) {
           add(key(look, set, dir, i), `${spec.folder}/${folder}/frame_${String(i).padStart(3, '0')}.png`);
         }
@@ -126,7 +125,7 @@ export function buildArt(scene) {
   buildNodeArt(scene);
   for (const look of LOOKS) {
     for (const [dir] of dirsOf(look)) {
-      for (const [set, spec] of setsOf(look, dir)) {
+      for (const [set, spec] of setsOf(look)) {
         const k = set === 'idle' ? idleAnim(look.id, dir) : walkAnim(look.id, dir);
         if (scene.anims.exists(k)) continue;
         scene.anims.create({

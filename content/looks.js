@@ -11,9 +11,8 @@
 //              height they are asked for exactly; left out, the air over the head is
 //              taken to be the quarter of the frame the crawl's art usually carries.
 //   walk     — folder of the walk cycle, and how many frames each direction has. Leave
-//              it out for somebody who stands where they are put and never walks. `dirs`
-//              names the ways it was actually painted, for art that only has some of
-//              them; a direction it does not cover is walked in the standing frame.
+//              it out for somebody who stands where they are put and never walks; a
+//              direction with no cycle behind it is walked in the standing frame.
 //   indoors  — the look this one becomes on a map that says it is indoors (see
 //              content/maps.js). Somebody painted twice — once small for the road, once
 //              at the size a room is painted at — is one person with two looks.
@@ -37,30 +36,16 @@
 
 export const LOOKS = [
   {
-    // You: the wanderer in the poncho and the wide hat, walking the town and the road.
-    // Six frames a direction and a painted rotation to stand on, which is all the export
-    // carries — there is no idle loop in it, and a standing figure does not need one.
+    // You: the wanderer in the poncho and the wide hat, everywhere in Dreadhollow — the
+    // road, the town and every room in it. One export at the size a room is painted at,
+    // walked all four ways, with a face of its own. There is no idle loop in it and a
+    // standing figure does not need one, so the painted rotations are what you stand in.
     id: 'player',
     path: 'art/player',
-    size: 64,
-    foot: 63, // the boots, all but the bottom row of the frame
-    head: 1, // and the crown of the hat
-    walk: { folder: 'Idle/animations/Walk', frames: 6 },
-    still: 'Idle/rotations',
-    portrait: 'Idle/portrait.png',
-    indoors: 'player-indoors',
-  },
-  {
-    // The same wanderer painted for a room: twice the size, and painted from the side,
-    // which is how a room is painted. The export walks one way only — south, which is the
-    // way you walk towards somebody across a floor — so every other way is walked in the
-    // standing frame until there is art for it.
-    id: 'player-indoors',
-    path: 'art/player-indoors',
     size: 128,
-    foot: 125,
-    head: 4,
-    walk: { folder: 'Idle/animations/Walk', frames: 6, dirs: ['down'] },
+    foot: 125, // the boots, three rows up from the bottom of the frame
+    head: 4, // and the crown of the hat
+    walk: { folder: 'Idle/animations/Walk', frames: 6 },
     still: 'Idle/rotations',
     portrait: 'Idle/portrait.png',
   },
