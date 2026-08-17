@@ -299,11 +299,33 @@ export function zoneOf(id) {
   return ZONE[id] || null;
 }
 
-// what a run at this hour and in this place is mostly made of, so the choice is made on
-// something more than the word for it
+// how much of a run here is something in the way rather than work, or null where the zone
+// has not said and it falls out of the nodes' own weights
+export function troubleAt(where, when) {
+  const share = (ZONE[where] || {}).trouble;
+  return share && share[when] !== undefined ? share[when] : null;
+}
+
+// What a run at this hour and in this place is mostly made of, so the choice is made on
+// something more than the word for it. Where the zone names its share, the two sides are
+// counted against that rather than against each other's weights — otherwise the readout
+// would say one thing and the road would do another.
 export function mixAt(when, where) {
+  const pool = poolAt(when, where);
+  const share = troubleAt(where, when);
+  const digging = pool.filter((e) => e.harvests);
+  const trouble = pool.filter((e) => !e.harvests);
   const by = {};
-  for (const e of poolAt(when, where)) by[e.nature] = (by[e.nature] || 0) + e.weight[when];
+  const add = (list, of) => {
+    const total = list.reduce((n, e) => n + e.weight[when], 0) || 1;
+    for (const e of list) by[e.nature] = (by[e.nature] || 0) + (e.weight[when] / total) * of;
+  };
+  if (share !== null && digging.length && trouble.length) {
+    add(digging, 100 - share);
+    add(trouble, share);
+  } else {
+    for (const e of pool) by[e.nature] = (by[e.nature] || 0) + e.weight[when];
+  }
   const total = Object.values(by).reduce((a, b) => a + b, 0);
   return Object.entries(by)
     .sort((a, b) => b[1] - a[1])
@@ -507,30 +529,42 @@ function whichWork(table, from) {
   return live[live.length - 1][0];
 }
 
-// What the road puts up next. Whether it is work or something in the way is the nodes'
-// own weights, the same as everything else, so the mix a zone reads out before the party
-// sets out is what they walk.
+// which of the nodes offering a given piece of work it turns out to be
+function workNode(gather, digging) {
+  const skill = whichWork(gather, digging);
+  const offering = digging.filter((e) => e.harvests.some((h) => h.skill === skill));
+  return weighted(offering.length ? offering : digging);
+}
+
+// What the road puts up next, in two questions.
 //
-// Which work, though, is the zone's to say: the `gather` table in content/places.js is
-// the shares a place is made of, and where there is one a resource node is drawn in two
-// steps — the work first, then which of the nodes offering that work it turns out to be.
-// The shares are shares of the work and not of the nodes, because a node with two
-// harvests in it is two kinds of work standing in one place: it is reached by either of
-// its rolls, so a wood that is two parts timber to one part fish puts up more mixed
-// stands than a straight reading of the table would. That is the mixed stand doing its
-// job. A zone with no table draws its resource nodes on their own weights, as before.
+// First, work or something in the way. A zone that names its `trouble` share says that in
+// one number an hour and it stays put however many nodes are written; a zone that does not
+// falls back to the nodes' own weights, where every encounter added moved the shape of
+// every run a little and a table could not be grown without retuning it.
+//
+// Then which. For work that is the zone's `gather` shares — the work first, then which of
+// the nodes offering it. Those are shares of the work and not of the nodes, because a node
+// with two harvests is two kinds of work standing in one place: it is reached by either of
+// its rolls, so a wood that is two parts timber to one part fish puts up more mixed stands
+// than a straight reading of the table would. That is the mixed stand doing its job. For
+// trouble it is the nodes' own weights, which is all that is wanted there: they are
+// already only competing with each other.
 function drawNode(from) {
   const gather = (ZONE[run.where] || {}).gather;
   const digging = gather ? from.filter((e) => e.harvests) : [];
   if (!digging.length) return weighted(from);
   const rest = from.filter((e) => !e.harvests);
+  if (!rest.length) return workNode(gather, digging);
+  const share = troubleAt(run.where, run.when);
+  if (share !== null) {
+    return Math.random() * 100 < share ? weighted(rest) : workNode(gather, digging);
+  }
   const of = (e) => e.weight[run.when];
   const all = from.reduce((n, e) => n + of(e), 0);
   const work = digging.reduce((n, e) => n + of(e), 0);
-  if (rest.length && Math.random() * all >= work) return weighted(rest);
-  const skill = whichWork(gather, digging);
-  const offering = digging.filter((e) => e.harvests.some((h) => h.skill === skill));
-  return weighted(offering.length ? offering : digging);
+  if (Math.random() * all >= work) return weighted(rest);
+  return workNode(gather, digging);
 }
 
 // The work a node has in it, and what the party's points are worth at each piece of it:

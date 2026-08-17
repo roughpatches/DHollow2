@@ -23,8 +23,13 @@
 //              often than one share alone would put it — which is a mixed stand behaving
 //              like a mixed stand. Retune the wood by editing these four numbers and
 //              nothing else. A place with no table draws its resource nodes on their own
-//              weights, and how often work comes up at all against something in the way is
-//              always the nodes' own weights in content/nodes.js.
+//              weights.
+//   trouble  — how much of the road here is something in the way rather than work, per
+//              hundred, by the hour. One number and it stays put however many encounter
+//              nodes get written: node weights then only decide which trouble the party
+//              meets, never how much of it there is. A place with no `trouble` falls back
+//              to the nodes' own weights against each other, where writing another
+//              encounter moved the shape of every run a little.
 //   environment — what it is like to stand in, a word apiece, shown as a row of icons
 //              along the bottom of the tab. A word with no icon of its own gets the blank
 //              square until there is art for it; see src/icons.js.
@@ -129,6 +134,9 @@ export const PLACES = [
     // timber to one and a half of herb, one of fish and half of stone. Read against each
     // other like every other table of odds here, so they need not add up to a hundred.
     gather: { woodcutting: 40, herblore: 30, fishing: 20, mining: 10 },
+    // And how much of the road is something in the way rather than work. After dark more
+    // of it is, because after dark there is more out there to be in the way.
+    trouble: { day: 40, night: 55 },
     terrain: 'forest',
     backdrop: { image: 'art/greywood/backdrop.png', ground: 350 },
     label: 'The Greywood',
