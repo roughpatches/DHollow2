@@ -54,6 +54,22 @@
 //             tuning.js. Write two of them and the node becomes a question the party is
 //             asked where they stand, so write two the same crew would want differently
 //             — not two spellings of one job.
+//             Each harvest carries its own three lines as well:
+//               text  — the way as it is offered, on the card the party reads on
+//                       arriving. Imperative and short. A harvest with none falls back to
+//                       naming its activity and skill, which is what they all read like
+//                       before there was anything else to say.
+//               offer — one line under it: what that work involves here in particular,
+//                       and what taking it costs the other thing standing here.
+//               done  — how it went, said afterwards: `well`, `middling` and `botched`.
+//                       Which one is said comes off the engine's quality against
+//                       workWellAt in tuning.js, and a botched activity says the third
+//                       whatever the number. A node whose engine has not been imported
+//                       yet is never played and always reads as `well`; write the other
+//                       two anyway, for the day it lands.
+//             A resource node's `body` is read on arriving at it, on the same card as the
+//             ways in — it is a description of a place, so it comes before the work and
+//             not after it. The tally afterwards says how the work went, not where it was.
 //
 // An encounter node also has:
 //   ways    — two or three of them. Each is `text` (the way as it is offered), the
@@ -80,6 +96,13 @@ export const RESOURCE_NODES = [
       {
         skill: 'woodcutting',
         activity: 'Felling',
+        text: 'Fell one of the standing oaks.',
+        offer: 'Straight stems and room to drop one, if you pick your gap.',
+        done: {
+          well: 'It went into the gap you picked and came down whole. Sound to the top, no shake in it.',
+          middling: 'It hung up on the way over and sat there a moment before it dropped. Half the crown is broken off into the brash.',
+          botched: 'It went the wrong way, into standing timber, and jammed there at an angle above your heads. You took what came free by hand and left the rest of it hanging.',
+        },
         spoils: { timber: [2, 4] },
         draw: { count: [1, 3], odds: { oakbranch: 50, oaklog: 30, heartwood: 12 } },
       },
@@ -88,12 +111,22 @@ export const RESOURCE_NODES = [
         // the dead wood at the foot of a stand nobody has cleared in twenty years.
         skill: 'herblore',
         activity: 'Foraging',
+        text: 'Work the brash for mushrooms.',
+        offer: 'Black trumpets down in the rot, oyster shelves on the old cut ends.',
+        done: {
+          well: 'The trumpets are thick under the leaf litter once you have the colour by eye. You clear the whole of it.',
+          middling: 'You take what is showing. There is more of it further into the brash, and the light goes before you get there.',
+          botched: 'Most of what you pull is past it, soft and full of flies. You throw the bad back and it is nearly all of it.',
+        },
         draw: { count: [1, 2], odds: { blacktrumpet: 40, oystermushroom: 30 } },
       },
     ],
     xp: [8, 14],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A line of old stumps, cut low and gone grey at the edges. Past them the stand carries on unworked — oak, straight, thick enough through that whoever stopped here did not stop because the wood ran out.',
+      'What they trimmed off is still lying in the brash where it fell. It has been down long enough to grow something.',
+    ],
   },
   {
     // Woodcutting's own node. It came down last week: nothing has had time to grow on it
@@ -109,13 +142,23 @@ export const RESOURCE_NODES = [
       {
         skill: 'woodcutting',
         activity: 'Sawing',
+        text: 'Saw the trunk into lengths.',
+        offer: 'It is up off the ground its whole length. You will not be cutting dirt.',
+        done: {
+          well: 'It cuts white the whole way through and every length comes off square. There is no rot in it anywhere.',
+          middling: 'The trunk rolls twice while you are in it and the saw binds both times. You get your lengths, shorter than you wanted them.',
+          botched: 'You are a foot into it when the weight shifts and the whole trunk settles onto the blade. You get the saw back out. You take what was already off.',
+        },
         spoils: { timber: [2, 4] },
         draw: { count: [2, 3], odds: { oaklog: 45, oakbranch: 40, heartwood: 10 } },
       },
     ],
     xp: [8, 14],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'A beech, roots and all, lying across its own crown. The plate of earth it brought up with it is still wet on the underside.',
+      'The bark has not lifted anywhere. Nothing has bored into it and nothing has come up out of it. It went over inside the week.',
+    ],
   },
   {
     id: 'water',
@@ -177,19 +220,36 @@ export const RESOURCE_NODES = [
       {
         skill: 'woodcutting',
         activity: 'Sawing',
+        text: 'Cut the trees out of the slip.',
+        offer: 'Every one of them is under tension and not one is lying flat.',
+        done: {
+          well: 'You read which way each one wants to go before you put the saw in it, and every one goes that way. Nothing comes down the slope behind you.',
+          middling: 'The first two go where you expect. The third comes round on you, and you spend the rest of the light digging the saw out of the ground.',
+          botched: 'You cut one that was holding two others. All three go, and a good deal of the slope with them. You get clear with what was already cut.',
+        },
         spoils: { timber: [1, 3] },
         draw: { count: [1, 2], odds: { oaklog: 40, oakbranch: 45 } },
       },
       {
         skill: 'mining',
         activity: 'Quarrying',
+        text: 'Work the open face for stone.',
+        offer: 'Iron showing in the seam, and everything above it loose.',
+        done: {
+          well: 'The face comes away in squared blocks where you set the wedges, and the ground above it holds the whole time you are under it.',
+          middling: 'You get stone, all of it broken small. Twice you have to come out from under the face and wait for it to stop coming down.',
+          botched: 'The face lets go above where you are working. You are out from under it before the worst of it lands. What you had is under it now.',
+        },
         spoils: { stone: [1, 3] },
         draw: { count: [0, 2], odds: { ironore: 45, roughgem: 7 } },
       },
     ],
     xp: [10, 16],
     con: [-2, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The hillside has come off in one piece and gone down, and the trees went with it — lying now the wrong way up, roots in the air, crowns in the mud at the bottom.',
+      'Where they were standing there is a raw face of open rock and cut earth, still shedding. Nothing on this slope has finished moving.',
+    ],
   },
   {
     id: 'shallows',
@@ -251,6 +311,13 @@ export const RESOURCE_NODES = [
       {
         skill: 'woodcutting',
         activity: 'Sawing',
+        text: 'Cut the jam and pull the sound wood out.',
+        offer: 'Take the logs holding it and the pool goes out with them.',
+        done: {
+          well: 'It comes apart in the order you cut it. By the time the wood is stacked on the bank the pool has drained out from under the fish.',
+          middling: 'It lets go while you are still standing in it. You get out. Half of what you cut goes downstream ahead of you.',
+          botched: 'Wrong log first. The whole face of it goes at once and takes the saw with it. The narrows are clear and you have nothing to show for them.',
+        },
         spoils: { timber: [2, 4] },
         draw: { count: [1, 2], odds: { oaklog: 45, oakbranch: 35 } },
       },
@@ -258,12 +325,22 @@ export const RESOURCE_NODES = [
         // Everything in the stream has been backing up behind it since the autumn.
         skill: 'fishing',
         activity: 'Casting',
+        text: 'Fish the pool while it still holds.',
+        offer: 'Cast into the slack behind the jam. The wood stays where it is.',
+        done: {
+          well: 'They are stacked three deep in the slack water and they take anything you put in front of them. You stop when you run out of hands.',
+          middling: 'You take a few off the top of the pool. The rest drop down under the jam and stay there.',
+          botched: 'The line goes into the deadfall on the second cast and stays in it. Everything in that pool knows about you now.',
+        },
         draw: { count: [2, 4], odds: { perch: 45, bluegill: 35, brooktrout: 25 } },
       },
     ],
     xp: [10, 16],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      "The narrows are stopped end to end with a winter's worth of deadfall, packed and settled and holding. The river goes round the outside of it and comes back grey.",
+      'Behind the jam the water has backed up into a pool, slow and deep and dark. There are fish standing in it that have no business this far up the river.',
+    ],
   },
   {
     id: 'crag',
