@@ -11,9 +11,9 @@ export const TUNING = {
   // The town seen from the side (see `street` in content/maps.js). It is drawn further
   // back than a grid map because a painted street is 384 pixels tall and a room is not:
   // at the grid's own zoom you would never see a roofline.
-  gridBodyPx: 22, // how tall anybody standing on a grid map is drawn, feet to head: the
-  // height the generated placeholders are drawn at, so a room of them and a room of drawn
-  // art are the same room
+  gridBodyPx: 34, // how tall anybody standing on a grid map is drawn, feet to head. The
+  // same height as the town's, so a room and the street outside it are the same world;
+  // the generated placeholders are drawn at 22 and come up to meet it.
 
   streetZoom: 2,
   streetBodyPx: 34, // how tall anybody standing on a street is drawn, feet to head
