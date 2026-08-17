@@ -23,6 +23,17 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+// What the engine calls the things it draws. It is a line under strain here and a guard
+// held on something in the dark elsewhere, so a caller can hand it another set through
+// `words` in its config; anything it does not name keeps the word below.
+const WORDS = {
+  prompt: 'Hold SPACE to keep the line in the band — too many slips and it snaps',
+  label: 'line',
+  holding: 'The rod is bent and holding.',
+  slipping: 'The line is running away from you.',
+  lost: 'The line snapped. It is gone.',
+};
+
 export class TensionBarEngine {
   constructor(scene, config) {
     this.scene = scene;
@@ -43,6 +54,7 @@ export class TensionBarEngine {
     // Time fields are seeded on the first update(): scene.time.now is 0 while a scene is
     // still building, which would fire every tick at once on the first live frame.
     this.startTime = null;
+    this.words = { ...WORDS, ...(this.config.words || {}) };
     this.totalTicks = Math.round(this.config.durationMs / this.config.tickIntervalMs);
 
     this.indicatorPos = 0.5;
@@ -53,10 +65,9 @@ export class TensionBarEngine {
     const L = this.config.layout;
     this.BW = L.barW ?? 320;
     const bx = L.x;
-    this.statusText = this.scene.add.text(bx, L.top,
-      'Hold SPACE to keep the line in the band — too many slips and it snaps',
+    this.statusText = this.scene.add.text(bx, L.top, this.words.prompt,
       { fontSize: '16px', fontFamily: FONT, color: COLOR.muted });
-    this.lineLabel = this.scene.add.text(bx, L.top + 34, 'line',
+    this.lineLabel = this.scene.add.text(bx, L.top + 34, this.words.label,
       { fontSize: '15px', fontFamily: FONT, color: COLOR.text });
 
     this.failed = false;
@@ -147,7 +158,7 @@ export class TensionBarEngine {
       if (this.integrity <= 0) {
         this.completed = true;
         this.failed = true;
-        this.statusText?.setText('The line snapped. It is gone.').setColor(COLOR.danger);
+        this.statusText?.setText(this.words.lost).setColor(COLOR.danger);
         this.onComplete?.(this.judgments);
         this._cleanup();
         return;
@@ -167,7 +178,7 @@ export class TensionBarEngine {
     const half = this.config.zoneWidth / 2;
     const inBand = Math.abs(this.indicatorPos - this.zoneCenter) <= half;
     this.bar.setMarkerTint(inBand ? null : 0xf2913a);
-    this.tensionText?.setText(inBand ? 'The rod is bent and holding.' : 'The line is running away from you.');
+    this.tensionText?.setText(inBand ? this.words.holding : this.words.slipping);
     this.tensionText?.setColor(inBand ? COLOR.text : COLOR.warn);
   }
 

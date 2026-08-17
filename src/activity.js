@@ -75,11 +75,11 @@ const ENGINES = {
   // it is played is the whole of what the blow does — see src/combat.js.
   Swing: {
     make: (scene, layout) => new FellEngine(scene, { ...TUNING.fell, ...TUNING.combat.swing, layout }),
-    hint: '[Hold Space] Swing    [Left/Right] Which side you cut',
+    hint: '[Hold Space] Swing    [Left/Right] Come in high or low',
   },
   Drive: {
     make: (scene, layout) => new MineEngine(scene, { ...TUNING.quarry.mine, ...TUNING.combat.drive, layout }),
-    hint: '[Hold Space] Drive it in    [Left/Right] Shallow or deep',
+    hint: '[Hold Space] Drive it in    [Left/Right] Short or all the way through',
   },
   Cover: {
     make: (scene, layout) => new Held(

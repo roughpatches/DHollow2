@@ -307,9 +307,48 @@ export const TUNING = {
     // in the numbers a single blow needs rather than a whole tree — the overrides below
     // are laid over that activity's own block in this file, so retuning Felling still
     // retunes the swing. See src/activity.js for which engine each is.
-    swing: { cutPerSwing: 5 }, // one axe swing ends it, however badly it went
-    drive: { fracturePerStrike: 5 }, // and one blow of the pick, the same way
-    cover: { durationMs: 2200, lineIntegrity: null }, // a hold, and one nobody can fail
+    // Each carries `words` as well: the same meters, called what they are in a fight
+    // rather than what they are in the wood. An engine keeps its own word for anything
+    // not named here, so a label added to an engine turns up in its trade's language
+    // until somebody writes the fighting one.
+    swing: {
+      cutPerSwing: 5, // one axe swing ends it, however badly it went
+      words: {
+        cut: 'Blow',
+        lean: 'Footing  (keep your weight in the band)',
+        face: 'Swinging: ◄ HIGH   (→ to come in low)',
+        back: 'Swinging: LOW ►   (← to come in high)',
+        power: 'Swing — hold SPACE, let go as it opens up',
+        sound: 'Balance',
+        status: '← high   → low',
+        good: 'SOLID',
+        glance: 'GLANCED OFF',
+      },
+    },
+    drive: {
+      fracturePerStrike: 5, // and one blow of the pick, the same way
+      words: {
+        fracture: 'Blow',
+        shock: 'Exposure  (every wind-up is time it can see you)',
+        stability: 'Footing',
+        power: 'Drive — hold SPACE, put it in where it is open',
+        deep: 'Going THROUGH it — hard, and you are wide open    [Left] ease off',
+        shallow: 'Going SHORT — safe, and it hardly tells    [Right] commit',
+        perfect: 'STRAIGHT THROUGH!',
+        good: 'IN IT',
+        glance: 'TURNED ASIDE',
+      },
+    },
+    cover: {
+      durationMs: 2200,
+      lineIntegrity: null, // a hold, and one nobody can fail
+      words: {
+        prompt: 'Hold SPACE to keep your guard on it',
+        label: 'guard',
+        holding: 'The guard is where it needs to be.',
+        slipping: 'It is coming round the side of you.',
+      },
+    },
     // What playing it well is worth. Quality is the engine's own 0..1 — see
     // activityWorth — and it is the whole of what a blow does: full harm at perfect,
     // less the worse it went, and never under the floor, because a bad swing is still
