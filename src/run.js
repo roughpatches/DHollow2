@@ -23,6 +23,7 @@ import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
 import {
   begin, take, swapTo, stepIn, flee, canFlee, muster, hurtOf, spoilsOf, saidCount, foeOf,
+  MOVES,
 } from './combat.js';
 
 // Everything a node can turn out to be: the ones a quest names by hand, and the ones the
@@ -844,10 +845,37 @@ export function swapIn(id) {
   return afterTurn(run.nodes[run.at]);
 }
 
+// A move is played rather than declared: the engine it names opens where the party is
+// standing, and what the player makes of it is what the blow is worth. A move with no
+// engine behind it resolves on the spot, the way every node did before its engine landed.
 export function fightMove(moveId) {
   if (!run || run.phase !== 'fight' || !run.fight || run.fight.over) return run;
+  const move = MOVES.find((m) => m.id === moveId);
+  if (move && hasEngine(move.play)) {
+    run.fight.move = moveId;
+    run.phase = 'activity';
+    return run;
+  }
   take(run.fight, moveId);
   return afterTurn(run.nodes[run.at]);
+}
+
+// and what the engine handed back, which is the rest of that same turn
+export function fightPlayed(played) {
+  if (!run || !run.fight || !run.fight.move) return run;
+  const moveId = run.fight.move;
+  run.fight.move = null;
+  run.phase = 'fight';
+  take(run.fight, moveId, played);
+  return afterTurn(run.nodes[run.at]);
+}
+
+// Which engine the controls are being handed to: the move being played where a fight is
+// on, and the work at the node everywhere else.
+export function playing() {
+  const held = run && run.fight && run.fight.move;
+  if (held) return (MOVES.find((m) => m.id === held) || {}).play;
+  return run && run.at >= 0 ? activityOf(run.nodes[run.at]) : null;
 }
 
 // Breaking off the whole thing, which is only on the card once whoever is up is badly

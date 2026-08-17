@@ -302,6 +302,21 @@ export const TUNING = {
     fleeDC: 11,
     fleeCon: 3, // and what getting away costs the pool: they came back at a run
     fleeXp: 0.5, // and what a node run away from is worth: half of it, for half a job
+
+    // A move is played, not rolled for. Each one is one of the imported activity engines
+    // in the numbers a single blow needs rather than a whole tree — the overrides below
+    // are laid over that activity's own block in this file, so retuning Felling still
+    // retunes the swing. See src/activity.js for which engine each is.
+    swing: { cutPerSwing: 5 }, // one axe swing ends it, however badly it went
+    drive: { fracturePerStrike: 5 }, // and one blow of the pick, the same way
+    cover: { durationMs: 2200, lineIntegrity: null }, // a hold, and one nobody can fail
+    // What playing it well is worth. Quality is the engine's own 0..1 — see
+    // activityWorth — and it is the whole of what a blow does: full harm at perfect,
+    // less the worse it went, and never under the floor, because a bad swing is still
+    // a swing. A guard covers by the same fraction, and a turn played well lands more
+    // often as well as harder.
+    harmFloor: 0.4,
+    playHit: 4,
     // A fighter at zero hit points is out of the run: their own constitution comes off
     // the party's pool, because a body being carried is not a body walking. Somebody else
     // who fights steps up; nobody left who fights and the party turns for home.

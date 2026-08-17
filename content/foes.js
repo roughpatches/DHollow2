@@ -45,6 +45,11 @@
 // A MOVE:
 //   id     — how src/combat.js refers to it.
 //   name   — shown on the card.
+//   play   — the activity the move is, from src/activity.js. Taking it hands the player
+//            the controls the same way a piece of work does, and how well it is played is
+//            what the blow is worth: full harm at perfect and down to harmFloor at worst,
+//            with the same fraction added to the roll to land it. A move naming nothing —
+//            or naming an activity with no engine yet — is resolved on the roll alone.
 //   line   — one line under it: what taking it costs, in words rather than numbers. The
 //            numbers are on the card underneath, off the fields below.
 //   hit    — added to this swing's d20.
@@ -165,6 +170,7 @@ export const MOVES = [
   {
     id: 'strike',
     name: 'Strike',
+    play: 'Swing', // the axe, one swing of it
     line: 'A blow you can take back if it misses.',
     hit: 0,
     harm: 1,
@@ -175,6 +181,7 @@ export const MOVES = [
   {
     id: 'press',
     name: 'Press it',
+    play: 'Drive', // the pick: a shallow-or-deep dial on top of the swing, which is the greed
     line: 'Everything behind it, and nothing left over to cover you.',
     hit: 1,
     harm: 1.7,
@@ -185,6 +192,7 @@ export const MOVES = [
   {
     id: 'guard',
     name: 'Guard',
+    play: 'Cover', // a hold against a drifting band: the same thing a guard is
     line: 'No swing. Take the weight of the next one and find your feet.',
     hit: 0,
     harm: 0, // a turn spent not swinging

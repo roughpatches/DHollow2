@@ -11,6 +11,7 @@
 import { TUNING } from '../tuning.js';
 import { FOES, MOVES } from '../content/foes.js';
 import { combatOf, nameOf } from './party.js';
+import { qualityOf } from './activity.js';
 
 const FOE = Object.fromEntries(FOES.map((f) => [f.id, f]));
 
@@ -233,17 +234,31 @@ function foeFlees(fight) {
   return true;
 }
 
-// One turn: the move the player took, and the foe's answer to it. A move that does not
-// swing is a move that takes the weight of what comes back and steadies the next one.
-export function take(fight, moveId) {
+// How well the turn was played, as one fraction. A move with an engine behind it was
+// played and this is what the player made of it; a move with none was not, and a blow
+// nobody had to earn lands as written.
+function playedAt(move, played) {
+  if (!move.play || !played) return 1;
+  if (played.failed) return TUNING.combat.harmFloor;
+  return Math.max(TUNING.combat.harmFloor, qualityOf(played.judgments));
+}
+
+// One turn: the move the player took, what they made of playing it, and the foe's answer.
+// A move that does not swing is a move that takes the weight of what comes back and
+// steadies the next one — and how well that was played is how much weight it takes.
+export function take(fight, moveId, played = null) {
   const move = MOVES.find((m) => m.id === moveId);
   if (!fight || fight.over || !move) return fight;
   fight.log = [];
   const me = combatOf(fight.who);
+  const well = playedAt(move, played);
+  // playing it well lands it as well as hurting with it, so a clean swing is a clean
+  // swing all the way through rather than a good roll with a number bolted on
+  const worked = move.play ? Math.round(well * TUNING.combat.playHit) : 0;
 
   if (move.harm > 0) {
-    const s = swing(me.hit + move.hit + fight.steady + fight.opening, fight.foe.guard);
-    const hurt = s.lands ? Math.max(1, Math.round(roll(me.harm) * move.harm)) : 0;
+    const s = swing(me.hit + move.hit + fight.steady + fight.opening + worked, fight.foe.guard);
+    const hurt = s.lands ? Math.max(1, Math.round(roll(me.harm) * move.harm * well)) : 0;
     fight.log.push([swingLine(nameOf(fight.who), s, hurt, 'it'), 'us']);
     fight.foeHp = Math.max(0, fight.foeHp - hurt);
     fight.steady = 0;
@@ -259,9 +274,12 @@ export function take(fight, moveId) {
   }
 
   // Their turn: change over behind a fresher one, break off altogether, or answer. The
-  // first two cost them the blow, which is what makes either of them a decision.
-  if (!pullsBack(fight) && !foeFlees(fight)) answer(fight, move.opens, move.keep);
-  fight.steady = move.steady || fight.steady;
+  // first two cost them the blow, which is what makes either of them a decision. What a
+  // guard turns aside is what the guard was worth: covered perfectly it is the move's own
+  // number, covered badly it is most of the blow anyway.
+  const kept = 1 - (1 - move.keep) * well;
+  if (!pullsBack(fight) && !foeFlees(fight)) answer(fight, move.opens, kept);
+  fight.steady = Math.round((move.steady || 0) * well) || fight.steady;
   fight.round += 1;
   return fight;
 }
@@ -319,13 +337,18 @@ export function moveLine(move, fight) {
   const me = fight ? combatOf(fight.who) : null;
   const bits = [];
   if (move.harm > 0) {
-    const harm = me ? `${Math.round(me.harm[0] * move.harm)}–${Math.round(me.harm[1] * move.harm)}` : 'harm';
+    // The span between a blow played badly and one played well, which is most of what
+    // there is to say about a move now that the playing is what decides it.
+    const worst = move.play ? TUNING.combat.harmFloor : 1;
+    const harm = me
+      ? `${Math.round(me.harm[0] * move.harm * worst)}–${Math.round(me.harm[1] * move.harm)}`
+      : 'harm';
     bits.push(`${harm} harm`);
     const hit = move.hit + (fight ? fight.steady + fight.opening : 0);
     if (hit) bits.push(`${hit > 0 ? '+' : ''}${hit} to hit`);
   } else bits.push('no swing');
   if (move.opens) bits.push(`it answers at +${move.opens}`);
-  if (move.keep < 1) bits.push(`its blow cut to ${Math.round(move.keep * 100)}%`);
+  if (move.keep < 1) bits.push(`its blow cut to ${Math.round(move.keep * 100)}% covered well`);
   if (move.steady) bits.push(`+${move.steady} to your next`);
   return bits.join(', ');
 }

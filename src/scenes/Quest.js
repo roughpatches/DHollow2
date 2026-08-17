@@ -750,7 +750,7 @@ export default class Quest extends Phaser.Scene {
         ? '[Up/Down] Choose    [Enter] Work it    [Esc] Turn back'
         : '[Enter] Get to work    [Esc] Turn back');
     }
-    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.activityOf(r.nodes[r.at])) : 'Walking.');
+    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.playing()) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
       this.hint(r.nodes[r.at].beat.choose
         ? '[Up/Down] Choose    [Enter] Do it    [Esc] Turn back'
@@ -1095,9 +1095,11 @@ export default class Quest extends Phaser.Scene {
   // landscape drops below the engine's own drawing so the party stays at the tree.
 
   startActivity() {
-    const r = run.active();
-    const doing = run.activityOf(r.nodes[r.at]);
+    const doing = run.playing();
     if (!hasEngine(doing) || this.activity) return;
+    // a blow being played rather than a piece of work: the same handover, and a
+    // different thing waiting at the end of it
+    const blow = !!run.fightingAt();
     const band = this.bands().walk;
     // the landscape drops below the engine's own drawing, with a scrim between them so
     // the readouts are read against something rather than against a hedge
@@ -1117,17 +1119,25 @@ export default class Quest extends Phaser.Scene {
       this.scrim?.destroy();
       this.scrim = null;
       this.walk.depth(28900);
-      this.walk.felled(); // whatever was standing there is not standing any more
-      run.settle({ judgments, failed });
+      if (blow) {
+        run.fightPlayed({ judgments, failed });
+      } else {
+        this.walk.felled(); // whatever was standing there is not standing any more
+        run.settle({ judgments, failed });
+      }
       this.draw();
     });
   }
 
-  // just the name of the work over the top of it; the engine draws everything else
+  // just the name of the work over the top of it; the engine draws everything else. In a
+  // fight it is who is swinging at what, because the node's name is not the news.
   activityHead(r, rect) {
     const n = r.nodes[r.at];
-    this.text(rect.x + 12, rect.y + 4, `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`,
-      TUNING.questBodySize + 2, COLORS.menuText);
+    const f = run.fightingAt();
+    const said = f
+      ? `${nameOf(f.who)} — ${f.foe.name}    ${run.hpOf(f.who)}/${run.hpMaxOf(f.who)} against ${f.foeHp}/${f.foeMax}`
+      : `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`;
+    this.text(rect.x + 12, rect.y + 4, said, TUNING.questBodySize + 2, COLORS.menuText);
   }
 
   // What is standing in front of them, and nothing about where along the road it is: the
