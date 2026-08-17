@@ -437,6 +437,14 @@ const oak = (name, ground) => ({
   stands: { still: `${name}/rotations/${name}.png`, ground },
 });
 
+// The same export's third object: the nest on its own, with the bird taken out of the
+// picture rather than flown out of it. The flying-off loop keeps the heron in the sky for
+// all nine of its frames, so nothing in it is a nest nobody is coming back to; this is.
+const EMPTYNEST = {
+  path: 'art/heron',
+  stands: { still: 'Remove_the_heron/rotations/Remove_the_heron.png', ground: 12 },
+};
+
 export const NODE_ART = {
   woodland: OAK, // Standing timber, the one the road rolls
   secondcut: OAK, // and The oak, the one the first job is taken for
@@ -479,4 +487,5 @@ export const NODE_ART = {
   ferry: stream('Footbridge'), // A troll, a bridge, and a price
   animal: WOLF, // A wolf, and what it has killed
   boar: BOAR, // A boar, in the ground you wanted
+  nest: EMPTYNEST, // Something emptied a nest here
 };

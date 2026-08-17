@@ -825,7 +825,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'Grey down caught along a whole branch line forty feet up, and the wreck of a nest at the top of it. What is on the ground underneath came off that tree in one go.',
+      'A nest of woven branches sitting at the foot of the tree it was built in, whole, wider than a cart and empty. Grey down is caught along the branch line forty feet above it. Nothing that size comes down in one piece by accident.',
     ],
     ways: [
       {
