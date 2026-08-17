@@ -360,10 +360,24 @@ const HERON = {
   },
 };
 
+// The rest of the oaks: the same tree dressed four ways, each painted once rather than
+// looped, because none of them does anything while the party is standing at it. `still` is
+// a state that is one picture instead of a folder of frames; see src/art.js. `ground` is
+// the empty pixels under the paint, the same measure every other state takes — the two
+// lying down float well up inside their frames and the two standing do not.
+const oak = (name, ground) => ({
+  path: 'art/oak',
+  stands: { still: `${name}/rotations/${name}.png`, ground },
+});
+
 export const NODE_ART = {
   woodland: OAK, // Standing timber, the one the road rolls
   secondcut: OAK, // and The oak, the one the first job is taken for
   heron: HERON, // The heron's nest, one way through the fork
   water: BROOK, // Standing water, rolled
   firstcast: BROOK, // and The stream, the first node of the first job
+  deadfall: oak('Deadfall', 45), // A beech gone over in the wind, root plate up
+  mushrooms: oak('Mushrooms', 43), // The mushroom copse, the same trunk gone over with them
+  offering: oak('Offering', 7), // Somebody has left something at the foot of that tree
+  sap: oak('Sap', 7), // A tree that is bleeding, the stripe painted down its trunk
 };

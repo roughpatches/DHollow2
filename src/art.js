@@ -103,13 +103,11 @@ export function preloadArt(scene) {
   // what stands at a node, for the encounters that have art for it
   for (const [id, art] of Object.entries(NODE_ART)) {
     for (const [state, spec] of nodeStates(art)) {
-      for (let i = 0; i < spec.frames; i++) {
+      for (let i = 0; i < framesIn(spec); i++) {
         // art that has to be turned is loaded under its own name and turned into the one
         // everything else asks for, so nothing downstream knows it was painted sideways
         const k = dressed(spec) ? `${nodeFrame(id, state, i)}_asis` : nodeFrame(id, state, i);
-        if (!scene.textures.exists(k)) {
-          scene.load.image(k, `${art.path}/${spec.folder}/frame_${String(i).padStart(3, '0')}.png`);
-        }
+        if (!scene.textures.exists(k)) scene.load.image(k, framePath(art, spec, i));
       }
     }
   }
@@ -172,6 +170,20 @@ function nodeStates(art) {
 // whether a state's art is used as painted, or has something done to it first
 function dressed(spec) {
   return !!(spec.turn || spec.trim || spec.fade || spec.shade);
+}
+
+// How long a state runs. A loop says how many frames it has; a state painted as one
+// picture has the one, and is held rather than played.
+function framesIn(spec) {
+  return spec.still ? 1 : spec.frames;
+}
+
+// Where a frame is on disk. `folder` is a loop of numbered frames, which is what a thing
+// that moves comes back as; `still` is the single export out of a rotations folder, which
+// is what a thing that only stands there comes back as, and is the whole of that state.
+function framePath(art, spec, i) {
+  if (spec.still) return `${art.path}/${spec.still}`;
+  return `${art.path}/${spec.folder}/frame_${String(i).padStart(3, '0')}.png`;
 }
 
 // One frame, turned, shaded, cut back and feathered into what it is standing on. A right
@@ -280,13 +292,13 @@ function buildNodeArt(scene) {
   for (const [id, art] of Object.entries(NODE_ART)) {
     for (const [state, spec] of nodeStates(art)) {
       if (dressed(spec)) {
-        for (let i = 0; i < spec.frames; i++) dressFrame(scene, nodeFrame(id, state, i), spec);
+        for (let i = 0; i < framesIn(spec); i++) dressFrame(scene, nodeFrame(id, state, i), spec);
       }
       const k = nodeAnim(id, state);
       if (scene.anims.exists(k)) continue;
       scene.anims.create({
         key: k,
-        frames: Array.from({ length: spec.frames }, (_, i) => ({ key: nodeFrame(id, state, i) })),
+        frames: Array.from({ length: framesIn(spec) }, (_, i) => ({ key: nodeFrame(id, state, i) })),
         frameRate: TUNING.artIdleFrameRate,
         repeat: state === 'stands' ? -1 : 0,
       });
