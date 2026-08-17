@@ -141,7 +141,7 @@ export const RESOURCE_NODES = [
     harvests: [
       {
         skill: 'woodcutting',
-        activity: 'Sawing',
+        activity: 'Felling',
         text: 'Saw the trunk into lengths.',
         offer: 'It is up off the ground its whole length. You will not be cutting dirt.',
         done: {
@@ -219,7 +219,7 @@ export const RESOURCE_NODES = [
     harvests: [
       {
         skill: 'woodcutting',
-        activity: 'Sawing',
+        activity: 'Felling',
         text: 'Cut the trees out of the slip.',
         offer: 'Every one of them is under tension and not one is lying flat.',
         done: {
@@ -232,7 +232,7 @@ export const RESOURCE_NODES = [
       },
       {
         skill: 'mining',
-        activity: 'Quarrying',
+        activity: 'Mining',
         text: 'Work the open face for stone.',
         offer: 'Iron showing in the seam, and everything above it loose.',
         done: {
@@ -268,7 +268,7 @@ export const RESOURCE_NODES = [
         // The same gravel, read the other way: what a stream has been carrying down off
         // whatever it comes out of.
         skill: 'mining',
-        activity: 'Panning',
+        activity: 'Mining',
         draw: { count: [1, 3], odds: { ironore: 40, stone: 35, roughgem: 6 } },
       },
     ],
@@ -310,7 +310,7 @@ export const RESOURCE_NODES = [
     harvests: [
       {
         skill: 'woodcutting',
-        activity: 'Sawing',
+        activity: 'Felling',
         text: 'Cut the jam and pull the sound wood out.',
         offer: 'Take the logs holding it and the pool goes out with them.',
         done: {
@@ -352,7 +352,7 @@ export const RESOURCE_NODES = [
     harvests: [
       {
         skill: 'mining',
-        activity: 'Quarrying',
+        activity: 'Mining',
         spoils: { stone: [2, 4] },
         draw: { count: [0, 2], odds: { ironore: 40, roughgem: 8 } },
       },
@@ -371,7 +371,7 @@ export const RESOURCE_NODES = [
     harvests: [
       {
         skill: 'mining',
-        activity: 'Quarrying',
+        activity: 'Mining',
         draw: { count: [1, 3], odds: { ironore: 50, stone: 30, roughgem: 10 } },
       },
       {

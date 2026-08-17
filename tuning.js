@@ -82,7 +82,7 @@ export const TUNING = {
   questToastStepMs: 90, // how long between one line landing and the next
   questToastHoldMs: 2800, // how long the whole tally stays up once it has landed
 
-  // Quarrying (src/minigames/QuarryEngine.js): sound the face, then break it. StarScape
+  // Mining (src/minigames/QuarryEngine.js): sound the face, then break it. StarScape
   // read these off a per-deposit richness table; there is one seam here and these are its
   // numbers.
   quarry: {
