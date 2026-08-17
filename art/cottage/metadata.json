@@ -1,0 +1,22 @@
+{
+  "group_id": "edeafa17-6e59-41cb-b68f-a0508aeb06a2",
+  "objects": [
+    {
+      "id": "7ba6ce35-5e58-401f-a106-625aa8081d1a",
+      "name": "base",
+      "prompt": "A single derelict fen cottage seen from directly above: sagging thatch roof over low stone walls, a dark doorway on the south side, no windows. One building only, filling the frame corner to corner. Dark wet grey-green stone and rotted thatch, never orange-brown. No ground, no water, no shadow \u2014 the cottage alone on empty background. Make the cottage fill the whole frame.",
+      "size": {
+        "width": 80,
+        "height": 80
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_single_derelict_fen_cottage.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T23:30:22.681106"
+}

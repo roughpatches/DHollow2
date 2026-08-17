@@ -786,11 +786,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'investigation', line: 'Something is stacked too neatly on that side to have got there by weather.' },
+    read: { skill: 'investigation', line: 'Somebody built on that side, and whatever they built it for is not out here any more.' },
     xp: [6, 10],
     con: [0, 0],
     body: [
-      'A pile at the side of the path with a canvas over it and stones set on the corners of the canvas. It has been rained on a great many times and nobody has come back for it.',
+      'A low hut off the side of the path, stone to the waist and gone soft above it, with the roof settled in on itself and a doorway with nothing behind it but dark. It has been rained on a great many years and nobody has come back for it.',
     ],
     ways: [
       {
@@ -798,8 +798,8 @@ export const ENCOUNTER_NODES = [
         skill: 'investigation',
         dc: 12,
         tried: 'Everything out, laid in a line, and looked at in the order it came out.',
-        held: 'Somebody stacked this to come back for it, and did not, and there is enough here to say why.',
-        lost: 'It is a pile of wet wood and some nails.',
+        held: 'Somebody walked out of this meaning to come back, and did not, and there is enough left inside to say why.',
+        lost: 'It is a wet floor and some nails.',
         spoils: { timber: [1, 2], nails: [1, 3] },
         lostCon: 0,
       },
@@ -807,7 +807,7 @@ export const ENCOUNTER_NODES = [
         text: 'Work out what sort of person leaves this.',
         skill: 'insight',
         dc: 13,
-        tried: 'Not what is in it. How it was put down, and how much of a hurry that was.',
+        tried: 'Not what is in it. How the door was left, and how much of a hurry that was.',
         held: 'They meant to be an hour. Whatever they are still carrying, they are carrying it light.',
         lost: 'It could be anybody. It probably was.',
         spoils: { nails: [1, 2] },

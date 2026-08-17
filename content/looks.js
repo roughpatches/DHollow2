@@ -366,6 +366,18 @@ const HERON = {
   },
 };
 
+// A derelict holding, painted at 80 and stood at twice that so a hut with a doorway in it
+// reads as something a person could have walked out of. It carries its own footing — the
+// stone courses at the base are the ground it stands on — so nothing is feathered.
+const COTTAGE = {
+  path: 'art/cottage',
+  stands: {
+    still: 'A_single_derelict_fen_cottage/rotations/A_single_derelict_fen_cottage.png',
+    ground: 10,
+    scale: 2,
+  },
+};
+
 // A hollow where the ground has given way, and the same hollow filled with what came down
 // into it afterwards. Painted as a full square of ground like the stream, so it is
 // feathered on the three sides that show; unlike the stream it came back warm, so nothing
@@ -499,4 +511,5 @@ export const NODE_ART = {
   nest: EMPTYNEST, // Something emptied a nest here
   slip: hollow('boulders_and_trees_collapsed_i'), // Where the ground gave way
   rockfall: hollow('Covered_in_stone_and'), // The path is under the stone
+  find: COTTAGE, // Left behind
 };
