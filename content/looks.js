@@ -366,6 +366,15 @@ const HERON = {
   },
 };
 
+// One boulder, painted four times: as it stands, with a block split off it, with water
+// coming out of it, and with somebody's stack of flat stones against its side. The vein is
+// in all four, which is why the same rock can be the ore, the spring and the marker. Every
+// state registers the same, because it is the same rock in the same place each time.
+const boulder = (name) => ({
+  path: 'art/boulder',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 19 },
+});
+
 // Thin deciduous trees, painted at 80 and stood up to three times that so a stand reads as
 // a stand beside an oak. Two exports of the one prompt, each carrying its own second half:
 // the leafy wall and the leafy wall half cut, the bare stand and the bare stand with one
@@ -401,4 +410,12 @@ export const NODE_ART = {
   claim: thicket('art/thicket', 'Half_the_trees_cut_d', 3),
   // Something has gone through this stand: bare the wrong month, one tree still in leaf
   blight: thicket('art/blight', 'A_single_tree_in_ful', 6),
+  // The boulder, whole and then opened: the only encounter here the party changes by
+  // working it, so it is the only one of the three that has a second state.
+  crag: {
+    ...boulder('A_large_lichen_covered_boulde'),
+    done: { still: 'Broken_Crag/rotations/Broken_Crag.png', ground: 19 },
+  },
+  spring: boulder('Water_Spring'), // Water coming out of the rock
+  cairn: boulder('A_cairn_of_piled_sto'), // A cairn nobody has added to
 };
