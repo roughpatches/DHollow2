@@ -319,9 +319,13 @@ const OAK = {
     ground: 7,
   },
   done: {
+    // Measured off the frame it settles on rather than the bounding box: the last rows
+    // of these frames are twigs thrown clear of the trunk, and registering on those hung
+    // the whole felled tree forty pixels over the path. Nothing showed it — a done state
+    // is only ever seen after an activity finishes.
     folder: 'Tree_is_cut_town_th/animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown',
     frames: 9,
-    ground: 35,
+    ground: 67,
   },
 };
 
@@ -618,9 +622,9 @@ export const NODE_ART = {
   seam: boulder('Split'), // A boulder split in two, the vein open on both walls of the gap
   adit: boulder('Shaft'), // A hole under the boulder somebody made
   cutting: boulder('Troll'), // A troll, and the rock in the path
-  fire: camp('A_stack_of_firewood', 9, 0xdcc8cd), // A fire, and what you carry
+  fire: camp('A_stack_of_firewood', 33, 0xdcc8cd), // A fire, and what you carry
   camp: camp('Four_figures_crowded', 32), // A fire that is not yours
-  burner: camp('Racks_of_drying_leav', 11, 0xd3bec4), // A man camped alone, and his racks
+  burner: camp('Racks_of_drying_leav', 30, 0xd3bec4), // A man camped alone, and his racks
   bakehouse: camp('A_dilapidated_stone', 7, 0xdfc9ce), // A bread oven standing in nothing
   deadwater: stream('A_stretch_of_stream_rocky_and'), // the stream with nothing in it
   pool: stream('Pool'), // A deep pool under the bank
