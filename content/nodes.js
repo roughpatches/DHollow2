@@ -348,7 +348,7 @@ export const RESOURCE_NODES = [
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'Bracken to the waist under the last of the trees, where the canopy thins and the light comes in sideways for an hour a day. It has grown here uninterrupted long enough to have layers to it.',
+      'Bracken standing higher than a man under the last of the trees, where the canopy thins and the light comes in sideways for an hour a day. It has grown here uninterrupted long enough to have layers to it.',
       'There is more than bracken in it. Two or three things standing in there are worth a name, and one of them is worth carrying home.',
     ],
   },

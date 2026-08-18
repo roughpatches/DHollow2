@@ -366,6 +366,16 @@ const HERON = {
   },
 };
 
+// The fern stand, with the mushrooms it pays out sitting at the foot of it. It carries its
+// own mossy footing and stops well inside its frame on every side, so nothing is dressed.
+const BRACKEN = {
+  path: 'art/bracken',
+  stands: {
+    still: 'A_copse_of_ferns_and_undergrow/rotations/A_copse_of_ferns_and_undergrow.png',
+    ground: 7,
+  },
+};
+
 // The cart that went over and stayed over. Two generations and an overgrown dressing of
 // the first; the overgrown one is what the node wants, because twenty years is what it
 // says and twenty years is what has grown through this. The other two ship with it — the
@@ -561,6 +571,7 @@ export const NODE_ART = {
   rockfall: hollow('Covered_in_stone_and'), // The path is under the stone
   find: COTTAGE, // Left behind
   oldiron: CART, // A cart nobody came back for
+  bracken: BRACKEN, // Fern and bracken under the eaves
   hazard: DRYGROUND, // Bad ground: the same flat with a crust on it
   mire: marsh('A_stretch_of_marshy_soggy_gro'), // The ground gives
   unquiet: marsh('A_number_of_dark_ea'), // Out of the ground
