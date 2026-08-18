@@ -313,7 +313,7 @@ const OAK = {
   stands: {
     // Painted a good deal brighter and oranger than the wood behind it, so it is knocked
     // back toward the trunks it is standing among rather than sitting in front of them.
-    shade: 0xdde0f5,
+    shade: 0xbcc6f5,
     folder: 'A_large_ancient_oak_treee_w/animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown',
     frames: 9,
     ground: 7,
@@ -338,7 +338,7 @@ const BROOK = {
     turn: 1,
     // Painted cold — grey rock and cyan water — under a wood that is all warm brown and
     // amber, so it is pulled toward the Greywood's light rather than repainted.
-    shade: 0xffcda0,
+    shade: 0xe4a387,
     // It is painted long enough to reach halfway up the trunks, which is further into the
     // wood than a brook crossing a road wants to be seen coming from. The far end is cut
     // back so it comes out of the trees just above the path; the near end is left, because
@@ -357,12 +357,15 @@ const BROOK = {
 // so the nest does not jump when the heron goes off it.
 const HERON = {
   path: 'art/heron',
+  // Grey-purple bird on a pale woven nest, luma 72 against the wood's 41.
   stands: {
+    shade: 0xe0c5cb,
     folder: 'A_giant_grey-purple_heron_gu/animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown',
     frames: 9,
     ground: 12,
   },
   done: {
+    shade: 0xe0c5cb,
     folder: 'The_heron_flies_off/animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown',
     frames: 9,
     ground: 12,
@@ -376,6 +379,7 @@ const BRACKEN = {
   stands: {
     still: 'A_copse_of_ferns_and_undergrow/rotations/A_copse_of_ferns_and_undergrow.png',
     ground: 7,
+    shade: 0xe3d8f1,
   },
 };
 
@@ -570,9 +574,13 @@ const thicket = (path, name, ground) => ({
 // a state that is one picture instead of a folder of frames; see src/art.js. `ground` is
 // the empty pixels under the paint, the same measure every other state takes — the two
 // lying down float well up inside their frames and the two standing do not.
-const oak = (name, ground) => ({
+// `shade` is optional and only the mushroom trunk needs its own: the fallen oak, the
+// bundle at the root and the bleeding tree all measure between luma 49 and 62, and the
+// pale fungus on the trunk measures 71, which is a different correction rather than more
+// of the same one — it is grey where the others are orange.
+const oak = (name, ground, shade = 0xd9e0ff) => ({
   path: 'art/oak',
-  stands: { still: `${name}/rotations/${name}.png`, ground },
+  stands: { still: `${name}/rotations/${name}.png`, ground, shade },
 });
 
 // The same export's third object: the nest on its own, with the bird taken out of the
@@ -580,7 +588,7 @@ const oak = (name, ground) => ({
 // all nine of its frames, so nothing in it is a nest nobody is coming back to; this is.
 const EMPTYNEST = {
   path: 'art/heron',
-  stands: { still: 'Remove_the_heron/rotations/Remove_the_heron.png', ground: 12 },
+  stands: { still: 'Remove_the_heron/rotations/Remove_the_heron.png', ground: 12, shade: 0xe0c5cb },
 };
 
 export const NODE_ART = {
@@ -590,7 +598,7 @@ export const NODE_ART = {
   water: BROOK, // Standing water, rolled
   firstcast: BROOK, // and The stream, the first node of the first job
   deadfall: oak('Deadfall', 45), // An oak gone over in the wind, root plate up
-  mushrooms: oak('Mushrooms', 43), // The mushroom copse, the same trunk gone over with them
+  mushrooms: oak('Mushrooms', 43, 0xddc6d0), // The mushroom copse, the same trunk gone over with them
   offering: oak('Offering', 7), // Somebody has left something at the foot of that tree
   sap: oak('Sap', 7), // A tree that is bleeding, the stripe painted down its trunk
   // The thicket, the wall of it across the road
@@ -610,9 +618,9 @@ export const NODE_ART = {
   seam: boulder('Split'), // A boulder split in two, the vein open on both walls of the gap
   adit: boulder('Shaft'), // A hole under the boulder somebody made
   cutting: boulder('Troll'), // A troll, and the rock in the path
-  fire: camp('A_stack_of_firewood', 9), // A fire, and what you carry
+  fire: camp('A_stack_of_firewood', 9, 0xdcc8cd), // A fire, and what you carry
   camp: camp('Four_figures_crowded', 32), // A fire that is not yours
-  burner: camp('Racks_of_drying_leav', 11), // A man camped alone, and his racks
+  burner: camp('Racks_of_drying_leav', 11, 0xd3bec4), // A man camped alone, and his racks
   bakehouse: camp('A_dilapidated_stone', 7, 0xdfc9ce), // A bread oven standing in nothing
   deadwater: stream('A_stretch_of_stream_rocky_and'), // the stream with nothing in it
   pool: stream('Pool'), // A deep pool under the bank
