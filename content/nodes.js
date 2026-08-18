@@ -474,11 +474,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 2, night: 4 },
-    read: { skill: 'investigation', line: 'The path ahead is holding water it has no business holding.' },
+    read: { skill: 'investigation', line: 'The ground ahead has dried to a crust, and a crust is not the same as a bottom.' },
     xp: [4, 8],
     con: [-1, 0],
     body: [
-      'The way ahead goes into standing water and reed, and the reed is growing in it rather than beside it. The ground either side does not look any different from the ground under all that. Somewhere under it there is nothing to stand on.',
+      'The way ahead crosses a flat of dried mud, cracked into plates and pale as old bone, the grass on it gone yellow and a length or two of timber lying where somebody laid it down and did not come back. It looks like ground the whole way over. Somewhere under it there is nothing to stand on.',
     ],
     ways: [
       {

@@ -366,6 +366,18 @@ const HERON = {
   },
 };
 
+// Dry ground: a flat gone to cracked plates with the grass yellow on it and a length or
+// two of timber lying where somebody left it. Same band shape as the marsh and feathered
+// the same way — what makes it a hazard is that it is the marsh with a lid on.
+const DRYGROUND = {
+  path: 'art/dryground',
+  stands: {
+    still: 'A_stretch_of_marshy_soggy_gro/rotations/A_stretch_of_marshy_soggy_gro.png',
+    ground: 35,
+    fade: [30, 30, 20, 0],
+  },
+};
+
 // The same two travellers, met three ways. Two of them with packs and stopping to talk;
 // the same two with the packs off and nothing in their hands; and two more standing in the
 // dark with no light on them, which is a second generation of the one prompt rather than a
@@ -536,8 +548,8 @@ export const NODE_ART = {
   slip: hollow('boulders_and_trees_collapsed_i'), // Where the ground gave way
   rockfall: hollow('Covered_in_stone_and'), // The path is under the stone
   find: COTTAGE, // Left behind
-  hazard: marsh('A_stretch_of_marshy_soggy_gro'), // Bad ground
-  mire: marsh('A_stretch_of_marshy_soggy_gro'), // and The ground gives, the same stretch
+  hazard: DRYGROUND, // Bad ground: the same flat with a crust on it
+  mire: marsh('A_stretch_of_marshy_soggy_gro'), // The ground gives
   unquiet: marsh('A_number_of_dark_ea'), // Out of the ground
   folk: traveller('Traveler_s_with_pack'), // Folk on the road
   hungry: traveller('Two_bedraggled_travelers_in_w'), // and the same two with the packs off

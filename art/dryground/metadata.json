@@ -1,0 +1,152 @@
+{
+  "objects": [
+    {
+      "id": "c068ae13-7822-41f1-99d1-585ecd3dda2d",
+      "name": "base",
+      "prompt": "A stretch of marshy, soggy ground",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_stretch_of_marshy_soggy_gro.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "aa316543-7236-42d0-8091-1c902a403ee7",
+      "name": "base",
+      "prompt": "A dark shadow of a wild beast, hunched over a dead animal",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_dark_shadow_of_a_wild_beast.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "3a2a8b11-50cd-4ee8-bd64-9069e27cc111",
+      "name": "base",
+      "prompt": "A large boar, standing in the middle of uprooted and overturned earth",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_large_boar_standing_in_the.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "733670cd-ae44-47b7-8fb0-1f96404d9f33",
+      "name": "base",
+      "prompt": "A large boar, standing in the middle of uprooted and overturned earth",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_large_boar_standing_in_the_2.png"
+      },
+      "animations": {}
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "ed3cd248-145b-4907-8f93-2abd5dabaa4d",
+      "folder": "objects/A_stretch_of_marshy_soggy_gro",
+      "objects": [
+        {
+          "id": "c068ae13-7822-41f1-99d1-585ecd3dda2d",
+          "name": "base",
+          "prompt": "A stretch of marshy, soggy ground",
+          "size": {
+            "width": 168,
+            "height": 168
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/A_stretch_of_marshy_soggy_gro.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "1b25ea20-f584-4118-ad2a-4e93548cfd72",
+      "folder": "objects/A_dark_shadow_of_a_wild_beast",
+      "objects": [
+        {
+          "id": "aa316543-7236-42d0-8091-1c902a403ee7",
+          "name": "base",
+          "prompt": "A dark shadow of a wild beast, hunched over a dead animal",
+          "size": {
+            "width": 168,
+            "height": 168
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/A_dark_shadow_of_a_wild_beast.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "a0f16dc7-1839-4eff-870a-dd99613406e8",
+      "folder": "objects/A_large_boar_standing_in_the",
+      "objects": [
+        {
+          "id": "3a2a8b11-50cd-4ee8-bd64-9069e27cc111",
+          "name": "base",
+          "prompt": "A large boar, standing in the middle of uprooted and overturned earth",
+          "size": {
+            "width": 168,
+            "height": 168
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/A_large_boar_standing_in_the.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "c538b0e6-2251-4671-a14d-bdb2aa3c3692",
+      "folder": "objects/A_large_boar_standing_in_the_2",
+      "objects": [
+        {
+          "id": "733670cd-ae44-47b7-8fb0-1f96404d9f33",
+          "name": "base",
+          "prompt": "A large boar, standing in the middle of uprooted and overturned earth",
+          "size": {
+            "width": 168,
+            "height": 168
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/A_large_boar_standing_in_the_2.png"
+          },
+          "animations": {}
+        }
+      ]
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-18T01:19:14.543461"
+}
