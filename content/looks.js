@@ -473,7 +473,14 @@ const stream = (name) => ({
   path: 'art/stream',
   stands: {
     still: `${name}/rotations/${name}.png`,
-    ground: 1,
+    // A stream crosses the road; it does not sit beyond it. The floor line goes two thirds
+    // of the way down the frame rather than at the bottom of it, so the far bank comes out
+    // of the trees and the near water runs on past the party — the same registration the
+    // brook uses, which puts its own floor line halfway up itself for the same reason.
+    ground: 110,
+    // and painted at 168 it is a puddle at the side of the road. Doubled, it spans the
+    // treeline to the path, which is the width a stream wants to be crossed at.
+    scale: 2,
     shade: 0xffd2a8,
     fade: [26, 26, 26, 0],
   },
