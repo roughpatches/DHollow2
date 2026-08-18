@@ -597,8 +597,8 @@ export const NODE_ART = {
   heron: HERON, // The heron's nest, one way through the fork
   water: BROOK, // Standing water, rolled
   firstcast: BROOK, // and The stream, the first node of the first job
-  deadfall: oak('Deadfall', 45), // An oak gone over in the wind, root plate up
-  mushrooms: oak('Mushrooms', 43, 0xddc6d0), // The mushroom copse, the same trunk gone over with them
+  deadfall: oak('Deadfall', 67), // An oak gone over in the wind, root plate up
+  mushrooms: oak('Mushrooms', 81, 0xddc6d0), // The mushroom copse, the same trunk gone over with them
   offering: oak('Offering', 7), // Somebody has left something at the foot of that tree
   sap: oak('Sap', 7), // A tree that is bleeding, the stripe painted down its trunk
   // The thicket, the wall of it across the road
