@@ -482,9 +482,13 @@ const hollow = (name) => ({
     // among the trunks and the near rim comes on past the party, which is what makes it
     // read as something you are looking down into rather than a patch beyond the path.
     ground: 84,
-    // The moss in it reads greener than the wood does, and doubling the thing doubled how
-    // much of it there is, so the green is taken back and the earth is left alone.
-    shade: 0xf1d1f2,
+    // The moss. The wood has no green in it at all — not one pixel of the backdrop's floor
+    // band is green-dominant, where a sixth of this export is — so there is nothing to
+    // match it to and the only question is how far to take it. Green alone turns the roots
+    // magenta, because taking green out of red-brown wood leaves red and blue; taking a
+    // little blue with it keeps them brown. Further than this and the moss stops being
+    // moss.
+    shade: 0xf1adcc,
     // A hollow the width of a barn, painted at 168, is a puddle. Doubled, it is a barn.
     scale: 2,
     // Feathered on all four sides now: the near rim is in view where it used to sit on
