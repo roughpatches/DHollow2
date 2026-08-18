@@ -311,14 +311,21 @@ export const SKILL_ART = {
 const OAK = {
   path: 'art/oak',
   stands: {
+    // Painted a good deal brighter and oranger than the wood behind it, so it is knocked
+    // back toward the trunks it is standing among rather than sitting in front of them.
+    shade: 0xbcc6f5,
     folder: 'A_large_ancient_oak_treee_w/animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown',
     frames: 9,
     ground: 7,
   },
   done: {
+    // Measured off the frame it settles on rather than the bounding box: the last rows
+    // of these frames are twigs thrown clear of the trunk, and registering on those hung
+    // the whole felled tree forty pixels over the path. Nothing showed it — a done state
+    // is only ever seen after an activity finishes.
     folder: 'Tree_is_cut_town_th/animations/Tree_is_cut_down_the_trunk_crashing_to_the_ground/unknown',
     frames: 9,
-    ground: 35,
+    ground: 67,
   },
 };
 
@@ -335,7 +342,7 @@ const BROOK = {
     turn: 1,
     // Painted cold — grey rock and cyan water — under a wood that is all warm brown and
     // amber, so it is pulled toward the Greywood's light rather than repainted.
-    shade: 0xffcda0,
+    shade: 0xe4a387,
     // It is painted long enough to reach halfway up the trunks, which is further into the
     // wood than a brook crossing a road wants to be seen coming from. The far end is cut
     // back so it comes out of the trees just above the path; the near end is left, because
@@ -354,12 +361,15 @@ const BROOK = {
 // so the nest does not jump when the heron goes off it.
 const HERON = {
   path: 'art/heron',
+  // Grey-purple bird on a pale woven nest, luma 72 against the wood's 41.
   stands: {
+    shade: 0xe0c5cb,
     folder: 'A_giant_grey-purple_heron_gu/animations/The_heron_shifts_its_weight_slightly_on_the_branch/unknown',
     frames: 9,
     ground: 12,
   },
   done: {
+    shade: 0xe0c5cb,
     folder: 'The_heron_flies_off/animations/The_Heron_flies_off_from_the_nest_and_into_the_dis/unknown',
     frames: 9,
     ground: 12,
@@ -373,6 +383,7 @@ const BRACKEN = {
   stands: {
     still: 'A_copse_of_ferns_and_undergrow/rotations/A_copse_of_ferns_and_undergrow.png',
     ground: 7,
+    shade: 0xe3d8f1,
   },
 };
 
@@ -385,6 +396,9 @@ const CART = {
   stands: {
     still: 'A_broken_overturned_cart_in_a/Overgrown/rotations/Overgrown.png',
     ground: 19,
+    // Twenty years of green is greener than anything the wood paints, so the green is what
+    // is taken; the oak under it keeps most of what it has.
+    shade: 0xe8cce5,
   },
 };
 
@@ -395,8 +409,12 @@ const DRYGROUND = {
   path: 'art/dryground',
   stands: {
     still: 'A_stretch_of_marshy_soggy_gro/rotations/A_stretch_of_marshy_soggy_gro.png',
-    ground: 35,
-    fade: [30, 30, 20, 0],
+    ground: 83,
+    scale: 2,
+    // Left as painted. It measures brighter and yellower than the wood, but the yellow in
+    // it is the same yellow the wood's dying grass is painted in, and taking it back only
+    // cost the grass its life. Not everything that measures wrong looks wrong.
+    fade: [30, 30, 20, 20],
   },
 };
 
@@ -406,7 +424,9 @@ const DRYGROUND = {
 // dressing of the first. Nobody here has a hard edge, so nothing is feathered.
 const traveller = (name) => ({
   path: 'art/travellers',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 22 },
+  // The brightest thing measured anywhere in the wood at luma 77, most of it the pale
+  // patch of ground they are painted standing on rather than the people themselves.
+  stands: { still: `${name}/rotations/${name}.png`, ground: 22, shade: 0xd3c2ce },
 });
 
 const STRANGERS = {
@@ -421,7 +441,18 @@ const STRANGERS = {
 // stretch of marsh, met by two parties asking it two different questions.
 const marsh = (name) => ({
   path: 'art/marsh',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 34, fade: [30, 30, 20, 0] },
+  stands: {
+    still: `${name}/rotations/${name}.png`,
+    // Bad ground is ground the road goes into, not ground beyond the road. Its floor line
+    // sits at the middle of the band rather than the bottom of it, so the far edge is back
+    // among the trunks and the near edge runs on past the party, and it is drawn at twice
+    // the size it was painted, which is the width a stretch thirty yards across wants.
+    ground: 83,
+    scale: 2,
+    // The near edge is in view now, where it used to sit on the road line and be hidden,
+    // so it is feathered too — all four sides, where before the bottom took none.
+    fade: [30, 30, 20, 20],
+  },
 });
 
 // A derelict holding, painted at 80 and stood at twice that so a hut with a doorway in it
@@ -433,6 +464,8 @@ const COTTAGE = {
     still: 'A_single_derelict_fen_cottage/rotations/A_single_derelict_fen_cottage.png',
     ground: 10,
     scale: 2,
+    // Pale and green-grey against a wood that has no neutral in it anywhere.
+    shade: 0xe6dcd8,
   },
 };
 
@@ -442,7 +475,22 @@ const COTTAGE = {
 // is multiplied — a shade here only dulls the green on the banks and buys nothing.
 const hollow = (name) => ({
   path: 'art/hollow',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 0, fade: [34, 34, 34, 0] },
+  stands: {
+    still: `${name}/rotations/${name}.png`,
+    // A hole in the ground is a hole the road runs to the lip of, so its floor line goes
+    // to the middle of the paint rather than the bottom of it: the far rim stays back
+    // among the trunks and the near rim comes on past the party, which is what makes it
+    // read as something you are looking down into rather than a patch beyond the path.
+    ground: 84,
+    // The moss in it reads greener than the wood does, and doubling the thing doubled how
+    // much of it there is, so the green is taken back and the earth is left alone.
+    shade: 0xf1d1f2,
+    // A hollow the width of a barn, painted at 168, is a puddle. Doubled, it is a barn.
+    scale: 2,
+    // Feathered on all four sides now: the near rim is in view where it used to sit on
+    // the road line and be hidden.
+    fade: [34, 34, 34, 34],
+  },
 });
 
 // The two beasts, one export each. The wolf stands on its own ground and needs nothing
@@ -473,8 +521,18 @@ const stream = (name) => ({
   path: 'art/stream',
   stands: {
     still: `${name}/rotations/${name}.png`,
-    ground: 1,
-    shade: 0xffd2a8,
+    // A stream crosses the road; it does not sit beyond it. The floor line goes two thirds
+    // of the way down the frame rather than at the bottom of it, so the far bank comes out
+    // of the trees and the near water runs on past the party — the same registration the
+    // brook uses, which puts its own floor line halfway up itself for the same reason.
+    ground: 110,
+    // and painted at 168 it is a puddle at the side of the road. Doubled, it spans the
+    // treeline to the path, which is the width a stream wants to be crossed at.
+    scale: 2,
+    // Blue-dominant where the wood is red-dominant, and already darker than the wood, so
+    // only the blue is taken. Cutting green with it made an asset that was too dark to
+    // begin with dingier without pulling it any further into the wood.
+    shade: 0xffffc0,
     fade: [26, 26, 26, 0],
   },
 });
@@ -483,9 +541,13 @@ const stream = (name) => ({
 // it, with four people crowded round it, with a tent and racks behind it, and with a bread
 // oven standing over it. Every state registers differently because the dressing is what
 // decides how far up the frame the paint stops, so each is measured off its own art.
-const camp = (name, ground) => ({
+// `shade` is optional here and only the oven takes one. The four objects on this export
+// are not one brightness: the oven measures luma 68 against the wood's 41 and wants taking
+// back, while the fire ring and the people round it are already at the dim end of legible
+// and a multiply would only push them under.
+const camp = (name, ground, shade) => ({
   path: 'art/fire',
-  stands: { still: `${name}/rotations/${name}.png`, ground },
+  stands: { still: `${name}/rotations/${name}.png`, ground, ...(shade ? { shade } : {}) },
 });
 
 // One boulder, painted four times: as it stands, with a block split off it, with water
@@ -494,7 +556,10 @@ const camp = (name, ground) => ({
 // state registers the same, because it is the same rock in the same place each time.
 const boulder = (name) => ({
   path: 'art/boulder',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 19 },
+  // Measures luma 74 against the wood's 41 — the brightest family on the road after the
+  // travellers, and the one seven nodes ride on, so a small correction here is worth more
+  // than a large one anywhere else.
+  stands: { still: `${name}/rotations/${name}.png`, ground: 19, shade: 0xd6c4d0 },
 });
 
 // Thin deciduous trees, painted at 80 and stood up to three times that so a stand reads as
@@ -503,7 +568,9 @@ const boulder = (name) => ({
 // tree still in leaf. What is left of each export is the half nobody asked a node for.
 const thicket = (path, name, ground) => ({
   path,
-  stands: { still: `${name}/rotations/${name}.png`, ground, scale: 3 },
+  // The brightest orange on the road by some way; knocked back harder than the oak, which
+  // is the same colour problem at a third of the size.
+  stands: { still: `${name}/rotations/${name}.png`, ground, scale: 3, shade: 0xd2d8f0 },
 });
 
 // The rest of the oaks: the same tree dressed four ways, each painted once rather than
@@ -511,9 +578,13 @@ const thicket = (path, name, ground) => ({
 // a state that is one picture instead of a folder of frames; see src/art.js. `ground` is
 // the empty pixels under the paint, the same measure every other state takes — the two
 // lying down float well up inside their frames and the two standing do not.
-const oak = (name, ground) => ({
+// `shade` is optional and only the mushroom trunk needs its own: the fallen oak, the
+// bundle at the root and the bleeding tree all measure between luma 49 and 62, and the
+// pale fungus on the trunk measures 71, which is a different correction rather than more
+// of the same one — it is grey where the others are orange.
+const oak = (name, ground, shade = 0xd9e0ff) => ({
   path: 'art/oak',
-  stands: { still: `${name}/rotations/${name}.png`, ground },
+  stands: { still: `${name}/rotations/${name}.png`, ground, shade },
 });
 
 // The same export's third object: the nest on its own, with the bird taken out of the
@@ -521,7 +592,7 @@ const oak = (name, ground) => ({
 // all nine of its frames, so nothing in it is a nest nobody is coming back to; this is.
 const EMPTYNEST = {
   path: 'art/heron',
-  stands: { still: 'Remove_the_heron/rotations/Remove_the_heron.png', ground: 12 },
+  stands: { still: 'Remove_the_heron/rotations/Remove_the_heron.png', ground: 12, shade: 0xe0c5cb },
 };
 
 export const NODE_ART = {
@@ -530,8 +601,8 @@ export const NODE_ART = {
   heron: HERON, // The heron's nest, one way through the fork
   water: BROOK, // Standing water, rolled
   firstcast: BROOK, // and The stream, the first node of the first job
-  deadfall: oak('Deadfall', 45), // An oak gone over in the wind, root plate up
-  mushrooms: oak('Mushrooms', 43), // The mushroom copse, the same trunk gone over with them
+  deadfall: oak('Deadfall', 67), // An oak gone over in the wind, root plate up
+  mushrooms: oak('Mushrooms', 81, 0xddc6d0), // The mushroom copse, the same trunk gone over with them
   offering: oak('Offering', 7), // Somebody has left something at the foot of that tree
   sap: oak('Sap', 7), // A tree that is bleeding, the stripe painted down its trunk
   // The thicket, the wall of it across the road
@@ -551,10 +622,10 @@ export const NODE_ART = {
   seam: boulder('Split'), // A boulder split in two, the vein open on both walls of the gap
   adit: boulder('Shaft'), // A hole under the boulder somebody made
   cutting: boulder('Troll'), // A troll, and the rock in the path
-  fire: camp('A_stack_of_firewood', 9), // A fire, and what you carry
+  fire: camp('A_stack_of_firewood', 33, 0xdcc8cd), // A fire, and what you carry
   camp: camp('Four_figures_crowded', 32), // A fire that is not yours
-  burner: camp('Racks_of_drying_leav', 11), // A man camped alone, and his racks
-  bakehouse: camp('A_dilapidated_stone', 7), // A bread oven standing in nothing
+  burner: camp('Racks_of_drying_leav', 30, 0xd3bec4), // A man camped alone, and his racks
+  bakehouse: camp('A_dilapidated_stone', 7, 0xdfc9ce), // A bread oven standing in nothing
   deadwater: stream('A_stretch_of_stream_rocky_and'), // the stream with nothing in it
   pool: stream('Pool'), // A deep pool under the bank
   shallows: stream('Gravel_Shallows'), // Gravel shallows
