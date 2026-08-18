@@ -366,6 +366,18 @@ const HERON = {
   },
 };
 
+// The cart that went over and stayed over. Two generations and an overgrown dressing of
+// the first; the overgrown one is what the node wants, because twenty years is what it
+// says and twenty years is what has grown through this. The other two ship with it — the
+// same cart clean, and a second generation that went into a cut ditch instead.
+const CART = {
+  path: 'art/cart',
+  stands: {
+    still: 'A_broken_overturned_cart_in_a/Overgrown/rotations/Overgrown.png',
+    ground: 19,
+  },
+};
+
 // Dry ground: a flat gone to cracked plates with the grass yellow on it and a length or
 // two of timber lying where somebody left it. Same band shape as the marsh and feathered
 // the same way — what makes it a hazard is that it is the marsh with a lid on.
@@ -548,6 +560,7 @@ export const NODE_ART = {
   slip: hollow('boulders_and_trees_collapsed_i'), // Where the ground gave way
   rockfall: hollow('Covered_in_stone_and'), // The path is under the stone
   find: COTTAGE, // Left behind
+  oldiron: CART, // A cart nobody came back for
   hazard: DRYGROUND, // Bad ground: the same flat with a crust on it
   mire: marsh('A_stretch_of_marshy_soggy_gro'), // The ground gives
   unquiet: marsh('A_number_of_dark_ea'), // Out of the ground

@@ -852,15 +852,15 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'oldiron',
-    name: 'Iron in the ditch',
+    name: 'A cart nobody came back for',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'investigation', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
+    read: { skill: 'investigation', line: 'There is a cart off the road on that side, and carts do not come out this far on their own.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A cart axle in the ditch with the wheels still on it and the bed still over it, tipped and left where it went. It went in loaded, and nobody ever came back with a horse.',
+      'A cart over on its side off the road, wheels still on it and the bed still over them and the tilt hoops bare, with what it was carrying spilled out at the foot of it and twenty years of green grown up through the whole thing. It went over loaded, and nobody ever came back with a horse.',
     ],
     ways: [
       {
@@ -868,7 +868,7 @@ export const ENCOUNTER_NODES = [
         skill: 'woodcutting',
         dc: 12,
         tried: 'Boards off the frame, the sound ones stacked and the rest left where they fall.',
-        held: 'Oak, under twenty years of ditch, and dry the whole way through the middle of it.',
+        held: 'Oak, under twenty years of weather, and dry the whole way through the middle of it.',
         lost: 'Every board comes off in three pieces and none of the three is worth carrying.',
         spoils: { timber: [1, 3], nails: [2, 4] },
         lostCon: 1,
@@ -878,8 +878,8 @@ export const ENCOUNTER_NODES = [
         skill: 'investigation',
         dc: 13,
         tried: 'Which way the ruts run, how deep they are loaded, and where they stop being ruts.',
-        held: 'It was loaded going out and empty coming back, and it never came back.',
-        lost: 'The ditch has had twenty years to lose the answer and it has used all of them.',
+        held: 'It was loaded going out and it never came back at all, and what it was carrying is lying where it fell.',
+        lost: 'The ground has had twenty years to lose the answer and it has used all of them.',
         spoils: { nails: [1, 3] },
         lostCon: 1,
       },
