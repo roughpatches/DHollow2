@@ -1,0 +1,110 @@
+{
+  "objects": [
+    {
+      "id": "4f0d42d9-34bc-433c-a8ed-a8d9973a46f0",
+      "name": "base",
+      "prompt": "A broken, overturned cart in a ditch",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/state_1.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "4e4cabd2-10a9-4886-91be-7b309dbd5395",
+      "name": "Overgrown",
+      "prompt": "A broken, overturned cart in a ditch",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Overgrown.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "549d3a72-a92d-4322-b533-729a9df4c22d",
+      "name": "base",
+      "prompt": "A broken, overturned cart in a ditch",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_broken_overturned_cart_in_a_2.png"
+      },
+      "animations": {}
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "e6115957-a226-4b7a-b041-92c5daa4f627",
+      "folder": "objects/A_broken_overturned_cart_in_a",
+      "objects": [
+        {
+          "id": "4f0d42d9-34bc-433c-a8ed-a8d9973a46f0",
+          "name": "base",
+          "prompt": "A broken, overturned cart in a ditch",
+          "size": {
+            "width": 168,
+            "height": 168
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/state_1.png"
+          },
+          "animations": {}
+        },
+        {
+          "id": "4e4cabd2-10a9-4886-91be-7b309dbd5395",
+          "name": "Overgrown",
+          "prompt": "A broken, overturned cart in a ditch",
+          "size": {
+            "width": 168,
+            "height": 168
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/Overgrown.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "e370cfeb-cba6-43dd-9637-ec1337facf32",
+      "folder": "objects/A_broken_overturned_cart_in_a_2",
+      "objects": [
+        {
+          "id": "549d3a72-a92d-4322-b533-729a9df4c22d",
+          "name": "base",
+          "prompt": "A broken, overturned cart in a ditch",
+          "size": {
+            "width": 168,
+            "height": 168
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/A_broken_overturned_cart_in_a_2.png"
+          },
+          "animations": {}
+        }
+      ]
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-18T01:28:15.654976"
+}

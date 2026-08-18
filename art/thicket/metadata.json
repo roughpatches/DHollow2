@@ -1,0 +1,37 @@
+{
+  "group_id": "9ad19bf1-0f98-4c25-a0be-d4e73921a471",
+  "objects": [
+    {
+      "id": "cbcdd0c1-f669-403e-a7fc-c93ed1298944",
+      "name": "base",
+      "prompt": "A thicket of dense, thin, deciduous trees",
+      "size": {
+        "width": 80,
+        "height": 80
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_thicket_of_dense_thin_deci.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "7938ae5d-bf71-484b-b929-03e4e1160b93",
+      "name": "Half the trees cut d",
+      "prompt": "A thicket of dense, thin, deciduous trees",
+      "size": {
+        "width": 80,
+        "height": 80
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Half_the_trees_cut_d.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T15:22:29.136933"
+}

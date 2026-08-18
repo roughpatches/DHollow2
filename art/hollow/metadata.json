@@ -1,0 +1,37 @@
+{
+  "group_id": "46ea50ac-3b34-4e7b-96cd-df45b7850196",
+  "objects": [
+    {
+      "id": "d787cfbe-c764-4c18-b0be-35cdbab89a2d",
+      "name": "base",
+      "prompt": "boulders and trees collapsed into a hollow where the ground below has given way",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/boulders_and_trees_collapsed_i.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "a2931363-8875-440c-bcb2-2af98ce719f7",
+      "name": "Covered in stone and",
+      "prompt": "boulders and trees collapsed into a hollow where the ground below has given way",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Covered_in_stone_and.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T23:21:21.707226"
+}

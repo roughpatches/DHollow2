@@ -159,7 +159,7 @@ export const RESOURCE_NODES = [
     // and nothing else is standing here, so the whole of it is one job and the party
     // either brought somebody who can do that job or turns round.
     id: 'deadfall',
-    name: 'A beech gone over in the wind',
+    name: 'An oak gone over in the wind',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 4, night: 2 },
@@ -171,7 +171,7 @@ export const RESOURCE_NODES = [
         text: 'Cut the trunk into lengths.',
         offer: 'It is up off the ground its whole length. You will not be cutting dirt.',
         done: {
-          well: 'It cuts white the whole way through and every length comes away clean. There is no rot in it anywhere.',
+          well: 'It cuts pale and dry the whole way through and every length comes away clean. There is no rot in it anywhere.',
           middling: 'The trunk rolls twice while you are in it and the axe glances off both times. You get your lengths, shorter than you wanted them.',
           botched: 'You are a foot into it when the weight shifts and the whole trunk settles onto the blade. You get the axe back out. You take what was already off.',
         },
@@ -182,7 +182,7 @@ export const RESOURCE_NODES = [
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'A beech, roots and all, lying across its own crown. The plate of earth it brought up with it is still wet on the underside.',
+      'An oak, roots and all, lying across its own crown. The plate of earth it brought up with it is still wet on the underside.',
       'The bark has not lifted anywhere. Nothing has bored into it and nothing has come up out of it. It went over inside the week.',
     ],
   },
@@ -236,7 +236,7 @@ export const RESOURCE_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 4, night: 2 },
-    read: { skill: 'fishing', line: 'The water goes dark and stops moving under that bank. Whatever is in this stream is in there.' },
+    read: { skill: 'fishing', line: 'The water goes dark and stops moving in the middle of that stretch. Whatever is in this stream is in there.' },
     harvests: [
       {
         skill: 'fishing',
@@ -256,7 +256,7 @@ export const RESOURCE_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'The stream turns hard against the bank and has cut in under it, and what it has cut is deep. The water goes from brown to black in the length of a stride.',
+      'The bed drops away in the middle of the stretch and what it drops into is deep. The water goes from brown to black in the length of a stride.',
       'Nothing on the surface. Nothing rising. Everything that lives in this stream is down there and none of it is in a hurry to say so.',
     ],
   },
@@ -264,21 +264,21 @@ export const RESOURCE_NODES = [
     // Woodcutting and Mining in one place: the slope took the trees down with it and left
     // the face they were standing on open behind them.
     id: 'slip',
-    name: 'Where the hillside came away',
+    name: 'Where the ground gave way',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'woodcraft', line: 'Half the trees on that slope are lying the wrong way, and the ground they were in is not there any more.' },
+    read: { skill: 'woodcraft', line: 'Half the trees on that side are lying in a hole that was not there last year, and the ground they were in is not there any more.' },
     harvests: [
       {
         skill: 'woodcutting',
         activity: 'Felling',
-        text: 'Cut the trees out of the slip.',
+        text: 'Cut the trees out of the hollow.',
         offer: 'Every one of them is under tension and not one is lying flat.',
         done: {
-          well: 'You read which way each one wants to go before you put the axe in it, and every one goes that way. Nothing comes down the slope behind you.',
+          well: 'You read which way each one wants to go before you put the axe in it, and every one goes that way. Nothing comes down the sides behind you.',
           middling: 'The first two go where you expect. The third comes round on you, and you spend the rest of the light digging the axe out of the ground.',
-          botched: 'You cut one that was holding two others. All three go, and a good deal of the slope with them. You get clear with what was already cut.',
+          botched: 'You cut one that was holding two others. All three go, and a good deal of the side with them. You get clear with what was already cut.',
         },
         spoils: { timber: [1, 3] },
         draw: { count: [1, 2], odds: { oaklog: 40, oakbranch: 45 } },
@@ -300,8 +300,8 @@ export const RESOURCE_NODES = [
     xp: [10, 16],
     con: [-2, 0],
     body: [
-      'The hillside has come off in one piece and gone down, and the trees went with it — lying now the wrong way up, roots in the air, crowns in the mud at the bottom.',
-      'Where they were standing there is a raw face of open rock and cut earth, still shedding. Nothing on this slope has finished moving.',
+      'The ground has gone out from under a stretch of the wood and taken what was standing on it down with it. There is a hollow the width of a barn where there was none, and the trees that were on top of it are lying across it now with their roots hanging out of the cut sides.',
+      'The sides are raw earth and open rock the whole way down, still shedding, with roots coming out of them at every level. There is stone in the bottom that has not been rained on yet. Nothing here has finished moving.',
     ],
   },
   {
@@ -343,7 +343,7 @@ export const RESOURCE_NODES = [
     con: [-1, 0],
     body: [
       'The stream runs out thin over a bar of grey gravel, ankle deep and quick, and you hear it from further off than you see it. Everything moving through this water has to come through here.',
-      'Under the gravel there is ledge. It shows in two places where the water has cut across it, and the bands in it are not the colour of the stone around them.',
+      'Under the gravel there is ledge. The water has scoured down to it in the fast part, and what it has laid bare is not the colour of the stone lying on top of it.',
     ],
   },
   {
@@ -374,7 +374,7 @@ export const RESOURCE_NODES = [
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'Bracken to the waist under the last of the trees, where the canopy thins and the light comes in sideways for an hour a day. It has grown here uninterrupted long enough to have layers to it.',
+      'Bracken standing higher than a man under the last of the trees, where the canopy thins and the light comes in sideways for an hour a day. It has grown here uninterrupted long enough to have layers to it.',
       'There is more than bracken in it. Two or three things standing in there are worth a name, and one of them is worth carrying home.',
     ],
   },
@@ -424,21 +424,21 @@ export const RESOURCE_NODES = [
   },
   {
     id: 'crag',
-    name: 'Broken crag',
+    name: 'A boulder with a vein in it',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 4, night: 1 },
-    read: { skill: 'mining', line: 'The face on that outcrop is fresh. It has come away square before and it will again.' },
+    read: { skill: 'mining', line: 'There is a vein running down that boulder, and it runs all the way into the ground.' },
     harvests: [
       {
         skill: 'mining',
         activity: 'Mining',
-        text: 'Open the face.',
+        text: 'Split it along the vein.',
         offer: 'Sound it first. It will come away in blocks or it will come away in rubble.',
         done: {
           well: 'It rings sound the whole width of it and comes off in blocks a man can carry. There is ore in the third one down.',
           middling: 'It rings hollow in two places and you work round them. What you get is good, and there is not much of it.',
-          botched: 'You strike where it rang wrong and the whole face comes down at once. It is all rubble, and half of it is on the ground you were standing on.',
+          botched: 'You strike wide of the vein and it splits the way it wanted to instead of the way you wanted it to. It is all rubble, and half of it is on the ground you were standing on.',
         },
         spoils: { stone: [2, 4] },
         draw: { count: [0, 2], odds: { ironore: 40, roughgem: 8 } },
@@ -447,39 +447,39 @@ export const RESOURCE_NODES = [
     xp: [8, 14],
     con: [-2, 0],
     body: [
-      'An outcrop standing out of the slope with one whole side gone, taken off clean at some point and not recently. The break is grey where it is old and paler where it is not.',
-      'It has come away square before. There is a line up the middle of the fresh face that says it will do it again, if anybody asks it properly.',
+      'A boulder the size of a cart, standing on its own with a dozen smaller ones settled round its foot where they came off it. Lichen has had the whole of it long enough to be the colour of the rock.',
+      'A vein runs down the face of it, dark and rusted and a hand across, and it goes in as far as it goes down. Split along that and the thing comes apart in blocks. Split anywhere else and it does not.',
     ],
   },
   {
     id: 'seam',
-    name: 'A seam in the cut bank',
+    name: 'A boulder split in two',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'investigation', line: 'The bank has come away there, and what is behind it is not more bank.' },
+    read: { skill: 'investigation', line: 'That rock has come apart down the middle, and there is a way into the middle of it.' },
     harvests: [
       {
         skill: 'mining',
         activity: 'Mining',
-        text: 'Follow the seam in.',
-        offer: 'It runs level and it runs back. How far back is the question.',
+        text: 'Follow the vein down the split.',
+        offer: 'It is open on both walls and it runs down. How far down is the question.',
         done: {
-          well: 'It holds its thickness the whole way in and comes out clean of the clay round it. You stop because you have enough, not because it did.',
-          middling: 'It thins a stride in and you are chasing it through clay after that. You come out with some of it and a good deal of the bank.',
-          botched: 'The roof of it comes down while you are under it. Nobody is hurt. Everything you had loosened is under everything that was above it.',
+          well: 'It holds its thickness the whole way down and comes away clean of the rock round it. You stop because you have enough, not because it did.',
+          middling: 'It thins a stride down and you are chasing it through cold stone after that. You come out with some of it and a good deal of gravel.',
+          botched: 'One half of it shifts while you are standing between them. Nobody is hurt. Everything you had loosened is under everything that was above it.',
         },
         draw: { count: [1, 3], odds: { ironore: 50, stone: 30, roughgem: 10 } },
       },
       {
         skill: 'herblore',
         activity: 'Foraging',
-        text: 'Work the shelf the slump left.',
-        offer: 'Two years of ground nothing has walked on, with the light straight onto it.',
+        text: 'Work the floor of the split.',
+        offer: 'Years of ground nothing has walked on, with the light straight down onto it.',
         done: {
-          well: 'Nothing has been at it since it came away. You take the whole shelf, and it is the cleanest stuff anybody has seen this side of the wood.',
-          middling: 'You take what is on the front of the shelf. The rest is back under the overhang, and you are not going under that.',
-          botched: 'The shelf is only the slump not finished slumping. It goes while you are on it and takes what you had picked with it.',
+          well: 'Nothing has been at it since the rock came apart. You take the whole floor of it, and it is the cleanest stuff anybody has seen this side of the wood.',
+          middling: 'You take what is standing in the light. The rest is back where the halves lean together, and you are not going under that.',
+          botched: 'The halves have not finished settling. One of them moves while you are in there and takes what you had picked with it.',
         },
         draw: { count: [1, 2], odds: { blacktrumpet: 35, oystermushroom: 25 } },
       },
@@ -487,8 +487,8 @@ export const RESOURCE_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'The bank has slumped and taken its own face off, and what is behind it is not more bank. A band of something darker runs through it, level, a hand thick, going back further than the light does.',
-      'Where the slump came away it has left a shelf, and things have taken root on the shelf in the year or two since.',
+      'The boulder has split from the crown down and the two halves have settled a stride apart, so there is a gap through the middle of it a person can get into sideways.',
+      'The vein is open on both walls of the gap, a hand thick and running down out of the light. Nothing has walked the floor of it in years, and things have taken root down there that grow nowhere else on this side of the wood.',
     ],
   },
 ];
@@ -500,11 +500,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 2, night: 4 },
-    read: { skill: 'investigation', line: 'The path ahead is holding water it has no business holding.' },
+    read: { skill: 'investigation', line: 'The ground ahead has dried to a crust, and a crust is not the same as a bottom.' },
     xp: [4, 8],
     con: [-1, 0],
     body: [
-      'The path goes on ahead of you and the ground either side of it does not look any different, but the path is holding water and the ground is not. Somewhere under it there is nothing to stand on.',
+      'The way ahead crosses a flat of dried mud, cracked into plates and pale as old bone, the grass on it gone yellow and a length or two of timber lying where somebody laid it down and did not come back. It looks like ground the whole way over. Somewhere under it there is nothing to stand on.',
     ],
     ways: [
       {
@@ -534,20 +534,20 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 4, night: 2 },
-    read: { skill: 'woodcraft', line: 'Bramble across the whole of that side, and it is older than the path is.' },
+    read: { skill: 'woodcraft', line: 'Stems that thin, grown in that close — something cleared the whole of that side once, and nothing has been at it since.' },
     xp: [6, 10],
     con: [-1, 0],
     body: [
-      'Bramble across the whole of that side, chest high and older than the path, with canes in it as thick as a thumb. Whatever way through there is, it was not made by anything walking upright.',
+      'Thin stems the thickness of a wrist, standing so close along that whole side that you cannot see past the second rank of them. The leaf is all overhead and the trunks under it are bare, and there is still no gap in it wide enough for a person. Whatever way through there is, it was not made by anything walking upright.',
     ],
     ways: [
       {
         text: 'Cut a way through it.',
         skill: 'woodcutting',
         dc: 12,
-        tried: 'Steel into old bramble, low down where the canes come out of the ground.',
+        tried: 'Steel into standing wood, low down where the stems come out of the ground.',
         held: 'It opens in three cuts and the party walks it upright.',
-        lost: 'It closes behind every cut and the party comes out the far side wearing most of it.',
+        lost: 'Nothing you cut falls. Every stem is held up by the ones either side of it, and the party comes out the far side having pushed the whole width.',
         spoils: { timber: [0, 1] },
         lostCon: 3,
       },
@@ -557,7 +557,7 @@ export const ENCOUNTER_NODES = [
         dc: 13,
         tried: 'Down at knee height, where anything living would have gone through it.',
         held: 'There is a run, and it comes out where the path picks up again.',
-        lost: 'There are four runs and every one of them ends in more bramble.',
+        lost: 'There are four runs and every one of them ends in more of the same.',
         lostCon: 2,
       },
     ],
@@ -568,11 +568,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
-    read: { skill: 'woodcraft', line: 'Nothing is growing across that stretch, and everything either side of it is.' },
+    read: { skill: 'woodcraft', line: 'Nothing that grows on dry ground is growing across that stretch, and everything either side of it is.' },
     xp: [6, 12],
     con: [-1, 0],
     body: [
-      'A stretch of open ground thirty yards across with nothing growing on it, ringed the whole way round by everything that would not grow there. The first boot in goes to the ankle and keeps going a while after that.',
+      'A stretch of soft ground thirty yards across — reed and root and standing water, with everything that wants a dry footing keeping to the edge of it. The first boot in goes to the ankle and keeps going a while after that.',
     ],
     ways: [
       {
@@ -640,7 +640,7 @@ export const ENCOUNTER_NODES = [
     xp: [12, 20],
     con: [-2, 0],
     body: [
-      'There are men standing off the path where the light does not reach, and they have been standing there long enough to have trodden the ground flat. Nobody is out here after dark without a lamp by accident.',
+      'There are two of them standing off the path where the light does not reach, close enough together to be one shape until they are not. They have been there long enough to have trodden the ground flat. Nobody is out here after dark without a lamp by accident.',
     ],
     ways: [
       {
@@ -717,7 +717,7 @@ export const ENCOUNTER_NODES = [
     xp: [16, 24],
     con: [-2, -1],
     body: [
-      'The ground here is turned in low mounds, a dozen of them, and the earth on top of each is darker than the earth around it. It has come up. It has not been put down.',
+      'The ground here is soft and standing in water, and out of it rise a dozen low mounds, the earth on top of each of them darker and drier than the wet it is sitting in. It has come up. It has not been put down.',
     ],
     ways: [
       {
@@ -798,7 +798,7 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'animal',
-    name: 'Something living',
+    name: 'A wolf, and what it has killed',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 4, night: 3 },
@@ -806,7 +806,7 @@ export const ENCOUNTER_NODES = [
     xp: [12, 20],
     con: [-2, 0],
     body: [
-      'Something big is standing in the open forty yards off with its head down, and it has not decided about you yet. Whatever it is standing over, it was not the one that killed it.',
+      'A wolf standing over a dead deer in the open forty yards off, black against the leaf litter, head down and muzzle red. It has stopped eating. It is looking at you, and it has not decided about you yet.',
     ],
     ways: [
       {
@@ -841,18 +841,18 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 2, night: 4 }, // mostly a thing done after dark, when it is wanted most
-    read: { skill: 'woodcraft', line: 'There is dry wood under that overhang, and it is the last of it for a mile.' },
+    read: { skill: 'woodcraft', line: 'Somebody laid a fire on that ground, and did not come back for the wood they left beside it.' },
     xp: [8, 14],
     con: [1, 2], // the stopping itself, before anybody has done anything with it
     body: [
-      'An overhang with dry ground under it and dry wood stacked against the back wall by nobody in particular. It is the last dry anything for a mile in the direction you are going.',
+      'A ring of stones with a dead fire in the middle of it, ashes and charred sticks gone cold, and beside it a stack of split wood that whoever was here last did not burn. It is dry, and it is stacked up off the ground, which is more than anything else on this side of the wood can say.',
     ],
     ways: [
       {
         text: 'Build it so it will still be burning in an hour.',
         skill: 'woodcraft',
         dc: 11,
-        tried: 'Standing deadwood, split small, and a wall of packs on the weather side of it.',
+        tried: 'The dry stuff off the stack, split smaller, and a wall of packs on the weather side of it.',
         held: 'It takes first time and it stays taken. Everybody gets dry.',
         lost: 'It smokes for twenty minutes and then it does not do that either.',
         con: 3,
@@ -876,11 +876,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'investigation', line: 'Something is stacked too neatly on that side to have got there by weather.' },
+    read: { skill: 'investigation', line: 'Somebody built on that side, and whatever they built it for is not out here any more.' },
     xp: [6, 10],
     con: [0, 0],
     body: [
-      'A pile at the side of the path with a canvas over it and stones set on the corners of the canvas. It has been rained on a great many times and nobody has come back for it.',
+      'A low hut off the side of the path, stone to the waist and gone soft above it, with the roof settled in on itself and a doorway with nothing behind it but dark. It has been rained on a great many years and nobody has come back for it.',
     ],
     ways: [
       {
@@ -888,8 +888,8 @@ export const ENCOUNTER_NODES = [
         skill: 'investigation',
         dc: 12,
         tried: 'Everything out, laid in a line, and looked at in the order it came out.',
-        held: 'Somebody stacked this to come back for it, and did not, and there is enough here to say why.',
-        lost: 'It is a pile of wet wood and some nails.',
+        held: 'Somebody walked out of this meaning to come back, and did not, and there is enough left inside to say why.',
+        lost: 'It is a wet floor and some nails.',
         spoils: { timber: [1, 2], nails: [1, 3] },
         lostCon: 0,
       },
@@ -897,7 +897,7 @@ export const ENCOUNTER_NODES = [
         text: 'Work out what sort of person leaves this.',
         skill: 'insight',
         dc: 13,
-        tried: 'Not what is in it. How it was put down, and how much of a hurry that was.',
+        tried: 'Not what is in it. How the door was left, and how much of a hurry that was.',
         held: 'They meant to be an hour. Whatever they are still carrying, they are carrying it light.',
         lost: 'It could be anybody. It probably was.',
         spoils: { nails: [1, 2] },
@@ -915,7 +915,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'Grey down caught along a whole branch line forty feet up, and the wreck of a nest at the top of it. What is on the ground underneath came off that tree in one go.',
+      'A nest of woven branches sitting at the foot of the tree it was built in, whole, wider than a cart and empty. Grey down is caught along the branch line forty feet above it. Nothing that size comes down in one piece by accident.',
     ],
     ways: [
       {
@@ -942,15 +942,15 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'oldiron',
-    name: 'Iron in the ditch',
+    name: 'A cart nobody came back for',
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'investigation', line: 'There is a cart axle in that ditch, and axles do not come out here on their own.' },
+    read: { skill: 'investigation', line: 'There is a cart off the road on that side, and carts do not come out this far on their own.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A cart axle in the ditch with the wheels still on it and the bed still over it, tipped and left where it went. It went in loaded, and nobody ever came back with a horse.',
+      'A cart over on its side off the road, wheels still on it and the bed still over them and the tilt hoops bare, with what it was carrying spilled out at the foot of it and twenty years of green grown up through the whole thing. It went over loaded, and nobody ever came back with a horse.',
     ],
     ways: [
       {
@@ -958,7 +958,7 @@ export const ENCOUNTER_NODES = [
         skill: 'woodcutting',
         dc: 12,
         tried: 'Boards off the frame, the sound ones stacked and the rest left where they fall.',
-        held: 'Oak, under twenty years of ditch, and dry the whole way through the middle of it.',
+        held: 'Oak, under twenty years of weather, and dry the whole way through the middle of it.',
         lost: 'Every board comes off in three pieces and none of the three is worth carrying.',
         spoils: { timber: [1, 3], nails: [2, 4] },
         lostCon: 1,
@@ -968,8 +968,8 @@ export const ENCOUNTER_NODES = [
         skill: 'investigation',
         dc: 13,
         tried: 'Which way the ruts run, how deep they are loaded, and where they stop being ruts.',
-        held: 'It was loaded going out and empty coming back, and it never came back.',
-        lost: 'The ditch has had twenty years to lose the answer and it has used all of them.',
+        held: 'It was loaded going out and it never came back at all, and what it was carrying is lying where it fell.',
+        lost: 'The ground has had twenty years to lose the answer and it has used all of them.',
         spoils: { nails: [1, 3] },
         lostCon: 1,
       },
@@ -1022,15 +1022,15 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'fishing', line: 'There is a line of floats across that pool and none of them is drifting.' },
+    read: { skill: 'fishing', line: 'There is netting in that water and none of it is fishing. It is just in there.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A line of floats across the pool, set square to the current and anchored at both ends, with no boat on the bank and no path down to it. Whoever put it there put it there properly.',
+      'Net in the water, hung up through the rocks and going nowhere, with floats scattered down the length of it and a bobber sitting where nothing is going to take it. No boat on the bank and no path down to it. Somebody set this properly once, and nothing has lifted it since.',
     ],
     ways: [
       {
-        text: 'Read the set, and lift what is in it.',
+        text: 'Work out how it was set, and lift what is still in it.',
         skill: 'fishing',
         dc: 12,
         tried: 'How it is anchored, which way it faces, and how long it has been down.',
@@ -1053,15 +1053,15 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'adit',
-    name: 'A hole in the hillside somebody made',
+    name: 'A hole under the boulder somebody made',
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 2 },
-    read: { skill: 'mining', line: 'That is not a cave. Somebody cut that, and they cut it square.' },
+    read: { skill: 'mining', line: 'That is not a hole a rock leaves when it settles. Somebody cut that, and they cut it square.' },
     xp: [12, 18],
     con: [-2, 0],
     body: [
-      'A square-cut mouth in the hillside with a spoil heap outside it gone over with grass. The dark inside goes back further than the light does.',
+      'A square-cut mouth going down under the foot of the boulder, with a spoil heap outside it gone over with grass. Whatever they were following, they followed it under the rock, and the dark goes back further than the light does.',
     ],
     ways: [
       {
@@ -1088,15 +1088,15 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'rockfall',
-    name: 'The path is under the hill',
+    name: 'The path is under the stone',
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
-    read: { skill: 'woodcraft', line: 'Half that slope is lying across the path and the trees above it are leaning after it.' },
+    read: { skill: 'woodcraft', line: 'The path stops where the ground did, and the trees on both sides of it are leaning in after it.' },
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'The path is under a slope that came down and stopped, and stopped is as much as anybody can say for it. The trees above the scar are leaning after it.',
+      'The path runs to the edge of a hollow and does not come out the far side of it. The ground gave way here and everything above it came down into the hole after — trees across the top, and under them stone, packed in and settled and filled to the brim. It came down and stopped, and stopped is as much as anybody can say for it.',
     ],
     ways: [
       {
@@ -1105,7 +1105,7 @@ export const ENCOUNTER_NODES = [
         dc: 12,
         tried: 'The big ones first, split where they want to split, and rolled rather than lifted.',
         held: 'It comes apart along its own lines and goes over the edge in an hour.',
-        lost: 'The wrong one goes first and takes the rest of the slope down onto the path behind it.',
+        lost: 'The wrong one goes first and takes the rest of the side down onto the path behind it.',
         spoils: { stone: [2, 3] },
         lostCon: 3,
       },
@@ -1199,24 +1199,24 @@ export const ENCOUNTER_NODES = [
 
   {
     id: 'ferry',
-    name: 'A man with a punt, and a price',
+    name: 'A troll, a bridge, and a price',
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 3, night: 2 },
-    read: { skill: 'persuasion', line: 'There is somebody sitting on the far bank who has been watching you since the treeline.' },
+    read: { skill: 'persuasion', line: 'There is something sitting at the far end of that bridge, and it has been watching you since the treeline.' },
     xp: [12, 18],
     con: [-1, 0],
     body: [
-      'The stream is too wide here to jump and too deep to want to wade. There is a man on the far bank sitting on a punt, and he has been watching you come since the treeline.',
+      'The stream is too wide here to jump and too deep to want to wade, and somebody has laid a plank footbridge over it. There is a troll sitting at the far end of the bridge with its feet in the water, and it has watched you come the whole way from the treeline.',
     ],
     ways: [
       {
-        text: 'Agree a price and be carried.',
+        text: 'Agree a price and be let across.',
         skill: 'persuasion',
         dc: 12,
-        tried: 'He names a number. Nobody takes the first number.',
-        held: 'Three crossings for the price of one, and he poles it himself.',
-        lost: 'One crossing for the price of three, and everybody gets wet anyway.',
+        tried: 'It names a number. Nobody takes the first number.',
+        held: 'Three crossings for the price of one, and it moves its feet out of the way.',
+        lost: 'One crossing for the price of three, and it counts you over one at a time.',
         con: 1,
         lostCon: 2,
       },
@@ -1225,7 +1225,7 @@ export const ENCOUNTER_NODES = [
         skill: 'fishing',
         dc: 12,
         tried: 'Where the surface breaks and where it does not, walked out to a knee first.',
-        held: 'Gravel the whole way and no deeper than a thigh. He watches you do it.',
+        held: 'Gravel the whole way and no deeper than a thigh. It watches you do it.',
         lost: 'It is thin where you are looking and it is not thin where you are walking.',
         spoils: { perch: [0, 1] },
         lostCon: 3,
@@ -1247,11 +1247,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
-    read: { skill: 'woodcraft', line: 'There are three ways off that clearing and somebody once thought it was worth saying which.' },
+    read: { skill: 'woodcraft', line: 'Somebody has stacked stones at the foot of that boulder, and stones do not stack themselves.' },
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'Three ways off one clearing, and a cairn standing waist high where they part. Nothing on top of it, and nothing added to it in years.',
+      'A boulder the size of a cart with the small ones settled round its foot, and against the side of it a stack of flat stones, waist high, laid course on course by somebody who took their time over it. Nothing on top of it, and nothing added to it in years.',
     ],
     ways: [
       {
@@ -1259,7 +1259,7 @@ export const ENCOUNTER_NODES = [
         skill: 'mining',
         dc: 12,
         tried: 'Grain, colour and how it has weathered, one course at a time.',
-        held: 'It was carried up from a bed two valleys east, which is where the road it marks goes.',
+        held: 'Not one course of it came off the boulder it is leaning on. All of it was carried here, from a bed two valleys east.',
         lost: 'It is stone. It has been stone for a long time.',
         spoils: { stone: [1, 2] },
         lostCon: 2,
@@ -1269,18 +1269,18 @@ export const ENCOUNTER_NODES = [
         skill: 'insight',
         dc: 12,
         tried: 'Not what it says. What somebody wanted badly enough to stack a hundredweight of rock about.',
-        held: 'It is not a signpost. It is a boundary, and the party is on the side of it they want to be.',
+        held: 'It is not a signpost and it is not a grave. Somebody found this rock once and wanted to be certain of finding it again.',
         lost: 'Somebody built it. That is as far as anybody gets.',
         con: 1,
         lostCon: 2,
       },
       {
-        text: 'See which way off it is still walked.',
+        text: 'Read the ground round the stones.',
         skill: 'woodcraft',
         dc: 12,
-        tried: 'Three mouths, and how much has grown across each of them since spring.',
-        held: 'Two have closed over. The third has not, and the third is the one you want.',
-        lost: 'All three look walked and all three look grown. You pick one.',
+        tried: 'Not the stack. What has been walked flat round the foot of the boulder, and how long ago it was walked.',
+        held: 'It has been walked, and not by one pair of feet, and not once. Somebody comes back to this.',
+        lost: 'Leaf mould and rain. Whatever was on this ground, the winter has had it.',
         lostCon: 2,
       },
     ],
@@ -1332,7 +1332,7 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'panners',
-    name: 'Somebody is working this water',
+    name: 'Two goblins, working the water',
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 3, night: 2 },
@@ -1340,7 +1340,7 @@ export const ENCOUNTER_NODES = [
     xp: [12, 18],
     con: [-1, 0],
     body: [
-      'Round the bend there are four of them standing in the shallows with pans, and the whole stream below them is running brown. They see you in the same moment you see them.',
+      'Round the bend there are two goblins squatting in the shallows with pans, working them steady and unhurried, and the whole stream below them is running brown. They see you in the same moment you see them.',
     ],
     ways: [
       {
@@ -1377,15 +1377,15 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'burner',
-    name: 'A charcoal burner, and his stack',
+    name: 'A man camped alone, and his racks',
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 3, night: 2 },
-    read: { skill: 'persuasion', line: 'That is a working stack, and a working stack has somebody sitting up with it.' },
+    read: { skill: 'persuasion', line: 'That is a tent and a set of racks, and somebody has been sitting with them a long while.' },
     xp: [12, 18],
     con: [-1, 0],
     body: [
-      'A turf-covered stack smoking evenly in a clearing somebody has kept clear on purpose, and a lean-to beside it with a man sitting in the mouth of it.',
+      'A tent pitched in a clearing somebody has kept clear on purpose, a fire ring in front of it, and two racks of leaves drying where the light gets at them. There is an old man sitting on his pack beside it who has watched you come the whole way in.',
     ],
     ways: [
       {
@@ -1402,9 +1402,9 @@ export const ENCOUNTER_NODES = [
         text: 'Read the camp rather than the man.',
         skill: 'investigation',
         dc: 13,
-        tried: 'How many bowls, how much bedding, and how far the wood has been dragged.',
-        held: 'He is not out here alone and he is not out here for charcoal.',
-        lost: 'A man, a stack, and nine days of firewood. Nothing that is not what it looks like.',
+        tried: 'How many bowls, how much bedding, and how much of what is on those racks is one man\'s work.',
+        held: 'He is not out here alone, and he is not out here for what is drying on the racks.',
+        lost: 'A man, a tent and nine days of firewood. Nothing that is not what it looks like.',
         spoils: { nails: [1, 3] },
         lostCon: 1,
       },
@@ -1426,15 +1426,15 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'talk',
     weight: { day: 2, night: 4 },
-    read: { skill: 'persuasion', line: 'There is a light through the trees and it is sitting still.' },
+    read: { skill: 'persuasion', line: 'There are people sitting up there, and there is no light on them.' },
     xp: [10, 16],
     con: [0, 1],
     body: [
-      'A light through the trees that is sitting still, and close to, four people round a fire that is not going to last the night.',
+      'Four of them crowded round a ring of stones, close in the way people get when there is nothing in the ring but cold ash. It went out a while ago, and there is nothing beside them left to put on it.',
     ],
     ways: [
       {
-        text: 'Ask to sit at it.',
+        text: 'Ask to sit with them.',
         skill: 'persuasion',
         dc: 12,
         tried: 'Hands out, walking slowly, and asking from further off than you have to.',
@@ -1448,7 +1448,7 @@ export const ENCOUNTER_NODES = [
         skill: 'woodcutting',
         dc: 11,
         tried: 'An armful of standing deadwood, split, before anybody has been asked anything.',
-        held: 'A fire that would have died at midnight burns to morning, and everybody sleeps at it.',
+        held: 'A fire that had gone out is going again inside ten minutes, and it burns to morning, and everybody sleeps at it.',
         lost: 'What you bring is green and it smokes them out of their own camp.',
         con: 2,
         spoils: { timber: [0, 1] },
@@ -1476,7 +1476,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'Three barrels lying on their sides in the shallows, one of them staved in and empty. Nothing square gets into a stream by itself.',
+      'Three barrels in the shallows — one standing as though somebody set it there, one on its side in the current, one staved in and empty. Nothing square gets into a stream by itself.',
     ],
     ways: [
       {
@@ -1516,7 +1516,7 @@ export const ENCOUNTER_NODES = [
 
   {
     id: 'boar',
-    name: 'Something is rooting where you wanted to dig',
+    name: 'A boar, in the ground you wanted',
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 3 },
@@ -1524,7 +1524,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'The best ground on this side has been turned over end to end, and the thing that turned it is still standing in the middle of what is left of it.',
+      'The best ground on this side has been turned over end to end, roots up and clods thrown, and the boar that turned it is still standing in the middle of what is left of it.',
     ],
     ways: [
       {
@@ -1559,7 +1559,7 @@ export const ENCOUNTER_NODES = [
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'There are people on the path ahead who have stopped walking to watch you come. They are carrying nothing, and they have been carrying nothing a while.',
+      'Two of them on the path ahead who have stopped walking to watch you come. Barefoot, worn through, and carrying nothing — and they have been carrying nothing a while.',
     ],
     ways: [
       {
@@ -1567,8 +1567,8 @@ export const ENCOUNTER_NODES = [
         skill: 'cooking',
         dc: 12,
         tried: 'More water, more salt, and everything in the packs that will swell.',
-        held: 'It goes round nine where it was made for four, and it is still worth eating.',
-        lost: 'It goes round nine. It is not worth eating and there is none of it left.',
+        held: 'It goes round six where it was made for four, and it is still worth eating.',
+        lost: 'It goes round six. It is not worth eating and there is none of it left.',
         con: 2,
         spoils: { nails: [0, 2] },
         lostCon: 2,
@@ -1586,34 +1586,34 @@ export const ENCOUNTER_NODES = [
   },
   {
     id: 'cutting',
-    name: 'The path runs through a cutting and the cutting is full',
+    name: 'A troll, and the rock in the path',
     zones: ['greywood'],
     nature: 'hazard',
     weight: { day: 3, night: 2 },
-    read: { skill: 'mining', line: 'Somebody cut that bank square once, and the bank has been putting itself back ever since.' },
+    read: { skill: 'mining', line: 'Something is hitting that rock, and it is not hitting it with anything a man could lift.' },
     xp: [8, 14],
     con: [-1, 0],
     body: [
-      'The path drops into a cutting somebody squared off a long time ago, and the bank has been putting itself back into it ever since. There is a gang in there now shifting it, and they have been at it since dawn.',
+      'The path runs straight into a boulder that came down onto it and stopped there, and there is no way round that is not the long way. There is a troll on it, twice the height of anybody here, swinging a maul of the same stone at the same place it has been swinging since dawn. It is not getting anywhere, and it has not noticed that yet.',
     ],
     ways: [
       {
-        text: 'Get in and shift it, which is quicker than waiting.',
+        text: 'Show it where the rock wants to break.',
         skill: 'mining',
         dc: 12,
-        tried: 'From the top down, and never standing under what is being moved.',
-        held: 'It comes out in an hour and the gang on the far side are glad enough to say so.',
-        lost: 'It comes out on top of the party, which is one way of moving it.',
+        tried: 'The grain of it, where it has already parted, and one place to point at.',
+        held: 'It looks where you are pointing for a long moment. Then it hits there, and the boulder comes apart in three pieces, and it is pleased in a way that does not need saying.',
+        lost: 'It hits where you point. Nothing happens. It turns round and looks at you for a while.',
         spoils: { stone: [1, 3] },
         lostCon: 3,
       },
       {
-        text: 'Get the gang to let you over their spoil.',
+        text: 'Talk your way past it.',
         skill: 'persuasion',
         dc: 12,
-        tried: 'They have been at it since dawn and they are not being paid by the hour.',
-        held: 'Over the top, one at a time, and somebody gives you a hand up at the far end.',
-        lost: 'The long way round, in the dark, with the sound of shovels behind you the whole way.',
+        tried: 'Slowly, from further off than you have to, and about the rock rather than about the road.',
+        held: 'It stands aside far enough to get by one at a time, and it is hitting the rock again before the last of you is through.',
+        lost: 'The long way round, in the dark, with the sound of it behind you the whole way.',
         lostCon: 2,
       },
     ],
@@ -1728,11 +1728,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'woodcutting', line: 'There is a pine on that side running down its own trunk, and it has been running a while.' },
+    read: { skill: 'woodcutting', line: 'There is an oak on that side running down its own trunk, and it has been running a while.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A pine on that side running down its own trunk, a stripe of it from a wound at head height all the way to the roots. It has been running long enough for the ground under it to be sticky.',
+      'An oak on that side running down its own trunk, a stripe of it from a wound at head height all the way to the roots. It has been running long enough for the ground under it to be sticky.',
     ],
     ways: [
       {
@@ -1750,9 +1750,9 @@ export const ENCOUNTER_NODES = [
         skill: 'woodcutting',
         dc: 12,
         tried: 'The bad wood cut back to sound wood, which is further in than it looks.',
-        held: 'The rot comes out in one piece and what is under it is pitch-soaked and worth carrying.',
+        held: 'The rot comes out in one piece and what is under it is dark and dry and sound.',
         lost: 'The rot goes further than the axe does, and the tree will be down by spring.',
-        spoils: { pitch: [1, 2], timber: [1, 2] },
+        spoils: { timber: [1, 2], heartwood: [0, 1] },
         lostCon: 1,
       },
     ],
@@ -1763,11 +1763,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 3 },
-    read: { skill: 'mining', line: 'There is water coming out of that face and it is coming out clear.' },
+    read: { skill: 'mining', line: 'There is water coming out of that boulder halfway up it, and it is coming out clear.' },
     xp: [8, 14],
     con: [1, 2],
     body: [
-      'Water coming straight out of the face of the rock, clear, cold enough to ache, running off into moss that has been there a long time.',
+      'Water coming straight out of the side of a boulder at head height, clear and cold enough to ache, falling into a pool it has worn for itself among the stones at the foot of it.',
     ],
     ways: [
       {
@@ -1784,9 +1784,9 @@ export const ENCOUNTER_NODES = [
         text: 'Tell what it has come through, which says the same.',
         skill: 'mining',
         dc: 12,
-        tried: 'The face above it and the crust it has left on the way down.',
-        held: 'Clean rock the whole way and nothing above it but more rock. It is good water.',
-        lost: 'Something up there is bleeding into it and there is no telling what.',
+        tried: 'The rock above the outlet, the vein running past it, and the crust it has left on the way down.',
+        held: 'It comes out above the vein and never touches it. Clean rock the whole way, and nothing over it but more rock.',
+        lost: 'It comes out of the vein itself. Whatever is in that rock is in the water, and there is no telling what.',
         con: 3,
         spoils: { roughgem: [0, 1] },
         lostCon: 2,
@@ -1799,11 +1799,11 @@ export const ENCOUNTER_NODES = [
     zones: ['greywood'],
     nature: 'gather',
     weight: { day: 3, night: 2 },
-    read: { skill: 'investigation', line: 'That is the last wall of a holding, and the only part of it anybody built properly.' },
+    read: { skill: 'investigation', line: 'That is the last of a holding, and the only part of it anybody built properly.' },
     xp: [10, 16],
     con: [-1, 0],
     body: [
-      'A bread oven and the wall it is set into, and nothing else — no floor, no roof, no other wall. It is the only part of whatever this was that anybody built to last.',
+      'A bread oven, domed and squat and built of cut stone, standing by itself with a cold fire ring in front of it. No floor, no roof, no wall, nothing at all to say what stood here. It is the only part of whatever this was that anybody built to last.',
     ],
     ways: [
       {

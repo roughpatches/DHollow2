@@ -282,6 +282,12 @@ export const SKILL_ART = {
 //   done   — the same for once the party has finished with it. Played once and held, so
 //            a tree that has come down stays down. Leave it out for anything the party
 //            does not change by working it: water is water afterwards.
+//   still  — a state's single export, out of its rotations folder, instead of `folder` and
+//            `frames`. What a thing that does nothing while you stand at it comes back as.
+//   scale  — a whole multiple to draw the art at, for art painted smaller than the road it
+//            has to stand on. Everything here is painted at whatever size it was asked for
+//            and a thicket painted at 80 is knee-high beside an oak painted at 256. Keep it
+//            whole: pixel art scaled by a fraction stops being pixel art.
 //   turn   — quarter turns clockwise to give the art before it is used, for a thing
 //            painted lying one way and wanted the other. A brook painted as a channel
 //            running across the frame is a brook running down the screen once it has been
@@ -360,10 +366,216 @@ const HERON = {
   },
 };
 
+// The fern stand, with the mushrooms it pays out sitting at the foot of it. It carries its
+// own mossy footing and stops well inside its frame on every side, so nothing is dressed.
+const BRACKEN = {
+  path: 'art/bracken',
+  stands: {
+    still: 'A_copse_of_ferns_and_undergrow/rotations/A_copse_of_ferns_and_undergrow.png',
+    ground: 7,
+  },
+};
+
+// The cart that went over and stayed over. Two generations and an overgrown dressing of
+// the first; the overgrown one is what the node wants, because twenty years is what it
+// says and twenty years is what has grown through this. The other two ship with it — the
+// same cart clean, and a second generation that went into a cut ditch instead.
+const CART = {
+  path: 'art/cart',
+  stands: {
+    still: 'A_broken_overturned_cart_in_a/Overgrown/rotations/Overgrown.png',
+    ground: 19,
+  },
+};
+
+// Dry ground: a flat gone to cracked plates with the grass yellow on it and a length or
+// two of timber lying where somebody left it. Same band shape as the marsh and feathered
+// the same way — what makes it a hazard is that it is the marsh with a lid on.
+const DRYGROUND = {
+  path: 'art/dryground',
+  stands: {
+    still: 'A_stretch_of_marshy_soggy_gro/rotations/A_stretch_of_marshy_soggy_gro.png',
+    ground: 35,
+    fade: [30, 30, 20, 0],
+  },
+};
+
+// The same two travellers, met three ways. Two of them with packs and stopping to talk;
+// the same two with the packs off and nothing in their hands; and two more standing in the
+// dark with no light on them, which is a second generation of the one prompt rather than a
+// dressing of the first. Nobody here has a hard edge, so nothing is feathered.
+const traveller = (name) => ({
+  path: 'art/travellers',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 22 },
+});
+
+const STRANGERS = {
+  path: 'art/strangers',
+  stands: { still: 'Two_people_heavily/rotations/Two_people_heavily.png', ground: 29 },
+};
+
+// Soggy ground, and the same soggy ground with a dozen mounds risen out of it. A band
+// rather than a thing, running off both sides of its frame, so it is feathered on the two
+// sides and the top; the bottom is the road. Warm enough as painted to want no shade.
+// Two nodes share the plain one: bad ground and the ground giving way are the same
+// stretch of marsh, met by two parties asking it two different questions.
+const marsh = (name) => ({
+  path: 'art/marsh',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 34, fade: [30, 30, 20, 0] },
+});
+
+// A derelict holding, painted at 80 and stood at twice that so a hut with a doorway in it
+// reads as something a person could have walked out of. It carries its own footing — the
+// stone courses at the base are the ground it stands on — so nothing is feathered.
+const COTTAGE = {
+  path: 'art/cottage',
+  stands: {
+    still: 'A_single_derelict_fen_cottage/rotations/A_single_derelict_fen_cottage.png',
+    ground: 10,
+    scale: 2,
+  },
+};
+
+// A hollow where the ground has given way, and the same hollow filled with what came down
+// into it afterwards. Painted as a full square of ground like the stream, so it is
+// feathered on the three sides that show; unlike the stream it came back warm, so nothing
+// is multiplied — a shade here only dulls the green on the banks and buys nothing.
+const hollow = (name) => ({
+  path: 'art/hollow',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 0, fade: [34, 34, 34, 0] },
+});
+
+// The two beasts, one export each. The wolf stands on its own ground and needs nothing
+// doing to it. The boar's turned earth runs off both sides of its frame — the animal stops
+// well inside it, at 159 — so only the earth is feathered, and only far enough out to stop
+// it ending in a straight line, which turned ground never does.
+const WOLF = {
+  path: 'art/wolf',
+  stands: { still: 'A_dark_shadow_of_a_wild_beast/rotations/A_dark_shadow_of_a_wild_beast.png', ground: 22 },
+};
+
+const BOAR = {
+  path: 'art/boar',
+  stands: {
+    still: 'A_large_boar_standing_in_the/rotations/A_large_boar_standing_in_the.png',
+    ground: 0,
+    fade: [16, 8, 0, 0],
+  },
+};
+
+// A stretch of stream, dressed nine ways. Unlike everything else standing on the road this
+// is painted as a full square of ground rather than as a thing with air round it, so every
+// state needs the two corrections the brook needs and for the same reasons: feathered at
+// the edges so it does not sit on the landscape as a rectangle, and multiplied toward the
+// wood's light, which is warm where this was painted cold. The bottom is not feathered
+// because the bottom is the road, and nothing of that edge is ever seen.
+const stream = (name) => ({
+  path: 'art/stream',
+  stands: {
+    still: `${name}/rotations/${name}.png`,
+    ground: 1,
+    shade: 0xffd2a8,
+    fade: [26, 26, 26, 0],
+  },
+});
+
+// One dead fire in a ring of stones, dressed four ways: with the wood nobody burned beside
+// it, with four people crowded round it, with a tent and racks behind it, and with a bread
+// oven standing over it. Every state registers differently because the dressing is what
+// decides how far up the frame the paint stops, so each is measured off its own art.
+const camp = (name, ground) => ({
+  path: 'art/fire',
+  stands: { still: `${name}/rotations/${name}.png`, ground },
+});
+
+// One boulder, painted four times: as it stands, with a block split off it, with water
+// coming out of it, and with somebody's stack of flat stones against its side. The vein is
+// in all four, which is why the same rock can be the ore, the spring and the marker. Every
+// state registers the same, because it is the same rock in the same place each time.
+const boulder = (name) => ({
+  path: 'art/boulder',
+  stands: { still: `${name}/rotations/${name}.png`, ground: 19 },
+});
+
+// Thin deciduous trees, painted at 80 and stood up to three times that so a stand reads as
+// a stand beside an oak. Two exports of the one prompt, each carrying its own second half:
+// the leafy wall and the leafy wall half cut, the bare stand and the bare stand with one
+// tree still in leaf. What is left of each export is the half nobody asked a node for.
+const thicket = (path, name, ground) => ({
+  path,
+  stands: { still: `${name}/rotations/${name}.png`, ground, scale: 3 },
+});
+
+// The rest of the oaks: the same tree dressed four ways, each painted once rather than
+// looped, because none of them does anything while the party is standing at it. `still` is
+// a state that is one picture instead of a folder of frames; see src/art.js. `ground` is
+// the empty pixels under the paint, the same measure every other state takes — the two
+// lying down float well up inside their frames and the two standing do not.
+const oak = (name, ground) => ({
+  path: 'art/oak',
+  stands: { still: `${name}/rotations/${name}.png`, ground },
+});
+
+// The same export's third object: the nest on its own, with the bird taken out of the
+// picture rather than flown out of it. The flying-off loop keeps the heron in the sky for
+// all nine of its frames, so nothing in it is a nest nobody is coming back to; this is.
+const EMPTYNEST = {
+  path: 'art/heron',
+  stands: { still: 'Remove_the_heron/rotations/Remove_the_heron.png', ground: 12 },
+};
+
 export const NODE_ART = {
   woodland: OAK, // Standing timber, the one the road rolls
   secondcut: OAK, // and The oak, the one the first job is taken for
   heron: HERON, // The heron's nest, one way through the fork
   water: BROOK, // Standing water, rolled
   firstcast: BROOK, // and The stream, the first node of the first job
+  deadfall: oak('Deadfall', 45), // An oak gone over in the wind, root plate up
+  mushrooms: oak('Mushrooms', 43), // The mushroom copse, the same trunk gone over with them
+  offering: oak('Offering', 7), // Somebody has left something at the foot of that tree
+  sap: oak('Sap', 7), // A tree that is bleeding, the stripe painted down its trunk
+  // The thicket, the wall of it across the road
+  thorn: thicket('art/thicket', 'A_thicket_of_dense_thin_deci', 6),
+  // Somebody is cutting here: the same wall, half of it down and the cut stacked
+  claim: thicket('art/thicket', 'Half_the_trees_cut_d', 3),
+  // Something has gone through this stand: bare the wrong month, one tree still in leaf
+  blight: thicket('art/blight', 'A_single_tree_in_ful', 6),
+  // The boulder, whole and then opened: the only encounter here the party changes by
+  // working it, so it is the only one of the three that has a second state.
+  crag: {
+    ...boulder('A_large_lichen_covered_boulde'),
+    done: { still: 'Broken_Crag/rotations/Broken_Crag.png', ground: 19 },
+  },
+  spring: boulder('Water_Spring'), // Water coming out of the rock
+  cairn: boulder('A_cairn_of_piled_sto'), // A cairn nobody has added to
+  seam: boulder('Split'), // A boulder split in two, the vein open on both walls of the gap
+  adit: boulder('Shaft'), // A hole under the boulder somebody made
+  cutting: boulder('Troll'), // A troll, and the rock in the path
+  fire: camp('A_stack_of_firewood', 9), // A fire, and what you carry
+  camp: camp('Four_figures_crowded', 32), // A fire that is not yours
+  burner: camp('Racks_of_drying_leav', 11), // A man camped alone, and his racks
+  bakehouse: camp('A_dilapidated_stone', 7), // A bread oven standing in nothing
+  deadwater: stream('A_stretch_of_stream_rocky_and'), // the stream with nothing in it
+  pool: stream('Pool'), // A deep pool under the bank
+  shallows: stream('Gravel_Shallows'), // Gravel shallows
+  flood: stream('Overrun'), // The path is under water for a hundred yards
+  logjam: stream('Logjam'), // A jam in the narrows
+  nets: stream('Fishing_Debris'), // Somebody's nets, and nobody's boat
+  barrels: stream('Barrels'), // Barrels in the shallows
+  panners: stream('Goblins_Panning'), // Two goblins, working the water
+  ferry: stream('Footbridge'), // A troll, a bridge, and a price
+  animal: WOLF, // A wolf, and what it has killed
+  boar: BOAR, // A boar, in the ground you wanted
+  nest: EMPTYNEST, // Something emptied a nest here
+  slip: hollow('boulders_and_trees_collapsed_i'), // Where the ground gave way
+  rockfall: hollow('Covered_in_stone_and'), // The path is under the stone
+  find: COTTAGE, // Left behind
+  oldiron: CART, // A cart nobody came back for
+  bracken: BRACKEN, // Fern and bracken under the eaves
+  hazard: DRYGROUND, // Bad ground: the same flat with a crust on it
+  mire: marsh('A_stretch_of_marshy_soggy_gro'), // The ground gives
+  unquiet: marsh('A_number_of_dark_ea'), // Out of the ground
+  folk: traveller('Traveler_s_with_pack'), // Folk on the road
+  hungry: traveller('Two_bedraggled_travelers_in_w'), // and the same two with the packs off
+  strangers: STRANGERS, // Strangers, and no lamp
 };

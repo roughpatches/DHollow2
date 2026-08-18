@@ -1,0 +1,112 @@
+{
+  "group_id": "68351d89-5310-46fa-8d04-7134d0f55ddb",
+  "objects": [
+    {
+      "id": "308429be-b343-4394-a631-579732f95394",
+      "name": "base",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_large_lichen_covered_boulde.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "6856ed09-62f5-481d-abcb-a0fd383ac167",
+      "name": "Broken Crag",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Broken_Crag.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "35eeffea-f951-460c-9e0d-7645dfd5b69a",
+      "name": "Water Spring",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Water_Spring.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "8952195f-abd8-46ff-bc7d-ee621f5cb0f6",
+      "name": "A cairn of piled sto",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_cairn_of_piled_sto.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "0af64702-8aec-4bdf-a08f-e41650438cba",
+      "name": "Split",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Split.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "76e668e5-ce5f-4305-946c-76dbe07ffb69",
+      "name": "Shaft",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Shaft.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "d18fedb2-96c7-4a8e-9ac2-7b9809872963",
+      "name": "Troll",
+      "prompt": "A large, lichen covered boulder with an ore vein running through it, surrounded by several smaller boulders",
+      "size": {
+        "width": 168,
+        "height": 168
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Troll.png"
+      },
+      "animations": {}
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-08-17T17:07:37.504834"
+}

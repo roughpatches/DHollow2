@@ -14,26 +14,7 @@
       "rotations": {
         "unknown": "rotations/A_large_ancient_oak_treee_w.png"
       },
-      "animations": {
-        "Tree_is_cut_town_the_trunk_collapsing_to_the_righ": {
-          "directions": {
-            "unknown": {
-              "frames": [
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_000.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_001.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_002.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_003.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_004.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_005.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_006.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_007.png",
-                "animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown/frame_008.png"
-              ],
-              "frame_count": 9
-            }
-          }
-        }
-      }
+      "animations": {}
     },
     {
       "id": "dc7049f9-c87d-4a98-a401-f0f23925478d",
@@ -68,8 +49,68 @@
           }
         }
       }
+    },
+    {
+      "id": "25da95cb-a64f-471a-892f-5446c79b5613",
+      "name": "Deadfall",
+      "prompt": "A large, ancient, oak treee, with large trunk and boughs, autumn leaves",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Deadfall.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "30dc8337-fe0d-44b2-af35-bc64ed1a1c3f",
+      "name": "Mushrooms",
+      "prompt": "A large, ancient, oak treee, with large trunk and boughs, autumn leaves",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Mushrooms.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "4d561b23-83e1-476c-b115-28899a340035",
+      "name": "Offering",
+      "prompt": "A large, ancient, oak treee, with large trunk and boughs, autumn leaves",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Offering.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "81d31c3e-5bbd-4d25-acaa-a141d7a4c615",
+      "name": "Sap",
+      "prompt": "A large, ancient, oak treee, with large trunk and boughs, autumn leaves",
+      "size": {
+        "width": 256,
+        "height": 256
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/Sap.png"
+      },
+      "animations": {}
     }
   ],
   "export_version": "1.1",
-  "export_date": "2026-08-14T14:39:19.413328"
+  "export_date": "2026-08-17T14:31:03.722218"
 }
