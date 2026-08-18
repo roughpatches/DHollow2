@@ -462,7 +462,19 @@ const COTTAGE = {
 // is multiplied — a shade here only dulls the green on the banks and buys nothing.
 const hollow = (name) => ({
   path: 'art/hollow',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 0, fade: [34, 34, 34, 0] },
+  stands: {
+    still: `${name}/rotations/${name}.png`,
+    // A hole in the ground is a hole the road runs to the lip of, so its floor line goes
+    // to the middle of the paint rather than the bottom of it: the far rim stays back
+    // among the trunks and the near rim comes on past the party, which is what makes it
+    // read as something you are looking down into rather than a patch beyond the path.
+    ground: 84,
+    // A hollow the width of a barn, painted at 168, is a puddle. Doubled, it is a barn.
+    scale: 2,
+    // Feathered on all four sides now: the near rim is in view where it used to sit on
+    // the road line and be hidden.
+    fade: [34, 34, 34, 34],
+  },
 });
 
 // The two beasts, one export each. The wolf stands on its own ground and needs nothing
