@@ -388,6 +388,9 @@ const CART = {
   stands: {
     still: 'A_broken_overturned_cart_in_a/Overgrown/rotations/Overgrown.png',
     ground: 19,
+    // Twenty years of green is greener than anything the wood paints, so the green is what
+    // is taken; the oak under it keeps most of what it has.
+    shade: 0xe8cce5,
   },
 };
 
@@ -413,7 +416,9 @@ const DRYGROUND = {
 // dressing of the first. Nobody here has a hard edge, so nothing is feathered.
 const traveller = (name) => ({
   path: 'art/travellers',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 22 },
+  // The brightest thing measured anywhere in the wood at luma 77, most of it the pale
+  // patch of ground they are painted standing on rather than the people themselves.
+  stands: { still: `${name}/rotations/${name}.png`, ground: 22, shade: 0xd3c2ce },
 });
 
 const STRANGERS = {
@@ -469,6 +474,9 @@ const hollow = (name) => ({
     // among the trunks and the near rim comes on past the party, which is what makes it
     // read as something you are looking down into rather than a patch beyond the path.
     ground: 84,
+    // The moss in it reads greener than the wood does, and doubling the thing doubled how
+    // much of it there is, so the green is taken back and the earth is left alone.
+    shade: 0xf1d1f2,
     // A hollow the width of a barn, painted at 168, is a puddle. Doubled, it is a barn.
     scale: 2,
     // Feathered on all four sides now: the near rim is in view where it used to sit on
@@ -525,9 +533,13 @@ const stream = (name) => ({
 // it, with four people crowded round it, with a tent and racks behind it, and with a bread
 // oven standing over it. Every state registers differently because the dressing is what
 // decides how far up the frame the paint stops, so each is measured off its own art.
-const camp = (name, ground) => ({
+// `shade` is optional here and only the oven takes one. The four objects on this export
+// are not one brightness: the oven measures luma 68 against the wood's 41 and wants taking
+// back, while the fire ring and the people round it are already at the dim end of legible
+// and a multiply would only push them under.
+const camp = (name, ground, shade) => ({
   path: 'art/fire',
-  stands: { still: `${name}/rotations/${name}.png`, ground },
+  stands: { still: `${name}/rotations/${name}.png`, ground, ...(shade ? { shade } : {}) },
 });
 
 // One boulder, painted four times: as it stands, with a block split off it, with water
@@ -536,7 +548,10 @@ const camp = (name, ground) => ({
 // state registers the same, because it is the same rock in the same place each time.
 const boulder = (name) => ({
   path: 'art/boulder',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 19 },
+  // Measures luma 74 against the wood's 41 — the brightest family on the road after the
+  // travellers, and the one seven nodes ride on, so a small correction here is worth more
+  // than a large one anywhere else.
+  stands: { still: `${name}/rotations/${name}.png`, ground: 19, shade: 0xd6c4d0 },
 });
 
 // Thin deciduous trees, painted at 80 and stood up to three times that so a stand reads as
@@ -598,7 +613,7 @@ export const NODE_ART = {
   fire: camp('A_stack_of_firewood', 9), // A fire, and what you carry
   camp: camp('Four_figures_crowded', 32), // A fire that is not yours
   burner: camp('Racks_of_drying_leav', 11), // A man camped alone, and his racks
-  bakehouse: camp('A_dilapidated_stone', 7), // A bread oven standing in nothing
+  bakehouse: camp('A_dilapidated_stone', 7, 0xdfc9ce), // A bread oven standing in nothing
   deadwater: stream('A_stretch_of_stream_rocky_and'), // the stream with nothing in it
   pool: stream('Pool'), // A deep pool under the bank
   shallows: stream('Gravel_Shallows'), // Gravel shallows
