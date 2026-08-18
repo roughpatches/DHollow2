@@ -6,6 +6,7 @@ import {
   roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf,
   isCombat, nameOf, fill, YOU,
 } from '../party.js';
+import { MOVES, moveLine, saidCount } from '../combat.js';
 import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf, hangOf } from '../frames.js';
@@ -237,6 +238,32 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'escape') this.close();
       return;
     }
+    // Who steps up. The only choice a party gets about a fight before it starts, and the
+    // one they get again the moment somebody is carried.
+    if (r.phase === 'fighter') {
+      const up = run.standing();
+      if (k === 'arrowup' || k === 'w') this.row = (this.row + up.length - 1) % up.length;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % up.length;
+      else if (k === 'enter' || k === ' ' || k === 'e') { run.stepUp(up[this.row]); this.row = 0; }
+      else if (k === 'escape') run.abandon();
+      this.draw();
+      return;
+    }
+    // And the fight: one thing off the card every turn, until one of them is down.
+    if (r.phase === 'fight') {
+      const ways = this.fightWays();
+      if (k === 'arrowup' || k === 'w') this.row = (this.row + ways.length - 1) % ways.length;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % ways.length;
+      else if (k === 'enter' || k === ' ' || k === 'e') {
+        const way = ways[this.row];
+        if (way.move) run.fightMove(way.move.id);
+        else if (way.flee) run.fightFlee();
+        else run.swapIn(way.swap);
+        this.row = 0; // whoever is up next is asked from the top of their own list
+      } else if (k === 'escape') run.abandon();
+      this.draw();
+      return;
+    }
     if (r.phase === 'beat') {
       const b = r.nodes[r.at].beat;
       const opts = b.choose;
@@ -308,7 +335,9 @@ export default class Quest extends Phaser.Scene {
     // after dark a fighter is taken before anybody else, because the job will not go
     // without one and the default crew should not have to be corrected by hand
     if (run.needsFighter(when)) rest.sort((a, b) => isCombat(b) - isCombat(a));
-    this.taking = [...must, ...rest].slice(0, Math.max(must.length, this.job.party - 1));
+    // you are one of the four, so the most anybody else can be is three
+    this.taking = [...must, ...rest]
+      .slice(0, Math.min(TUNING.partyMax - 1, Math.max(must.length, this.job.party - 1)));
     this.mode = 'party';
     this.row = 0;
   }
@@ -326,6 +355,7 @@ export default class Quest extends Phaser.Scene {
   toggleWalker(id) {
     if ((this.job.must || []).includes(id)) return; // the job does not go without them
     if (this.taking.includes(id)) this.taking = this.taking.filter((x) => x !== id);
+    else if (this.crew().length >= TUNING.partyMax) return; // four walk out and no more
     else if (recruit.asked(id, this.job, this.when_).willing) this.taking.push(id);
   }
 
@@ -354,8 +384,13 @@ export default class Quest extends Phaser.Scene {
   bands() {
     const b = this.box;
     const pad = padOf('band');
-    // the band over the road holds the bar and nothing else, so it is as deep as the bar
-    const barY = b.y + (TUNING.questHeadHeight - TUNING.questBarHeight) / 2;
+    // The band over the road holds the constitution and, where anybody on the run fights,
+    // a slim bar apiece under it: hit points are nobody's but their own, so they are not
+    // in the pool and they are not on the pool's bar.
+    const hp = this.fightersOn();
+    const barY = hp.length
+      ? b.y + pad.t + 2
+      : b.y + (TUNING.questHeadHeight - TUNING.questBarHeight) / 2;
     const top = b.y + TUNING.questHeadHeight;
     const bottom = b.y + b.h - TUNING.questTrailHeight;
     const trailTop = bottom + pad.t + 4; // the ring around the goal reaches above its box
@@ -363,6 +398,14 @@ export default class Quest extends Phaser.Scene {
     const col = this.scored().length ? TUNING.questSkillWidth : 0;
     return {
       bar: { x: this.left, y: barY, w: this.wide, h: TUNING.questBarHeight },
+      hp: hp.length
+        ? {
+          x: this.left,
+          y: barY + TUNING.questBarHeight + 6,
+          w: this.wide,
+          h: TUNING.questHpHeight,
+        }
+        : null,
       skills: { x: b.x, y: top, w: col, h: bottom - top },
       // the road the party walks, and under it the land it is painted on, which is
       // everything down to the trail and out to both edges
@@ -575,9 +618,10 @@ export default class Quest extends Phaser.Scene {
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
     const others = this.taking.length === 1 ? 'one other' : `${this.taking.length} others`;
     const coming = this.taking.length ? `You and ${others} coming` : 'You, and nobody else';
+    const full = this.crew().length >= TUNING.partyMax;
     y += this.text(this.left, y,
       short > 0 ? `Needs ${this.job.party}. ${coming} — ${short} short.`
-        : `Needs ${this.job.party}. ${coming}.`,
+        : `Needs ${this.job.party}. ${coming}.${full ? `  ${TUNING.partyMax} is the most that walk out.` : ''}`,
       TUNING.questBodySize, short > 0 ? COLORS.menuMapFolk : COLORS.menuText).height + 10;
     // the night rule is said on the screen where the crew is picked, because that is
     // the only screen where it can be answered
@@ -674,10 +718,13 @@ export default class Quest extends Phaser.Scene {
     }
 
     this.conBar(r, band.bar);
+    this.hpRow(r, band.hp);
     this.skills(r, band.skills);
     this.trail(r, band.trail);
 
-    if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
+    if (r.state === 'running' && r.phase === 'fighter') this.card(band.walk, this.fighterLines(r), this.nodeHead(r));
+    else if (r.state === 'running' && r.phase === 'fight') this.card(band.walk, this.fightLines(r), this.fightHead());
+    else if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
     else if (r.state === 'running' && r.phase === 'choose' && !this.approaching) {
       this.card(band.walk, this.workLines(r), this.nodeHead(r));
     }
@@ -694,6 +741,8 @@ export default class Quest extends Phaser.Scene {
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r), true);
 
     if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
+    else if (r.phase === 'fighter') this.hint('[Up/Down] Who steps up    [Enter] Send them    [Esc] Turn back');
+    else if (r.phase === 'fight') this.hint('[Up/Down] Choose    [Enter] Do it    [Esc] Break off');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
     else if (r.phase === 'choose' && !this.approaching) {
       // one thing to do here is not a question, so it is not asked as one
@@ -701,7 +750,7 @@ export default class Quest extends Phaser.Scene {
         ? '[Up/Down] Choose    [Enter] Work it    [Esc] Turn back'
         : '[Enter] Get to work    [Esc] Turn back');
     }
-    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.activityOf(r.nodes[r.at])) : 'Walking.');
+    else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.playing()) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
       this.hint(r.nodes[r.at].beat.choose
         ? '[Up/Down] Choose    [Enter] Do it    [Esc] Turn back'
@@ -719,6 +768,26 @@ export default class Quest extends Phaser.Scene {
   // Iron, like everything else on the screen: a sunk trough, a rim lit along its top,
   // and a rivet driven in at each end. What is left in them is the gold the leaves are,
   // and it goes the red they go as it runs out.
+  // A sunk trough with something left in it. The one shape every readout on the crawl is
+  // made of: the constitution across the top, and the slim bars under it.
+  trough(g, rect, frac, low, full) {
+    const { x, y, w, h } = rect;
+    g.fillStyle(COLORS.conTrough, 1);
+    g.fillRect(x, y, w, h);
+    g.lineStyle(1, blend(COLORS.conRim, 0x000000, 0.55), 1);
+    g.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+
+    const lit = Math.round((w - 4) * Math.max(0, Math.min(1, frac)));
+    if (lit <= 0) return;
+    const c = blend(low, full, frac);
+    g.fillStyle(c, 1);
+    g.fillRect(x + 2, y + 2, lit, h - 4);
+    g.fillStyle(blend(c, 0xffffff, 0.32), 1); // the light along the top of it
+    g.fillRect(x + 2, y + 2, lit, 1);
+    g.fillStyle(blend(c, 0x000000, 0.4), 1);
+    g.fillRect(x + 2, y + h - 3, lit, 1);
+  }
+
   conBar(r, rect) {
     const frac = r.conMax ? Math.max(0, Math.min(1, r.con / r.conMax)) : 0;
     const { x, y, w, h } = rect;
@@ -729,21 +798,7 @@ export default class Quest extends Phaser.Scene {
     const cap = TUNING.questBarCap;
     const tx = x + cap;
     const tw = w - cap * 2;
-    g.fillStyle(COLORS.conTrough, 1);
-    g.fillRect(tx, y, tw, h);
-    g.lineStyle(1, blend(COLORS.conRim, 0x000000, 0.55), 1);
-    g.strokeRect(tx + 0.5, y + 0.5, tw - 1, h - 1);
-
-    const lit = Math.round((tw - 4) * frac);
-    if (lit > 0) {
-      const c = blend(COLORS.conLow, COLORS.conFull, frac);
-      g.fillStyle(c, 1);
-      g.fillRect(tx + 2, y + 2, lit, h - 4);
-      g.fillStyle(blend(c, 0xffffff, 0.32), 1); // the light along the top of it
-      g.fillRect(tx + 2, y + 2, lit, 1);
-      g.fillStyle(blend(c, 0x000000, 0.4), 1);
-      g.fillRect(tx + 2, y + h - 3, lit, 1);
-    }
+    this.trough(g, { x: tx, y, w: tw, h }, frac, COLORS.conLow, COLORS.conFull);
 
     // the caps: iron, lit along the top and shadowed under, with a rivet driven through
     for (const cx of [x, x + w - cap]) {
@@ -757,6 +812,49 @@ export default class Quest extends Phaser.Scene {
       g.fillRect(cx + cap / 2 - 2, y + h / 2 - 2, 4, 4);
       g.fillStyle(COLORS.conRivet, 1);
       g.fillRect(cx + cap / 2 - 2, y + h / 2 - 2, 3, 3);
+    }
+  }
+
+  // Everybody on the run who fights, in the order they were taken. Empty on a day run and
+  // on a night one crewed before anybody could — and then there is no second row at all.
+  fightersOn() {
+    const r = run.active();
+    return r && this.mode === 'run' ? r.party.filter((id) => isCombat(id)) : [];
+  }
+
+  // The slim bars under the constitution: what each fighter has left, and — while a fight
+  // is on — what is left of the thing they are fighting, at the far end of the row in its
+  // own colour. A fighter who has been carried keeps their place and is drawn empty,
+  // because the party is still carrying them.
+  hpRow(r, rect) {
+    const who = this.fightersOn();
+    if (!rect || !who.length) return;
+    const fight = run.fightingAt();
+    const cells = who.length + (fight ? 1 : 0);
+    const gap = 18;
+    const wide = (rect.w - gap * (cells - 1)) / cells;
+    const g = this.add.graphics();
+    this.layer.add(g);
+
+    const bar = (i, label, frac, low, full, dim) => {
+      const x = rect.x + i * (wide + gap);
+      const t = this.text(x, rect.y - 3, label, TUNING.questHintSize, dim ? COLORS.menuRule : COLORS.menuDim);
+      const from = x + t.width + 8;
+      this.trough(g, { x: from, y: rect.y, w: Math.max(24, x + wide - from), h: rect.h }, frac, low, full);
+    };
+
+    who.forEach((id, i) => {
+      const max = run.hpMaxOf(id);
+      const now = run.hpOf(id);
+      const up = fight && fight.who === id;
+      bar(i, `${up ? '▸ ' : ''}${nameOf(id)} ${now}/${max}`, max ? now / max : 0,
+        COLORS.hpLow, COLORS.hpFull, !now);
+    });
+    if (fight) {
+      // the one in front, and how many are still behind it waiting their turn
+      const more = fight.rest.length ? ` +${fight.rest.length}` : '';
+      bar(who.length, `${fight.foe.name}${more} ${fight.foeHp}/${fight.foeMax}`,
+        fight.foeMax ? fight.foeHp / fight.foeMax : 0, COLORS.foeLow, COLORS.foeFull);
     }
   }
 
@@ -997,9 +1095,11 @@ export default class Quest extends Phaser.Scene {
   // landscape drops below the engine's own drawing so the party stays at the tree.
 
   startActivity() {
-    const r = run.active();
-    const doing = run.activityOf(r.nodes[r.at]);
+    const doing = run.playing();
     if (!hasEngine(doing) || this.activity) return;
+    // a blow being played rather than a piece of work: the same handover, and a
+    // different thing waiting at the end of it
+    const blow = !!run.fightingAt();
     const band = this.bands().walk;
     // the landscape drops below the engine's own drawing, with a scrim between them so
     // the readouts are read against something rather than against a hedge
@@ -1019,17 +1119,25 @@ export default class Quest extends Phaser.Scene {
       this.scrim?.destroy();
       this.scrim = null;
       this.walk.depth(28900);
-      this.walk.felled(); // whatever was standing there is not standing any more
-      run.settle({ judgments, failed });
+      if (blow) {
+        run.fightPlayed({ judgments, failed });
+      } else {
+        this.walk.felled(); // whatever was standing there is not standing any more
+        run.settle({ judgments, failed });
+      }
       this.draw();
     });
   }
 
-  // just the name of the work over the top of it; the engine draws everything else
+  // just the name of the work over the top of it; the engine draws everything else. In a
+  // fight it is who is swinging at what, because the node's name is not the news.
   activityHead(r, rect) {
     const n = r.nodes[r.at];
-    this.text(rect.x + 12, rect.y + 4, `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`,
-      TUNING.questBodySize + 2, COLORS.menuText);
+    const f = run.fightingAt();
+    const said = f
+      ? `${nameOf(f.who)} — ${f.foe.name}    ${run.hpOf(f.who)}/${run.hpMaxOf(f.who)} against ${f.foeHp}/${f.foeMax}`
+      : `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`;
+    this.text(rect.x + 12, rect.y + 4, said, TUNING.questBodySize + 2, COLORS.menuText);
   }
 
   // What is standing in front of them, and nothing about where along the road it is: the
@@ -1056,6 +1164,10 @@ export default class Quest extends Phaser.Scene {
     // How the work went, in the words written for it. A node whose account was read on the
     // way in does not say it again here; one that was not — an authored scene, played out
     // in its beats — still does.
+    // what was fought here, and what it cost, before anything is counted off it
+    const won = run.wonLine(n);
+    if (won) out.push([won, TUNING.questBodySize, COLORS.menuText]);
+    for (const line of run.faintLines(n)) out.push([line, TUNING.questBodySize, COLORS.menuMapFolk]);
     const done = run.doneLine(n);
     if (done) out.push([done, TUNING.questBodySize, COLORS.menuText]);
     if (!n.shown) for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
@@ -1082,6 +1194,78 @@ export default class Quest extends Phaser.Scene {
       out.push([`${doing} — waiting on that engine. For now the party works it out and moves on.`,
         TUNING.questHintSize, COLORS.menuDim]);
     }
+    return out;
+  }
+
+  // Who goes and stands in front of it. Asked when a fight starts with more than one
+  // fighter on the run, and again the moment one of them is carried — which is the whole
+  // of what a second fighter is for.
+  fighterLines(r) {
+    const up = run.standing();
+    if (this.row >= up.length) this.row = 0;
+    const n = r.nodes[r.at];
+    const out = [];
+    for (const line of run.faintLines(n)) out.push([line, TUNING.questBodySize, COLORS.menuMapFolk]);
+    out.push([up.length > 1 ? 'Who stands in front of it?' : 'Only one of you fights.',
+      TUNING.questBodySize, COLORS.menuText]);
+    up.forEach((id, i) => {
+      const on = i === this.row;
+      out.push([`${on ? '>' : ' '} ${nameOf(id)}    ${run.hpOf(id)}/${run.hpMaxOf(id)} hit points`,
+        TUNING.questBodySize, on ? COLORS.menuAccent : COLORS.menuDim]);
+    });
+    return out;
+  }
+
+  // Everything that can be done with a turn: the three moves, and — where somebody else
+  // on the run fights and is still up — changing over to them, which costs the whole of it.
+  fightWays() {
+    const f = run.fightingAt();
+    if (!f) return [];
+    return [
+      ...MOVES.map((move) => ({ move })),
+      ...run.standing().filter((id) => id !== f.who).map((swap) => ({ swap })),
+      // last, and only once whoever is up is badly hurt, so the rows above it do not
+      // move under the cursor the turn it appears
+      ...(run.canBreakOff() ? [{ flee: true }] : []),
+    ];
+  }
+
+  // Whoever is in front of the party right now, and how much of the band is behind it
+  fightHead() {
+    const f = run.fightingAt();
+    return f.rest.length ? `${f.foe.name}, and ${saidCount(f.rest.length)} behind it` : f.foe.name;
+  }
+
+  // The fight itself: what the last exchange came to, and what can be done about the next
+  // one. Never paged — the question and the answers are one card.
+  fightLines(r) {
+    const f = run.fightingAt();
+    const ways = this.fightWays();
+    if (this.row >= ways.length) this.row = 0;
+    const tone = { us: COLORS.menuText, them: COLORS.menuMapFolk, said: COLORS.menuDim };
+    // The last exchange and no further back. A fight with a band in it and a changeover
+    // in the middle of it can put six lines on the card, and the card is over the road.
+    const out = f.log.slice(-4).map(([line, side]) => [line, TUNING.questBodySize, tone[side]]);
+    // What each way costs is written under the one the cursor is on rather than under all
+    // of them: there are five rows here when the party is beaten and has somewhere to send
+    // for, and five rows with a line each is a card taller than the road it hangs over.
+    ways.forEach((way, i) => {
+      const on = i === this.row;
+      const head = way.move ? way.move.name
+        : way.flee ? 'Break off' : `Send in ${nameOf(way.swap)}`;
+      out.push([`${on ? '>' : ' '} ${head}`, TUNING.questBodySize,
+        on ? COLORS.menuAccent : COLORS.menuDim]);
+      if (!on) return;
+      const said = way.move
+        ? `${way.move.line}  (${moveLine(way.move, f)})`
+        : way.flee
+          ? 'Leave it standing and go, if you can.  '
+            + `(the turn, a d20 against ${TUNING.combat.fleeDC}, `
+            + `and it answers at +${TUNING.combat.swapOpens} if you do not get clear)`
+        // what they have left is on the bar above; what it costs is the whole of the news
+          : `They come across, you come out.  (the turn, and it answers at +${TUNING.combat.swapOpens})`;
+      out.push([`    ${said}`, TUNING.questHintSize, COLORS.menuText]);
+    });
     return out;
   }
 
@@ -1181,6 +1365,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   endHead(r) {
+    if (r.state === 'spent' && r.routed) return 'Nobody left standing.';
     return { done: 'Done.', spent: 'Nothing left in them.', abandoned: 'Turned back.' }[r.state];
   }
 
@@ -1189,8 +1374,10 @@ export default class Quest extends Phaser.Scene {
     const out = [];
     if (won) out.push([r.quest.goal, TUNING.questBodySize, COLORS.menuText]);
     if (r.state === 'spent') {
-      out.push(['The constitution ran out with the job unfinished. They came home from where they stood.',
-        TUNING.questBodySize, COLORS.menuMapFolk]);
+      out.push([r.routed
+        ? 'Everybody who could fight is being carried, and there is still something out there standing up. They came home from where they stood, and they came home the long way.'
+        : 'The constitution ran out with the job unfinished. They came home from where they stood.',
+      TUNING.questBodySize, COLORS.menuMapFolk]);
     }
     out.push([`Carried out of it: ${run.listOf(r.spoils)}.    ${r.xp} xp each.`, TUNING.questBodySize, COLORS.menuText]);
     if (r.lost && Object.keys(r.lost).length) {

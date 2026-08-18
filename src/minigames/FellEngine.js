@@ -28,6 +28,24 @@ function clamp01(v) {
   return Math.max(0, Math.min(1, v));
 }
 
+// What the engine calls the things it draws. The same swing is a tree coming down in the
+// wood and a blow landing in a fight, so a caller can hand it another set through
+// `words` in its config; anything it does not name keeps the word below. Nothing here
+// touches the mechanic — these are labels on the same meters.
+const WORDS = {
+  cut: 'Cut',
+  lean: 'Lean  (keep it in the band)',
+  face: 'Cutting: ◄ FACE   (→ to back-cut)',
+  back: 'Cutting: BACK ►   (← to face-cut)',
+  power: 'Swing — hold SPACE, release in the moving bite',
+  sound: 'Soundness',
+  status: '← face cut   → back cut',
+  wild: 'WILD SWING',
+  perfect: 'PERFECT!',
+  good: 'BITE',
+  glance: 'GLANCING',
+};
+
 export class FellEngine {
   constructor(scene, config) {
     this.scene = scene;
@@ -53,6 +71,7 @@ export class FellEngine {
     this.startTime = null;
 
     const c = this.config;
+    this.words = { ...WORDS, ...(c.words || {}) };
     const pz = c.powerZone;
     this.zoneCenter = (pz.min + pz.max) / 2;
     // Swing-zone travel bounds, kept inside the bar (fixes the zone overrunning it).
@@ -94,7 +113,7 @@ export class FellEngine {
 
     // Swing power track with moving bite-zone + marker. The bite window uses the bespoke
     // grain-gold "good cut" band and the axe-bit marker once baked, else the generic pair.
-    this.powerText = this.scene.add.text(bx, L.top + 146, 'Swing — hold SPACE, release in the moving bite', { fontSize: '16px', fontFamily: FONT, color: COLOR.muted });
+    this.powerText = this.scene.add.text(bx, L.top + 146, this.words.power, { fontSize: '16px', fontFamily: FONT, color: COLOR.muted });
     this.powerTrack = trackWidget(this.scene, bx, L.top + 178, this.BW, {
       height: 22,
       markerKey: resolveFrame(this.scene, 'ui', ['axe_marker', 'marker']),
@@ -105,7 +124,7 @@ export class FellEngine {
     // Soundness (break gate). The grove_split overlay on the trunk IS the gauge now — it
     // retires the generic bar_integrity for this activity; keep a small numeric readout here.
     this.soundText = this.scene.add.text(bx, L.top + 244, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.grass });
-    this.statusText = this.scene.add.text(bx, L.top + 276, '← face cut   → back cut', { fontSize: '15px', fontFamily: FONT, color: COLOR.muted });
+    this.statusText = this.scene.add.text(bx, L.top + 276, this.words.status, { fontSize: '15px', fontFamily: FONT, color: COLOR.muted });
 
     this._layout();
   }
@@ -133,16 +152,16 @@ setSide(dir) {
     const inZone = power >= this.zoneCenter - half && power <= this.zoneCenter + half;
 
     if (power > c.overchargeAt) {
-      this._resolve('miss', 'WILD SWING', 0xff8c42, () => { this.soundness = clamp01(this.soundness - c.wildChip); this.cut = clamp01(this.cut + c.cutPerSwing * 0.3); this._applyLean(0.5); });
+      this._resolve('miss', this.words.wild, 0xff8c42, () => { this.soundness = clamp01(this.soundness - c.wildChip); this.cut = clamp01(this.cut + c.cutPerSwing * 0.3); this._applyLean(0.5); });
     } else if (inZone) {
       const precision = Math.abs(power - this.zoneCenter) / half;
       const perfect = precision <= 0.5;
-      this._resolve(perfect ? 'perfect' : 'good', perfect ? 'PERFECT!' : 'BITE', perfect ? 0xffffff : 0xffd700, () => {
+      this._resolve(perfect ? 'perfect' : 'good', perfect ? this.words.perfect : this.words.good, perfect ? 0xffffff : 0xffd700, () => {
         this.cut = clamp01(this.cut + c.cutPerSwing * (perfect ? 1 : 0.85));
         this._applyLean(1);
       });
     } else {
-      this._resolve('miss', 'GLANCING', 0x99a0b0, () => { this.cut = clamp01(this.cut + c.cutPerSwing * 0.2); this._applyLean(0.5); });
+      this._resolve('miss', this.words.glance, 0x99a0b0, () => { this.cut = clamp01(this.cut + c.cutPerSwing * 0.2); this._applyLean(0.5); });
     }
 
     // The bite moves forward/back with each swing — a face cut nudges it forward
@@ -226,7 +245,7 @@ setSide(dir) {
 
   _layout() {
     this.cutBar.setValue(this.cut);
-    this.cutText.setText(`Cut  ${Math.round(this.cut * 100)}%`);
+    this.cutText.setText(`${this.words.cut}  ${Math.round(this.cut * 100)}%`);
     if (this.pips.length) {
       const spent = Math.floor(this.cut * this.pips.length);
       this.pips.forEach((p, i) => p.setFrame(i < spent ? 'strike_pip_spent' : 'strike_pip_full'));
@@ -235,8 +254,8 @@ setSide(dir) {
     const balanced = this.lean >= this.bandCenter - this.bandHalf && this.lean <= this.bandCenter + this.bandHalf;
     this.leanGauge.setBand(this.bandCenter, this.bandHalf).setBandTint(0x9ad06f)
       .setMarker(this.lean).setMarkerTint(balanced ? null : 0xd97a6a);
-    this.leanText.setText('Lean  (keep it in the band)');
-    this.sideText.setText(this.side === 'face' ? 'Cutting: ◄ FACE   (→ to back-cut)' : 'Cutting: BACK ►   (← to face-cut)');
+    this.leanText.setText(this.words.lean);
+    this.sideText.setText(this.side === 'face' ? this.words.face : this.words.back);
 
     const p = Math.min(this.power, 1);
     const half = this.config.powerZone.width / 2;
@@ -244,7 +263,7 @@ setSide(dir) {
     this.powerTrack.setBand(this.zoneCenter, half).setBandTint(inZone ? 0xffffff : 0x9ad06f)
       .setMarker(p).setMarkerTint(this.power > this.config.overchargeAt ? 0xd97a6a : null);
 
-    this.soundText.setText(`Soundness  ${Math.round(this.soundness * 100)}%`);
+    this.soundText.setText(`${this.words.sound}  ${Math.round(this.soundness * 100)}%`);
     this.soundText.setColor(this.soundness <= 0.3 ? COLOR.warn : this.soundness <= 0.6 ? COLOR.gold : COLOR.grass);
   }
 

@@ -39,6 +39,11 @@ export const TUNING = {
   interactReach: 12,
   interactRange: 20,
 
+  // Four a side and no more. The most that walk out of Dreadhollow on one job, and the
+  // most that can be standing on the other side of a fight — one number because it is
+  // one rule, and because a card that holds four rows holds four rows either way.
+  partyMax: 4,
+
   // A run is a line of nodes with a fork before some of them. Node counts are
   // [least, most] and are rolled once the length is chosen.
   questNodes: { short: [4, 8], medium: [8, 12], long: [12, 16] },
@@ -352,6 +357,95 @@ export const TUNING = {
   skillOddsPerPoint: 0.06,
   skillOddsMost: 0.6, // and this is as flat as any table gets, at any score
 
+  // Fighting. What is fought and what it takes to fight it is in content/foes.js; these
+  // are the numbers the system itself runs on, and they are the same for every fight.
+  combat: {
+    // What a character marked `combat` in content/party.js is worth, where their own
+    // block does not say. A block naming none of these is a fighter of exactly this size.
+    fighter: { hp: 24, hit: 2, guard: 12, harm: [3, 6] },
+    hpPerLevel: 4, // added to a fighter's hit points for every level past the first
+    ambushHit: 3, // what a foe adds to its opening blow at a fight walked into blind
+    // Changing over mid-fight costs the whole turn — nobody swings — and the one coming
+    // in takes what the foe makes of the gap. Somebody stepping in over a fighter who is
+    // already down pays neither: the blow that put the last one down was that turn.
+    swapOpens: 2,
+    // Badly hurt: this far down and a side has decisions to make. A foe written to look
+    // after itself pulls back behind a fresher one rather than dying in front of you —
+    // costing them the blow they would have thrown, and handing your next swing the same
+    // swapOpens their side pays. What comes back later comes back as hurt as it went.
+    // It is also the point at which either side may try to leave the fight altogether.
+    badlyHurt: 0.3,
+    // Breaking off. It costs the turn whether or not it works — no swing, and the other
+    // side takes the opening — and it is a bare d20 against this, because running is not
+    // a thing anybody here is trained at.
+    fleeDC: 11,
+    fleeCon: 3, // and what getting away costs the pool: they came back at a run
+    fleeXp: 0.5, // and what a node run away from is worth: half of it, for half a job
+
+    // A move is played, not rolled for. Each one is one of the imported activity engines
+    // in the numbers a single blow needs rather than a whole tree — the overrides below
+    // are laid over that activity's own block in this file, so retuning Felling still
+    // retunes the swing. See src/activity.js for which engine each is.
+    // Each carries `words` as well: the same meters, called what they are in a fight
+    // rather than what they are in the wood. An engine keeps its own word for anything
+    // not named here, so a label added to an engine turns up in its trade's language
+    // until somebody writes the fighting one.
+    swing: {
+      // One swing ends it however badly it went, which is a floor and not a preference:
+      // a glancing blow adds a fifth of this and a wild one three tenths, so anything
+      // under five would quietly make a bad swing take two turns to throw.
+      cutPerSwing: 6,
+      words: {
+        cut: 'Blow',
+        lean: 'Footing  (keep your weight in the band)',
+        face: 'Swinging: ◄ HIGH   (→ to come in low)',
+        back: 'Swinging: LOW ►   (← to come in high)',
+        power: 'Swing — hold SPACE, let go as it opens up',
+        sound: 'Balance',
+        status: '← high   → low',
+        good: 'SOLID',
+        glance: 'GLANCED OFF',
+      },
+    },
+    drive: {
+      fracturePerStrike: 5, // and the pick, whose worst blow is a quarter: four or more
+      words: {
+        fracture: 'Blow',
+        shock: 'Exposure  (every wind-up is time it can see you)',
+        stability: 'Footing',
+        power: 'Drive — hold SPACE, put it in where it is open',
+        deep: 'Going THROUGH it — hard, and you are wide open    [Left] ease off',
+        shallow: 'Going SHORT — safe, and it hardly tells    [Right] commit',
+        perfect: 'STRAIGHT THROUGH!',
+        good: 'IN IT',
+        glance: 'TURNED ASIDE',
+      },
+    },
+    cover: {
+      durationMs: 2200,
+      lineIntegrity: null, // a hold, and one nobody can fail
+      words: {
+        prompt: 'Hold SPACE to keep your guard on it',
+        label: 'guard',
+        holding: 'The guard is where it needs to be.',
+        slipping: 'It is coming round the side of you.',
+      },
+    },
+    // What playing it well is worth. Quality is the engine's own 0..1 — see
+    // activityWorth — and it is the whole of what a blow does: full harm at perfect,
+    // less the worse it went, and never under the floor, because a bad swing is still
+    // a swing. A guard covers by the same fraction, and a turn played well lands more
+    // often as well as harder.
+    harmFloor: 0.4,
+    playHit: 4,
+    // A fighter at zero hit points is out of the run: their own constitution comes off
+    // the party's pool, because a body being carried is not a body walking. Somebody else
+    // who fights steps up; nobody left who fights and the party turns for home.
+    faintCon: 1, // what fraction of their constitution the pool loses. One is all of it.
+  },
+
+  questHpHeight: 10, // the slim bar under the constitution, one per fighter on the run
+
   // Skill checks. A die, plus the skill, against a DC written on the encounter or the
   // job. The best in the party rolls it. A natural top always holds and a natural 1
   // never does, so no DC is a wall and none is a formality.
@@ -458,6 +552,14 @@ export const COLORS = {
   conRivet: 0x9aa0a6,
   conFull: 0xd1943c,
   conLow: 0xa8341f,
+
+  // The slim bars under it: a fighter's own hit points, and — while a fight is on — what
+  // is left of the thing they are fighting. The party's runs green to the same red the
+  // constitution goes to; the foe's is its own colour, so the two are never confused.
+  hpFull: 0x7f9f5a,
+  hpLow: 0xa8341f,
+  foeFull: 0x8a4a5e,
+  foeLow: 0x3a2028,
 
   // What is behind the town. The paintings carry no sky — it is transparent in them, so
   // the weather is the game's to draw — and where a panel has a hole in it you are looking

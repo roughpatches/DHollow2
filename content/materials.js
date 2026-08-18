@@ -246,4 +246,15 @@ export const MATERIALS = [
       'The fletching is heron. Whoever makes these is paying for them twice out of the same bird.',
     ],
   },
+
+  // --- off what is fought after dark -----------------------------------------
+  {
+    id: 'bone',
+    name: 'Bone',
+    start: 0,
+    body: [
+      'Taken off something that was standing up an hour ago and is not standing now.',
+      'Not all of it is the shape bone is supposed to be.',
+    ],
+  },
 ];

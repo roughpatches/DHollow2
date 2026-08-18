@@ -13,7 +13,7 @@ import { ENCOUNTERS } from '../content/encounters.js';
 import { SKILLS } from '../content/skills.js';
 import { DRAWN_KINDS } from './nodes.js';
 import {
-  roster, charOf, award, levelOf, raiseBond, conOf, conTotal,
+  roster, charOf, award, levelOf, raiseBond, conOf, conTotal, combatOf,
   rankOf, scoreOf, check, bestAt, skillOf, skillForActivity, walking, fighters, YOU,
   nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
@@ -21,6 +21,10 @@ import { give, nameOf } from './town.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
+import {
+  begin, take, swapTo, stepIn, flee, canFlee, muster, hurtOf, spoilsOf, saidCount, foeOf,
+  MOVES,
+} from './combat.js';
 
 // Everything a node can turn out to be: the ones a quest names by hand, and the ones the
 // road draws. They are one shape and one lookup, so nothing downstream has to know which
@@ -129,6 +133,24 @@ for (const [i, a] of gathering.entries()) {
   for (const b of gathering.slice(i + 1)) {
     if (!pairings.has([a, b].sort().join('+'))) console.warn(`No resource node pairs ${a} with ${b}.`);
   }
+}
+
+// A combat node with nothing to fight is a node that reads as a fight and then is not
+// one, and a foe nobody wrote is a fight that cannot start. Both are content mistakes and
+// both are cheap to say here.
+for (const e of KINDS) {
+  const band = e.foes || (e.foe ? [e.foe] : []);
+  for (const entry of band) {
+    const id = typeof entry === 'string' ? entry : entry.id;
+    if (!foeOf(id)) console.warn(`${e.name}: no such foe — ${id}`);
+  }
+  if (e.nature === 'combat' && !band.length) console.warn(`${e.name}: a combat node with nothing to fight.`);
+}
+
+// Four a side. A job that asks for more than that is a job that cannot be crewed, and
+// this is where that is cheap to say rather than found on the screen where they are picked.
+for (const q of QUESTS) {
+  if (q.party > TUNING.partyMax) console.warn(`${q.label}: asks for ${q.party}; ${TUNING.partyMax} is the most that walk out.`);
 }
 
 // Somewhere to set out for has to have something to walk. A zone open for work with
@@ -381,7 +403,8 @@ export function start(id, when, party, choice = {}) {
   // and are the only ones who can read anything at a fork. The player is on it whoever
   // else is, so their three skills are the three the party always has.
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
-    .filter((id, i, all) => all.indexOf(id) === i);
+    .filter((id, i, all) => all.indexOf(id) === i)
+    .slice(0, TUNING.partyMax); // four walk out and no more, however they were picked
   const nodes = quest.line ? authored(quest.line) : drawn(size);
   // everyone's own constitution, and what knowing this ground adds to it
   const con = conTotal(who) + groundCon(who, terrainOf(quest, where));
@@ -389,6 +412,11 @@ export function start(id, when, party, choice = {}) {
     quest, size, where, when: at, party: who, nodes, at: -1, state: 'running',
     used: new Set(), // the kinds this run has had that it is only allowed one of
     spoils: {}, xp: 0, con, conMax: con,
+    // Hit points are the fighters' own and are not pooled: the party shares a
+    // constitution and nobody shares a rib. Full at the gate, spent down by whatever
+    // they trade blows with, and forgotten when the run ends — the same as the pool.
+    hp: Object.fromEntries(fighters(who).map((id) => [id, combatOf(id).hp])),
+    fight: null, // the one going on right now, and null the rest of the time
   };
   step();
   return run;
@@ -707,6 +735,9 @@ function toBeat(node, id) {
     return;
   }
   story.set(b.flag);
+  // The beat the fight starts at. `true` is a beat that fights whatever the node names;
+  // src/nodes.js writes the fuller form, with what the way through was worth to it.
+  if (b.fight) node.fight = b.fight === true ? { foe: KIND[node.kind].foe } : b.fight;
   if (b.con) node.conBeat += b.con;
   if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
   if (b.draw) node.beatDraw = b.draw; // the beat walked into decides which table, if any
@@ -735,15 +766,177 @@ export function advance() {
   return run;
 }
 
-// The end of the beats is the end of the node — unless the encounter also names an
-// activity, in which case the beats were the walk up to it and the player takes the
-// controls now. That is how a node gets words in front of its minigame.
+// The end of the beats is the end of the node — unless the way the party took walked
+// them into a fight, or the encounter also names an activity, in which case the beats
+// were the walk up to it and the player takes the controls now. That is how a node gets
+// words in front of its minigame, and words in front of whatever is standing in the road.
 function outOfBeats(node) {
+  if (!node.passed && node.fight) {
+    toFight(node);
+    return;
+  }
   if (!node.passed && hasEngine(activityOf(node))) {
     run.phase = 'activity';
     return;
   }
   settle(null);
+}
+
+// --- fighting ---------------------------------------------------------------
+// A fight is 1v1: one combat character is up and the rest of the party stands off it.
+// The rules are in src/combat.js and what is fought is in content/foes.js; this is only
+// what a run does with the result. Hit points are the fighter's own — the pool hears
+// about a fight when somebody goes down, and not before.
+
+// who on the run can fight and is still on their feet
+export function standing() {
+  return run ? fighters(run.party).filter((id) => run.hp[id] > 0) : [];
+}
+
+export function hpOf(id) {
+  return run && run.hp[id] !== undefined ? run.hp[id] : 0;
+}
+
+export function hpMaxOf(id) {
+  const c = combatOf(id);
+  return c ? c.hp : 0;
+}
+
+export function fightingAt() {
+  return run ? run.fight : null;
+}
+
+// The party has walked up to something that has to be fought. Where more than one of them
+// fights, which one steps up is the player's call — it is the only choice they get about
+// a fight before it starts, and it is the whole of what a second fighter is for.
+function toFight(node) {
+  // What is standing there is rolled once, here, and the same band is what the whole
+  // fight is against however many of the party have to be fed into it.
+  node.band = node.band || muster(node.fight.band, node.fight.thin || 0);
+  if (!node.band.length) { settle(null); return; } // said at boot; the run walks on
+  const up = standing();
+  if (!up.length) { rout(); return; }
+  if (up.length === 1) stepUp(up[0]);
+  else run.phase = 'fighter';
+}
+
+// Sending somebody to the front: the first one, or the one who steps over them when they
+// go down. There is one fight and it is the same fight all the way through, so a fighter
+// carried out of it leaves the thing standing there as wounded as they left it.
+export function stepUp(id) {
+  if (!run || !standing().includes(id)) return run;
+  const node = run.nodes[run.at];
+  if (run.fight) stepIn(run.fight, id);
+  else {
+    run.fight = begin(id, node.band, {
+      pool: run.hp, weaken: node.fight.weaken || 0, ambush: !!node.fight.ambush,
+    });
+  }
+  run.phase = 'fight';
+  return afterTurn(node);
+}
+
+// And changing over mid-fight because you would rather the other one wore the next few.
+// It costs the turn; see swapTo in src/combat.js.
+export function swapIn(id) {
+  if (!run || run.phase !== 'fight' || !run.fight || run.fight.over) return run;
+  if (id === run.fight.who || !standing().includes(id)) return run;
+  swapTo(run.fight, id);
+  return afterTurn(run.nodes[run.at]);
+}
+
+// A move is played rather than declared: the engine it names opens where the party is
+// standing, and what the player makes of it is what the blow is worth. A move with no
+// engine behind it resolves on the spot, the way every node did before its engine landed.
+export function fightMove(moveId) {
+  if (!run || run.phase !== 'fight' || !run.fight || run.fight.over) return run;
+  const move = MOVES.find((m) => m.id === moveId);
+  if (move && hasEngine(move.play)) {
+    run.fight.move = moveId;
+    run.phase = 'activity';
+    return run;
+  }
+  take(run.fight, moveId);
+  return afterTurn(run.nodes[run.at]);
+}
+
+// and what the engine handed back, which is the rest of that same turn
+export function fightPlayed(played) {
+  if (!run || !run.fight || !run.fight.move) return run;
+  const moveId = run.fight.move;
+  run.fight.move = null;
+  run.phase = 'fight';
+  take(run.fight, moveId, played);
+  return afterTurn(run.nodes[run.at]);
+}
+
+// Which engine the controls are being handed to: the move being played where a fight is
+// on, and the work at the node everywhere else.
+export function playing() {
+  const held = run && run.fight && run.fight.move;
+  if (held) return (MOVES.find((m) => m.id === held) || {}).play;
+  return run && run.at >= 0 ? activityOf(run.nodes[run.at]) : null;
+}
+
+// Breaking off the whole thing, which is only on the card once whoever is up is badly
+// hurt. It costs the turn and it is not promised; see flee in src/combat.js.
+export function canBreakOff() {
+  return canFlee(run && run.fight);
+}
+
+export function fightFlee() {
+  if (!run || run.phase !== 'fight' || !canBreakOff()) return run;
+  flee(run.fight);
+  return afterTurn(run.nodes[run.at]);
+}
+
+// Whatever the turn came to. The fight is only over two ways: the thing goes down, or
+// the fighter does.
+function afterTurn(node) {
+  const f = run.fight;
+  if (!f || !f.over) return run;
+  if (f.over === 'down') { faint(f.who); return run; }
+
+  // Everything else is the fight being over: they are down, they ran, or the party did.
+  // Whatever was felled along the way still pays — what got away does not.
+  node.won = {
+    foe: f.foe.name,
+    felled: f.felled.length,
+    broke: f.over === 'broke',
+    fled: f.over === 'fled',
+    rounds: f.round,
+    hurt: hurtOf(f),
+  };
+  node.beatSpoils = { ...(node.beatSpoils || {}), ...spoilsOf(f) };
+  // The party ran. They keep what they had already taken off it and pay for the running:
+  // a party that came back down the road at a dead sprint is a party that is spent.
+  if (f.over === 'fled') node.conBeat -= TUNING.combat.fleeCon;
+  run.fight = null;
+  settle(null);
+  return run;
+}
+
+// A fighter at nothing is carried, and a body being carried is not a body walking: their
+// constitution comes off the pool with them. Somebody else who fights steps up; nobody
+// left who fights and the party is finished out here whatever the pool still says.
+function faint(id) {
+  const node = run.nodes[run.at];
+  run.fight.who = null; // nothing standing in front of it, and the fight still going on
+  const lost = Math.round(conOf(id) * TUNING.combat.faintCon);
+  run.conMax = Math.max(0, run.conMax - lost);
+  run.con = Math.max(0, Math.min(run.conMax, run.con - lost));
+  node.fainted = [...(node.fainted || []), { who: whoIs(id), con: lost }];
+  if (!standing().length) { rout(); return; }
+  if (run.con <= 0) { run.fight = null; spend(); return; }
+  run.phase = 'fighter'; // the thing is still standing there and somebody has to
+}
+
+// Nobody left who fights, with something in the road that has to be. They break off and
+// come home from where they stand, the same as a party with nothing left in the pool.
+function rout() {
+  run.routed = true;
+  run.fight = null;
+  spend();
 }
 
 // A way through a scene that names work nobody on the run knows is a way the party
@@ -833,7 +1026,10 @@ export function settle(played) {
   }
   node.xp = node.passed ? 0 : Math.round(roll(e.xp)
     * (night ? TUNING.questNightXp : 1)
-    * (node.check && node.check.pass ? TUNING.checkPassXp : 1));
+    * (node.check && node.check.pass ? TUNING.checkPassXp : 1)
+    // half a fight is half a job: what you learn from a thing you ran from is what you
+    // learned before you ran
+    * (node.won && node.won.fled ? TUNING.combat.fleeXp : 1));
   run.xp += node.xp;
   // who the node's experience took to a new level, so the tally at the node can say so
   // where it happened rather than leaving it to be noticed on the crew screen later
@@ -977,6 +1173,36 @@ export function passedLine(node) {
   const named = (node.harvests || []).map((h) => h.skill.name);
   const skill = named.length ? named.join(' or ') : 'this work';
   return `Nobody walking this knows ${skill}. The party looks at it a while and goes on.`;
+}
+
+// What the fight came to, on the tally afterwards: what went down, how long it took, and
+// what it cost the one who was up. Null at a node where nothing was fought.
+export function wonLine(node) {
+  const w = node.won;
+  if (!w) return null;
+  const rounds = `${w.rounds} ${w.rounds === 1 ? 'round' : 'rounds'}`;
+  // How it ended: the party ran, the last of them ran, or everything that was standing
+  // there is down. What got away is named as got away, because it is still out there.
+  const felled = w.felled === 1 ? 'one of them down'
+    : `${saidCount(w.felled)} of them down`;
+  const down = w.fled
+    ? `You broke off and left it standing${w.felled ? `, with ${felled}` : ''}`
+    : w.broke
+      ? `The last of them breaks and goes${w.felled ? `, with ${felled} behind it` : ''}`
+      : w.felled > 1
+        ? `${w.felled === 2 ? 'Both' : `All ${saidCount(w.felled)}`} of them are down, ${w.foe} last`
+        : `${w.foe} is down`;
+  if (!w.hurt.length) return `${down}, in ${rounds}, and nothing laid a hand on anybody.`;
+  const total = w.hurt.reduce((n, [, v]) => n + v, 0);
+  const off = w.hurt.length > 1
+    ? `between ${w.hurt.map(([id]) => whoIs(id)).join(' and ')}`
+    : `off ${whoIs(w.hurt[0][0])}`;
+  return `${down}. ${rounds}, and ${total} hit points ${off}.`;
+}
+
+// and who was carried out of it, and what the pool lost with them
+export function faintLines(node) {
+  return (node.fainted || []).map((f) => `${f.who} is carried. ${f.con} constitution off the pool.`);
 }
 
 // who is walking it and what each of them is worth to the pool — the readout under the

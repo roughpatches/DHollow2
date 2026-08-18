@@ -82,6 +82,32 @@
 //             parties three different questions and is a third likelier to have something
 //             for the one standing in front of it; the card holds three and no more.
 //
+// And a COMBAT node — an encounter node carrying a foe — also has:
+//   foe     — an id from content/foes.js. Whatever the ways come to, this is what is
+//             standing there, and a node carrying one is only ever drawn after dark.
+//             One combat character steps up and fights it 1v1; see src/combat.js.
+//   foes    — a band instead of one thing, where more than one of them is standing there.
+//             Each entry is a foe id, or `{ id, many: [least, most] }` for a number of
+//             them rolled when the party walks into it — write `[0, 2]` for ones that are
+//             sometimes not there at all. It is still 1v1: they come forward one at a
+//             time. Never more than partyMax of them however the rolls fall, so a band
+//             written long is a band trimmed rather than a fight nobody can win.
+//   The ways are what a party can do about it before it comes to that, and each one says
+//   what holding it is worth against a fight:
+//     avoids  — true if holding this way means the fight does not happen at all. The
+//               node pays what the way pays and the party walks on.
+//     weakens — hold it and the fight still happens, with the one in front this many hit
+//               points down. A way that modifies rather than avoids.
+//     thins   — and this many fewer of them standing there. Never below one: a way that
+//               empties the road is `avoids`, and this is a way that shortens the odds.
+//               It is the back of the band that goes, so write the ones a good check
+//               would keep off the road — the dog still on the picket — last.
+//     a way with none of them holds and the fight happens as written.
+//   Losing any of them walks the party into the fight blind, and a foe that was not seen
+//   coming has the first blow. Write one way that names no skill at all — no roll, no
+//   `tried`, just `met` — so meeting it head on is always on the card: a party who cannot
+//   read the ground should be able to choose the fight rather than be handed it.
+//
 // Add a node by adding a block. Nothing reads either list by position.
 
 export const RESOURCE_NODES = [
@@ -643,6 +669,7 @@ export const ENCOUNTER_NODES = [
     name: 'Something following',
     zones: ['greywood'],
     nature: 'combat',
+    foe: 'stalker', // and if it is not talked out of it, this is what it turns out to be
     weight: { day: 1, night: 5 },
     read: { skill: 'woodcraft', line: 'Everything that should be making noise on that side has stopped.' },
     xp: [18, 28],
@@ -656,7 +683,8 @@ export const ENCOUNTER_NODES = [
         skill: 'woodcraft',
         dc: 14,
         tried: 'The party stops moving and starts listening, which is the opposite of what it wants.',
-        held: 'You see it before it means you to, and it goes back to being weather in the trees.',
+        held: 'You see it before it means you to, and a thing seen is a thing that has lost its evening. It goes back to being weather in the trees.',
+        avoids: true, // the whole of what Woodcraft buys here: the fight does not happen
         lost: 'The first anybody knows of it is the weight of it.',
         lostCon: 4,
       },
@@ -665,9 +693,15 @@ export const ENCOUNTER_NODES = [
         skill: 'intimidation',
         dc: 14,
         tried: 'Steel on steel, and four people shouting at a wood that has gone quiet.',
-        held: 'Whatever it was decides it is somebody else\'s evening, and the noise of it going is louder than the noise of it coming.',
+        held: 'It comes anyway. But it comes carefully, and it comes late, and it has spent an hour deciding on ground of your choosing.',
+        weakens: 6, // not talked out of it — talked down to a size that can be handled
         lost: 'It answers. Everything that was following now knows exactly where to be.',
         lostCon: 4,
+      },
+      {
+        // the way that asks nothing of anybody: no roll, and the fight on your terms
+        text: 'Stop walking and let it come.',
+        met: 'Nobody says the word. Everybody turns at once and faces the quiet side, and after a while the quiet side stops pretending.',
       },
     ],
   },
@@ -676,6 +710,8 @@ export const ENCOUNTER_NODES = [
     name: 'Out of the ground',
     zones: ['greywood'],
     nature: 'combat',
+    // a dozen mounds, and one to three of them get all the way up
+    foes: [{ id: 'unquiet', many: [1, 3] }],
     weight: { day: 1, night: 4 },
     read: { skill: 'investigation', line: 'That earth has been turned, and it was turned from underneath.' },
     xp: [16, 24],
@@ -689,7 +725,8 @@ export const ENCOUNTER_NODES = [
         skill: 'investigation',
         dc: 15,
         tried: 'Everybody stands still and counts the mounds, twice.',
-        held: 'The turned earth is noticed while it is still only turned earth.',
+        held: 'The turned earth is noticed while it is still only turned earth, and the party is a field away before the first of it opens.',
+        avoids: true,
         lost: 'It is noticed afterwards, from the far side of it.',
         spoils: { nails: [0, 2] },
         lostCon: 4,
@@ -699,10 +736,63 @@ export const ENCOUNTER_NODES = [
         skill: 'intimidation',
         dc: 14,
         tried: 'Nobody backs off the mound. Everybody faces it, and the noise they make is not fear.',
-        held: 'Whatever was coming up thinks better of the company and goes back down into it.',
+        held: 'Most of what was coming up thinks better of the company and settles back into it. One of them was never listening.',
+        thins: 2, // talked back down to whatever was never listening
+        weakens: 4, // and that one comes up slower for having thought about it
         lost: 'It was never deciding. It was only slow.',
         spoils: { nails: [1, 3] },
         lostCon: 4,
+      },
+      {
+        text: 'Get in among the mounds while there is still only one of them up.',
+        met: 'You go to it rather than waiting on it, and you go while the count is still one.',
+      },
+    ],
+  },
+  {
+    // The poacher the first job's clues are about, standing at the end of his own line of
+    // grey fletching. He is the one thing out here that can be talked to, and the only
+    // reason to fight him is that he will not be.
+    id: 'greyarrows',
+    name: 'The man at the fire',
+    zones: ['greywood'],
+    nature: 'combat',
+    // A fire out here is not one man on his own. One or two of them, and the dogs they
+    // keep — which are sometimes on the picket and sometimes already coming.
+    foes: [{ id: 'poacher', many: [1, 2] }, { id: 'lurcher', many: [0, 2] }],
+    weight: { day: 1, night: 3 },
+    read: { skill: 'insight', line: 'Somebody is sitting up with a fire lit, out here, on purpose. That is either a fool or an invitation.' },
+    xp: [20, 30],
+    con: [-2, -1],
+    body: [
+      'A fire under the bank, burnt down to the red of it, and a man sitting the wrong side of it so the light is in your eyes and not his. There is a bow across his knees and grey fletching standing out of the quiver at his hip, and there is more dead bird stacked behind him than one man could carry.',
+    ],
+    ways: [
+      {
+        text: 'Talk to him across the fire.',
+        skill: 'persuasion',
+        dc: 15,
+        tried: 'Slowly, from where he can see all of you, and about the weather first.',
+        held: 'He talks. Not much, and not about who is paying him, but he talks — and when the party walks on he is still sitting down.',
+        avoids: true,
+        spoils: { greyarrow: [1, 3] },
+        lost: 'He listens to all of it with his hand on the bow, and when he has heard enough he stands up.',
+        lostCon: 2,
+      },
+      {
+        text: 'Get between him and the bow.',
+        skill: 'insight',
+        dc: 13,
+        tried: 'Watching his hands rather than his face, and moving on the moment they move.',
+        held: 'The bow is on the far side of the fire from him before he has finished standing up, and a poacher without his bow is a man with a knife. The dog on the picket is still on the picket.',
+        weakens: 6,
+        thins: 1, // whatever was tied up stays tied up
+        lost: 'You read him a half-second late, which is the same as not reading him.',
+        lostCon: 2,
+      },
+      {
+        text: 'Walk into the firelight.',
+        met: 'You walk in where he can see you and he is up before your second step, and neither of you says anything at all.',
       },
     ],
   },
