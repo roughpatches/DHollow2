@@ -20,7 +20,7 @@ const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 // The name is here for the same reason: everyone else is named in content, and the
 // player is named in the hut, by the player.
 const state = new Map(PARTY.map((c) => [c.id, {
-  level: 1, xp: 0, bond: c.bond || 0, skills: { ...c.skills }, name: c.name,
+  level: 1, xp: 0, bond: c.bond || 0, skills: { ...c.skills }, name: c.name, points: 0,
 }]));
 
 // a misspent or misspelt skill list is a content mistake, and content mistakes are
@@ -144,7 +144,10 @@ export function xpToNext(level) {
   return level >= TUNING.maxLevel ? Infinity : TUNING.xpBase * level;
 }
 
-// returns how many levels were gained, so a caller can say so
+// Experience goes to the level and to nothing else: no skill is ever practised into
+// existence. A level hands back skillPointsPerLevel points, and what those are spent on
+// is a decision somebody makes — the player at the sheet, everybody else on the spot.
+// Returns how many levels were gained, so a caller can say so.
 export function award(id, xp) {
   const s = stateOf(id);
   if (s.level >= TUNING.maxLevel) return 0; // XP past the last level has nowhere to go
@@ -155,7 +158,26 @@ export function award(id, xp) {
     s.level += 1;
     gained += 1;
   }
+  if (gained) {
+    s.points += gained * TUNING.skillPointsPerLevel;
+    if (id !== YOU) autoSpend(id);
+  }
   return gained;
+}
+
+// There is one character sheet the player fills in, and it is theirs. Everyone else
+// spends as they earn, and broadens rather than deepens: the point goes on whichever of
+// the things they already know they are worst at, so a companion stays the shape they
+// were recruited as instead of turning into a specialist nobody asked for.
+function autoSpend(id) {
+  const s = stateOf(id);
+  const known = Object.keys(s.skills).filter((t) => SKILL[t]);
+  if (!known.length) return;
+  while (s.points > 0) {
+    const t = known.reduce((a, b) => (s.skills[b] < s.skills[a] ? b : a));
+    s.skills[t] += 1;
+    s.points -= 1;
+  }
 }
 
 // what level somebody has reached — the crew screen says it, and so does the tally at a
@@ -208,6 +230,24 @@ export function skillForActivity(activity) {
 
 export function rankOf(id, skillId) {
   return stateOf(id).skills[skillId] || 0;
+}
+
+// what a level handed over and nobody has spent yet
+export function pointsOf(id) {
+  return stateOf(id).points;
+}
+
+// Points off the bank and onto skills, as {skillId: points}. The whole sheet is committed
+// at once, so a point moved onto something and off it again never left the bank. Returns
+// how many were spent, and spends none of them if the sheet asks for more than there are.
+export function spendPoints(id, spent) {
+  const s = stateOf(id);
+  const wanted = Object.entries(spent).filter(([t, n]) => SKILL[t] && n > 0);
+  const n = wanted.reduce((a, [, v]) => a + v, 0);
+  if (!n || n > s.points) return 0;
+  for (const [t, v] of wanted) s.skills[t] = (s.skills[t] || 0) + v;
+  s.points -= n;
+  return n;
 }
 
 // what one point is worth to an activity, and so what a rank is worth
@@ -301,7 +341,8 @@ export function partyRows() {
       note: `Lv ${s.level} · Con ${conOf(c.id)}`,
       body: [
         `Level ${s.level}    Constitution ${conOf(c.id)}    `
-          + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`),
+          + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`)
+          + (s.points ? `    ${s.points} unspent` : ''),
         c.you
           ? 'On every run. Nobody has to be asked to bring you.'
           : `Bond: ${bandName(bandOf(c.id))} (${s.bond} points).`,
@@ -325,10 +366,16 @@ export function skillRows() {
       .filter((c) => has(c.id, t.id))
       .sort((a, b) => rankOf(b.id, t.id) - rankOf(a.id, t.id));
     const score = scoreOf(walking().map((c) => c.id), t.id);
+    const yours = rankOf(YOU, t.id);
+    const bank = pointsOf(YOU);
     return {
       label: t.name,
       note: `${score} in town`,
+      skill: t.id, // and so [Enter] on this row is a point spent on it; see src/scenes/Menu.js
       body: [
+        (yours ? `You have ${yours}.` : 'You have none.')
+          + (bank ? `  ${bank} point${bank === 1 ? '' : 's'} to spend — [Enter] to spend ${bank === 1 ? 'it' : 'them'}.`
+            : '  Nothing to spend; a level is what hands the points over.'),
         `A point adds ${TUNING.skillBonusPerPoint} to ${t.activities.join(', ')}, one to any ${t.name} roll, `
           + `and ${Math.round(TUNING.skillYieldPerPoint * 100)}% to what work of that kind pays the party. `
           + 'It also turns up the scarcer things more often, where the work has any.',

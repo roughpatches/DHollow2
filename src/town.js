@@ -52,6 +52,11 @@ export function stock() {
   return MATERIALS.map((m) => [m.id, held.get(m.id)]);
 }
 
+// how much of one thing is in the pack — what a recipe's cost is counted against
+export function heldOf(mid) {
+  return held.get(mid) || 0;
+}
+
 // What the Inventory tab shows above the kit the character set out with, in the same
 // {label, note, body} shape every tab uses. A material at none is not carried and does
 // not take a square; it appears the moment a run brings some home. The icon is the

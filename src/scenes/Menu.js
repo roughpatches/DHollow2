@@ -7,7 +7,7 @@ import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
-import { partyRows, skillRows, fill } from '../party.js';
+import { partyRows, skillRows, fill, pointsOf, YOU } from '../party.js';
 import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
@@ -115,6 +115,14 @@ export default class Menu extends Phaser.Scene {
       if (!canStart(entry.quest)) return;
       this.close();
       this.game.events.emit('quest:start', entry.quest);
+      return;
+    }
+    // a level's points, put on the skill under the cursor. The sheet opens over the town
+    // with the menu shut behind it, the way it did the first time it was filled in.
+    if (entry.skill) {
+      if (!pointsOf(YOU)) return;
+      this.close();
+      this.game.events.emit('skills:spend', entry.skill);
       return;
     }
     if (!entry.options) return;
@@ -537,6 +545,7 @@ export default class Menu extends Phaser.Scene {
     const rows = this.rows();
     let change = rows.some((r) => r.options) ? '    [Enter] Change' : '';
     if (rows.some((r) => r.quest)) change = '    [Enter] Set out';
+    if (rows.some((r) => r.skill)) change = pointsOf(YOU) ? '    [Enter] Spend a point' : '';
     this.text(
       this.listX,
       this.box.y + this.box.h - 26,

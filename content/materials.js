@@ -39,6 +39,108 @@ export const MATERIALS = [
   // Everything above is what a building is repaired with, and comes off the road's own
   // encounters. Everything below is what a node of the first job hands over by name.
 
+  // --- what comes off a bench ------------------------------------------------
+  // Nothing on the road pays these out: they are made in town, at a workstation, out of
+  // what a run brought home. See content/recipes.js.
+  {
+    id: 'charcoal',
+    name: 'Charcoal',
+    start: 0,
+    body: [
+      'Light, black, and ringing when two pieces knock together — wood with everything but the burning taken out of it.',
+      'It is half the weight of what went into the clamp and four times the heat.',
+    ],
+  },
+  {
+    id: 'ironbar',
+    name: 'Iron Bar',
+    start: 0,
+    body: [
+      'A hand\'s length of worked iron, square in section, with the hammer still legible along it.',
+      'This is the first iron anybody has drawn in Dreadhollow since the smithy went cold.',
+    ],
+  },
+  {
+    id: 'cabochon',
+    name: 'Cabochon',
+    start: 0,
+    body: [
+      'A domed stone worked to eight soft flats, polished until it holds the light rather than throwing it.',
+      'Worth having. Not worth what the same stone would have been in better hands.',
+    ],
+  },
+  {
+    id: 'tablegem',
+    name: 'Table-Cut Stone',
+    start: 0,
+    body: [
+      'Six faces and a broad flat top, cut to be looked into rather than looked at.',
+      'The first thing off that wheel in a generation that anybody would call a gem.',
+    ],
+  },
+  {
+    id: 'brilliant',
+    name: 'Brilliant',
+    start: 0,
+    body: [
+      'Twelve faces, and every one of them doing something to the light on its way back out.',
+      'Somebody who can cut one of these does not stay in a town like this. That is the usual order of it.',
+    ],
+  },
+  {
+    id: 'tonic',
+    name: 'Steeped Tonic',
+    start: 0,
+    body: [
+      'A stoppered bottle of something dark that smells of the forest floor and tastes worse than it smells.',
+      'It does what it does whether or not anybody enjoys it.',
+    ],
+  },
+  {
+    id: 'salve',
+    name: 'Field Salve',
+    start: 0,
+    body: [
+      'Grey-black, stiff at the top of the pot and softer underneath, and it goes on cold.',
+      'Made to be carried by somebody who is going to need it a long way from the person who made it.',
+    ],
+  },
+  {
+    id: 'cordial',
+    name: 'Heartwood Cordial',
+    start: 0,
+    body: [
+      'Clear, amber, and heavier in the hand than a bottle that size ought to be.',
+      'The first thing to come off that still in twenty years, and the shop it came out of is not open.',
+    ],
+  },
+  {
+    id: 'friedfish',
+    name: 'Fried Fish',
+    start: 0,
+    body: [
+      'Crisped on the skin side, folded onto a board, and eaten standing up before it stops being hot.',
+    ],
+  },
+  {
+    id: 'woodstew',
+    name: 'Forager\'s Stew',
+    start: 0,
+    body: [
+      'Fish and fungus cooked down together until neither is arguing with the other.',
+      'Thin, dark, and the best-smelling thing to come out of that kitchen in years.',
+    ],
+  },
+  {
+    id: 'smokedfish',
+    name: 'Smoked Trout',
+    start: 0,
+    body: [
+      'Stiff, mahogany-dark, and dry enough to carry in a pocket for a week.',
+      'Food that keeps is the difference between a day out and a night out.',
+    ],
+  },
+
   // --- the stream -----------------------------------------------------------
   {
     id: 'brooktrout',
