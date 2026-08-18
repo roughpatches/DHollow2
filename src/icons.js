@@ -233,11 +233,6 @@ const SHAPES = {
 // [shape, ink]. Ink names a pair in COLORS.icon, so retinting every wooden thing at
 // once is one edit in tuning.js.
 const ICONS = {
-  timber: ['planks', 'wood'],
-  stone: ['block', 'stone'],
-  nails: ['spikes', 'iron'],
-  pitch: ['pot', 'pitch'],
-  canvas: ['sheet', 'cloth'],
   brooktrout: ['fish', 'trout'],
   perch: ['fish', 'perch'],
   bluegill: ['fish', 'bluegill'],

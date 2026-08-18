@@ -13,7 +13,9 @@
 //       craft — whether the workstation inside works at this level. A building with this
 //               on a stage is a workstation from that stage on, and standing at it opens
 //               what can be made there; see content/recipes.js.
-//       cost  — materials to reach the NEXT stage. The last stage has none.
+//       cost  — materials to reach the NEXT stage. The last stage has none, and no stage
+//               has one at the moment: the materials repairs were written in are gone and
+//               the new ones are not written yet, so nothing levels until they are.
 //   body    — what the place is, in the world's voice. Yours to write.
 // A building whose id is also in STRUCTURES in content/looks.js has a picture per stage,
 // and repairing it changes the picture where it stands.
@@ -47,12 +49,10 @@ export const BUILDINGS = [
       {
         name: 'Burnt out',
         note: 'The roof is in the nave and the door is boarded over.',
-        cost: { timber: 14, nails: 30, canvas: 4 },
       },
       {
         name: 'Shored up',
         note: 'Scaffolded, sheeted, and dry for the first winter in years.',
-        cost: { timber: 22, stone: 16, nails: 40, pitch: 6 },
       },
       {
         name: 'Roofed and lit',
@@ -78,13 +78,11 @@ export const BUILDINGS = [
       {
         name: 'Cold',
         note: 'The roof is off the shed and the hearth is full of rain.',
-        cost: { timber: 10, stone: 12, nails: 20 },
       },
       {
         name: 'Hearth lit',
         note: 'Sheeted over, the hearth swept, the bellows patched, and the treadle wheel turning again in the corner.',
         craft: true,
-        cost: { stone: 18, ironbar: 4, pitch: 4 },
       },
       {
         name: 'Bloomery standing',
@@ -110,13 +108,11 @@ export const BUILDINGS = [
       {
         name: 'Shuttered',
         note: 'Boarded at the front and going green at the back. The shelves are still up.',
-        cost: { timber: 8, stone: 6, canvas: 4, nails: 10 },
       },
       {
         name: 'Bench and stove',
         note: 'Swept, glazed, and warm enough to hold a steep at temperature.',
         craft: true,
-        cost: { stone: 12, ironbar: 2, canvas: 6 },
       },
       {
         name: 'Still standing',
@@ -141,7 +137,6 @@ export const BUILDINGS = [
       {
         name: 'Cold hearth',
         note: 'The range is out and has been out long enough to be a shelf.',
-        cost: { timber: 8, nails: 12, pitch: 2 },
       },
       {
         name: 'Lit',

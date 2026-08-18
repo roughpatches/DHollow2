@@ -12,9 +12,9 @@ const MATERIAL = Object.fromEntries(MATERIALS.map((m) => [m.id, m]));
 // pack of trout is not an answer to what the chapel wants, and the panel below says so.
 const BUILDABLE = new Set(BUILDINGS.flatMap((b) => b.stages.flatMap((s) => Object.keys(s.cost || {}))));
 
-const held = new Map(MATERIALS.map((m) => [m.id, m.start]));
+const held = new Map(MATERIALS.map((m) => [m.id, 0])); // the pack starts empty
 const level = new Map(BUILDINGS.map((b) => [b.id, b.level]));
-// part-paid stages persist: you can bring four timber now and the rest tomorrow
+// part-paid stages persist: you can bring four of something now and the rest tomorrow
 const paid = new Map(BUILDINGS.map((b) => [b.id, {}]));
 
 for (const b of BUILDINGS) {

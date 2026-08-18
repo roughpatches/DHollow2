@@ -143,7 +143,7 @@ export const PLACES = [
     note: 'Wilds',
     quest: 'firstday',
     environment: ['forest', 'water', 'dark'],
-    resources: ['timber', 'oakbranch', 'blacktrumpet', 'heronfeather'],
+    resources: ['oakbranch', 'blacktrumpet', 'heronfeather'],
     body: ['[Placeholder Text]'],
   },
   {

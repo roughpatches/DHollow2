@@ -65,23 +65,6 @@ export const RECIPES = [
     ],
   },
   {
-    id: 'nails',
-    name: 'Draw nails',
-    at: 'forge',
-    stage: 1,
-    level: 2,
-    skill: 'smithing',
-    rank: 1,
-    activity: 'Forging',
-    costs: { ironbar: 1, charcoal: 1 },
-    makes: { nails: 10 },
-    xp: 14,
-    body: [
-      'A bar drawn down to rod, the rod cut to lengths, and every length headed over the hardy hole while it is still orange.',
-      'Nobody has made a nail in Dreadhollow in twenty years, and every roof in it is waiting on one.',
-    ],
-  },
-  {
     // The second stage of the smithy in one line: the same ore, and twice as much of it
     // comes out as iron. This is what rebuilding the bloomery bought.
     id: 'bloomery',
@@ -192,11 +175,11 @@ export const RECIPES = [
     rank: 2,
     activity: 'Brewing',
     hard: 'tricky',
-    costs: { oystermushroom: 4, charcoal: 2, pitch: 1 },
+    costs: { oystermushroom: 4, charcoal: 2 },
     makes: { salve: 1 },
     xp: 24,
     body: [
-      'Caps rendered down, charcoal ground through them, and pitch worked in last while it is still too hot to touch.',
+      'Caps rendered down and charcoal ground through them while it is all still too hot to touch.',
       'Five measures, and none of them at the pace of the one before.',
     ],
   },

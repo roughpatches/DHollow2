@@ -16,7 +16,7 @@ import * as craft from './craft.js';
 // so a character can be levelled from the browser console while there is no content that
 // does it yet: party.award('aldis', 40)
 window.party = party;
-// and so materials can be handed out before any activity produces them: town.give('timber', 20)
+// and so materials can be handed out before any activity produces them: town.give('ironore', 20)
 window.town = town;
 // and so a run can be started without walking to the Sea Hag: run.start('fenedge')
 window.run = run;
