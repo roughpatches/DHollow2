@@ -398,11 +398,12 @@ const DRYGROUND = {
   path: 'art/dryground',
   stands: {
     still: 'A_stretch_of_marshy_soggy_gro/rotations/A_stretch_of_marshy_soggy_gro.png',
-    ground: 35,
+    ground: 83,
+    scale: 2,
     // Left as painted. It measures brighter and yellower than the wood, but the yellow in
     // it is the same yellow the wood's dying grass is painted in, and taking it back only
     // cost the grass its life. Not everything that measures wrong looks wrong.
-    fade: [30, 30, 20, 0],
+    fade: [30, 30, 20, 20],
   },
 };
 
@@ -427,7 +428,18 @@ const STRANGERS = {
 // stretch of marsh, met by two parties asking it two different questions.
 const marsh = (name) => ({
   path: 'art/marsh',
-  stands: { still: `${name}/rotations/${name}.png`, ground: 34, fade: [30, 30, 20, 0] },
+  stands: {
+    still: `${name}/rotations/${name}.png`,
+    // Bad ground is ground the road goes into, not ground beyond the road. Its floor line
+    // sits at the middle of the band rather than the bottom of it, so the far edge is back
+    // among the trunks and the near edge runs on past the party, and it is drawn at twice
+    // the size it was painted, which is the width a stretch thirty yards across wants.
+    ground: 83,
+    scale: 2,
+    // The near edge is in view now, where it used to sit on the road line and be hidden,
+    // so it is feathered too — all four sides, where before the bottom took none.
+    fade: [30, 30, 20, 20],
+  },
 });
 
 // A derelict holding, painted at 80 and stood at twice that so a hut with a doorway in it
