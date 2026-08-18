@@ -311,6 +311,9 @@ export const SKILL_ART = {
 const OAK = {
   path: 'art/oak',
   stands: {
+    // Painted a good deal brighter and oranger than the wood behind it, so it is knocked
+    // back toward the trunks it is standing among rather than sitting in front of them.
+    shade: 0xdde0f5,
     folder: 'A_large_ancient_oak_treee_w/animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown',
     frames: 9,
     ground: 7,
@@ -396,6 +399,9 @@ const DRYGROUND = {
   stands: {
     still: 'A_stretch_of_marshy_soggy_gro/rotations/A_stretch_of_marshy_soggy_gro.png',
     ground: 35,
+    // Left as painted. It measures brighter and yellower than the wood, but the yellow in
+    // it is the same yellow the wood's dying grass is painted in, and taking it back only
+    // cost the grass its life. Not everything that measures wrong looks wrong.
     fade: [30, 30, 20, 0],
   },
 };
@@ -433,6 +439,8 @@ const COTTAGE = {
     still: 'A_single_derelict_fen_cottage/rotations/A_single_derelict_fen_cottage.png',
     ground: 10,
     scale: 2,
+    // Pale and green-grey against a wood that has no neutral in it anywhere.
+    shade: 0xe6dcd8,
   },
 };
 
@@ -481,7 +489,10 @@ const stream = (name) => ({
     // and painted at 168 it is a puddle at the side of the road. Doubled, it spans the
     // treeline to the path, which is the width a stream wants to be crossed at.
     scale: 2,
-    shade: 0xffd2a8,
+    // Blue-dominant where the wood is red-dominant, and already darker than the wood, so
+    // only the blue is taken. Cutting green with it made an asset that was too dark to
+    // begin with dingier without pulling it any further into the wood.
+    shade: 0xffffc0,
     fade: [26, 26, 26, 0],
   },
 });
@@ -510,7 +521,9 @@ const boulder = (name) => ({
 // tree still in leaf. What is left of each export is the half nobody asked a node for.
 const thicket = (path, name, ground) => ({
   path,
-  stands: { still: `${name}/rotations/${name}.png`, ground, scale: 3 },
+  // The brightest orange on the road by some way; knocked back harder than the oak, which
+  // is the same colour problem at a third of the size.
+  stands: { still: `${name}/rotations/${name}.png`, ground, scale: 3, shade: 0xd2d8f0 },
 });
 
 // The rest of the oaks: the same tree dressed four ways, each painted once rather than
