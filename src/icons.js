@@ -88,6 +88,15 @@ const SHAPES = {
     fill(g, b, 9, 7, 4, 2);
     fill(g, b, 3, 9, 4, 2);
   },
+  // dug rather than picked: a forked taproot with what was showing above it left on top
+  root: (g, [a, b]) => {
+    fill(g, a, 7, 4, 2, 6);
+    g.fillStyle(a, 1);
+    g.fillTriangle(8, 9, 4, 15, 7, 10);
+    g.fillTriangle(8, 9, 12, 15, 9, 10);
+    fill(g, b, 4, 2, 3, 2);
+    fill(g, b, 9, 1, 3, 2);
+  },
   fish: (g, [a, b]) => {
     g.fillStyle(a, 1);
     g.fillEllipse(9, 8, 12, 7);
@@ -246,6 +255,7 @@ const ICONS = {
   heartwood: ['grain', 'heart'],
   blacktrumpet: ['trumpet', 'soot'],
   oystermushroom: ['cap', 'bone'],
+  bitterroot: ['root', 'herb'],
   heronfeather: ['feather', 'ash'],
   eggshell: ['shell', 'shell'],
   greyarrow: ['arrows', 'ash'],

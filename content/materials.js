@@ -316,6 +316,19 @@ export const MATERIALS = [
       'The ones that bruised blue under the knife were buried deep enough that nothing else finds them.',
     ],
   },
+  {
+    // The third thing Herblore brings home, and the only one that is not a fungus: it is
+    // dug rather than picked, so it comes off damp ground and ground nothing has walked
+    // on rather than off rot and fallen trunks. Scarcer than either mushroom in every
+    // table it is in, which is what points in the skill are for.
+    id: 'bitterroot',
+    name: 'Bitterroot',
+    start: 0,
+    body: [
+      'A pale forked root out of wet ground, snapping white and wet, and the smell of it comes up the moment it is broken.',
+      'It is in every second thing an apothecary ever wrote down, and nobody has ever claimed to like it.',
+    ],
+  },
 
   // --- the heron's nest -----------------------------------------------------
   {
