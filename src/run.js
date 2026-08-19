@@ -1509,12 +1509,6 @@ export function placeLines(id) {
   return [head, q.goal, ...(ground ? [ground] : []), 'Ready. [Enter] to set out.'];
 }
 
-// a roll, said the way a table says it: die, what the skill added, and what it came to
-export function checkLine(c) {
-  return `${c.skill.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
-    + `${c.steady ? ` +${c.steady}` : ''} = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
-}
-
 // What the ground is worth to a given crew, said where the crew is picked. Null when the
 // job has no ground, so nothing is said about nothing.
 export function groundLine(q, ids, where) {
