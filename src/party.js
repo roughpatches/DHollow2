@@ -144,9 +144,9 @@ export function conOf(id) {
   return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1) + charmOn(id, 'con');
 }
 
-// What one person can shift, and what a crew can. The pack a run walks out with is
-// everybody's added together: taking a fourth walker is room for what they can carry as
-// much as it is what they can do.
+// How many slots one person is worth, and how many a crew is. The grid a run walks out
+// with is everybody's added together: taking a fourth walker is squares as much as it is
+// what they can do.
 export function carryOf(id) {
   const c = charOf(id);
   return (c && c.carry) ?? TUNING.carryDefault;

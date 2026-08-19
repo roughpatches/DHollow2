@@ -427,12 +427,14 @@ export function start(id, when, party, choice = {}, bring = {}) {
   // src/party.js — and what is worn on the cord is on the cord, not in the pack.
   const room = carryTotal(who);
   const pack = {};
-  let packed = 0;
+  const squares = () => Object.values(pack).reduce((a, v) => a + Math.ceil(v / TUNING.stackMax), 0);
   for (const [m, n] of Object.entries(bring)) {
-    const take = Math.max(0, Math.min(n, heldOf(m), room - packed));
+    const have = pack[m] || 0;
+    const inLast = have % TUNING.stackMax;
+    const spare = inLast ? TUNING.stackMax - inLast : 0;
+    const take = Math.max(0, Math.min(n, heldOf(m), spare + (room - squares()) * TUNING.stackMax));
     if (take > 0) {
-      pack[m] = take;
-      packed += take;
+      pack[m] = have + take;
       give(m, -take); // it is off the shelf in town the moment they walk out with it
     }
   }
@@ -489,12 +491,33 @@ export function packOf() {
   return run ? run.pack : {};
 }
 
-export function packUsed() {
-  return run ? Object.values(run.pack).reduce((n, v) => n + v, 0) : 0;
+// How many squares a count of one thing takes up. Everything is stacked the same way, so
+// this is the whole of the arithmetic: stackMax to a square and the remainder takes one
+// more of its own.
+export function slotsFor(n) {
+  return Math.ceil(Math.max(0, n) / TUNING.stackMax);
 }
 
+export function packUsed() {
+  return run ? Object.values(run.pack).reduce((n, v) => n + slotsFor(v), 0) : 0;
+}
+
+// Squares with nothing in them. What the grid draws empty, and what a full pack has none
+// of.
 export function packRoom() {
   return run ? Math.max(0, run.room - packUsed()) : 0;
+}
+
+// How many more of one particular thing will go in: whatever is left in its own part-filled
+// square, plus a whole square for every empty one. Asked per thing rather than in general
+// because a pack with one square left has room for twenty ore and no room at all for one
+// of anything else it is not already carrying.
+export function roomFor(m) {
+  if (!run) return 0;
+  const have = run.pack[m] || 0;
+  const inLast = have % TUNING.stackMax;
+  const spare = inLast ? TUNING.stackMax - inLast : 0;
+  return spare + packRoom() * TUNING.stackMax;
 }
 
 // What is standing in front of them that will not go in. Held on the run rather than paid
@@ -504,19 +527,36 @@ export function offering() {
 }
 
 function putIn(m, n) {
-  const fits = Math.max(0, Math.min(n, packRoom()));
+  const fits = Math.max(0, Math.min(n, roomFor(m)));
   if (fits > 0) run.pack[m] = (run.pack[m] || 0) + fits;
   return fits;
 }
 
-// A thing out of the pack and onto the ground, and whatever was waiting for the room
-// goes straight into it. Dropping is how the offer is answered: you are not choosing
-// between two lists, you are deciding what this is worth more than.
-export function dropOne(m) {
-  if (!run || !(run.pack[m] > 0)) return null;
-  run.pack[m] -= 1;
-  if (run.pack[m] <= 0) delete run.pack[m];
-  run.left[m] = (run.left[m] || 0) + 1;
+// The pack as the grid draws it: one entry per square, and then the empty squares that
+// are left over. A stack past stackMax is more than one square and is drawn as more than
+// one, so what is on the screen is what the arithmetic says and not a summary of it.
+export function packCells() {
+  if (!run) return [];
+  const cells = [];
+  for (const [m, n] of Object.entries(run.pack)) {
+    for (let left = n; left > 0; left -= TUNING.stackMax) {
+      cells.push({ id: m, n: Math.min(left, TUNING.stackMax) });
+    }
+  }
+  while (cells.length < run.room) cells.push(null);
+  return cells;
+}
+
+// A square emptied onto the ground, and whatever was waiting for the room goes straight
+// into it. The whole square goes rather than one thing off it: the point of the prompt is
+// that a square is what is short, so freeing one is what answering it means.
+export function dropSquare(i) {
+  if (!run) return null;
+  const cell = packCells()[i];
+  if (!cell) return run;
+  run.pack[cell.id] -= cell.n;
+  if (run.pack[cell.id] <= 0) delete run.pack[cell.id];
+  run.left[cell.id] = (run.left[cell.id] || 0) + cell.n;
   fillFromOffer();
   return run;
 }
@@ -1285,7 +1325,9 @@ export function doneLine(node) {
 
 // How full they are, said wherever the pack is shown.
 export function packLine() {
-  return run ? `Pack ${packUsed()} of ${run.room}.` : null;
+  if (!run) return null;
+  const spare = packRoom();
+  return `Pack ${packUsed()} of ${run.room} squares${spare ? '' : ' — full'}.`;
 }
 
 // What would not go in and was left where it fell. Said at the node, in the same voice

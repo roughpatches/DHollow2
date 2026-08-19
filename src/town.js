@@ -65,6 +65,7 @@ export function carriedRows() {
   return MATERIALS.filter((m) => held.get(m.id) > 0).map((m) => ({
     label: m.name,
     note: `x${held.get(m.id)}`,
+    n: held.get(m.id), // what the grid splits into squares; see stackMax in tuning.js
     icon: m.id,
     body: m.body,
   }));

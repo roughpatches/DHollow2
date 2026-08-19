@@ -273,6 +273,19 @@ export const SKILL_ART = {
   },
 };
 
+// And the same for the things a pack holds: materials by their id from
+// content/materials.js, cut stones by their gem id from content/gems.js. Same shape as
+// SKILL_ART and read by the same code, so a sheet dropped under art/ and a column of
+// [column, row] here is the whole of putting painted icons in the game. Until then every
+// square keeps the shape src/icons.js draws for it, and nothing else changes either way.
+// `at` is empty because the sheet is not painted yet: that is the hole, and it closes by
+// filling this in rather than by touching any code.
+export const ITEM_ART = {
+  sheet: null, // 'art/…-item-icons.png' once it exists
+  cell: 32,
+  at: {},
+};
+
 // What is standing at a node, for the encounters that have art instead of the silhouette
 // src/textures.js draws for their nature. Keyed by the encounter id in
 // content/encounters.js, and two of them can share one export.

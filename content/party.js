@@ -15,11 +15,11 @@
 //              src/party.js complains to the console if either count is wrong. The
 //              skills not listed are what they are untrained at, and they roll for
 //              those on the die alone.
-//   carry    — how much of the run's pack is theirs, in things rather than in kinds:
-//              seven iron ore is seven of it. Everybody's added together is the whole of
-//              what a run can bring home, so who you take is how much you can carry out
-//              as well as what you can do out there. Leave it out and it is carryDefault
-//              in tuning.js.
+//   carry    — how many slots of the run's pack are theirs. A slot holds stackMax of one
+//              thing and no more of it; past that it takes another. Everybody's added
+//              together is the grid the party walks with, so who you take is how much you
+//              can carry out as well as what you can do out there. Leave it out and it is
+//              carryDefault in tuning.js.
 //   fears    — ids from content/fears.js. A quest carrying one of these as a tag needs
 //              a deeper bond before they will walk out on it.
 //   combat   — the numbers they fight on, and carrying the line at all is what makes them
@@ -53,7 +53,7 @@ export const PARTY = [
     name: 'You',
     palette: 'player',
     con: 11, // the Vitality on the Character tab, and the same number for the same reason
-    carry: 10, // you are the one the pack is on
+    carry: 4, // you are the one the pack is on
     // Filled in by the scene in Aldis's hut, which is on hold — so these three stand in
     // for the sheet until it is asked for again, and are overwritten the moment it is.
     // Three skills and six points, the same as everyone else was built with, and picked
@@ -70,7 +70,7 @@ export const PARTY = [
     // His two Animal Handling points came onto Woodcraft in the merge. Perception stays
     // where it was; the spare point went to Woodcutting because he is the one who picks
     // the stand, and nobody else in town has a point of it.
-    carry: 12, // he has carried wood out of that forest his whole life and it shows
+    carry: 5, // he has carried wood out of that forest his whole life and it shows
     skills: { woodcraft: 3, investigation: 2, woodcutting: 1 },
     fears: ['thedead'], // the grave-pin in their pack that they have mentioned to nobody
     // no combat: he knows the Greywood, he does not fight it. The first job is day work
@@ -89,7 +89,7 @@ export const PARTY = [
     // Three skills, six points, like everybody else. Nothing here is what makes them a
     // fighter — the line below is — but they are the second pair of eyes on the road at
     // night, which is what a night job's own roll usually asks for.
-    carry: 6, // the one who fights walks with their hands free, and that costs the pack
+    carry: 2, // the one who fights walks with their hands free, and that costs the pack
     skills: { intimidation: 3, fording: 2, investigation: 1 },
     // A fighter at the size tuning.js says a fighter is. Written this way and not as the
     // four numbers over again, because the only fighter in the game repeating the

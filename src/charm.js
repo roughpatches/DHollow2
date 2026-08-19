@@ -135,6 +135,8 @@ export function cutRows() {
   return cutStones().map((s) => ({
     label: fullName(s.gem, s.grade),
     note: s.key === wornKey ? 'Worn' : `x${s.n}`,
+    n: s.n,
+    key: s.key,
     icon: s.gem.id,
     body: [
       worthLine(s.gem, s.grade) + (s.key === wornKey ? ', and on.' : '.'),

@@ -12,6 +12,7 @@ import {
 } from '../charm.js';
 import { MOVES, moveLine, saidCount } from '../combat.js';
 import { iconKeyFor } from '../icons.js';
+import { drawSlots, shapeOf } from '../slots.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf, hangOf } from '../frames.js';
 import { rewardToast, clearToast } from '../toast.js';
@@ -224,16 +225,21 @@ export default class Quest extends Phaser.Scene {
       return;
     }
 
-    // What goes out with them. The crew is behind this screen and the road is in front of
-    // it, so Esc is back to who is coming and Enter is the gate.
+    // What goes out with them. The cursor walks the shelves as a grid — up and down are a
+    // row, left and right a square — so Space and Backspace are what move a stack rather
+    // than an arrow. The crew is behind this screen and the road is in front of it.
     if (this.mode === 'pack') {
       const rows = this.packRows();
       const n = Math.max(1, rows.length);
+      const { cols } = this.shelfShape();
+      const step = (d) => { this.row = ((this.row + d) % n + n) % n; };
       if (k === 'escape') { this.mode = 'party'; this.row = 0; }
-      else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + n) % n;
-      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % n;
-      else if (k === 'arrowright' || k === 'd' || k === ' ') this.packMore(rows[this.row], 1);
-      else if (k === 'arrowleft' || k === 'a') this.packMore(rows[this.row], -1);
+      else if (k === 'arrowup' || k === 'w') step(-cols);
+      else if (k === 'arrowdown' || k === 's') step(cols);
+      else if (k === 'arrowleft' || k === 'a') step(-1);
+      else if (k === 'arrowright' || k === 'd') step(1);
+      else if (k === ' ') this.packMore(rows[this.row], 1);
+      else if (k === 'backspace') this.packMore(rows[this.row], -1);
       else if (k === 'enter') this.begin(this.when_);
       this.draw();
       return;
@@ -260,13 +266,17 @@ export default class Quest extends Phaser.Scene {
     // A full pack with something standing in front of it. Dropping is the only way to
     // make room, and leaving it is always on the card: nobody is trapped in here.
     if (r.phase === 'pack') {
-      const held = Object.keys(run.packOf());
-      const n = Math.max(1, held.length);
-      if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + n) % n;
-      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % n;
-      else if ((k === 'enter' || k === ' ') && held.length) {
-        run.dropOne(held[this.row]);
-        this.row = Math.min(this.row, Math.max(0, Object.keys(run.packOf()).length - 1));
+      const cells = run.packCells();
+      const n = Math.max(1, cells.length);
+      const cols = shapeOf(this.bands().walk.w - 28, n, TUNING.menuIconCell).cols;
+      const step = (d) => { this.row = ((this.row + d) % n + n) % n; };
+      if (k === 'arrowup' || k === 'w') step(-cols);
+      else if (k === 'arrowdown' || k === 's') step(cols);
+      else if (k === 'arrowleft' || k === 'a') step(-1);
+      else if (k === 'arrowright' || k === 'd') step(1);
+      else if ((k === 'enter' || k === ' ') && cells[this.row]) {
+        run.dropSquare(this.row);
+        this.row = Math.min(this.row, Math.max(0, run.packCells().length - 1));
       } else if (k === 'escape' || k === 'e') { run.leaveOffer(); this.row = 0; }
       this.draw();
       return;
@@ -394,34 +404,70 @@ export default class Quest extends Phaser.Scene {
   }
 
   // The crew is settled, so what they can carry is settled. Packing is the last thing
-  // asked before the gate, and it is asked here rather than in the town's menu because
-  // it is a decision about this job: what is worth the room on this road, at this hour,
-  // with these four.
+  // asked before the gate, and it is asked here rather than in the town's menu because it
+  // is a decision about this job: what is worth a square on this road, at this hour, with
+  // these four.
+  //
+  // Two grids. The town's shelves on the left, which is where the cursor is, and the pack
+  // on the right, which is a readout of what the left one has done. The pack is drawn at
+  // exactly the number of squares the crew is worth, empties and all, because how much
+  // room is left is the whole question.
   toPacking() {
     this.bring = {};
     this.mode = 'pack';
     this.row = 0;
   }
 
-  // Everything that could go out: the cut stones first, because one of them goes on the
-  // cord rather than in the pack and is the only thing here that is not weight.
+  // What is still on the shelves, a square at a time, with the cut stones first: one of
+  // those goes on the cord rather than in a square and is the only thing here that is not
+  // weight. What has been packed has left the shelf and is drawn in the other grid, so the
+  // two together always add up to what the town owns — except for a thing taken down to
+  // none, which keeps one empty square so there is somewhere to put it back to.
   packRows() {
-    return [
-      ...cutStones().map((c) => ({ stone: true, key: c.key, gem: c.gem, grade: c.grade, n: c.n })),
-      ...stock().filter(([, n]) => n > 0).map(([id, n]) => ({ id, n })),
-    ];
+    const out = [];
+    for (const c of cutStones()) out.push({ stone: true, key: c.key, gem: c.gem, grade: c.grade, n: c.n });
+    for (const [id, n] of stock()) {
+      const taken = (this.bring || {})[id] || 0;
+      const shelf = n - taken;
+      if (shelf <= 0) {
+        if (taken > 0) out.push({ id, n: 0 });
+        continue;
+      }
+      for (let left = shelf; left > 0; left -= TUNING.stackMax) {
+        out.push({ id, n: Math.min(left, TUNING.stackMax) });
+      }
+    }
+    return out;
+  }
+
+  // A square of the pack is stackMax of one thing. Taking and putting back both move a
+  // square's worth, because a square is the unit the screen is drawn in.
+  packSquares() {
+    const cells = [];
+    for (const [m, n] of Object.entries(this.bring)) {
+      for (let left = n; left > 0; left -= TUNING.stackMax) {
+        cells.push({ id: m, n: Math.min(left, TUNING.stackMax) });
+      }
+    }
+    return cells;
   }
 
   packUsed() {
-    return Object.values(this.bring).reduce((n, v) => n + v, 0);
+    return this.packSquares().length;
   }
 
   packRoom() {
     return carryTotal(this.crew()) - this.packUsed();
   }
 
-  // One more of it, or one fewer. A stone is not weight and is not counted: it goes on
-  // the cord, and the cord holds one.
+  // How many more of one thing will go: what is left in its own part-filled square, plus
+  // a whole square for every empty one. The same sum src/run.js does out on the road.
+  roomFor(id) {
+    const have = this.bring[id] || 0;
+    const inLast = have % TUNING.stackMax;
+    return (inLast ? TUNING.stackMax - inLast : 0) + this.packRoom() * TUNING.stackMax;
+  }
+
   packMore(row, by) {
     if (!row) return;
     if (row.stone) {
@@ -430,62 +476,93 @@ export default class Quest extends Phaser.Scene {
       else if (on && on.key === row.key) wear(row.key);
       return;
     }
-    const have = heldOf(row.id) - (this.bring[row.id] || 0);
+    const have = this.bring[row.id] || 0;
     if (by > 0) {
-      if (have <= 0 || this.packRoom() <= 0) return;
-      this.bring[row.id] = (this.bring[row.id] || 0) + 1;
+      const take = Math.min(TUNING.stackMax, heldOf(row.id) - have, this.roomFor(row.id));
+      if (take <= 0) return;
+      if (take > 0) this.bring[row.id] = have + take;
     } else {
-      if (!this.bring[row.id]) return;
-      this.bring[row.id] -= 1;
+      const back = Math.min(TUNING.stackMax, have);
+      if (!back) return;
+      this.bring[row.id] = have - back;
       if (!this.bring[row.id]) delete this.bring[row.id];
     }
+  }
+
+  // Where the two grids sit and how wide they are. The renderer draws to it and the keys
+  // step by it, so the cursor never moves by a different number of columns than the eye.
+  shelfShape() {
+    const cell = TUNING.menuIconCell;
+    const room = carryTotal(this.crew());
+    const packWide = Math.min(this.wide * 0.4,
+      Math.max(3, Math.min(shapeOf(this.wide, room, cell).cols, 5)) * cell);
+    const shelfWide = this.wide - packWide - 28;
+    return { cell, packWide, shelfWide, cols: shapeOf(shelfWide, 0, cell).cols };
   }
 
   packing() {
     const rows = this.packRows();
     const crew = this.crew();
+    const room = carryTotal(crew);
+    const cell = TUNING.menuIconCell;
     let y = this.top;
 
-    y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
-    const room = this.packRoom();
-    this.text(this.left + this.wide, y + 2,
-      `Pack ${this.packUsed()} of ${carryTotal(crew)}`, TUNING.menuRowSize,
-      room > 0 ? COLORS.menuText : COLORS.menuMapMark).setOrigin(1, 0);
+    y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 4;
     y += this.text(this.left, y,
-      `${crew.map((id) => nameOf(id)).join(', ')} — what they can shift between them.`,
-      TUNING.questBodySize, COLORS.menuDim, this.wide).height + 8;
-    y += this.text(this.left, y,
-      'Counted in things, not in kinds. Whatever is found out there has to fit in what is left of it.',
-      TUNING.questHintSize, COLORS.menuDim, this.wide).height + 10;
-    this.rule(y);
-    y += 14;
+      `${crew.map((id) => nameOf(id)).join(', ')} — ${room} squares between them, `
+      + `${TUNING.stackMax} of a thing to a square.`,
+      TUNING.questBodySize, COLORS.menuDim, this.wide).height + 12;
 
-    if (!rows.length) {
-      y += this.text(this.left, y, 'The pack is empty and so are the shelves. You walk out with what you stand up in.',
-        TUNING.questBodySize, COLORS.menuMapFolk, this.wide).height + 8;
-    }
+    // the two headings, and under each of them its grid
+    const { packWide, shelfWide } = this.shelfShape();
+    const packX = this.left + shelfWide + 28;
 
-    const on = worn();
-    rows.forEach((r, i) => {
-      const sel = i === this.row;
-      if (r.stone) {
-        const isOn = on && on.key === r.key;
-        y += this.text(this.left, y,
-          `${sel ? '>' : ' '} ${isOn ? '[cord]' : '[    ]'} ${fullName(r.gem, r.grade)}`,
-          TUNING.questBodySize, isOn ? COLORS.menuAccent : sel ? COLORS.menuText : COLORS.menuDim).height + 2;
-        y += this.text(this.left + 40, y, `${worthLine(r.gem, r.grade)}. Worn, not carried — it costs no room.`,
-          TUNING.questHintSize, sel ? COLORS.menuDim : COLORS.menuRule, this.wide - 40).height + 8;
-        return;
-      }
-      const taking = this.bring[r.id] || 0;
-      this.text(this.left + this.wide, y + 2, `${r.n - taking} left in town`,
-        TUNING.questHintSize, sel ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
-      y += this.text(this.left, y,
-        `${sel ? '>' : ' '} ${taking ? `[${String(taking).padStart(2, ' ')}]` : '[  ]'} ${goodName(r.id)}`,
-        TUNING.questBodySize, taking ? COLORS.menuAccent : sel ? COLORS.menuText : COLORS.menuDim).height + 6;
+    this.text(this.left, y, 'On the shelves', TUNING.menuRowSize, COLORS.menuDim);
+    this.text(packX, y, `In the pack — ${this.packUsed()} of ${room}`, TUNING.menuRowSize,
+      this.packRoom() ? COLORS.menuText : COLORS.menuMapMark);
+    y += 24;
+
+    const draw = (at, cells, sel) => drawSlots(this, {
+      at,
+      cell,
+      cells,
+      sel,
+      ink: (c) => this.ink(c),
+      add: (o) => this.layer.add(o),
+      text: (x, ty, str, size, colour) => this.text(x, ty, str, size, colour),
     });
 
-    this.hint('[Up/Down] Look    [Right] Take one    [Left] Put one back    [Enter] Set out    [Esc] Back');
+    const on = worn();
+    const shelf = rows.map((r) => (r.stone
+      ? { id: r.gem.id, note: on && on.key === r.key ? 'cord' : '' }
+      : { id: r.id, n: r.n, note: `${r.n}` }));
+    const { cols: shelfCols } = this.shelfShape();
+    while (!shelf.length || shelf.length % shelfCols) shelf.push(null);
+    const bottom = draw({ x: this.left, y, w: shelfWide }, shelf, this.row);
+
+    const packed = this.packSquares();
+    while (packed.length < room) packed.push(null);
+    draw({ x: packX, y, w: packWide }, packed, -1);
+
+    // what the cursor is on, said in full under both grids
+    const r = rows[this.row];
+    let ty = Math.max(bottom, y + Math.ceil(room / Math.max(1, shapeOf(packWide, room, cell).cols)) * cell) + 10;
+    if (r && r.stone) {
+      ty += this.text(this.left, ty, fullName(r.gem, r.grade), TUNING.menuRowSize, COLORS.menuAccent).height + 2;
+      this.text(this.left, ty, `${worthLine(r.gem, r.grade)}. Worn on the cord, not carried — it takes no square.`,
+        TUNING.questHintSize, COLORS.menuDim, this.wide);
+    } else if (r) {
+      const taking = this.bring[r.id] || 0;
+      ty += this.text(this.left, ty, goodName(r.id), TUNING.menuRowSize, COLORS.menuAccent).height + 2;
+      this.text(this.left, ty,
+        `${heldOf(r.id) - taking} on the shelf${taking ? `, ${taking} in the pack` : ''}.`,
+        TUNING.questHintSize, COLORS.menuDim, this.wide);
+    } else {
+      this.text(this.left, ty, 'The shelves are bare. You walk out with what you stand up in.',
+        TUNING.questHintSize, COLORS.menuMapFolk, this.wide);
+    }
+
+    this.hint('[Arrows] Look    [Space] Take a stack, or wear a stone    [Backspace] Put it back    [Enter] Set out    [Esc] Back');
   }
 
   begin(when) {
@@ -813,27 +890,50 @@ export default class Quest extends Phaser.Scene {
       : '[Up/Down] Look    [Space] Take or leave    [Esc] Back');
   }
 
-  // What is in front of them, what is on their backs, and the one question between the
-  // two. The pack is listed in full because the choice is only a choice if the whole of
-  // it is on the page.
-  packFullLines(r) {
-    const out = [];
-    out.push([run.offerLine(), TUNING.questBodySize, COLORS.menuMapMark]);
-    out.push([`${run.packLine()} There is no room for it without putting something down.`,
-      TUNING.questBodySize, COLORS.menuText]);
-    const held = Object.entries(run.packOf());
-    if (!held.length) {
-      out.push(['And nothing on their backs to put down. It stays where it is.',
-        TUNING.questBodySize, COLORS.menuMapFolk]);
-      return out;
+  // The pack, drawn as what it is: a grid with no empty square in it, and the thing that
+  // will not go in named above it. The same widget as the shelves and the town's tab, so
+  // a full pack is read the same way wherever the player meets one.
+  packFull(rect) {
+    const cells = run.packCells();
+    const cell = TUNING.menuIconCell;
+    // Sized to its own contents and hung on the same plaque a node's account is written
+    // on, so the grid sits on the road's furniture rather than on the trees.
+    const cols = shapeOf(rect.w - 56, cells.length, cell).cols;
+    const rows = Math.max(1, Math.ceil(cells.length / cols));
+    const pad = padOf(CARD);
+    const high = pad.t + pad.b + 76 + rows * cell + 30;
+    const box = { x: rect.x + 10, y: rect.y + rect.h - high - 10, w: rect.w - 20, h: high };
+    this.hang(CARD, box, run.active().when === 'night');
+
+    const on_ = (c) => inkOf(CARD, c);
+    let y = box.y + pad.t;
+    y += this.text(box.x + pad.l, y, 'The pack will not hold it.',
+      TUNING.questTitleSize, on_(COLORS.menuAccent)).height + 4;
+    y += this.text(box.x + pad.l, y, `${run.offerLine()} ${run.packLine()}`,
+      TUNING.questBodySize, on_(COLORS.menuMapMark), box.w - pad.l - pad.r).height + 10;
+
+    if (!cells.some(Boolean)) {
+      this.text(box.x + pad.l, y, 'And nothing on their backs to put down. It stays where it is.',
+        TUNING.questBodySize, on_(COLORS.menuMapFolk), box.w - pad.l - pad.r);
+      return;
     }
-    held.forEach(([m, n], i) => {
-      const on = i === this.row;
-      const brought = (r.brought || {})[m];
-      out.push([`${on ? '>' : ' '} ${n} ${goodName(m)}${brought ? '   (carried out with you)' : ''}`,
-        TUNING.questBodySize, on ? COLORS.menuAccent : COLORS.menuDim]);
+
+    const bottom = drawSlots(this, {
+      at: { x: box.x + pad.l, y, w: box.w - pad.l - pad.r },
+      cell,
+      cells,
+      sel: this.row,
+      ink: on_,
+      add: (o) => this.layer.add(o),
+      text: (x, ty, str, size, colour) => this.text(x, ty, str, size, on_(colour)),
     });
-    return out;
+
+    const on = cells[this.row];
+    if (on) {
+      const brought = (r0) => ((run.active().brought || {})[r0] ? '  — carried out with you' : '');
+      this.text(box.x + pad.l, bottom + 10, `${on.n} ${goodName(on.id)}${brought(on.id)}`,
+        TUNING.questBodySize, on_(COLORS.menuText), box.w - pad.l - pad.r);
+    }
   }
 
   crawl() {
@@ -876,7 +976,7 @@ export default class Quest extends Phaser.Scene {
     this.skills(r, band.skills);
     this.trail(r, band.trail);
 
-    if (r.state === 'running' && r.phase === 'pack') this.card(band.walk, this.packFullLines(r), 'The pack will not hold it.');
+    if (r.state === 'running' && r.phase === 'pack') this.packFull(band.walk);
     else if (r.state === 'running' && r.phase === 'fighter') this.card(band.walk, this.fighterLines(r), this.nodeHead(r));
     else if (r.state === 'running' && r.phase === 'fight') this.card(band.walk, this.fightLines(r), this.fightHead());
     else if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
@@ -896,7 +996,7 @@ export default class Quest extends Phaser.Scene {
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r), true);
 
     if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
-    else if (r.phase === 'pack') this.hint('[Up/Down] Choose    [Enter] Drop one    [Esc] Leave the rest');
+    else if (r.phase === 'pack') this.hint('[Arrows] Choose a square    [Enter] Tip it out    [Esc] Leave the rest');
     else if (r.phase === 'fighter') this.hint('[Up/Down] Who steps up    [Enter] Send them    [Esc] Turn back');
     else if (r.phase === 'fight') this.hint('[Up/Down] Choose    [Enter] Do it    [Esc] Break off');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');

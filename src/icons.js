@@ -8,7 +8,7 @@
 // still gets a square, drawn as UNKNOWN.
 
 import { COLORS } from '../tuning.js';
-import { SKILL_ART } from '../content/looks.js';
+import { SKILL_ART, ITEM_ART } from '../content/looks.js';
 
 const PX = 16; // drawn small and scaled up in the menu, like every other placeholder here
 
@@ -329,24 +329,31 @@ export function iconKeyFor(name) {
 }
 
 export function preloadIcons(scene) {
-  const { sheet } = SKILL_ART;
-  if (sheet && !scene.textures.exists(sheet)) scene.load.image(sheet, sheet);
+  for (const { sheet } of [SKILL_ART, ITEM_ART]) {
+    if (sheet && !scene.textures.exists(sheet)) scene.load.image(sheet, sheet);
+  }
 }
 
-// One cell off the painted sheet, under the name the drawn shape would have had. Returns
-// false if there is no cell for this one or the sheet is not in the repo yet, which is
-// what sends it back to the generator.
-function cutIcon(scene, name) {
-  const at = SKILL_ART.at[name];
-  if (!at || !scene.textures.exists(SKILL_ART.sheet)) return false;
-  const px = SKILL_ART.cell;
+// One cell off a painted sheet, under the name the drawn shape would have had. Two sheets
+// are read — the things a pack holds first, then the skills — and either is allowed not to
+// exist yet: a name with no cell on either, or a sheet not in the repo, goes back to the
+// generator and gets the shape drawn for it. That is how the whole set is placeholder
+// today and how it stops being one a sheet at a time.
+function cutFrom(scene, spec, name) {
+  const at = spec.at[name];
+  if (!at || !spec.sheet || !scene.textures.exists(spec.sheet)) return false;
+  const px = spec.cell;
   const tex = scene.textures.createCanvas(keyOf(name), px, px);
   const ctx = tex.getContext();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(scene.textures.get(SKILL_ART.sheet).getSourceImage(),
+  ctx.drawImage(scene.textures.get(spec.sheet).getSourceImage(),
     (at[0] - 1) * px, (at[1] - 1) * px, px, px, 0, 0, px, px);
   tex.refresh();
   return true;
+}
+
+function cutIcon(scene, name) {
+  return cutFrom(scene, ITEM_ART, name) || cutFrom(scene, SKILL_ART, name);
 }
 
 // Painted where there is paint for it, drawn where there is not, and the same key either
