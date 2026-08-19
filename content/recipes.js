@@ -61,7 +61,7 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 1,
     activity: 'Smelting',
-    costs: { copperore: 3, tinore: 1, charcoal: 2 },
+    costs: { copperore: 2, tinore: 1, charcoal: 2 },
     makes: { bronzebar: 1 },
     xp: 16,
     body: [
@@ -98,7 +98,7 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 2,
     activity: 'Smelting',
-    costs: { copperore: 6, tinore: 2, coal: 3 },
+    costs: { copperore: 4, tinore: 2, coal: 3 },
     makes: { bronzebar: 3 },
     xp: 34,
     body: [
@@ -241,7 +241,7 @@ export const RECIPES = [
     rank: 1,
     activity: 'Brewing',
     hard: 'simple',
-    costs: { oystermushroom: 4, blacktrumpet: 2 },
+    costs: { oystermushroom: 3, blacktrumpet: 1 },
     makes: { copsebroth: 1 },
     xp: 12,
     body: [
@@ -300,7 +300,7 @@ export const RECIPES = [
     rank: 2,
     activity: 'Brewing',
     hard: 'tricky',
-    costs: { bitterroot: 3, oystermushroom: 1 },
+    costs: { bitterroot: 2, oystermushroom: 1 },
     makes: { bitterwash: 1 },
     xp: 22,
     body: [
@@ -339,7 +339,7 @@ export const RECIPES = [
     rank: 3,
     activity: 'Brewing',
     hard: 'wicked',
-    costs: { blacktrumpet: 2, bitterroot: 1 },
+    costs: { blacktrumpet: 4, bitterroot: 3 },
     makes: { blackdraught: 1 },
     xp: 40,
     body: [
