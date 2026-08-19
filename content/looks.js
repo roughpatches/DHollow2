@@ -350,16 +350,22 @@ export const SKILL_ART = {
   },
 };
 
-// Two paintings and nine stones. A stone is the lump it comes out of the ground as and
-// the same stone off the wheel, and every stone shares both: the painting is put through
-// that stone's own pair of colours from COLORS.icon on the way to the screen, which is
-// exactly how the drawn placeholders already worked. One stone painted is every stone
-// painted, so this is two files rather than eighteen.
-const ROUGH_STONE = 'art/gems/An_uncut_gem_recently_mined/rotations/An_uncut_gem_recently_mined.png';
-const CUT_STONE = 'art/gems/Cut_and_polished_int/rotations/Cut_and_polished_int.png';
-// The stones these two are worn by. Tier one, because tier one is what is dug so far; a
-// stone left off keeps the shape src/icons.js draws for it and nothing else changes.
-const PAINTED_STONES = ['garnet', 'agate', 'amethyst'];
+// A stone is painted twice — the lump it comes out of the ground as, and the same stone
+// off the wheel — and both come out of one export, under the two names below. Colour is
+// not what an export decides: the painting is put through that stone's own pair from
+// COLORS.icon on the way to the screen, which is exactly how the drawn placeholders
+// already worked. So an export is a shape, and every stone cut to that shape shares it.
+//   folder under art/gems → the stones painted in it
+// A stone left off keeps the shape src/icons.js draws for it and nothing else changes.
+// Tier one is here because tier one is what is dug so far.
+const STONE_ART = {
+  // A crust of points on the rough and a faceted stone off the wheel.
+  crystal: ['agate', 'amethyst'],
+  // A river-stone nodule on the rough and a domed cabochon off the wheel.
+  nodule: ['garnet'],
+};
+const ROUGH_STONE = 'An_uncut_gem_recently_mined/rotations/An_uncut_gem_recently_mined.png';
+const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
 
 // And the same for the things a pack holds: materials by their id from
 // content/materials.js, cut stones by their gem id from content/gems.js. Same shape as
@@ -375,10 +381,11 @@ export const ITEM_ART = {
   // And art that came back as its own file rather than as a cell on a sheet: icon name →
   // the painting, and the ink out of COLORS.icon to put it through. Read before `at`, so a
   // name with a painting of its own wins over the same name on a sheet.
-  files: Object.fromEntries(PAINTED_STONES.flatMap((id) => [
-    [`rough${id}`, [ROUGH_STONE, id]],
-    [id, [CUT_STONE, id]],
-  ])),
+  files: Object.fromEntries(Object.entries(STONE_ART).flatMap(([shape, stones]) => stones
+    .flatMap((id) => [
+      [`rough${id}`, [`art/gems/${shape}/${ROUGH_STONE}`, id]],
+      [id, [`art/gems/${shape}/${CUT_STONE}`, id]],
+    ]))),
 };
 
 // What is standing at a node, for the encounters that have art instead of the silhouette
