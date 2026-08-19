@@ -391,6 +391,13 @@ const PAINTED_ITEMS = {
   coalfish: 'art/items/coalfish/Barbequed_for_dinner/rotations/Barbequed_for_dinner.png',
   perch: 'art/items/perch/A_single_Fish_freshly_caught/rotations/A_single_Fish_freshly_caught.png',
   friedfish: 'art/items/friedfish/Fried_for_dinner/rotations/Fried_for_dinner.png',
+  // Four of the six the wood pays for, each in the glass it is kept in: the round amber
+  // flask, the green cone, the tall dark bottle, the purple round. Bitter Wash and Steady
+  // Hand keep their drawn shapes.
+  copsebroth: 'art/items/copsebroth/Copse_Draught/rotations/Copse_Draught.png',
+  woodsdraught: 'art/items/woodsdraught/Woodsdraught/rotations/Woodsdraught.png',
+  blackdraught: 'art/items/blackdraught/Blackdraught/rotations/Blackdraught.png',
+  nightwash: 'art/items/nightwash/Nightshade_Wash/rotations/Nightshade_Wash.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
