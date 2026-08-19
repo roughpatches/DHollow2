@@ -20,10 +20,7 @@ import {
 } from './party.js';
 import { give, nameOf, heldOf } from './town.js';
 import * as potions from './potions.js';
-import {
-  packedStones, packedKeys, packedTotal, drop as dropStone, clearPack,
-  cycle as cycleCord, fullName as stoneName, worn,
-} from './charm.js';
+
 import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
@@ -432,13 +429,10 @@ export function start(id, when, party, choice = {}, bring = {}) {
   const con = conTotal(who) + groundCon(who, terrainOf(quest, where)) + dosed;
   // What the crew can shift between them, and what of the town's stock is going out on
   // their backs. Counted in squares — see carryOf in src/party.js — with stackMax of one
-  // thing to a square, and a stone one square of its own whether or not it is worn.
+  // thing to a square. Nothing worn takes one: a stone set in a ring is on a finger.
   const room = carryTotal(who);
   const pack = {};
-  // Stones were put in the pack at the gate — see src/charm.js — and each one is a square
-  // gone before any ore is counted, which is the whole cost of taking a charm out.
-  const squares = () => packedTotal()
-    + Object.values(pack).reduce((a, v) => a + Math.ceil(v / TUNING.stackMax), 0);
+  const squares = () => Object.values(pack).reduce((a, v) => a + Math.ceil(v / TUNING.stackMax), 0);
   for (const [m, n] of Object.entries(bring)) {
     const have = pack[m] || 0;
     const inLast = have % TUNING.stackMax;
@@ -523,7 +517,7 @@ export function slotsFor(n) {
 
 export function packUsed() {
   if (!run) return 0;
-  return packedTotal() + Object.values(run.pack).reduce((n, v) => n + slotsFor(v), 0);
+  return Object.values(run.pack).reduce((n, v) => n + slotsFor(v), 0);
 }
 
 // Squares with nothing in them. What the grid draws empty, and what a full pack has none
@@ -562,14 +556,6 @@ function putIn(m, n) {
 export function packCells() {
   if (!run) return [];
   const cells = [];
-  // The stones first, because they were packed first and because one of them is on the
-  // cord: a square that is doing something is a square worth seeing before the ore.
-  const on = worn();
-  for (const s of packedStones()) {
-    cells.push({
-      id: s.gem.id, n: 1, stone: s.key, name: stoneName(s.gem, s.grade), note: on && on.key === s.key ? 'cord' : '',
-    });
-  }
   for (const [m, n] of Object.entries(run.pack)) {
     for (let left = n; left > 0; left -= TUNING.stackMax) {
       cells.push({ id: m, n: Math.min(left, TUNING.stackMax) });
@@ -586,16 +572,6 @@ export function dropSquare(i) {
   if (!run) return null;
   const cell = packCells()[i];
   if (!cell) return run;
-  // A stone tipped out is a stone gone: it is not stock and it does not come home in
-  // halves, so it is named where it was left rather than counted with the ore.
-  if (cell.stone) {
-    dropStone(cell.stone);
-    run.stonesLeft = [...(run.stonesLeft || []), cell.name];
-    const node = run.nodes[run.at];
-    if (node) node.stonesLeft = [...(node.stonesLeft || []), cell.name];
-    fillFromOffer();
-    return run;
-  }
   run.pack[cell.id] -= cell.n;
   if (run.pack[cell.id] <= 0) delete run.pack[cell.id];
   run.left[cell.id] = (run.left[cell.id] || 0) + cell.n;
@@ -651,7 +627,6 @@ export function abandon() {
 // have been worn down since the first. Move this the day beds and food cost something.
 export function clear() {
   potions.clear(); // nothing drunk survives the run it was drunk into
-  clearPack(); // and the stones that walked out come off the cord and back on the shelf
   run = null;
 }
 
@@ -696,28 +671,6 @@ export function inForce() {
 // or the card at the fire. Neither of them has to know what a potion is.
 export function drinkRow(mid) {
   return { mid, name: nameOf(mid), body: potions.linesFor(mid) };
-}
-
-// The cord at a camp, for the same reason the pack is only opened at one: they have
-// stopped, and nobody changes a stone over standing in front of a boar. What is on offer
-// is what they packed — the charm left in town is still in town — so this is the gate's
-// choice made again with better information about the road.
-export function cordable() {
-  return atCamp() ? packedKeys() : [];
-}
-
-// One press moves the cord on: the next stone they are carrying, and past the last of
-// them, nothing.
-export function changeCord() {
-  if (!atCamp() || !cordable().length) return null;
-  return cycleCord();
-}
-
-// What the card says about it: every stone in the pack, and which of them is on.
-export function cordRows() {
-  const on = worn();
-  return packedStones().filter((s, i, all) => all.findIndex((o) => o.key === s.key) === i)
-    .map((s) => ({ key: s.key, gem: s.gem, grade: s.grade, on: !!on && on.key === s.key }));
 }
 
 // --- walking ---------------------------------------------------------------
@@ -1464,9 +1417,7 @@ export function packLine() {
 // as work left standing: it is the same kind of regret.
 export function leftLine(node) {
   const left = (node && node.left) || {};
-  const stones = (node && node.stonesLeft) || [];
-  const said = [...Object.keys(left).length ? [listOf(left)] : [], ...stones];
-  return said.length ? `Left on the ground: ${said.join(', ')}.` : null;
+  return Object.keys(left).length ? `Left on the ground: ${listOf(left)}.` : null;
 }
 
 // The thing standing in front of a full pack, and the sentence that says what the choice

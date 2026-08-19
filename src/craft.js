@@ -23,7 +23,7 @@ import {
   cut, gemOf, validate, fullName, worthLine,
 } from './charm.js';
 import {
-  forge, pieceOf, fullName as gearName, worthLine as gearWorth, slotName,
+  forge, pieceOf, fullName as gearName, worthLine as gearWorth, slotName, socketLine,
 } from './gear.js';
 
 const MATERIAL = new Set(MATERIALS.map((m) => m.id));
@@ -219,9 +219,15 @@ export function recipeLines(r) {
       ? `Makes: one ${gem.name}, ${TUNING.gem.grades.map((g) => `${g.name} ${worthLine(gem, g)}`).join(' / ')}.`
       : kit
         // The same for a piece off the anvil, and for the same reason: one comes off it
-        // however good the smith is, and how good the smith is decides which one.
-        ? `Makes: one ${kit.name} for the ${slotName(kit.slot).toLowerCase()}, `
-          + `${TUNING.gear.grades.map((g) => `${g.name} ${gearWorth(kit, g)}`).join(' / ')}.`
+        // however good the smith is, and how good the smith is decides which one. Except
+        // where it does not: jewellery is settings and nothing else, and a setting is a
+        // setting at any standard, so its line is said once rather than three times over.
+        ? (kit.sockets
+          ? `Makes: one ${kit.name} — ${kit.sockets} setting${kit.sockets === 1 ? '' : 's'}, `
+            + 'whatever it comes off the anvil like.'
+          : `Makes: one ${kit.name} for the ${slotName(kit.slot).toLowerCase()}, `
+            + `${TUNING.gear.grades.map((g) => `${g.name} ${gearWorth(kit, g)}`).join(' / ')}`
+            + `. At ${TUNING.gear.grades[0].name.toLowerCase()} it also takes a stone.`)
         : `Makes: ${list(Object.entries(r.makes))}${more ? `, and ${Math.round(more * 100)}% more for your ${skillOf(r.skill).name}` : ''}.`,
     playedAt(r)
       ? `${r.activity}${hard ? `, ${hard}` : ''}. Worth ${r.xp} to your level, and worth doing well.`
@@ -242,9 +248,12 @@ export function madeLines(r, result) {
     out.push(`${fullName(result.stone.gem, result.stone.grade)}. ${worthLine(result.stone.gem, result.stone.grade)} while it is worn.`);
   }
   if (result.piece) {
-    const { piece, grade } = result.piece;
-    out.push(`${gearName(piece, grade)}. ${gearWorth(piece, grade)} while it is on, `
-      + `and it goes on at the gate.`);
+    const w = result.piece;
+    const holds = w.sockets.length
+      ? ` ${w.sockets.length} setting${w.sockets.length === 1 ? '' : 's'} in it: ${socketLine(w)}.`
+      : '';
+    out.push(`${gearName(w.piece, w.grade)}. ${gearWorth(w.piece, w.grade)} while it is on,`
+      + `${holds} It goes on at the gate.`);
   } else if (result.cracked) {
     out.push('It cracked. There is nothing on the anvil and the metal is gone with it.');
   }

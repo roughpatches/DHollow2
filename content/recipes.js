@@ -251,6 +251,70 @@ export const RECIPES = [
     ],
   },
 
+  // --- and what a stone goes in ------------------------------------------------
+  // One slot, three things that fit it, and none of them worth anything empty. A ring is
+  // a setting on a band and an amulet is three settings on a disc, and that is the whole
+  // difference: what the smithy sells here is somewhere to put what the wheel cut.
+  // These are the cheap end of the anvil on purpose. A masterwork sword also takes a
+  // stone, but it has to be a masterwork sword first — a ring only has to be a ring, and
+  // that is what makes it the first thing a stone can go into.
+  {
+    id: 'bronzering',
+    name: 'Draw a bronze ring',
+    at: 'forge',
+    stage: 1,
+    level: 2,
+    skill: 'smithing',
+    rank: 1,
+    activity: 'Forging',
+    fuel: 3,
+    costs: { bronzebar: 1 },
+    forges: 'bronzering',
+    xp: 22,
+    body: [
+      'A band bent round a mandrel and closed with a weld you can only find by looking for it, and a bezel raised on the front of it with a stone-sized hollow in the middle.',
+      'The claws are bent over last, with the stone already in, and they are bent with the thumbs.',
+    ],
+  },
+  {
+    id: 'bronzebracelet',
+    name: 'Hinge a bronze bracelet',
+    at: 'forge',
+    stage: 1,
+    level: 5,
+    skill: 'smithing',
+    rank: 2,
+    activity: 'Forging',
+    hard: 'edges',
+    fuel: 5,
+    costs: { bronzebar: 2, charcoal: 1 },
+    forges: 'bronzebracelet',
+    xp: 42,
+    body: [
+      'Two halves raised to the same curve, hinged along one edge and pinned along the other, with a setting on each half so the pair sit level when it is closed.',
+      'Two halves that do not match is a cuff that will not shut. The hinge is easy and the matching is not.',
+    ],
+  },
+  {
+    id: 'bronzeamulet',
+    name: 'Raise a bronze amulet',
+    at: 'forge',
+    stage: 2,
+    level: 8,
+    skill: 'smithing',
+    rank: 3,
+    activity: 'Forging',
+    hard: 'raising',
+    fuel: 7,
+    costs: { bronzebar: 3, charcoal: 2 },
+    forges: 'bronzeamulet',
+    xp: 76,
+    body: [
+      'A disc raised from flat until it stands a little proud, three bezels set into the face of it at the points of a triangle, and a hole drilled at the top for the cord.',
+      'Three settings on one piece of metal, and every one of them has to sit flat on a face that is not flat. That is the job.',
+    ],
+  },
+
   // --- the Artisan's Studio --------------------------------------------------
   // A rough stone comes off a mining node about one time in eight, so every one of these
   // is a stone the player walked a long way for and gets one go at. Three shapes and three

@@ -194,6 +194,29 @@ const SHAPES = {
     }
     fill(g, b, 3, 2, 10, 1); // the collar
   },
+  // A band seen face on, with the setting standing proud at the top of it. The bracelet
+  // borrows it: at sixteen pixels a cuff and a ring are the same picture.
+  ring: (g, [a, b]) => {
+    fill(g, a, 6, 6, 4, 1); // the band, stepped round so it reads as a hoop and not a jar
+    fill(g, a, 5, 7, 1, 1);
+    fill(g, a, 10, 7, 1, 1);
+    fill(g, a, 4, 8, 1, 3);
+    fill(g, a, 11, 8, 1, 3);
+    fill(g, a, 5, 11, 1, 1);
+    fill(g, a, 10, 11, 1, 1);
+    fill(g, a, 6, 12, 4, 1);
+    fill(g, b, 6, 3, 4, 3); // the bezel above it, and the stone in it
+    fill(g, a, 5, 5, 6, 1);
+  },
+  // A disc on a cord with three settings on its face.
+  amulet: (g, [a, b]) => {
+    fill(g, b, 4, 1, 8, 1); // the cord across the top
+    fill(g, a, 5, 4, 6, 8);
+    fill(g, a, 4, 5, 8, 6);
+    fill(g, b, 7, 5, 2, 2);
+    fill(g, b, 5, 8, 2, 2);
+    fill(g, b, 9, 8, 2, 2);
+  },
   // A round with a boss in the middle of it, which is the whole of what a shield is.
   shield: (g, [a, b]) => {
     fill(g, a, 6, 1, 4, 1); // the round, stepped in from the top and out to the waist
@@ -336,6 +359,9 @@ const ICONS = {
   bronzeshield: ['shield', 'bronze'],
   bronzechainmail: ['mail', 'bronze'],
   bronzeplatemail: ['mail', 'bronze'],
+  bronzering: ['ring', 'bronze'],
+  bronzebracelet: ['ring', 'bronze'],
+  bronzeamulet: ['amulet', 'bronze'],
   ironbar: ['log', 'iron'],
   friedfish: ['fish', 'food'],
   woodstew: ['pot', 'food'],

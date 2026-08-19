@@ -386,6 +386,11 @@ export const TUNING = {
       { id: 'sound', name: 'Sound', at: 0.55, worth: 2 },
       { id: 'rough', name: 'Rough', at: 0, worth: 1 },
     ],
+    // How many stones a weapon, a shield or a piece of armour will hold, and it only holds
+    // them at the top grade above: a socket is what a masterwork piece is for, and it is
+    // the reason to forge one rather than settle for the piece you already have.
+    // Jewellery ignores this and says its own count — see content/gear.js.
+    socketsAtMasterwork: 1,
     // A point of guard and a point of hit are worth the same on a d20; a point of hit
     // points is not, against a fighter who starts with twenty-four of them. This is what
     // one step of `worth` buys in each number, so the five pieces read against each other
