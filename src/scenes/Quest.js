@@ -148,6 +148,7 @@ export default class Quest extends Phaser.Scene {
     this.walk = null;
     clearToast();
     clearRoll();
+    this.holding = false;
     run.clear();
     this.game.events.emit('quest:close');
   }
@@ -262,6 +263,10 @@ export default class Quest extends Phaser.Scene {
     }
 
     const r = run.active();
+    // A throw still in the air takes the next key and nothing else does: the die comes
+    // down where it stands and the card comes up behind it, so nobody presses past the
+    // one thing they were waiting on.
+    if (this.holding) { this.landRoll(); return; }
     if (this.activity) {
       // The engine has the controls: space winds up and releases, and every arrow is
       // handed over by the name of its direction. What an engine has no use for it
@@ -654,6 +659,7 @@ export default class Quest extends Phaser.Scene {
     this.shownAt = -1;
     this.toasted = -1;
     this.thrown = null;
+    this.holding = false;
     this.approaching = false;
   }
 
@@ -1022,7 +1028,7 @@ export default class Quest extends Phaser.Scene {
     const sig = `${r.state}:${r.at}:${r.phase}:${r.nodes[r.at]?.beat?.id || ''}`;
     // and a throw still in the air belonged to the card that was showing when it was
     // made, so moving on takes it down with that card
-    if (sig !== this.cardSig) { this.cardSig = sig; this.page = 0; clearRoll(); }
+    if (sig !== this.cardSig) { this.cardSig = sig; this.page = 0; clearRoll(); this.holding = false; }
 
     // A node the party has not walked up to yet is not a node they know anything about,
     // so the approach runs first and the card only opens when it has arrived.
@@ -1043,21 +1049,26 @@ export default class Quest extends Phaser.Scene {
     // the node, or off the last beat of the walk up to it
     if (r.state === 'running' && r.phase === 'activity' && !this.approaching) this.startActivity();
 
-    // What the node gave up, raised the moment it is settled and gone again on its own.
-    // Once per node: the card under it is redrawn on every keypress, and a tally that
-    // came back with the page turn would be a tally nobody could read past.
-    if (r.state === 'running' && r.phase === 'node' && !this.approaching && this.toasted !== r.at) {
-      this.toasted = r.at;
-      rewardToast(this, band.walk, r.nodes[r.at], r.when === 'night');
-    }
-
-    // And the die, thrown the first time the card showing it is drawn. Kept by the check
+    // The die, thrown the first time the card showing it is drawn. Kept by the check
     // itself rather than by which node it was: every roll is its own object, so a beat
     // that rolls a second time at the same node is a second throw and a redraw is not.
     const throwing = !this.approaching ? this.rollShown(r) : null;
     if (throwing && this.thrown !== throwing) {
       this.thrown = throwing;
-      rollCard(this, band.walk, throwing, r.when === 'night');
+      this.holding = true; // and the card stays down until the word has been said
+      rollCard(this, band.walk, throwing, r.when === 'night', () => {
+        this.holding = false;
+        this.draw();
+      });
+    }
+
+    // What the node gave up, raised the moment it is settled and gone again on its own.
+    // Once per node: the card under it is redrawn on every keypress, and a tally that
+    // came back with the page turn would be a tally nobody could read past.
+    if (r.state === 'running' && r.phase === 'node' && !this.approaching && !this.holding
+      && this.toasted !== r.at) {
+      this.toasted = r.at;
+      rewardToast(this, band.walk, r.nodes[r.at], r.when === 'night');
     }
 
     this.conBar(r, band.bar);
@@ -1073,7 +1084,7 @@ export default class Quest extends Phaser.Scene {
       this.card(band.walk, this.workLines(r), this.nodeHead(r));
     }
     else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
-    else if (r.state === 'running' && r.phase === 'beat' && !this.approaching) {
+    else if (r.state === 'running' && r.phase === 'beat' && !this.approaching && !this.holding) {
       // A beat can be the moment the thing on the road stops being there — the heron
       // taking flight rather than a tree coming down, but the same change of state.
       // Said on every draw of the beat and not once when it is reached: the loop it
@@ -1081,10 +1092,13 @@ export default class Quest extends Phaser.Scene {
       if (r.nodes[r.at].beat.leaves) this.walk.felled();
       this.card(band.walk, this.beatLines(r), this.nodeHead(r), !r.nodes[r.at].beat.choose);
     }
-    else if (r.state === 'running' && !this.approaching) this.card(band.walk, this.nodeLines(r), this.nodeHead(r), true);
+    else if (r.state === 'running' && !this.approaching && !this.holding) {
+      this.card(band.walk, this.nodeLines(r), this.nodeHead(r), true);
+    }
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r), true);
 
-    if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
+    if (r.state === 'running' && this.holding) this.hint('The die is in the air.    [Any key] Bring it down');
+    else if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
     else if (r.phase === 'pack') this.hint('[Arrows] Choose a square    [Enter] Tip it out    [Esc] Leave the rest');
     else if (r.phase === 'fighter') this.hint('[Up/Down] Who steps up    [Enter] Send them    [Esc] Turn back');
     else if (r.phase === 'fight') this.hint('[Up/Down] Choose    [Enter] Do it    [Esc] Break off');
@@ -1510,16 +1524,24 @@ export default class Quest extends Phaser.Scene {
     return `${e.name}${n.goal ? ' — the goal' : ''}`;
   }
 
-  // The roll the card is showing right now, or nothing. A node's own check is read out
-  // when the node is settled; a scene's is read out on the beat that reads it back, and
-  // not on the beat that made it — the party is told what they tried before they are
-  // told how it went.
+  // The roll the die is thrown for right now, or nothing. A node's own check is thrown
+  // when the node settles; a scene's is thrown on the way into the beat the roll picked
+  // — see advance in src/run.js — so the party reads what they tried, and the die and
+  // the word come between that and what came of it.
+  // The die brought down where it stands, because somebody pressed a key rather than
+  // watching it. What was going to be said is not said; the card comes up instead.
+  landRoll() {
+    clearRoll();
+    this.holding = false;
+    this.draw();
+  }
+
   rollShown(r) {
     if (r.state !== 'running') return null;
     const n = r.nodes[r.at];
     if (!n || !n.check) return null;
     if (r.phase === 'node') return n.check;
-    if (r.phase === 'beat' && n.beat && n.beat.result) return n.check;
+    if (r.phase === 'beat' && n.beat && n.beat.id === n.rollAt) return n.check;
     return null;
   }
 
@@ -1546,9 +1568,9 @@ export default class Quest extends Phaser.Scene {
     const done = run.doneLine(n);
     if (done) out.push([done, TUNING.questBodySize, COLORS.menuText]);
     if (!n.shown) for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
+    // What the roll came to is the die's to say and the word's after it — all this card
+    // carries is the line written for the way it went.
     if (n.check) {
-      out.push([run.checkLine(n.check), TUNING.questBodySize, n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk]);
-      // a beat node's roll was said in the beats; it carries no line of its own
       const said = n.check.pass ? n.check.held : n.check.lost;
       if (said) out.push([said, TUNING.questBodySize, COLORS.menuText]);
     }
@@ -1673,11 +1695,6 @@ export default class Quest extends Phaser.Scene {
         out.push([`${nameOf(para.who)}: ${fill(para.line, n.actorId)}`,
           TUNING.questBodySize, COLORS.menuText]);
       }
-    }
-    // the roll is shown once, on the beat that reads it back
-    if (b.result && n.check) {
-      out.push([run.checkLine(n.check), TUNING.questBodySize,
-        n.check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk]);
     }
     (b.choose || []).forEach((o, i) => {
       const on = i === this.row;

@@ -1156,6 +1156,9 @@ export function advance() {
   const next = b.result
     ? (node.check && node.check.pass ? b.result.hit : b.result.miss)
     : (b.toss ? pick(b.toss) : b.then);
+  // The beat the roll picked is the beat the die is thrown on the way into: the attempt
+  // is read first, then the throw, then what came of it. See rollShown in Quest.js.
+  if (b.result) node.rollAt = next;
   if (!next) outOfBeats(node);
   else toBeat(node, next);
   return run;
@@ -1555,12 +1558,6 @@ export function placeLines(id) {
   const ground = groundLine(q, walking().map((c) => c.id));
   if (stop.length) return [head, q.goal, ...(ground ? [ground] : []), ...stop];
   return [head, q.goal, ...(ground ? [ground] : []), 'Ready. [Enter] to set out.'];
-}
-
-// a roll, said the way a table says it: die, what the skill added, and what it came to
-export function checkLine(c) {
-  return `${c.skill.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
-    + `${c.steady ? ` +${c.steady}` : ''} = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
 }
 
 // What the ground is worth to a given crew, said where the crew is picked. Null when the

@@ -114,9 +114,19 @@ export const TUNING = {
   questRollTicks: 20, // faces turned over before it settles
   questRollSpinMs: 900, // and how long the whole spin takes, slowing as it goes
   questRollLandScale: 1.25, // the thump when it stops
-  questRollPauseMs: 220, // a beat before what the party brought starts coming in
-  questRollStepMs: 260, // and how long between one line of it and the next
-  questRollHoldMs: 1800, // how long the throw stays up once it has all landed
+  questRollPauseMs: 180, // a beat before what the party brought starts coming in
+  questRollStepMs: 200, // and how long between one line of it and the next
+  questRollHoldMs: 1400, // how long the panel stands behind the word before it goes
+
+  // And the word the throw is answered with, across the middle of the road. The card
+  // under it is held back until this has been read — see src/scenes/Quest.js — so these
+  // are also how long the party waits to be told what came of it.
+  questFlashSize: 56,
+  questFlashFrom: 0.7, // it comes up out of nothing
+  questFlashTo: 1.15, // and goes off the front of the screen rather than simply fading
+  questFlashInMs: 170,
+  questFlashHoldMs: 520, // how long it is held before the card is let up behind it
+  questFlashOutMs: 320,
 
   // How hard a check is, in words rather than in its DC: a party reads a climb, not a
   // number. Lightest green at the bottom, dark red at the top, and the last band takes
@@ -701,6 +711,11 @@ export const COLORS = {
   seaFar: 0x55606b, // steel, out at the horizon
   seaNear: 0x2c3540, // and darker close in
   seaCrest: 0x77828c, // the swell on it
+
+  // The word a check is answered with, across the road (src/roll.js). Green and red and
+  // nothing subtler: it is the one thing on the screen at the moment it is up.
+  rollHeld: 0x8fbf5f,
+  rollLost: 0xc4402c,
 
   questNightFill: 0x0c0e14, // a run at night is drawn colder than one by day
   questNightEdge: 0x3f4a63,

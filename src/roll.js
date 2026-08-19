@@ -8,6 +8,11 @@
 // in and not the DC, because a party knows a hard climb when it sees one and does not
 // know the number behind it.
 //
+// And then the word, across the whole road: Success or Failure. That is where the throw
+// is answered — the card says nothing about it and does not come up until it has been
+// said, so the reading of it is one thing at a time rather than a page arriving with the
+// answer already on it.
+//
 // Iron, not paper: the card under the road is the account, and this is the throw.
 
 import { TUNING, COLORS, hex } from '../tuning.js';
@@ -18,12 +23,16 @@ const PLATE = 'plate'; // and the square the face turns up in
 const DEPTH = 29300; // over the tally, which is over the card
 
 // One at a time, held here for the same reason the tally is: a screen closed or a page
-// turned under a live throw would leave it hanging over whatever came next.
+// turned under a live throw would leave it hanging over whatever came next. The word is
+// held apart from the panel because it outlives none of it and comes down with either.
 let live = null;
+let word = null;
 
 export function clearRoll() {
   live?.destroy();
+  word?.destroy();
   live = null;
+  word = null;
 }
 
 // How hard it was, in words. The last band takes everything above it, so a DC nobody has
@@ -49,9 +58,32 @@ function otherFace(showing) {
   return face;
 }
 
+// The word across the road, once the sum is in: the whole of what the throw came to,
+// where nothing else on the screen is. `onDone` is called as it starts to go, which is
+// when whatever is waiting on the answer — the card, the tally — is free to come up.
+function flash(scene, rect, check, onDone) {
+  const t = scene.add.text(rect.x + rect.w / 2, rect.y + rect.h / 2,
+    check.pass ? 'Success' : 'Failure', {
+      fontFamily: TUNING.font, fontSize: `${TUNING.questFlashSize}px`,
+      color: hex(check.pass ? COLORS.rollHeld : COLORS.rollLost),
+    }).setOrigin(0.5).setDepth(DEPTH + 1).setAlpha(0).setScale(TUNING.questFlashFrom);
+  word = t;
+  scene.tweens.add({
+    targets: t, alpha: 1, scale: 1, duration: TUNING.questFlashInMs, ease: 'Back.out',
+  });
+  scene.time.delayedCall(TUNING.questFlashInMs + TUNING.questFlashHoldMs, () => {
+    if (word !== t) return;
+    onDone();
+    scene.tweens.add({
+      targets: t, alpha: 0, scale: TUNING.questFlashTo, duration: TUNING.questFlashOutMs,
+      onComplete: () => { if (word === t) word = null; t.destroy(); },
+    });
+  });
+}
+
 // Thrown at the near corner of the road, opposite the tally: the two never overlap, and
 // one of them is what the party is about to find out and the other is what it got them.
-export function rollCard(scene, rect, check, night) {
+export function rollCard(scene, rect, check, night, onDone = () => {}) {
   clearRoll();
 
   const pad = padOf(FRAME);
@@ -70,12 +102,14 @@ export function rollCard(scene, rect, check, night) {
   // parchment square — so it is written in ink, like anything else that lands on a page.
   const face = write(String(otherFace(check.die)), TUNING.questRollFaceSize, COLORS.inkText)
     .setOrigin(0.5);
-  const named = write(check.skill.name, TUNING.questHintSize, COLORS.menuDim);
+  // Who threw it and what at, in the words the table used to say it in, wrapped rather
+  // than run off the panel: a long name beside a long skill is two lines and a taller head.
+  const named = write(`${check.name} ${check.you ? 'roll' : 'rolls'} ${check.skill.name}`,
+    TUNING.questHintSize, COLORS.menuDim);
+  named.setWordWrapWidth(wrap - dial - 14);
   const how = write(band.name, TUNING.questRollBandSize, band.colour);
   const chips = bonuses.map((b) => write(`+${b.n} ${b.label}`, TUNING.questBodySize, COLORS.menuAccent));
   const sum = write(`= ${check.total}`, TUNING.questBodySize + 2, COLORS.menuText);
-  const said = write(check.pass ? 'Held.' : 'Lost.', TUNING.questBodySize + 2,
-    check.pass ? COLORS.menuMapMark : COLORS.menuMapFolk);
 
   // The chips run left to right under the dial and wrap when the panel runs out, so a
   // party carrying more than the two things there are today still fits inside its frame.
@@ -92,7 +126,7 @@ export function rollCard(scene, rect, check, night) {
   // The sum is the tallest line on the panel and the last one, so the frame is built to
   // the height it actually came out rather than to a row's worth: a line measured short
   // is a line written on the bottom rail.
-  const tail = Math.max(sum.height, said.height) + 6;
+  const tail = sum.height + 6;
   const h = Math.max(minOf(FRAME).h,
     pad.t + head + 4 + chipRows * TUNING.questRollRow + tail + pad.b);
   const x = rect.x + TUNING.questRollInset;
@@ -121,13 +155,11 @@ export function rollCard(scene, rect, check, night) {
   });
   for (const chip of chips) box.add(chip);
   sum.setPosition(dx, ty);
-  said.setPosition(dx + sum.width + 12, ty);
   box.add(sum);
-  box.add(said);
 
   // Nothing behind the dial is showing yet: the panel comes up with a face turning over
   // in it and fills in from there.
-  for (const o of [...chips, sum, said]) o.setAlpha(0);
+  for (const o of [...chips, sum]) o.setAlpha(0);
   how.setAlpha(0);
   box.setAlpha(0);
   scene.tweens.add({ targets: box, alpha: 1, duration: TUNING.questToastFadeMs, ease: 'Sine.out' });
@@ -162,11 +194,16 @@ export function rollCard(scene, rect, check, night) {
     });
   });
   scene.tweens.add({
-    targets: [sum, said], alpha: 1, duration: TUNING.questToastFadeMs,
+    targets: sum, alpha: 1, duration: TUNING.questToastFadeMs,
     delay: after + chips.length * TUNING.questRollStepMs,
   });
 
+  // and then the word, and the panel stands a while behind it before it goes
   const done = after + (chips.length + 1) * TUNING.questRollStepMs;
+  scene.time.delayedCall(done, () => {
+    if (live !== box) return;
+    flash(scene, rect, check, onDone);
+  });
   scene.time.delayedCall(done + TUNING.questRollHoldMs, () => {
     if (live !== box) return;
     scene.tweens.add({
