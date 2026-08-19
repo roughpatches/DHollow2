@@ -380,6 +380,7 @@ const PAINTED_ITEMS = {
   heartwood: 'art/items/heartwood/An_Oak_log/rotations/An_Oak_log.png',
   copperore: 'art/items/copperore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   tinore: 'art/items/tinore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
+  coal: 'art/items/coal/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
