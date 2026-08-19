@@ -381,6 +381,16 @@ const PAINTED_ITEMS = {
   copperore: 'art/items/copperore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   tinore: 'art/items/tinore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   coal: 'art/items/coal/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
+  bronzebar: 'art/items/bronzebar/A_metal_bar_for_use_in_blacksm/rotations/A_metal_bar_for_use_in_blacksm.png',
+  // Each fish and the dish it is the whole of: the trout supper, the bluegill off the
+  // embers and the pan-fried perch. The other four dishes have more than one thing in
+  // them and keep their drawn shapes.
+  brooktrout: 'art/items/brooktrout/Brook_Trout/rotations/Brook_Trout.png',
+  troutsupper: 'art/items/troutsupper/Cooked_and_served_a/rotations/Cooked_and_served_a.png',
+  bluegill: 'art/items/bluegill/A_single_Fish_freshly_caught/rotations/A_single_Fish_freshly_caught.png',
+  coalfish: 'art/items/coalfish/Barbequed_for_dinner/rotations/Barbequed_for_dinner.png',
+  perch: 'art/items/perch/A_single_Fish_freshly_caught/rotations/A_single_Fish_freshly_caught.png',
+  friedfish: 'art/items/friedfish/Fried_for_dinner/rotations/Fried_for_dinner.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
