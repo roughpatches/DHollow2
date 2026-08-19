@@ -689,11 +689,21 @@ export function drink(mid) {
   return took;
 }
 
+// One meal to a fire. A camp is a party sitting down once, not a party eating their way
+// down the pack until the pool is full: they get a dinner here, and the next one waits for
+// the next fire. It is written on the node rather than on the run because that is what
+// makes it a rule about the fire — a longer road is more fires and more dinners, which is
+// the whole reason a party takes the longer road.
+export function mealAt() {
+  const node = run && run.at >= 0 ? run.nodes[run.at] : null;
+  return (node && node.ate) || null;
+}
+
 // And what can be eaten here, by the same rule and out of the same pack. A meal is not a
 // potion — see src/food.js — so nothing is held off because something like it is already
-// working: a party carrying four dinners may eat four dinners.
+// working; what holds a second one off is that the first one was eaten at this fire.
 export function edible() {
-  return atCamp() ? food.carried(fromPack) : [];
+  return atCamp() && !mealAt() ? food.carried(fromPack) : [];
 }
 
 // Eaten at the fire. The constitution goes back into the pool, capped at what the run set
@@ -701,9 +711,10 @@ export function edible() {
 // their own. Nobody is got up off the ground by a meal: that is a black draught's job, and
 // somebody being carried is not somebody eating.
 export function eat(mid) {
-  if (!atCamp() || !food.canEat(mid, fromPack)) return null;
+  if (!atCamp() || mealAt() || !food.canEat(mid, fromPack)) return null;
   const ate = food.eat(mid, fromPack);
   if (!ate) return null;
+  run.nodes[run.at].ate = ate.name; // and that is this fire's meal gone
   const { con = 0, hp = 0 } = ate.effect;
   if (con) run.con = Math.max(0, Math.min(run.conMax, run.con + con));
   if (hp) {

@@ -1663,7 +1663,8 @@ export default class Quest extends Phaser.Scene {
     const can = run.atHand();
     const force = run.inForce();
     const cord = run.cordRows();
-    if (!can.length && !force.length && !run.cordable().length) return [];
+    const ate = run.mealAt();
+    if (!can.length && !force.length && !ate && !run.cordable().length) return [];
     const out = [['', TUNING.questHintSize, COLORS.menuRule]];
     if (can.length) {
       out.push(['Somebody has the pack open.', TUNING.questHintSize, COLORS.menuDim]);
@@ -1672,6 +1673,12 @@ export default class Quest extends Phaser.Scene {
         out.push([`  [${i + 1}] ${p.name} — ${p.body.join(' ')}`,
           TUNING.questHintSize, COLORS.menuText]);
       });
+    }
+    // Said rather than left to be noticed: the food went out of the numbered list when it
+    // was eaten, and a square that simply vanishes tells the player nothing.
+    if (ate) {
+      out.push([`  They have eaten — ${ate}. There is one meal in a fire, and this fire has had it.`,
+        TUNING.questHintSize, COLORS.menuMapFolk]);
     }
     for (const p of force) {
       out.push([`  ${p.name} is working. ${p.body.join(' ')}`,

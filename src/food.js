@@ -16,9 +16,9 @@
 //
 // A meal is not a potion. Nothing lingers, so there is no one-at-a-time rule and no
 // clearing up after a run: what it gives it gives the moment it is eaten, and after that
-// there is only an empty pan. That is also why a party can eat four times over if they
-// carried four dinners — the limit on food is the room in the pack and the fish in the
-// stream, which is a limit the road already enforces.
+// there is only an empty pan. What stops a party eating their way down the pack is the
+// fire and not the food — one meal to a camp, counted in src/run.js — so a dinner is worth
+// carrying only as far as the next place they can sit down with it.
 
 import { MATERIALS } from '../content/materials.js';
 import { nameOf } from './town.js';
