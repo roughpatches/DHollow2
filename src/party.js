@@ -9,12 +9,11 @@
 import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
 import { SKILLS } from '../content/skills.js';
-import { FEARS } from '../content/fears.js';
+import { levelCap } from './town.js';
 import * as story from './story.js';
 import { bonus as charmBonus, worn } from './charm.js';
 
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
-const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
 // Skills live here rather than in content/party.js because the player's are chosen in
 // the hut and everyone's could move later; content says what they start as.
@@ -161,9 +160,21 @@ export function conTotal(ids) {
   return ids.reduce((n, id) => n + conOf(id), 0);
 }
 
-// leaving a level costs more than leaving the one before it
+// The level nobody can pass at the moment: the game's own ceiling, or the lower one the
+// town has not been rebuilt past yet. See levelCap in src/town.js.
+export function capNow() {
+  return Math.min(TUNING.maxLevel, levelCap());
+}
+
+// leaving a level costs more than leaving the one before it, and costs everything at the
+// cap, which is what a cap is
 export function xpToNext(level) {
-  return level >= TUNING.maxLevel ? Infinity : TUNING.xpBase * level;
+  return level >= capNow() ? Infinity : TUNING.xpBase * level;
+}
+
+// whether this character is at it, which is what anything saying so reads
+export function atCap(id) {
+  return stateOf(id).level >= capNow();
 }
 
 // Experience goes to the level and to nothing else: no skill is ever practised into
@@ -172,7 +183,10 @@ export function xpToNext(level) {
 // Returns how many levels were gained, so a caller can say so.
 export function award(id, xp) {
   const s = stateOf(id);
-  if (s.level >= TUNING.maxLevel) return 0; // XP past the last level has nowhere to go
+  // XP earned at the cap has nowhere to go and is not kept for later: work done at the
+  // ceiling is work done for what it paid out at the time. Raising the cap is what makes
+  // the next day's work worth something, not what makes yesterday's worth more.
+  if (s.level >= capNow()) return 0;
   s.xp += xp;
   let gained = 0;
   while (s.xp >= xpToNext(s.level)) {
@@ -180,6 +194,9 @@ export function award(id, xp) {
     s.level += 1;
     gained += 1;
   }
+  // and whatever the last level of it overshot by goes with the rest: an award that runs
+  // into the cap is not part-credited toward the level above it.
+  if (s.level >= capNow()) s.xp = 0;
   if (gained) {
     s.points += gained * TUNING.skillPointsPerLevel;
     if (id !== YOU) autoSpend(id);
@@ -322,16 +339,19 @@ export function scoreOf(ids, skillId) {
 // A check against a DC: a die, plus what the skill is worth, rolled by the party's best
 // at it. A natural top holds whatever the DC, and a natural 1 never does, so a hard
 // check is never impossible and an easy one is never free.
-export function check(ids, skillId, dc) {
+// `steady` is whatever is standing behind them that is not skill — a potion in force,
+// today — added to the total and shown on the card beside the rank.
+export function check(ids, skillId, dc, steady = 0) {
   const who = bestAt(ids, skillId);
   const rank = who ? rankOf(who, skillId) : 0;
   const die = 1 + Math.floor(Math.random() * TUNING.checkDie);
-  const total = die + rank;
+  const total = die + rank + steady;
   return {
     name: who ? nameOf(who) : 'Nobody',
     you: who === YOU, // 'You roll', not 'You rolls'
     skill: skillOf(skillId),
     rank,
+    steady,
     die,
     total,
     dc,

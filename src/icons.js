@@ -96,6 +96,15 @@ const SHAPES = {
     fill(g, b, 9, 7, 4, 2);
     fill(g, b, 3, 9, 4, 2);
   },
+  // dug rather than picked: a forked taproot with what was showing above it left on top
+  root: (g, [a, b]) => {
+    fill(g, a, 7, 4, 2, 6);
+    g.fillStyle(a, 1);
+    g.fillTriangle(8, 9, 4, 15, 7, 10);
+    g.fillTriangle(8, 9, 12, 15, 9, 10);
+    fill(g, b, 4, 2, 3, 2);
+    fill(g, b, 9, 1, 3, 2);
+  },
   fish: (g, [a, b]) => {
     g.fillStyle(a, 1);
     g.fillEllipse(9, 8, 12, 7);
@@ -249,11 +258,20 @@ const ICONS = {
   heartwood: ['grain', 'heart'],
   blacktrumpet: ['trumpet', 'soot'],
   oystermushroom: ['cap', 'bone'],
+  bitterroot: ['root', 'herb'],
   heronfeather: ['feather', 'ash'],
   eggshell: ['shell', 'shell'],
   greyarrow: ['arrows', 'ash'],
   bone: ['shard', 'bone'],
+  copperore: ['grain', 'copper'],
+  tinore: ['grain', 'tin'],
+  coal: ['block', 'coal'],
   ironore: ['grain', 'iron'],
+  mithrilore: ['grain', 'mithril'],
+  adamantiumore: ['grain', 'adamant'],
+  dwarvenore: ['block', 'dwarf'],
+  elvishore: ['grain', 'elf'],
+  holyore: ['grain', 'holy'],
   charcoal: ['block', 'soot'],
   // The nine stones: the rough lump out of the ground, and the same stone cut. All three
   // grades of a cut stone share its square — a Flawless Ruby is a ruby.
@@ -278,10 +296,18 @@ const ICONS = {
   tonic: ['flask', 'herb'],
   salve: ['pot', 'bone'],
   cordial: ['flask', 'bronze'],
+  woodsdraught: ['flask', 'food'],
+  copsebroth: ['pot', 'herb'],
+  blackdraught: ['flask', 'soot'],
+  nightwash: ['flask', 'ash'],
+  steadyhand: ['pot', 'glass'],
+  bitterwash: ['flask', 'shell'],
+  bronzebar: ['log', 'bronze'],
   ironbar: ['log', 'iron'],
   friedfish: ['fish', 'food'],
   woodstew: ['pot', 'food'],
   smokedfish: ['fish', 'soot'],
+  shorepie: ['loaf', 'food'],
   bread: ['loaf', 'food'],
   candle: ['taper', 'bone'],
   flint: ['shard', 'stone'],

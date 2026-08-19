@@ -490,7 +490,7 @@ export const TUNING = {
   // reason to take the woodsman into the wood. Zero turns the whole thing off.
   conPerTerrainPoint: 1,
 
-  maxLevel: 10,
+  maxLevel: 9, // the game's ceiling, and what the chapel's last stage caps at
   conPerLevel: 3, // added to a character's own constitution for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
   // Experience is only ever spent on the level. What a level buys is points, and the
@@ -616,6 +616,17 @@ export const COLORS = {
     stone: [0x6f7379, 0x9aa0a6],
     iron: [0x4a4f58, 0x878d96],
     bronze: [0x8a6a2f, 0xc9a95f],
+    // the nine ores, tier by tier: green-crusted copper and black tin and blacker coal,
+    // then iron's rust, mithril's bright thread and adamantium's blue, then the three
+    // nobody has dug yet
+    copper: [0x4f6b4a, 0xb06a4a],
+    tin: [0x3f4348, 0x767c84],
+    coal: [0x232225, 0x45414a],
+    mithril: [0x7f8894, 0xdfe7f0],
+    adamant: [0x2a3244, 0x5d7099],
+    dwarf: [0x5b4a35, 0x9a7d4e],
+    elf: [0x4a6b53, 0x9fc38a],
+    holy: [0xb9b3a0, 0xf2ead2],
     cloth: [0x8d8266, 0xb9ab8c],
     pitch: [0x2b2a2e, 0x4a4652],
     food: [0xa8763f, 0xd0a061],

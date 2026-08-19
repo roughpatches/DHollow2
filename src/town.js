@@ -2,6 +2,7 @@
 // is carrying to repair it with, and what has already been paid toward the next stage.
 // content/buildings.js says what a building is; this says where it has got to.
 
+import { TUNING } from '../tuning.js';
 import { BUILDINGS } from '../content/buildings.js';
 import { MATERIALS } from '../content/materials.js';
 
@@ -44,6 +45,24 @@ export function isOpen(id) {
   return !!stageOf(id).open;
 }
 
+// The level nobody can pass while the town is in the state it is in. A stage with a `cap`
+// on it is a building holding the party back until it is repaired further; the highest cap
+// standing anywhere is the party's, and TUNING.maxLevel is the ceiling behind all of them.
+// Rebuilding is the only thing that moves it — see award in src/party.js.
+export function levelCap() {
+  let cap = 0;
+  for (const b of BUILDINGS) cap = Math.max(cap, stageOf(b.id).cap || 0);
+  return cap || TUNING.maxLevel;
+}
+
+// And which building is holding it there, so a screen can name what to go and repair.
+// Null once nothing is: a building at the last stage it has has finished holding anybody
+// back, whatever number it carries.
+export function capHeldBy() {
+  const cap = levelCap();
+  return BUILDINGS.find((b) => stageOf(b.id).cap === cap && !!stageOf(b.id).cost) || null;
+}
+
 export function nameOf(mid) {
   return MATERIAL[mid] ? MATERIAL[mid].name : mid;
 }
@@ -67,6 +86,7 @@ export function carriedRows() {
     note: `x${held.get(m.id)}`,
     n: held.get(m.id), // what the grid splits into squares; see stackMax in tuning.js
     icon: m.id,
+    mid: m.id, // what it is, for the one tab that does something to a thing rather than list it
     body: m.body,
   }));
 }
@@ -136,6 +156,7 @@ export function statusLines(id) {
   const b = buildingOf(id);
   const s = stageOf(id);
   const lines = [`${b.name} — ${s.name}.`, s.note];
+  if (s.cap && s.cost) lines.push(`Nobody can pass level ${s.cap} while it stands like this.`);
   const rem = remaining(id);
   if (!rem) {
     lines.push('Nothing more is wanted here.');
@@ -159,6 +180,7 @@ export function contributeLines(id, result) {
   if (result.levelled) {
     const s = stageOf(id);
     lines.push(`${buildingOf(id).name} is now ${s.name}.`, s.note);
+    if (s.cap) lines.push(`The party can level to ${s.cap}.`);
     if (remaining(id)) lines.push(`Next stage wants: ${list(Object.entries(remaining(id)))}.`);
   } else {
     lines.push(`Still wanted: ${list(Object.entries(remaining(id)))}.`);

@@ -43,6 +43,9 @@
 //   con     — what standing here does to the party's constitution, [least, most].
 //             Negative takes and positive gives. Night multiplies what it takes.
 //   body    — what it is, in the world's voice. Yours to write.
+//   camp    — true if the party can open a pack standing here. It is the only place on a
+//             run a potion can be drunk: they have stopped, there is a fire, and nobody
+//             drinks anything standing in front of a boar. See src/potions.js.
 //
 // A resource node also has:
 //   harvests — one or two of them. Each names the gathering skill the work is done with,
@@ -216,13 +219,13 @@ export const RESOURCE_NODES = [
         skill: 'herblore',
         activity: 'Foraging',
         text: 'Take the bank instead.',
-        offer: 'Black trumpets in the shade under the lip, where it never dries.',
+        offer: 'Black trumpets in the shade under the lip, and bitterroot in the wet ground below them.',
         done: {
           well: 'They are in a run along the whole lip once you know to look at the underside of it. You come away with your hands full and your boots ruined.',
           middling: 'You clear what is on the top of the lip. Whatever is under it stays there, and you are not going in after it.',
           botched: 'The lip gives while you are standing on it. You come out of the mud with less than you went in with.',
         },
-        draw: { count: [1, 2], odds: { blacktrumpet: 45, oystermushroom: 20 } },
+        draw: { count: [1, 2], odds: { blacktrumpet: 45, oystermushroom: 20, bitterroot: 14 } },
       },
     ],
     xp: [10, 16],
@@ -290,13 +293,13 @@ export const RESOURCE_NODES = [
         skill: 'mining',
         activity: 'Mining',
         text: 'Work the open face for stone.',
-        offer: 'Iron showing in the seam, and everything above it loose.',
+        offer: 'Copper showing green in the seam, and everything above it loose.',
         done: {
           well: 'The face comes away in squared blocks where you set the wedges, and the ground above it holds the whole time you are under it.',
           middling: 'You get stone, all of it broken small. Twice you have to come out from under the face and wait for it to stop coming down.',
           botched: 'The face lets go above where you are working. You are out from under it before the worst of it lands. What you had is under it now.',
         },
-        draw: { count: [0, 2], odds: { ironore: 45 } },
+        draw: { count: [0, 2], odds: { copperore: 30, tinore: 12, coal: 10 } },
         stones: { roughgarnet: 3, roughagate: 3, roughamethyst: 1 },
       },
     ],
@@ -339,7 +342,7 @@ export const RESOURCE_NODES = [
           middling: 'You get down through the gravel and into the ledge and it does not want to come. You take what breaks off the top of it.',
           botched: 'You are working in a foot of moving water and it carries the spoil off as fast as you free it. Most of what you break goes downstream.',
         },
-        draw: { count: [1, 3], odds: { ironore: 40 } },
+        draw: { count: [1, 3], odds: { tinore: 34, copperore: 10 } },
         stones: { roughgarnet: 3, roughagate: 2, roughamethyst: 1 },
       },
     ],
@@ -366,13 +369,13 @@ export const RESOURCE_NODES = [
         skill: 'herblore',
         activity: 'Foraging',
         text: 'Work the stand.',
-        offer: 'An hour in the bracken on your knees, going by smell as much as by eye.',
+        offer: 'An hour in the bracken on your knees, going by smell as much as by eye, and a trowel for whatever is under it.',
         done: {
           well: 'You go through it in lines and miss nothing. Half of what comes out of it would not be recognised by anybody who walked past.',
           middling: 'You take the obvious. What is under the bracken proper stays under it, and you know that while you are walking away.',
           botched: 'You go through it fast and take everything that looked right. Sorting it afterwards, most of it is the wrong thing, and one of them is worse than wrong.',
         },
-        draw: { count: [2, 4], odds: { blacktrumpet: 45, oystermushroom: 40 } },
+        draw: { count: [2, 4], odds: { blacktrumpet: 45, oystermushroom: 40, bitterroot: 22 } },
       },
     ],
     xp: [8, 14],
@@ -443,7 +446,7 @@ export const RESOURCE_NODES = [
           middling: 'It rings hollow in two places and you work round them. What you get is good, and there is not much of it.',
           botched: 'You strike wide of the vein and it splits the way it wanted to instead of the way you wanted it to. It is all rubble, and half of it is on the ground you were standing on.',
         },
-        draw: { count: [0, 2], odds: { ironore: 40 } },
+        draw: { count: [0, 2], odds: { copperore: 38, coal: 8 } },
         stones: { roughgarnet: 3, roughagate: 3, roughamethyst: 2 },
       },
     ],
@@ -451,7 +454,7 @@ export const RESOURCE_NODES = [
     con: [-2, 0],
     body: [
       'A boulder the size of a cart, standing on its own with a dozen smaller ones settled round its foot where they came off it. Lichen has had the whole of it long enough to be the colour of the rock.',
-      'A vein runs down the face of it, dark and rusted and a hand across, and it goes in as far as it goes down. Split along that and the thing comes apart in blocks. Split anywhere else and it does not.',
+      'A vein runs down the face of it, green-stained and a hand across, and it goes in as far as it goes down. Split along that and the thing comes apart in blocks. Split anywhere else and it does not.',
     ],
   },
   {
@@ -472,20 +475,20 @@ export const RESOURCE_NODES = [
           middling: 'It thins a stride down and you are chasing it through cold stone after that. You come out with some of it and a good deal of gravel.',
           botched: 'One half of it shifts while you are standing between them. Nobody is hurt. Everything you had loosened is under everything that was above it.',
         },
-        draw: { count: [1, 3], odds: { ironore: 50 } },
+        draw: { count: [1, 3], odds: { coal: 34, copperore: 18 } },
         stones: { roughgarnet: 4, roughagate: 4, roughamethyst: 2 },
       },
       {
         skill: 'herblore',
         activity: 'Foraging',
         text: 'Work the floor of the split.',
-        offer: 'Years of ground nothing has walked on, with the light straight down onto it.',
+        offer: 'Years of ground nothing has walked on, with the light straight down onto it and nothing dug out of it.',
         done: {
           well: 'Nothing has been at it since the rock came apart. You take the whole floor of it, and it is the cleanest stuff anybody has seen this side of the wood.',
           middling: 'You take what is standing in the light. The rest is back where the halves lean together, and you are not going under that.',
           botched: 'The halves have not finished settling. One of them moves while you are in there and takes what you had picked with it.',
         },
-        draw: { count: [1, 2], odds: { blacktrumpet: 35, oystermushroom: 25 } },
+        draw: { count: [1, 2], odds: { blacktrumpet: 35, oystermushroom: 25, bitterroot: 16 } },
       },
     ],
     xp: [10, 16],
@@ -836,6 +839,7 @@ export const ENCOUNTER_NODES = [
     name: 'A fire, and what you carry',
     zones: ['greywood'],
     nature: 'gather',
+    camp: true, // stopped, with a fire on: the one place on the road a potion is drunk
     weight: { day: 2, night: 4 }, // mostly a thing done after dark, when it is wanted most
     read: { skill: 'woodcraft', line: 'Somebody laid a fire on that ground, and did not come back for the wood they left beside it.' },
     xp: [8, 14],
@@ -1062,7 +1066,7 @@ export const ENCOUNTER_NODES = [
         tried: 'The haft of a pick against the back of it, one pace at a time, listening for the note to go dead.',
         held: 'It rings sound for thirty feet and then it does not, and thirty feet is enough.',
         lost: 'The note goes dead a pace after somebody has already taken it.',
-        spoils: { ironore: [1, 2] },
+        spoils: { coal: [1, 2] },
         lostCon: 4,
       },
       {
@@ -1345,7 +1349,7 @@ export const ENCOUNTER_NODES = [
         tried: 'Where the water slows, where the heavy stuff drops, and how far up they have got.',
         held: 'They are working the wrong bar. The right one is two bends up and untouched.',
         lost: 'They are working the right bar. That is why they are on it.',
-        spoils: { ironore: [1, 2] },
+        spoils: { tinore: [1, 2] },
         lostCon: 2,
       },
       {
@@ -1511,10 +1515,10 @@ export const ENCOUNTER_NODES = [
         text: 'Take what is left round the edges of it.',
         skill: 'herblore',
         dc: 12,
-        tried: 'The rim of the turned ground, where the roots were too shallow to be worth its while.',
+        tried: 'The rim of the turned ground, where the roots ran too deep to be worth its while.',
         held: 'It missed the whole of the north edge, and the north edge is where the light gets in.',
         lost: 'It missed nothing. It has been at this for a week.',
-        spoils: { blacktrumpet: [1, 2] },
+        spoils: { blacktrumpet: [1, 2], bitterroot: [0, 1] },
         lostCon: 2,
       },
       {

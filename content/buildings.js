@@ -14,8 +14,15 @@
 //               on a stage is a workstation from that stage on, and standing at it opens
 //               what can be made there; see content/recipes.js.
 //       cost  — materials to reach the NEXT stage. The last stage has none, and no stage
-//               has one at the moment: the materials repairs were written in are gone and
-//               the new ones are not written yet, so nothing levels until they are.
+//               has one at the moment: the materials repairs used to be written in are
+//               gone and the new ones are not written yet, so nothing levels until they
+//               are. Every stage below is what a building IS at that level; what it takes
+//               to get there is the hole.
+//       cap   — the level nobody can pass while the building stands like this. It is how
+//               a repair is worth something to a character rather than only to the town:
+//               the highest cap standing anywhere is the party's, and rebuilding is the
+//               only thing that moves it. See levelCap in src/town.js. A stage without one
+//               holds nobody back.
 //   body    — what the place is, in the world's voice. Yours to write.
 // A building whose id is also in STRUCTURES in content/looks.js has a picture per stage,
 // and repairing it changes the picture where it stands.
@@ -39,6 +46,8 @@ export const BUILDINGS = [
   {
     // Three stages, three pictures. The door is shut until the roof is back on: there is
     // nothing inside a burnt chapel but weather.
+    // It is also what holds the party's level down. Nothing else in town carries a `cap`,
+    // so the chapel is the whole of it: three at a ruin, six shored up, nine roofed.
     id: 'chapel',
     name: 'The chapel',
     map: 'woodend',
@@ -49,14 +58,17 @@ export const BUILDINGS = [
       {
         name: 'Burnt out',
         note: 'The roof is in the nave and the door is boarded over.',
+        cap: 3,
       },
       {
         name: 'Shored up',
         note: 'Scaffolded, sheeted, and dry for the first winter in years.',
+        cap: 6,
       },
       {
         name: 'Roofed and lit',
         note: 'Slated, swept, and open. You can hear how big it is from the door.',
+        cap: 9,
         open: true,
       },
     ],
@@ -67,7 +79,7 @@ export const BUILDINGS = [
   },
   {
     // The first workstation. Two working stages: a hearth anybody can smelt at, and the
-    // bloomery behind it, which is what the second repair buys and what the recipes gated
+    // furnace behind it, which is what the second repair buys and what the recipes gated
     // at stage 2 are waiting for.
     id: 'forge',
     name: 'The smithy',
@@ -81,12 +93,12 @@ export const BUILDINGS = [
       },
       {
         name: 'Hearth lit',
-        note: 'Sheeted over, the hearth swept, the bellows patched, and the treadle wheel turning again in the corner.',
+        note: 'Sheeted over, the hearth swept, the bellows patched, and a fire in it that will hold all day.',
         craft: true,
       },
       {
-        name: 'Bloomery standing',
-        note: 'A stack tall enough to hold its heat, and iron coming out of it by the bar.',
+        name: 'Furnace standing',
+        note: 'A stack tall enough to hold its heat, coal in the top of it, and bronze coming out of the bottom by the bar.',
         craft: true,
       },
     ],
@@ -126,8 +138,12 @@ export const BUILDINGS = [
     ],
   },
   {
-    // Inside the Sea Hag, at the far end of the bar. A workstation on an interior map
-    // needs nothing the street's do not: a site, and a stage that crafts.
+    // Inside the Sea Hag, at the far end of the bar, and the only workstation in town
+    // there is no way of seeing from the road. A workstation on an interior map needs
+    // nothing the street's do not: a site, and a stage that crafts.
+    // Two working stages: a range anybody can put a pan on, and the smokehouse in the
+    // yard behind it, which is what the second repair buys and what the keeping food is
+    // waiting for.
     id: 'kitchen',
     name: 'The Sea Hag\'s kitchen',
     map: 'tavern',
@@ -143,10 +159,74 @@ export const BUILDINGS = [
         note: 'Drawing properly, with a pan on it and somebody willing to lend you the pan.',
         craft: true,
       },
+      {
+        name: 'Range and smokehouse',
+        note: 'An oven that holds its heat, and a shed in the yard hung to the roof.',
+        craft: true,
+      },
     ],
     body: [
       'A cast range at the west end of the bar with a flue that has not been swept in the landlord\'s lifetime.',
       'There is nothing wrong with it that a day\'s work and something worth cooking would not fix.',
+    ],
+  },
+  {
+    // The gem cutter's bench, in the house east of the Sea Hag with its windows out —
+    // which is why it is that house: cutting is done in daylight or not at all. Two
+    // working stages: a hand wheel anybody can grind on, and the treadle mill behind it,
+    // which is what the second repair buys and what the faceted stones are waiting for.
+    id: 'studio',
+    name: 'The Artisan\'s Studio',
+    map: 'harbourroad',
+    site: [29], // the door east of the tavern, under the window with the glass gone
+    level: 0,
+    stages: [
+      {
+        name: 'Windows out',
+        note: 'Glass gone from the front and the weather coming in where the light should.',
+      },
+      {
+        name: 'Bench and hand wheel',
+        note: 'Glazed, swept, and a wheel on the bench that turns as fast as an arm can turn it.',
+        craft: true,
+      },
+      {
+        name: 'Treadle mill standing',
+        note: 'A wheel driven from the floor, so both hands are free for the stone.',
+        craft: true,
+      },
+    ],
+    body: [
+      'A shopfront with its glass out and its shutters gone, which is the worst thing that can happen to a room and the best thing that can happen to the light in one.',
+      'The bench is still against the window. Whoever worked at it took the wheel and left the bench.',
+    ],
+  },
+  {
+    // The east end of town, where the paving runs out over the mud. Nothing is made here
+    // yet: three stages of repair and no `craft` on any of them, so standing at it is
+    // repairing it and nothing else until there is work written for it.
+    id: 'docks',
+    name: 'The docks',
+    map: 'quay',
+    site: [34], // the head of the old jetty, where the paving gives out over the mud
+    level: 0,
+    stages: [
+      {
+        name: 'Washed out',
+        note: 'Half the piles are down and the deck of it is on the mud in pieces.',
+      },
+      {
+        name: 'Piled and decked',
+        note: 'Driven, decked and railed, and it will take a man walking out to the end of it.',
+      },
+      {
+        name: 'Working wharf',
+        note: 'Bollards, a crane post, and water enough under it to lay a boat alongside.',
+      },
+    ],
+    body: [
+      'A jetty going out over the flat on legs that are mostly not there any more, with the deck of it lying about underneath in the mud it fell into.',
+      'A harbour was cut here once and the shape of the ground still says where. Everything else about it has to be put back.',
     ],
   },
 ];

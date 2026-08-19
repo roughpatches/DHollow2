@@ -10,10 +10,10 @@ import { RECIPES } from '../content/recipes.js';
 import { MATERIALS } from '../content/materials.js';
 import { SKILLS } from '../content/skills.js';
 import {
-  award, levelOf as levelYou, rankOf, skillOf, YOU,
+  award, atCap, levelOf as levelYou, rankOf, skillOf, YOU,
 } from './party.js';
 import {
-  buildingOf, levelOf as stageAt, give, heldOf, nameOf, remaining,
+  buildingOf, levelOf as stageAt, give, heldOf, nameOf, remaining, levelCap, capHeldBy,
 } from './town.js';
 import { hasEngine, qualityOf, hardLine } from './activity.js';
 import {
@@ -61,7 +61,13 @@ export function blockers(r) {
   const out = [];
   const b = buildingOf(r.at);
   if (stageAt(r.at) < r.stage) out.push(`Wants ${b.name} rebuilt to ${b.stages[r.stage].name}.`);
-  if (levelYou(YOU) < r.level) out.push(`Wants level ${r.level}; you are ${levelYou(YOU)}.`);
+  if (levelYou(YOU) < r.level) {
+    out.push(`Wants level ${r.level}; you are ${levelYou(YOU)}.`);
+    // and where the town is what is stopping the levelling rather than the walking, say so:
+    // no amount of work in the wood answers a cap.
+    const held = capHeldBy();
+    if (r.level > levelCap() && held) out.push(`Nobody passes level ${levelCap()} until ${held.name} is rebuilt.`);
+  }
   const want = r.rank || 0;
   if (rankOf(YOU, r.skill) < want) {
     out.push(`Wants ${want} point${want === 1 ? '' : 's'} of ${skillOf(r.skill).name}; you have ${rankOf(YOU, r.skill)}.`);
@@ -176,9 +182,16 @@ export function madeLines(r, result) {
     out.push(`${fullName(result.stone.gem, result.stone.grade)}. ${worthLine(result.stone.gem, result.stone.grade)} while it is worn.`);
   }
   const got = Object.entries(result.made);
+  // A cut says what came off the wheel above this, so a bench that made only a stone is
+  // not also told it made nothing.
   if (got.length) out.push(`You have ${list(got)}.`);
   else if (!result.stone) out.push('Nothing came off the bench worth carrying.');
-  out.push(`${result.xp} toward your level.`);
+  // Work done at the cap pays what it pays in materials and nothing to the level, and is
+  // said so here rather than left to be noticed on the crew screen.
+  const held = capHeldBy();
+  out.push(atCap(YOU) && held
+    ? `Worth ${result.xp} to your level, and nothing counts until ${held.name} is rebuilt.`
+    : `${result.xp} toward your level.`);
   if (result.levels) {
     out.push(`Level ${levelYou(YOU)}. ${result.levels * TUNING.skillPointsPerLevel} points to spend.`);
   }

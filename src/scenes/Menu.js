@@ -12,6 +12,7 @@ import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
 import { drawSlots, shapeOf } from '../slots.js';
 import { cutRows } from '../charm.js';
+import * as potions from '../potions.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
@@ -22,10 +23,11 @@ const PLATE = 'plate'; // and a picture on it is set in the square off the same 
 // above the log of everything else the village has told you it wants.
 const questLog = () => [...questRows(), ...QUESTS];
 
-// What is in the town's stock, and above it the cut stones. This is a readout and not a
-// place to act: what goes out on a run and which stone goes on the cord are decided at
-// the gate, on the packing screen in src/scenes/Quest.js, because they are decisions
-// about a job rather than about a shelf.
+// What is in the town's stock, and above it the cut stones. Mostly a readout: what goes
+// out on a run and which stone goes on the cord are decided at the gate, on the packing
+// screen in src/scenes/Quest.js, because they are decisions about a job rather than about
+// a shelf. The one exception is a potion, which is drunk where it is standing.
+//
 // One row per SQUARE rather than per thing: a stack past stackMax is more than one square
 // and is listed as more than one, so the cursor walks what is drawn. Every square of a
 // stack points at the same entry, so the detail pane reads the same either way.
@@ -37,9 +39,30 @@ const squares = (entry, n) => {
   return out;
 };
 
+// A potion is the one square on the tab that does something: Enter drinks it, and drunk
+// in town it takes the next job out rather than this afternoon. Once it is drunk the
+// bottle is gone from the pack, so what is waiting is listed after it — otherwise the
+// square would simply vanish and the player would be told nothing.
+const withPotion = (r) => (potions.isPotion(r.mid) ? {
+  ...r,
+  body: [
+    ...r.body,
+    ...potions.linesFor(r.mid),
+    potions.taken(r.mid)
+      ? 'One of these is already working. A second would do nothing.'
+      : 'Drink it here and it takes the next job out. [Enter]',
+  ],
+} : r);
+
 const inventory = () => [
   ...cutRows().flatMap((r) => squares(r, r.n ?? 1)),
-  ...carriedRows().flatMap((r) => squares(r, r.n)),
+  ...carriedRows().map(withPotion).flatMap((r) => squares(r, r.n)),
+  ...potions.waitingRows().map((p) => ({
+    label: p.name,
+    note: 'Drunk',
+    icon: p.mid,
+    body: ['Drunk here, and waiting on the next job out.', ...p.body],
+  })),
   ...INVENTORY,
 ];
 
@@ -140,6 +163,12 @@ export default class Menu extends Phaser.Scene {
       if (!pointsOf(YOU)) return;
       this.close();
       this.game.events.emit('skills:spend', entry.skill);
+      return;
+    }
+    // a bottle, and the only square on the Inventory tab that answers to Enter
+    if (entry.mid && potions.canDrink(entry.mid)) {
+      potions.drink(entry.mid);
+      this.draw();
       return;
     }
     if (!entry.options) return;
@@ -553,6 +582,9 @@ export default class Menu extends Phaser.Scene {
     let change = rows.some((r) => r.options) ? '    [Enter] Change' : '';
     if (rows.some((r) => r.quest)) change = '    [Enter] Set out';
     if (rows.some((r) => r.skill)) change = pointsOf(YOU) ? '    [Enter] Spend a point' : '';
+    // said only while the cursor is on a bottle, because it is the only square that answers
+    const here = rows[this.row[this.tab]];
+    if (here && here.mid && potions.canDrink(here.mid)) change = '    [Enter] Drink it';
     this.text(
       this.listX,
       this.box.y + this.box.h - 26,

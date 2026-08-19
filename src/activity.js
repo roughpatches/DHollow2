@@ -158,6 +158,9 @@ export function qualityOf(judgments) {
 export function qualityLine(node) {
   if (node.quality === undefined) return null;
   if (node.failed) return 'Botched it.';
+  // It went wrong and something held it: the work is not lost, and nobody is pretending
+  // it went well either.
+  if (node.saved) return 'It went wrong, and what you drank held it. Nothing worse than that.';
   const pct = Math.round(node.quality * 100);
   const said = node.quality >= 0.9 ? 'Clean work.'
     : node.quality >= TUNING.activityConGood ? 'Well done.'

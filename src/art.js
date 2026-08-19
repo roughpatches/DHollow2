@@ -6,7 +6,9 @@ import { TUNING } from '../tuning.js';
 import { LOOKS, NODE_ART, STRUCTURES, PROPS } from '../content/looks.js';
 import { PLACES } from '../content/places.js';
 import { MAPS } from '../content/maps.js';
-import { actorFrame, walkAnim, proneKey, portraitKey } from './textures.js';
+import {
+  actorFrame, walkAnim, proneKey, portraitKey, stageKey, stagesIn,
+} from './textures.js';
 import { buildingOf, levelOf } from './town.js';
 import { DEPTH, atTile } from './street.js';
 
@@ -90,6 +92,8 @@ export function preloadArt(scene) {
     if (look.portrait) add(portraitKey(look.id), look.portrait);
   }
   for (const s of STRUCTURES) {
+    // a building with no export yet is drawn at boot instead of loaded; see src/textures.js
+    if (s.shell) continue;
     s.stages.forEach((path, i) => {
       const k = stageKey(s, i);
       if (!scene.textures.exists(k)) scene.load.image(k, `${s.path}/${path}`);
@@ -378,11 +382,9 @@ export function bodyOf(palette) {
 
 // --- buildings -------------------------------------------------------------
 // A building is one picture per stage of repair, standing where the panel says it stands.
-// Repairing it changes the picture and nothing else.
-
-function stageKey(s, i) {
-  return `built_${s.id}_${i}`;
-}
+// Repairing it changes the picture and nothing else. The picture is loaded off disk where
+// there is an export for it and drawn at boot where there is not; both answer to the same
+// key, so nothing below here knows which it got.
 
 // How much empty frame a picture carries under it. An export is padded out to a square and
 // the padding is not the same on every stage — the burnt chapel has eight pixels of nothing
@@ -454,7 +456,7 @@ export function raiseProps(scene, mapKey) {
 export function restate(built, id) {
   const e = built[id];
   if (!e) return;
-  const key = stageKey(e.spec, Math.min(levelOf(id), e.spec.stages.length - 1));
+  const key = stageKey(e.spec, Math.min(levelOf(id), stagesIn(e.spec) - 1));
   e.img.setTexture(key);
   // on a street it is stood on its own feet rather than on the bottom of its frame, and
   // where its feet are inside that frame changes with the stage

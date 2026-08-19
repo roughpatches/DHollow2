@@ -122,6 +122,15 @@ export const LOOKS = [
 //            line. Fractions are fine: it is placed by eye against what it stands on.
 //   stages — one image per stage of repair, lowest first. A stage past the end of the
 //            list keeps the last picture.
+//   shell  — instead of `path` and `stages`, for a building with no export yet: a drawn
+//            placeholder, one per stage, generated at boot by src/textures.js.
+//              size  — the finished thing, in pixels: how wide it stands and how tall.
+//              roof  — whether the last stage is capped with one. A jetty is not.
+//              built — how much of it is standing at each stage, lowest first, 0 to 1.
+//                     How many numbers are on this line is how many stages it has.
+//            It is drawn see-through and hatched on purpose: it stands over a painted
+//            town, and it should read as somewhere art is going rather than as art.
+//            Swap it for `path` and `stages` when the export arrives; nothing else changes.
 export const STRUCTURES = [
   // The Sea Hag has no entry: it is painted into the harbour road, sign and all, and a
   // building that is already in the picture does not want a second one standing on it.
@@ -138,6 +147,20 @@ export const STRUCTURES = [
       'wrapped_in_timber_sc/rotations/unknown.png',
       'roof_rebuilt_and_sla/rotations/unknown.png',
     ],
+  },
+  {
+    // No export yet. A shopfront bay — the door and the window beside it — rather than
+    // the whole house, so the painted terrace it stands in front of is still readable.
+    id: 'studio',
+    at: [29], // the door east of the tavern, the same tile the building is reached at
+    shell: { size: [76, 132], roof: true, built: [0.18, 0.62, 1] },
+  },
+  {
+    // No export yet either, and a jetty rather than a house: wide, low, and finished with
+    // a rail along it instead of a roof over it.
+    id: 'docks',
+    at: [34], // the head of the old jetty, where the paving gives out
+    shell: { size: [150, 34], roof: false, built: [0.3, 0.7, 1] },
   },
 ];
 
@@ -495,9 +518,13 @@ const hollow = (name) => ({
     // among the trunks and the near rim comes on past the party, which is what makes it
     // read as something you are looking down into rather than a patch beyond the path.
     ground: 84,
-    // The moss in it reads greener than the wood does, and doubling the thing doubled how
-    // much of it there is, so the green is taken back and the earth is left alone.
-    shade: 0xf1d1f2,
+    // The moss. The wood has no green in it at all — not one pixel of the backdrop's floor
+    // band is green-dominant, where a sixth of this export is — so there is nothing to
+    // match it to and the only question is how far to take it. Green alone turns the roots
+    // magenta, because taking green out of red-brown wood leaves red and blue; taking a
+    // little blue with it keeps them brown. Further than this and the moss stops being
+    // moss.
+    shade: 0xf1adcc,
     // A hollow the width of a barn, painted at 168, is a puddle. Doubled, it is a barn.
     scale: 2,
     // Feathered on all four sides now: the near rim is in view where it used to sit on
