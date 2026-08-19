@@ -81,6 +81,31 @@ export const LOOKS = [
     down: '../aldis/Collapsed_in_a_heap/rotations/south.png',
   },
   {
+    // Melovia, the herbalist with the staff and the leather satchel, out on the road. Her
+    // export carries no face — the room-sized one below has it — so she talks with that,
+    // the way Aldis does.
+    id: 'melovia',
+    path: 'art/melovia',
+    size: 64,
+    foot: 63,
+    head: 1,
+    walk: { folder: 'Idle/animations/Walk', frames: 6 },
+    still: 'Idle/rotations',
+    portrait: '../melovia-indoors/Idle/portrait.png',
+    indoors: 'melovia-indoors',
+  },
+  {
+    // The same herbalist at the size a room is painted at, painted all eight ways and
+    // walking none of them: indoors she stands where she is put. The face is hers.
+    id: 'melovia-indoors',
+    path: 'art/melovia-indoors',
+    size: 128,
+    foot: 126,
+    head: 3, // the crown of her head; the staff tops out level with it
+    still: 'Idle/rotations',
+    portrait: 'Idle/portrait.png',
+  },
+  {
     id: 'gregorious',
     path: 'art/gregorious',
     size: 60,
