@@ -15,7 +15,10 @@ import {
 import {
   buildingOf, levelOf as stageAt, give, heldOf, nameOf, remaining, levelCap, capHeldBy,
 } from './town.js';
-import { hasEngine, qualityOf, hardLine } from './activity.js';
+import {
+  hasEngine, qualityOf, hardLine, firedWork,
+} from './activity.js';
+import { lay, burnSeconds, layLine } from './fuel.js';
 import {
   cut, gemOf, validate, fullName, worthLine,
 } from './charm.js';
@@ -38,6 +41,10 @@ for (const r of RECIPES) {
   for (const m of [...Object.keys(r.costs), ...Object.keys(r.makes || {})]) {
     if (!MATERIAL.has(m)) console.warn(`${r.name}: no such material — ${m}`);
   }
+  // Work over a fire with no fuel written is work with no clock on it, which is the one
+  // way a fired recipe can be wrong and still run.
+  if (firedWork(r.activity) && !r.fuel) console.warn(`${r.name}: ${r.activity} is done over a fire and wants a fuel.`);
+  if (r.fuel && !firedWork(r.activity)) console.warn(`${r.name}: ${r.activity} is not done over a fire, so its fuel is never burnt.`);
 }
 
 // Whether standing at this building hands the player a bench at all. It is the stage and
@@ -76,7 +83,25 @@ export function blockers(r) {
   if (short.length) {
     out.push(`Short of ${short.map(([m, n]) => `${n - heldOf(m)} ${nameOf(m)}`).join(', ')}.`);
   }
+  // The fire is the last of it and the plainest: work done over heat wants something to
+  // burn, and nothing in the pack burns hot enough or long enough for this one.
+  if (fuelFor(r) && layFor(r).short) out.push('Nothing left in the pack will hold a fire that long.');
   return out;
+}
+
+// How much fuel this work wants. Written on the recipe, because how long a job takes is a
+// thing about the job: a clamp of charcoal is an afternoon and a furnace run is a day.
+// Work that is not done over a fire wants none, whatever the recipe says.
+export function fuelFor(r) {
+  return firedWork(r.activity) ? (r.fuel || 0) : 0;
+}
+
+// And what would go on that fire, out of what is carried and is not already spent on the
+// recipe itself. Asked three times over — by the bench before it will offer the work, by
+// the engine to know how long it has, and by the making to take it — and it answers the
+// same every time, because nothing touches the pack in between.
+export function layFor(r) {
+  return lay(fuelFor(r), r.costs);
 }
 
 export function canMake(r) {
@@ -107,7 +132,14 @@ export function playedAt(r) {
 // in. Only the pot reads either at the moment — a brew is a shape an ingredient at a time —
 // and an engine that wants neither is handed both and ignores them.
 export function optionsFor(r) {
-  return { hard: r.hard, labels: Object.keys(r.costs).map((m) => nameOf(m)) };
+  const want = fuelFor(r);
+  return {
+    hard: r.hard,
+    labels: Object.keys(r.costs).map((m) => nameOf(m)),
+    // How long the fire under it is alight for. Nought is work that is not over a fire,
+    // and src/activity.js hands that engine over bare.
+    burnSeconds: want ? burnSeconds(layFor(r).worth) : 0,
+  };
 }
 
 // Make it. `played` is what an engine handed back — { judgments, failed } — or null for
@@ -115,7 +147,12 @@ export function optionsFor(r) {
 // before anything is played, because a botched smelt is ore lost and not ore returned.
 export function make(r, played) {
   if (!canMake(r)) return null;
+  // The fire is laid before the pot is charged, so what is burnt is what the bench quoted
+  // and not what is left after the ingredients have gone. Both go whether the work came
+  // off or not: wood burnt is wood burnt.
+  const burnt = fuelFor(r) ? layFor(r).take : [];
   for (const [m, n] of Object.entries(r.costs)) give(m, -n);
+  for (const [m, n] of burnt) give(m, -n);
 
   const quality = !played ? null : (played.failed ? 0 : qualityOf(played.judgments));
   // The same arithmetic a node's yield gets: a botched job keeps a quarter of it, and
@@ -141,7 +178,7 @@ export function make(r, played) {
   // Crafting is the player's own work and nobody else's: they are the one standing at the
   // bench, so the experience is theirs and so are the points it comes to.
   return {
-    made, stone, xp, quality, failed: !!(played && played.failed), levels: award(YOU, xp),
+    made, stone, xp, quality, burnt, failed: !!(played && played.failed), levels: award(YOU, xp),
   };
 }
 
@@ -157,6 +194,7 @@ export function recipeLines(r) {
   const more = moreOf(r);
   const hard = hardLine(r.activity, r.hard);
   const gem = r.cuts && gemOf(r.cuts);
+  const fire = fuelFor(r) ? layLine(fuelFor(r), layFor(r)) : null;
   const out = [
     `Takes: ${list(Object.entries(r.costs))}.`,
     gem
@@ -168,6 +206,7 @@ export function recipeLines(r) {
       ? `${r.activity}${hard ? `, ${hard}` : ''}. Worth ${r.xp} to your level, and worth doing well.`
       : `${r.activity} — worth ${r.xp} to your level. Waiting on that engine; for now it is simply done.`,
   ];
+  if (fire) out.splice(1, 0, fire);
   const stop = blockers(r);
   out.push(stop.length ? stop.join('  ') : 'Ready. [Enter] to make it.');
   return out;
@@ -181,6 +220,9 @@ export function madeLines(r, result) {
   if (result.stone) {
     out.push(`${fullName(result.stone.gem, result.stone.grade)}. ${worthLine(result.stone.gem, result.stone.grade)} while it is worn.`);
   }
+  // What went under it is said whichever way it went: a fire that was lit is wood that is
+  // gone, and a job lost to one is the player being told what it cost them.
+  if (result.burnt.length) out.push(`Burnt: ${list(result.burnt)}.`);
   const got = Object.entries(result.made);
   // A cut says what came off the wheel above this, so a bench that made only a stone is
   // not also told it made nothing.

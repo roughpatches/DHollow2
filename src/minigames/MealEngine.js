@@ -67,7 +67,19 @@ export class MealEngine {
     return countMin + Math.floor(Math.random() * (countMax - countMin + 1));
   }
 
+  // The fire under the kitchen went out: the board or the pot is cleared away and nothing
+  // that was already in flight is allowed to report anything.
+  stop() {
+    // What the board scored before the pot was taken off is still what the board scored.
+    this.judgments = [...(this.seq?.allJudgments || [])];
+    this.completed = true;
+    this.seq?.stop();
+    this.headText?.destroy();
+    this.headText = null;
+  }
+
   _end(judgments) {
+    if (this.completed) return;
     this.judgments = judgments;
     this.completed = true;
     this.headText?.destroy();

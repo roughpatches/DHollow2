@@ -35,7 +35,17 @@ export class PhaseSequenceEngine {
     this._startPhase();
   }
 
+  // Stopped where it stands — the fire under it went out. The running phase is torn down
+  // and nothing pending is allowed to start another or report one finished.
+  stop() {
+    this.stopped = true;
+    this.completed = true;
+    this.current?._cleanup?.();
+    this.current = null;
+  }
+
   _startPhase() {
+    if (this.stopped) return;
     const phase = this.phases[this.phaseIndex];
     this.currentType = phase.type;
     this.current = phase.makeEngine(this.scene);
@@ -44,6 +54,7 @@ export class PhaseSequenceEngine {
   }
 
   _onPhaseComplete(judgments) {
+    if (this.stopped) return;
     this.allJudgments.push(...judgments);
     const phase = this.phases[this.phaseIndex];
     const failed = this.current?.failed === true;
@@ -67,7 +78,7 @@ export class PhaseSequenceEngine {
   }
 
   update(now) {
-    if (this.current) this.current.update(now);
+    if (!this.stopped && this.current) this.current.update(now);
   }
 
   // --- input routing ----------------------------------------------------------

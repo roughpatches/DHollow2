@@ -6,9 +6,11 @@
 //  - PUMP (SPACE) works the bellows. Heat is what melts the charge, and the band in the
 //    middle of the gauge is where it melts cleanest: above it the pool oxidises and the
 //    purity goes down while you watch.
-//  - FUEL is the clock, and it is the only one. It drains whether anything is happening or
-//    not, and a pump costs a little on top. Run dry with metal still in the pot and the
-//    whole charge is lost — the one hard fail.
+//  - THE FIRE is the clock, and it is the only one. It is not the crucible's own any more:
+//    it is the bench's, laid with what the recipe's `fuel` was worth out of the pack and
+//    drawn across the top of the screen by src/minigames/Fired.js, the same as at the
+//    kitchen and the still. A pump costs a little on top of the burning. Run dry with
+//    metal still in the pot and the whole charge is lost.
 //  - MOLTEN is how much of the charge has run. Half of it is the least that can be poured,
 //    and pouring at the least is a poor bar rather than no bar.
 //  - SKIM (UP) lifts the oldest clump of dross off the surface. Fresh, it comes away clean
@@ -25,7 +27,9 @@
 // oxide, which is enough for the fire to be worth watching. The judgments are new: the
 // game reads work as perfect / good / miss, so a clean skim is a perfect one, a set skim a
 // good one, a clump sunk a miss, and the pour itself is worth several of them — see
-// `pourWeight` in tuning.js.
+// `pourWeight` in tuning.js. Changed since: the fuel reserve it carried is the bench's
+// fire now, so a pump is charged to that and the bar it used to draw is drawn once, above
+// every fired activity, rather than three times over.
 
 import { COLOR, FONT } from './ui.js';
 import { meterBar, heatGauge, popFeedback } from './meters.js';
@@ -55,7 +59,7 @@ export class SmeltEngine {
     this.config = config;
     this.judgments = [];
     this.completed = false;
-    this.failed = false; // the fire going out, and nothing else
+    this.failed = false; // nothing the crucible does loses a charge; the fire going out does
     this.onComplete = null;
   }
 
@@ -67,13 +71,11 @@ export class SmeltEngine {
     this.failed = false;
 
     this.heat = new HeatCore(c);
-    this.fuel = c.fuelReserve;
     this.molten = 0;
     this.purity = c.purity0;
     this.skims = c.baseSkims;
     this.dross = []; // [{ spawnedAt, slot }], oldest first
     this.nextDrossAt = null; // not seeded until the charge starts to run
-    this.warnedFuel = false;
     this.armed = true; // one pump to a press: a key held down is not a bellows
     this.startTime = null; // seeded on the first update
 
@@ -84,29 +86,27 @@ export class SmeltEngine {
       bx, L.top + dy, str, { fontSize: size, fontFamily: FONT, color: colour },
     );
 
-    this.fuelText = row(0, '');
-    this.fuelBar = meterBar(this.scene, bx, L.top + 30, this.BW, 14, 'bar_hp');
-    this.moltenText = row(52, '');
-    this.moltenBar = meterBar(this.scene, bx, L.top + 82, this.BW, 14, 'bar_integrity');
-    this.purityText = row(104, '');
-    this.purityBar = meterBar(this.scene, bx, L.top + 134, this.BW, 14, 'bar_quality');
+    this.moltenText = row(0, '');
+    this.moltenBar = meterBar(this.scene, bx, L.top + 30, this.BW, 14, 'bar_integrity');
+    this.purityText = row(52, '');
+    this.purityBar = meterBar(this.scene, bx, L.top + 82, this.BW, 14, 'bar_quality');
 
-    this.heatText = row(160, '', COLOR.muted, '16px');
-    this.heatGauge = heatGauge(this.scene, bx, L.top + 192, this.BW, { height: 18 });
+    this.heatText = row(108, '', COLOR.muted, '16px');
+    this.heatGauge = heatGauge(this.scene, bx, L.top + 140, this.BW, { height: 18 });
     // The band, drawn over the gauge where it actually is: which stretch of the gradient
     // the work wants is not a thing to be learnt by losing charges.
     const band = this.scene.add.rectangle(
-      bx + this.BW * c.sweetBand.low, L.top + 192,
+      bx + this.BW * c.sweetBand.low, L.top + 140,
       this.BW * (c.sweetBand.high - c.sweetBand.low), 18, COLORS.ui.grass, 0.5,
     ).setOrigin(0, 0.5).setStrokeStyle(1, COLORS.ui.goldBright, 0.9);
     this.heatGauge.marker.setDepth(band.depth + 1);
     this.band = band;
 
-    this.surfaceText = row(222, '', COLOR.muted, '16px');
+    this.surfaceText = row(170, '', COLOR.muted, '16px');
     this.g = this.scene.add.graphics();
-    this.surfaceY = L.top + 256;
-    this.fbPos = { x: bx + this.BW / 2, y: L.top + 290 };
-    this.statusText = row(312, '', COLOR.muted, '15px');
+    this.surfaceY = L.top + 204;
+    this.fbPos = { x: bx + this.BW / 2, y: L.top + 238 };
+    this.statusText = row(260, '', COLOR.muted, '15px');
 
     this._layout();
   }
@@ -118,7 +118,7 @@ export class SmeltEngine {
     const c = this.config;
     this.armed = false;
     this.heat.pump();
-    this.fuel = Math.max(0, this.fuel - c.pumpFuelCost);
+    c.fire?.take(c.pumpFuelSec); // the bellows are paid for out of the bench's fire
   }
 
   strike() {
@@ -180,13 +180,6 @@ export class SmeltEngine {
 
     this.heat.decay(dt);
 
-    this.fuel = Math.max(0, this.fuel - c.fuelDrainPerSec * dt);
-    if (this.fuel <= 0) return this._fail();
-    if (!this.warnedFuel && this.fuel <= c.fuelReserve * c.fuelWarnAt) {
-      this.warnedFuel = true;
-      this._setStatus('The fire is guttering. The fuel is the clock.', COLOR.danger);
-    }
-
     const zone = this.heat.zone();
     this.molten = clamp01(this.molten + c.meltRatePerSec * HEAT_FACTOR[zone] * dt);
     // Held above the band, the pool takes air and the purity goes with it. Scorching costs
@@ -237,11 +230,11 @@ export class SmeltEngine {
     popFeedback(this.scene, this.fbPos.x, this.fbPos.y, judgment);
   }
 
-  _fail() {
-    this.failed = true;
-    this._setStatus('The fire is out, and the charge with it.', COLOR.danger);
-    this._layout();
-    this._finish();
+  // The bench's fire went out with metal still in the pot: the charge is lost, which is
+  // the same as it always was — it is the fire that says so now rather than the crucible.
+  stop() {
+    this.completed = true;
+    this._cleanup();
   }
 
   _finish() {
@@ -259,11 +252,7 @@ export class SmeltEngine {
     if (!this.g) return;
     const c = this.config;
     const bx = c.layout.x;
-    const low = this.fuel <= c.fuelReserve * c.fuelWarnAt;
 
-    this.fuelBar.setValue(this.fuel / c.fuelReserve);
-    this.fuelText.setText(`Fuel  ${Math.round((this.fuel / c.fuelReserve) * 100)}%`)
-      .setColor(low ? COLOR.danger : COLOR.text);
     this.moltenBar.setValue(this.molten);
     this.moltenText.setText(`Molten  ${Math.round(this.molten * 100)}%`
       + (this.molten < c.minMoltenToPour ? `  (${Math.round(c.minMoltenToPour * 100)}% before it will pour)` : ''));
@@ -292,9 +281,9 @@ export class SmeltEngine {
   }
 
   _cleanup() {
-    [this.fuelText, this.moltenText, this.purityText, this.heatText,
+    [this.moltenText, this.purityText, this.heatText,
       this.surfaceText, this.statusText, this.band, this.g].forEach((o) => o?.destroy());
-    [this.fuelBar, this.moltenBar, this.purityBar, this.heatGauge].forEach((w) => w?.destroy());
+    [this.moltenBar, this.purityBar, this.heatGauge].forEach((w) => w?.destroy());
     this.g = null;
   }
 }

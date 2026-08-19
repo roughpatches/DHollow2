@@ -143,6 +143,13 @@ export class BrewEngine {
     });
   }
 
+  // The fire under the still went out. What has been measured is measured; the pot is
+  // taken off, and the shape that was swelling in it is not read either way.
+  stop() {
+    this.completed = true;
+    this._cleanup();
+  }
+
   _succeed() {
     this.completed = true;
     this.scene.time.delayedCall(300, () => {

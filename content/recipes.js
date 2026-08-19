@@ -22,6 +22,14 @@ import { GEMS } from './gems.js';
 //   hard     — how hard the work is, where the engine takes a difficulty. Brewing does: it
 //              names a tier in `brew` in tuning.js, which is how many shapes go in the pot
 //              and how fast and how evenly they swell. Left out, it is the first tier.
+//   fuel     — how much fire the work wants, for work done over one: Smelting, Cooking and
+//              Brewing. It buys both halves of the same thing — what is taken out of the
+//              pack to burn, and how long the bar across the top of the screen lasts — so a
+//              longer job is a dearer one and the two can never disagree. What a thing is
+//              worth on the fire and how many seconds a unit buys are in `fuel` in
+//              tuning.js; the pack is emptied from the cheap end, so branches go before
+//              logs and coal is the last thing touched. Left off, or on work that is not
+//              over a fire, there is no fire and no clock — a wheel is not a hearth.
 //   costs    — what is taken out of the pack, and taken before anything is played.
 //   makes    — what goes back into it, before the maker's points and how well it went.
 //   cuts     — a gem id from content/gems.js, for work that grades its output instead of
@@ -62,9 +70,10 @@ const CUTTING = {
 
 export const RECIPES = [
   // --- the smithy ------------------------------------------------------------
-  // Bronze is the one chain in town that runs end to end: the wood and the coal pay for
-  // the fire, the fire pays for the bar, and the bar is what the chapel roof is nailed on
-  // with. It is tier-one work, because tier one is all the Greywood has in it — copper
+  // Bronze is the one chain in town that runs end to end: the wood and the coal are the
+  // fire, the fire pays for the bar, and the bar is what the chapel roof is nailed on
+  // with. Nothing here lists its fuel among its costs — `fuel` is what the fire takes, and
+  // it takes it out of the same pack by the same rule at every bench in town. It is tier-one work, because tier one is all the Greywood has in it — copper
   // and tin and coal. Iron is written and unreachable until its ground is; see
   // content/materials.js.
   {
@@ -76,6 +85,7 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 1,
     activity: 'Smelting',
+    fuel: 4,
     costs: { oakbranch: 4 },
     makes: { charcoal: 3 },
     xp: 8,
@@ -95,7 +105,8 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 1,
     activity: 'Smelting',
-    costs: { copperore: 2, tinore: 1, charcoal: 2 },
+    fuel: 5,
+    costs: { copperore: 2, tinore: 1 },
     makes: { bronzebar: 1 },
     xp: 16,
     body: [
@@ -106,7 +117,8 @@ export const RECIPES = [
   {
     // The second stage of the smithy in one line: the same ore, and half again as much of
     // it comes out as metal. This is what rebuilding the furnace bought, and it is the
-    // first thing in town that coal is burnt in rather than charcoal.
+    // first fire in town big enough that a pack of branches will not hold it: nine of them
+    // to one lump of coal, and the coal is why anybody bothers picking it up off a face.
     id: 'furnace',
     name: 'Run the furnace',
     at: 'forge',
@@ -115,7 +127,8 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 2,
     activity: 'Smelting',
-    costs: { copperore: 4, tinore: 2, coal: 3 },
+    fuel: 7,
+    costs: { copperore: 4, tinore: 2 },
     makes: { bronzebar: 3 },
     xp: 34,
     body: [
@@ -163,6 +176,7 @@ export const RECIPES = [
     rank: 1,
     activity: 'Brewing',
     hard: 'simple',
+    fuel: 2,
     costs: { blacktrumpet: 3 },
     makes: { tonic: 1 },
     xp: 12,
@@ -181,6 +195,7 @@ export const RECIPES = [
     rank: 2,
     activity: 'Brewing',
     hard: 'tricky',
+    fuel: 3,
     costs: { oystermushroom: 4, charcoal: 2 },
     makes: { salve: 1 },
     xp: 24,
@@ -199,6 +214,7 @@ export const RECIPES = [
     rank: 3,
     activity: 'Brewing',
     hard: 'wicked',
+    fuel: 4,
     costs: { heartwood: 2, blacktrumpet: 3, eggshell: 2 },
     makes: { cordial: 1 },
     xp: 46,
@@ -224,6 +240,7 @@ export const RECIPES = [
     rank: 1,
     activity: 'Brewing',
     hard: 'simple',
+    fuel: 2,
     costs: { oystermushroom: 3, blacktrumpet: 1 },
     makes: { copsebroth: 1 },
     xp: 12,
@@ -243,6 +260,7 @@ export const RECIPES = [
     rank: 1,
     activity: 'Brewing',
     hard: 'simple',
+    fuel: 2,
     costs: { blacktrumpet: 3, oystermushroom: 2 },
     makes: { woodsdraught: 1 },
     xp: 18,
@@ -263,6 +281,7 @@ export const RECIPES = [
     rank: 2,
     activity: 'Brewing',
     hard: 'tricky',
+    fuel: 3,
     costs: { oystermushroom: 2, bitterroot: 2 },
     makes: { steadyhand: 1 },
     xp: 34,
@@ -283,6 +302,7 @@ export const RECIPES = [
     rank: 2,
     activity: 'Brewing',
     hard: 'tricky',
+    fuel: 3,
     costs: { bitterroot: 2, oystermushroom: 1 },
     makes: { bitterwash: 1 },
     xp: 22,
@@ -303,6 +323,7 @@ export const RECIPES = [
     rank: 2,
     activity: 'Brewing',
     hard: 'tricky',
+    fuel: 3,
     costs: { blacktrumpet: 3, bitterroot: 1 },
     makes: { nightwash: 1 },
     xp: 28,
@@ -322,6 +343,7 @@ export const RECIPES = [
     rank: 3,
     activity: 'Brewing',
     hard: 'wicked',
+    fuel: 4,
     costs: { blacktrumpet: 4, bitterroot: 3 },
     makes: { blackdraught: 1 },
     xp: 40,
@@ -343,6 +365,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 1,
     activity: 'Cooking',
+    fuel: 2,
     costs: { perch: 2 },
     makes: { friedfish: 1 },
     xp: 10,
@@ -360,6 +383,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 1,
     activity: 'Cooking',
+    fuel: 3,
     costs: { bluegill: 2, oystermushroom: 2 },
     makes: { woodstew: 1 },
     xp: 18,
@@ -377,6 +401,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 2,
     activity: 'Cooking',
+    fuel: 4,
     costs: { brooktrout: 4, blacktrumpet: 2 },
     makes: { smokedfish: 3 },
     xp: 30,
@@ -396,6 +421,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 2,
     activity: 'Cooking',
+    fuel: 4,
     costs: { perch: 2, bluegill: 2, oystermushroom: 2 },
     makes: { shorepie: 2 },
     xp: 34,
