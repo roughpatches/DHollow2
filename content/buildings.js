@@ -81,11 +81,13 @@ export const BUILDINGS = [
     // The first workstation. Two working stages: a hearth anybody can smelt at, and the
     // furnace behind it, which is what the second repair buys and what the recipes gated
     // at stage 2 are waiting for.
+    // It starts at the hearth rather than cold, because no stage in town has a repair cost
+    // written yet: left at stage 0 the crucible would be a thing nobody could reach.
     id: 'forge',
     name: 'The smithy',
     map: 'searow',
     site: [31], // the open-fronted shed at the east end of the row, off the cobbles
-    level: 0,
+    level: 1,
     stages: [
       {
         name: 'Cold',
@@ -175,11 +177,14 @@ export const BUILDINGS = [
     // which is why it is that house: cutting is done in daylight or not at all. Two
     // working stages: a hand wheel anybody can grind on, and the treadle mill behind it,
     // which is what the second repair buys and what the faceted stones are waiting for.
+    // It starts at the hand wheel for the same reason the smithy starts lit: no stage in
+    // town has a repair cost written yet, and the nine stones would otherwise be a list
+    // nobody could reach.
     id: 'studio',
     name: 'The Artisan\'s Studio',
     map: 'harbourroad',
     site: [29], // the door east of the tavern, under the window with the glass gone
-    level: 0,
+    level: 1,
     stages: [
       {
         name: 'Windows out',
