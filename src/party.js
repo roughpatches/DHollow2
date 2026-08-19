@@ -144,6 +144,18 @@ export function conOf(id) {
   return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1) + charmOn(id, 'con');
 }
 
+// What one person can shift, and what a crew can. The pack a run walks out with is
+// everybody's added together: taking a fourth walker is room for what they can carry as
+// much as it is what they can do.
+export function carryOf(id) {
+  const c = charOf(id);
+  return (c && c.carry) ?? TUNING.carryDefault;
+}
+
+export function carryTotal(ids) {
+  return ids.reduce((n, id) => n + carryOf(id), 0);
+}
+
 // what a set of people are worth as a body — the number a run starts with
 export function conTotal(ids) {
   return ids.reduce((n, id) => n + conOf(id), 0);
@@ -348,34 +360,6 @@ export function scoreLine(ids) {
 // the player first, because they are on every run, then whoever else can be asked
 export function walking() {
   return [charOf(YOU), ...roster()];
-}
-
-export function partyRows() {
-  return walking().map((c) => {
-    const s = stateOf(c.id);
-    const next = xpToNext(s.level);
-    const skills = skillsOf(c.id);
-    const fears = (c.fears || []).map((f) => FEAR[f]).filter(Boolean);
-    return {
-      label: nameOf(c.id),
-      note: `Lv ${s.level} · Con ${conOf(c.id)}`,
-      body: [
-        `Level ${s.level}    Constitution ${conOf(c.id)}    `
-          + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`)
-          + (s.points ? `    ${s.points} unspent` : ''),
-        c.you
-          ? 'On every run. Nobody has to be asked to bring you.'
-          : `Bond: ${bandName(bandOf(c.id))} (${s.bond} points).`,
-        skills.length
-          ? skills.map((t) => `${t.name} ${t.rank} — +${worthOf(t.rank)} to ${t.activities.join(', ')}`).join('\n')
-          : 'Nothing settled yet. Every roll is the die on its own.',
-        fears.length
-          ? fears.map((f) => `${f.name} — ${f.kind === 'scruple' ? 'will not do it' : 'will not face it'}`).join('\n')
-          : `Nothing ${c.you ? 'you' : 'they'} will not walk into.`,
-        ...c.body,
-      ],
-    };
-  });
 }
 
 // Who has the points is the thing worth knowing about a skill, so the tab is rebuilt

@@ -83,6 +83,9 @@ export const CHARACTER = [
   },
 ];
 
+// Nothing shows these at the moment: the Equipment tab is gone, and the one slot that was
+// live — the Charm — is chosen at the gate now, on the packing screen. Kept because they
+// are written, and because the slots come back the day there is gear to put in them.
 export const EQUIPMENT = [
   {
     label: 'Head',

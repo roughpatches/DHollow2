@@ -368,6 +368,12 @@ export const TUNING = {
   skillOddsPerPoint: 0.06,
   skillOddsMost: 0.6, // and this is as flat as any table gets, at any score
 
+  // What one person carries, where their block in content/party.js does not say. A run's
+  // pack is everybody's added together, and it is counted in things rather than in kinds:
+  // seven iron ore is seven of it. What is worn on the cord is not carried and does not
+  // count. See src/run.js.
+  carryDefault: 8,
+
   // A stone is not part of what a face pays. It is a chance at the end of a shift that
   // went well, rolled once against the `stones` table a harvest carries — see
   // content/nodes.js. Work below stoneFloor finds nothing at all, and the chance climbs

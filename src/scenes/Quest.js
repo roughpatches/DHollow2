@@ -4,8 +4,12 @@ import * as run from '../run.js';
 import * as recruit from '../recruit.js';
 import {
   roster, charOf, bandName, bandOf, scoreLine, scoreOf, skillsOf, skillOf,
-  isCombat, nameOf, fill, YOU,
+  isCombat, nameOf, fill, YOU, carryTotal,
 } from '../party.js';
+import { stock, heldOf, nameOf as goodName } from '../town.js';
+import {
+  cutStones, worn, wear, fullName, worthLine,
+} from '../charm.js';
 import { MOVES, moveLine, saidCount } from '../combat.js';
 import { iconKeyFor } from '../icons.js';
 import { createWalk } from '../walk.js';
@@ -215,7 +219,22 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + all.length) % all.length;
       else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % all.length;
       else if (k === ' ') this.toggleWalker(all[this.row].id);
-      else if (k === 'enter' && this.crewed()) this.begin(this.when_);
+      else if (k === 'enter' && this.crewed()) this.toPacking();
+      this.draw();
+      return;
+    }
+
+    // What goes out with them. The crew is behind this screen and the road is in front of
+    // it, so Esc is back to who is coming and Enter is the gate.
+    if (this.mode === 'pack') {
+      const rows = this.packRows();
+      const n = Math.max(1, rows.length);
+      if (k === 'escape') { this.mode = 'party'; this.row = 0; }
+      else if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + n) % n;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % n;
+      else if (k === 'arrowright' || k === 'd' || k === ' ') this.packMore(rows[this.row], 1);
+      else if (k === 'arrowleft' || k === 'a') this.packMore(rows[this.row], -1);
+      else if (k === 'enter') this.begin(this.when_);
       this.draw();
       return;
     }
@@ -238,6 +257,21 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'escape') this.close();
       return;
     }
+    // A full pack with something standing in front of it. Dropping is the only way to
+    // make room, and leaving it is always on the card: nobody is trapped in here.
+    if (r.phase === 'pack') {
+      const held = Object.keys(run.packOf());
+      const n = Math.max(1, held.length);
+      if (k === 'arrowup' || k === 'w') this.row = (this.row - 1 + n) % n;
+      else if (k === 'arrowdown' || k === 's') this.row = (this.row + 1) % n;
+      else if ((k === 'enter' || k === ' ') && held.length) {
+        run.dropOne(held[this.row]);
+        this.row = Math.min(this.row, Math.max(0, Object.keys(run.packOf()).length - 1));
+      } else if (k === 'escape' || k === 'e') { run.leaveOffer(); this.row = 0; }
+      this.draw();
+      return;
+    }
+
     // Who steps up. The only choice a party gets about a fight before it starts, and the
     // one they get again the moment somebody is carried.
     if (r.phase === 'fighter') {
@@ -359,8 +393,104 @@ export default class Quest extends Phaser.Scene {
     else if (recruit.asked(id, this.job, this.when_).willing) this.taking.push(id);
   }
 
+  // The crew is settled, so what they can carry is settled. Packing is the last thing
+  // asked before the gate, and it is asked here rather than in the town's menu because
+  // it is a decision about this job: what is worth the room on this road, at this hour,
+  // with these four.
+  toPacking() {
+    this.bring = {};
+    this.mode = 'pack';
+    this.row = 0;
+  }
+
+  // Everything that could go out: the cut stones first, because one of them goes on the
+  // cord rather than in the pack and is the only thing here that is not weight.
+  packRows() {
+    return [
+      ...cutStones().map((c) => ({ stone: true, key: c.key, gem: c.gem, grade: c.grade, n: c.n })),
+      ...stock().filter(([, n]) => n > 0).map(([id, n]) => ({ id, n })),
+    ];
+  }
+
+  packUsed() {
+    return Object.values(this.bring).reduce((n, v) => n + v, 0);
+  }
+
+  packRoom() {
+    return carryTotal(this.crew()) - this.packUsed();
+  }
+
+  // One more of it, or one fewer. A stone is not weight and is not counted: it goes on
+  // the cord, and the cord holds one.
+  packMore(row, by) {
+    if (!row) return;
+    if (row.stone) {
+      const on = worn();
+      if (by > 0) { if (!on || on.key !== row.key) wear(row.key); }
+      else if (on && on.key === row.key) wear(row.key);
+      return;
+    }
+    const have = heldOf(row.id) - (this.bring[row.id] || 0);
+    if (by > 0) {
+      if (have <= 0 || this.packRoom() <= 0) return;
+      this.bring[row.id] = (this.bring[row.id] || 0) + 1;
+    } else {
+      if (!this.bring[row.id]) return;
+      this.bring[row.id] -= 1;
+      if (!this.bring[row.id]) delete this.bring[row.id];
+    }
+  }
+
+  packing() {
+    const rows = this.packRows();
+    const crew = this.crew();
+    let y = this.top;
+
+    y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
+    const room = this.packRoom();
+    this.text(this.left + this.wide, y + 2,
+      `Pack ${this.packUsed()} of ${carryTotal(crew)}`, TUNING.menuRowSize,
+      room > 0 ? COLORS.menuText : COLORS.menuMapMark).setOrigin(1, 0);
+    y += this.text(this.left, y,
+      `${crew.map((id) => nameOf(id)).join(', ')} — what they can shift between them.`,
+      TUNING.questBodySize, COLORS.menuDim, this.wide).height + 8;
+    y += this.text(this.left, y,
+      'Counted in things, not in kinds. Whatever is found out there has to fit in what is left of it.',
+      TUNING.questHintSize, COLORS.menuDim, this.wide).height + 10;
+    this.rule(y);
+    y += 14;
+
+    if (!rows.length) {
+      y += this.text(this.left, y, 'The pack is empty and so are the shelves. You walk out with what you stand up in.',
+        TUNING.questBodySize, COLORS.menuMapFolk, this.wide).height + 8;
+    }
+
+    const on = worn();
+    rows.forEach((r, i) => {
+      const sel = i === this.row;
+      if (r.stone) {
+        const isOn = on && on.key === r.key;
+        y += this.text(this.left, y,
+          `${sel ? '>' : ' '} ${isOn ? '[cord]' : '[    ]'} ${fullName(r.gem, r.grade)}`,
+          TUNING.questBodySize, isOn ? COLORS.menuAccent : sel ? COLORS.menuText : COLORS.menuDim).height + 2;
+        y += this.text(this.left + 40, y, `${worthLine(r.gem, r.grade)}. Worn, not carried — it costs no room.`,
+          TUNING.questHintSize, sel ? COLORS.menuDim : COLORS.menuRule, this.wide - 40).height + 8;
+        return;
+      }
+      const taking = this.bring[r.id] || 0;
+      this.text(this.left + this.wide, y + 2, `${r.n - taking} left in town`,
+        TUNING.questHintSize, sel ? COLORS.menuDim : COLORS.menuRule).setOrigin(1, 0);
+      y += this.text(this.left, y,
+        `${sel ? '>' : ' '} ${taking ? `[${String(taking).padStart(2, ' ')}]` : '[  ]'} ${goodName(r.id)}`,
+        TUNING.questBodySize, taking ? COLORS.menuAccent : sel ? COLORS.menuText : COLORS.menuDim).height + 6;
+    });
+
+    this.hint('[Up/Down] Look    [Right] Take one    [Left] Put one back    [Enter] Set out    [Esc] Back');
+  }
+
   begin(when) {
-    const r = run.start(this.job.id, when, this.taking, { size: this.size_, where: this.where_ });
+    const r = run.start(this.job.id, when, this.taking,
+      { size: this.size_, where: this.where_ }, this.bring || {});
     // The board and the crew are panels over the town because the party is still standing
     // in it. Once they have set out they are not, so the crawl paints its own ground and
     // the town behind it is gone rather than showing through the ironwork.
@@ -437,6 +567,7 @@ export default class Quest extends Phaser.Scene {
     else if (this.mode === 'when') this.when();
     else if (this.mode === 'where') this.where();
     else if (this.mode === 'party') this.party();
+    else if (this.mode === 'pack') this.packing();
     else this.crawl();
   }
 
@@ -678,8 +809,31 @@ export default class Quest extends Phaser.Scene {
     this.text(this.left, this.foot - 44, scoreLine(crew),
       TUNING.questHintSize, COLORS.menuDim);
     this.hint(this.crewed()
-      ? '[Up/Down] Look    [Space] Take or leave    [Enter] Set out    [Esc] Back'
+      ? '[Up/Down] Look    [Space] Take or leave    [Enter] Pack for it    [Esc] Back'
       : '[Up/Down] Look    [Space] Take or leave    [Esc] Back');
+  }
+
+  // What is in front of them, what is on their backs, and the one question between the
+  // two. The pack is listed in full because the choice is only a choice if the whole of
+  // it is on the page.
+  packFullLines(r) {
+    const out = [];
+    out.push([run.offerLine(), TUNING.questBodySize, COLORS.menuMapMark]);
+    out.push([`${run.packLine()} There is no room for it without putting something down.`,
+      TUNING.questBodySize, COLORS.menuText]);
+    const held = Object.entries(run.packOf());
+    if (!held.length) {
+      out.push(['And nothing on their backs to put down. It stays where it is.',
+        TUNING.questBodySize, COLORS.menuMapFolk]);
+      return out;
+    }
+    held.forEach(([m, n], i) => {
+      const on = i === this.row;
+      const brought = (r.brought || {})[m];
+      out.push([`${on ? '>' : ' '} ${n} ${goodName(m)}${brought ? '   (carried out with you)' : ''}`,
+        TUNING.questBodySize, on ? COLORS.menuAccent : COLORS.menuDim]);
+    });
+    return out;
   }
 
   crawl() {
@@ -722,7 +876,8 @@ export default class Quest extends Phaser.Scene {
     this.skills(r, band.skills);
     this.trail(r, band.trail);
 
-    if (r.state === 'running' && r.phase === 'fighter') this.card(band.walk, this.fighterLines(r), this.nodeHead(r));
+    if (r.state === 'running' && r.phase === 'pack') this.card(band.walk, this.packFullLines(r), 'The pack will not hold it.');
+    else if (r.state === 'running' && r.phase === 'fighter') this.card(band.walk, this.fighterLines(r), this.nodeHead(r));
     else if (r.state === 'running' && r.phase === 'fight') this.card(band.walk, this.fightLines(r), this.fightHead());
     else if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
     else if (r.state === 'running' && r.phase === 'choose' && !this.approaching) {
@@ -741,6 +896,7 @@ export default class Quest extends Phaser.Scene {
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r), true);
 
     if (r.state !== 'running') this.hint(this.page < this.pages - 1 ? '[Enter] Read on' : '[Enter] Back to town');
+    else if (r.phase === 'pack') this.hint('[Up/Down] Choose    [Enter] Drop one    [Esc] Leave the rest');
     else if (r.phase === 'fighter') this.hint('[Up/Down] Who steps up    [Enter] Send them    [Esc] Turn back');
     else if (r.phase === 'fight') this.hint('[Up/Down] Choose    [Enter] Do it    [Esc] Break off');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
@@ -1179,7 +1335,13 @@ export default class Quest extends Phaser.Scene {
     }
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
-    out.push([`Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`, TUNING.questBodySize, COLORS.menuAccent]);
+    // What went in the pack rather than what the node gave up: they are the same thing
+    // until the pack is full, and the day they are not is the day the difference matters.
+    out.push([`Taken: ${run.listOf(n.packed || n.spoils)}.    ${n.xp} xp each.`,
+      TUNING.questBodySize, COLORS.menuAccent]);
+    const left = run.leftLine(n);
+    if (left) out.push([left, TUNING.questBodySize, COLORS.menuMapFolk]);
+    out.push([run.packLine(), TUNING.questHintSize, COLORS.menuDim]);
     const stone = run.stoneLine(n);
     if (stone) out.push([stone, TUNING.questBodySize, COLORS.menuMapMark]);
     // what the work they chose was worth, and what is still standing here after it
@@ -1381,7 +1543,12 @@ export default class Quest extends Phaser.Scene {
         : 'The constitution ran out with the job unfinished. They came home from where they stood.',
       TUNING.questBodySize, COLORS.menuMapFolk]);
     }
-    out.push([`Carried out of it: ${run.listOf(r.spoils)}.    ${r.xp} xp each.`, TUNING.questBodySize, COLORS.menuText]);
+    // The pack at the gate, which is the whole of what the walk was worth: nothing reached
+    // the town's stock until they did.
+    out.push([`Carried out of it: ${run.listOf(r.pack)}.    ${r.xp} xp each.`, TUNING.questBodySize, COLORS.menuText]);
+    if (Object.keys(r.left || {}).length) {
+      out.push([`Left on the road: ${run.listOf(r.left)}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
+    }
     if (r.lost && Object.keys(r.lost).length) {
       out.push([`Half of it went down on the road: ${run.listOf(r.lost)}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
     }

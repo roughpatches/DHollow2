@@ -2,8 +2,9 @@
 // node and goes in the pack with everything else; the moment it is cut it stops being a
 // material and becomes one of these, because a worn thing is not a stack of anything.
 // content/gems.js says what a stone is worth; this says which ones exist and which one is
-// on. Only the player wears a charm — one at a time, in the slot that is already on the
-// Equipment tab.
+// on. Only the player wears a charm — one at a time, and which one is chosen at the gate,
+// on the packing screen in src/scenes/Quest.js, because it is a decision about the job
+// you are about to walk rather than about a shelf in town.
 
 import { TUNING } from '../tuning.js';
 import { GEMS } from '../content/gems.js';
@@ -126,36 +127,15 @@ export function worthLine(gem, grade) {
   return gem.stats.map((s) => `+${grade.worth} ${nameOfStat(s)}`).join(', ');
 }
 
-// The Charm row on the Equipment tab, in the {label, note, body} shape every tab uses.
-// With nothing on, it says what the slot is for rather than saying nothing.
-export function charmRow() {
-  const w = worn();
-  if (!w) {
-    return {
-      label: 'Charm',
-      note: 'Empty',
-      body: [
-        'Nothing on the cord. The slot a cut stone goes in, and the only one that changes a number rather than describing you.',
-        'Cut something at the wheel in the corner of the smithy and it can go here.',
-      ],
-    };
-  }
-  return {
-    label: 'Charm',
-    note: fullName(w.gem, w.grade),
-    body: [worthLine(w.gem, w.grade) + '.', ...w.gem.body],
-  };
-}
-
-// And the squares the Inventory tab gives them, above the materials. A stone being worn
-// says so where it sits, so the pack never disagrees with the slot. The icon is the gem's
+// And the squares the Inventory tab gives them, above the materials. A readout and no
+// more: which stone goes on the cord is answered at the gate, not here. A stone being
+// worn still says so, so the shelf never disagrees with the road. The icon is the gem's
 // own id — see src/icons.js — so all three grades of a stone share one picture.
 export function cutRows() {
   return cutStones().map((s) => ({
     label: fullName(s.gem, s.grade),
     note: s.key === wornKey ? 'Worn' : `x${s.n}`,
     icon: s.gem.id,
-    gem: s.key, // what the menu reads to put it on with [Enter]
     body: [
       worthLine(s.gem, s.grade) + (s.key === wornKey ? ', and on.' : '.'),
       ...s.gem.body,
