@@ -221,6 +221,19 @@ function offTable(table, take, tilt) {
   return out;
 }
 
+// A stone at the end of a shift. Not part of the yield and not multiplied by anything:
+// one roll, and either there is a stone in the spoil or there is not. How well the work
+// went is the whole of whether — nothing under stoneFloor, climbing to stoneBest at
+// perfect — and the table it is drawn from is read on the same tilt as any other, so who
+// was brought decides which stone it is. Work no engine was played for finds none: a
+// stone is what a good shift turns up, and nobody had a good shift they did not have.
+function stoneFrom(table, quality, tilt) {
+  if (!(quality > TUNING.stoneFloor)) return null;
+  const chance = TUNING.stoneBest * (quality - TUNING.stoneFloor) / (1 - TUNING.stoneFloor);
+  if (Math.random() >= chance) return null;
+  return Object.keys(offTable({ odds: table, count: [1, 1] }, 1, tilt))[0] || null;
+}
+
 export function questOf(id) {
   return QUESTS.find((q) => q.id === id);
 }
@@ -604,7 +617,7 @@ function drawNode(from) {
 // node with a single piece of work whose yield is the kind's own.
 function harvestsOf(e) {
   const listed = e.harvests || (e.harvest
-    ? [{ skill: e.harvest, activity: e.activity, spoils: e.spoils, draw: e.draw, whole: true }]
+    ? [{ skill: e.harvest, activity: e.activity, spoils: e.spoils, draw: e.draw, stones: e.stones, whole: true }]
     : []);
   return listed.map((h) => {
     const score = scoreOf(run.party, h.skill);
@@ -1014,6 +1027,16 @@ export function settle(played) {
         for (const [m, n] of Object.entries(offTable(took.draw, take, tiltOf(took.score)))) put(m, n);
       }
     }
+    // And the one thing the face does not owe anybody. A check lost on the way in does
+    // not cost it — the stone is in the rock or it is not — but botched work finds
+    // nothing, the same as work that went badly enough not to clear the floor.
+    if (took && took.stones && !node.failed) {
+      const stone = stoneFrom(took.stones, node.quality, tiltOf(took.score));
+      if (stone) {
+        node.stone = stone;
+        put(stone, 1);
+      }
+    }
   }
 
   node.spoils = {};
@@ -1144,6 +1167,13 @@ export function doneLine(node) {
   if (node.failed) return said.botched;
   if (node.quality === undefined) return said.well;
   return node.quality >= TUNING.workWellAt ? said.well : said.middling;
+}
+
+// The one thing out of the spoil worth saying by name. A stone is not part of what the
+// face owed and it is not turned up often, so it is said where it happened rather than
+// left to be picked out of a list of ore.
+export function stoneLine(node) {
+  return node.stone ? `And something in the spoil that is not ore: ${nameOf(node.stone)}.` : null;
 }
 
 // What the work they chose was worth to them, in the one line that says why they chose it

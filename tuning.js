@@ -368,6 +368,15 @@ export const TUNING = {
   skillOddsPerPoint: 0.06,
   skillOddsMost: 0.6, // and this is as flat as any table gets, at any score
 
+  // A stone is not part of what a face pays. It is a chance at the end of a shift that
+  // went well, rolled once against the `stones` table a harvest carries — see
+  // content/nodes.js. Work below stoneFloor finds nothing at all, and the chance climbs
+  // from there to stoneBest at perfect work. Which stone it is, where one is found, is
+  // the same tilt every other table is read with: how well it went says whether, and who
+  // was brought says which.
+  stoneFloor: 0.5,
+  stoneBest: 0.35,
+
   // Fighting. What is fought and what it takes to fight it is in content/foes.js; these
   // are the numbers the system itself runs on, and they are the same for every fight.
   combat: {

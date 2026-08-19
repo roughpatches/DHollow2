@@ -1180,6 +1180,8 @@ export default class Quest extends Phaser.Scene {
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
     out.push([`Taken: ${run.listOf(n.spoils)}.    ${n.xp} xp each.`, TUNING.questBodySize, COLORS.menuAccent]);
+    const stone = run.stoneLine(n);
+    if (stone) out.push([stone, TUNING.questBodySize, COLORS.menuMapMark]);
     // what the work they chose was worth, and what is still standing here after it
     const worth = run.harvestLine(n);
     if (worth) out.push([worth, TUNING.questHintSize, COLORS.menuDim]);

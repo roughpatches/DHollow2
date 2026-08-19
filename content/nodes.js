@@ -51,7 +51,13 @@
 //             luck — `count` things come off it, each one drawn against `odds`. Odds are
 //             read against each other and need not add up to a hundred. Points in the
 //             skill take more off it and bend the table toward its scarce end; see
-//             tuning.js. Write two of them and the node becomes a question the party is
+//             tuning.js.
+//             `stones` is the third and is not part of the yield at all: one roll at the
+//             end of work that went well, against a table read like any other. How well
+//             the work was played decides whether anything is found — nothing under
+//             stoneFloor in tuning.js, and work no engine was played for finds none —
+//             and the party's points decide which of them it is. It is what a gem drops
+//             off; see content/gems.js. Write two of them and the node becomes a question the party is
 //             asked where they stand, so write two the same crew would want differently
 //             — not two spellings of one job.
 //             Each harvest carries its own three lines as well:
@@ -290,7 +296,8 @@ export const RESOURCE_NODES = [
           middling: 'You get stone, all of it broken small. Twice you have to come out from under the face and wait for it to stop coming down.',
           botched: 'The face lets go above where you are working. You are out from under it before the worst of it lands. What you had is under it now.',
         },
-        draw: { count: [0, 2], odds: { ironore: 45, roughgarnet: 3, roughagate: 3, roughamethyst: 1 } },
+        draw: { count: [0, 2], odds: { ironore: 45 } },
+        stones: { roughgarnet: 3, roughagate: 3, roughamethyst: 1 },
       },
     ],
     xp: [10, 16],
@@ -332,7 +339,8 @@ export const RESOURCE_NODES = [
           middling: 'You get down through the gravel and into the ledge and it does not want to come. You take what breaks off the top of it.',
           botched: 'You are working in a foot of moving water and it carries the spoil off as fast as you free it. Most of what you break goes downstream.',
         },
-        draw: { count: [1, 3], odds: { ironore: 40, roughgarnet: 3, roughagate: 2, roughamethyst: 1 } },
+        draw: { count: [1, 3], odds: { ironore: 40 } },
+        stones: { roughgarnet: 3, roughagate: 2, roughamethyst: 1 },
       },
     ],
     xp: [10, 16],
@@ -435,7 +443,8 @@ export const RESOURCE_NODES = [
           middling: 'It rings hollow in two places and you work round them. What you get is good, and there is not much of it.',
           botched: 'You strike wide of the vein and it splits the way it wanted to instead of the way you wanted it to. It is all rubble, and half of it is on the ground you were standing on.',
         },
-        draw: { count: [0, 2], odds: { ironore: 40, roughgarnet: 3, roughagate: 3, roughamethyst: 2 } },
+        draw: { count: [0, 2], odds: { ironore: 40 } },
+        stones: { roughgarnet: 3, roughagate: 3, roughamethyst: 2 },
       },
     ],
     xp: [8, 14],
@@ -463,7 +472,8 @@ export const RESOURCE_NODES = [
           middling: 'It thins a stride down and you are chasing it through cold stone after that. You come out with some of it and a good deal of gravel.',
           botched: 'One half of it shifts while you are standing between them. Nobody is hurt. Everything you had loosened is under everything that was above it.',
         },
-        draw: { count: [1, 3], odds: { ironore: 50, roughgarnet: 4, roughagate: 4, roughamethyst: 2 } },
+        draw: { count: [1, 3], odds: { ironore: 50 } },
+        stones: { roughgarnet: 4, roughagate: 4, roughamethyst: 2 },
       },
       {
         skill: 'herblore',
