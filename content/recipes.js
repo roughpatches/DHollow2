@@ -22,6 +22,12 @@ import { GEMS } from './gems.js';
 //   hard     — how hard the work is, where the engine takes a difficulty. Brewing does: it
 //              names a tier in `brew` in tuning.js, which is how many shapes go in the pot
 //              and how fast and how evenly they swell. Left out, it is the first tier.
+//   fire     — whether this can also be made at a campfire on the road, out of the pack
+//              rather than off the shelves. A camp is a fire and a pan and nothing else,
+//              so a dish wanting an oven or a smokehouse does not carry it. Nothing is
+//              burnt out there and there is no clock on the work: the fire is already lit,
+//              and what the road charges for a dinner is one meal to a camp. See the camp
+//              section of src/run.js.
 //   fuel     — how much fire the work wants, for work done over one: Smelting, Cooking and
 //              Brewing. It buys both halves of the same thing — what is taken out of the
 //              pack to burn, and how long the bar across the top of the screen lasts — so a
@@ -370,6 +376,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 1,
     activity: 'Cooking',
+    fire: true,
     fuel: 2,
     costs: { bluegill: 3 },
     makes: { coalfish: 2 },
@@ -390,6 +397,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 2,
     activity: 'Cooking',
+    fire: true,
     fuel: 3,
     costs: { perch: 3, blacktrumpet: 2 },
     makes: { panperch: 2 },
@@ -411,6 +419,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 3,
     activity: 'Cooking',
+    fire: true,
     fuel: 3,
     costs: { brooktrout: 3, bitterroot: 1 },
     makes: { troutsupper: 1 },
@@ -429,6 +438,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 1,
     activity: 'Cooking',
+    fire: true,
     fuel: 2,
     costs: { perch: 2 },
     makes: { friedfish: 1 },
@@ -447,6 +457,7 @@ export const RECIPES = [
     skill: 'cooking',
     rank: 1,
     activity: 'Cooking',
+    fire: true,
     fuel: 3,
     costs: { bluegill: 2, oystermushroom: 2 },
     makes: { woodstew: 1 },

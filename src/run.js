@@ -21,6 +21,10 @@ import {
 import { give, nameOf, heldOf } from './town.js';
 import * as potions from './potions.js';
 import * as food from './food.js';
+import { RECIPES } from '../content/recipes.js';
+import {
+  canCook, cookLines, make as makeAt, playedAt,
+} from './craft.js';
 import {
   packedStones, packedKeys, packedTotal, drop as dropStone, clearPack,
   cycle as cycleCord, fullName as stoneName, worn,
@@ -463,6 +467,7 @@ export function start(id, when, party, choice = {}, bring = {}) {
     // they trade blows with, and forgotten when the run ends — the same as the pool.
     hp: Object.fromEntries(fighters(who).map((id) => [id, combatOf(id).hp])),
     fight: null, // the one going on right now, and null the rest of the time
+    cooking: null, // and the pan on the camp fire, the same
   };
   step();
   return run;
@@ -499,9 +504,14 @@ function drawn(size) {
 // which of the two stores it is spending.
 const fromPack = {
   heldOf: (m) => (run ? run.pack[m] || 0 : 0),
-  take: (m, n) => {
+  take: (m, n) => fromPack.give(m, -n),
+  // Paid into as well as spent, because a fire on the road cooks into the same pack it
+  // cooked out of. Nothing here argues with the room: what comes out of a pan is smaller
+  // than what went into it, and a party who cannot fit their own dinner is a joke rather
+  // than a rule.
+  give: (m, n) => {
     if (!run) return;
-    run.pack[m] = (run.pack[m] || 0) - n;
+    run.pack[m] = (run.pack[m] || 0) + n;
     if (run.pack[m] <= 0) delete run.pack[m];
   },
 };
@@ -696,7 +706,7 @@ export function drink(mid) {
 // the whole reason a party takes the longer road.
 export function mealAt() {
   const node = run && run.at >= 0 ? run.nodes[run.at] : null;
-  return (node && node.ate) || null;
+  return (node && node.meal) || null;
 }
 
 // And what can be eaten here, by the same rule and out of the same pack. A meal is not a
@@ -714,7 +724,8 @@ export function eat(mid) {
   if (!atCamp() || mealAt() || !food.canEat(mid, fromPack)) return null;
   const ate = food.eat(mid, fromPack);
   if (!ate) return null;
-  run.nodes[run.at].ate = ate.name; // and that is this fire's meal gone
+  // and that is this fire's meal gone, whether it was carried out cooked or cooked here
+  run.nodes[run.at].meal = { how: 'ate', name: ate.name };
   const { con = 0, hp = 0 } = ate.effect;
   if (con) run.con = Math.max(0, Math.min(run.conMax, run.con + con));
   if (hp) {
@@ -725,21 +736,74 @@ export function eat(mid) {
   return ate;
 }
 
-// The pack at a fire, as one numbered list: the bottles first and then the food, because
-// that is the order they were added to the game and the numbers should not move under the
-// player's hand. The screen asks for this and does not have to know which is which.
+// --- cooking at the fire ----------------------------------------------------
+// A camp is a fire, and a fire is a pan. What can be cooked at one is content — `fire` on
+// a recipe in content/recipes.js — because a recipe is the only thing that knows whether
+// it wants an oven. Nothing is burnt out of the pack and there is no clock on the work:
+// the fire is already alight, which is what makes it a camp.
+//
+// Cooking and eating share the fire's one meal. A party can put a pan on or open something
+// they carried, and either way they have had their hour here: turning three trout into a
+// supper and then eating it is two sittings, and there is one to a fire.
+
+// What could be cooked here, out of what is in the pack.
+export function cookable() {
+  if (!atCamp() || mealAt()) return [];
+  return RECIPES.filter((r) => canCook(r, fromPack));
+}
+
+export function cookingAt() {
+  return run ? run.cooking : null;
+}
+
+// Put the pan on. The meal is spent the moment it goes on and not when it comes off: a
+// party who botched a supper have still sat here as long as one takes.
+export function startCook(id) {
+  const r = RECIPES.find((x) => x.id === id);
+  if (!r || !atCamp() || mealAt() || !canCook(r, fromPack)) return null;
+  run.cooking = { r, was: run.phase };
+  run.nodes[run.at].meal = { how: 'cooked', name: r.name };
+  if (!playedAt(r)) return cookPlayed(null);
+  run.phase = 'activity';
+  return run;
+}
+
+// And what came off it. The costs and the produce are the pack's, and the experience is
+// the player's, the same as at any bench — see make in src/craft.js.
+export function cookPlayed(played) {
+  if (!run || !run.cooking) return run;
+  const { r, was } = run.cooking;
+  run.cooking = null;
+  run.phase = was;
+  const result = makeAt(r, played, { store: fromPack });
+  run.nodes[run.at].meal = { how: 'cooked', name: r.name, result };
+  return run;
+}
+
+// The pack at a fire, as one numbered list: the bottles, then what is already cooked, then
+// what could be. One shape for all three, so the card numbers them without knowing what
+// any of them is — and the row is handed back on the way in, because a recipe and a dish
+// may well share an id.
+//   kind — 'drink', 'eat' or 'cook'
+//   id   — the material to drink or eat, or the recipe to put on
 export function atHand() {
-  return [...drinkable(), ...edible()];
+  return [
+    ...drinkable().map((mid) => ({
+      kind: 'drink', id: mid, name: nameOf(mid), body: potions.linesFor(mid),
+    })),
+    ...edible().map((mid) => ({
+      kind: 'eat', id: mid, name: nameOf(mid), body: food.linesFor(mid),
+    })),
+    ...cookable().map((r) => ({
+      kind: 'cook', id: r.id, name: r.name, body: cookLines(r, fromPack),
+    })),
+  ];
 }
 
-export function takeAtHand(mid) {
-  return food.isFood(mid) ? eat(mid) : drink(mid);
-}
-
-export function handRow(mid) {
-  return food.isFood(mid)
-    ? { mid, name: nameOf(mid), body: food.linesFor(mid) }
-    : drinkRow(mid);
+export function takeAtHand(row) {
+  if (!row) return null;
+  if (row.kind === 'cook') return startCook(row.id);
+  return row.kind === 'eat' ? eat(row.id) : drink(row.id);
 }
 
 export function inForce() {
@@ -1188,6 +1252,7 @@ export function fightPlayed(played) {
 export function playing() {
   const held = run && run.fight && run.fight.move;
   if (held) return (MOVES.find((m) => m.id === held) || {}).play;
+  if (run && run.cooking) return run.cooking.r.activity;
   return run && run.at >= 0 ? activityOf(run.nodes[run.at]) : null;
 }
 
