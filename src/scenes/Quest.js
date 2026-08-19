@@ -7,10 +7,10 @@ import {
   isCombat, nameOf, fill, YOU, carryTotal,
 } from '../party.js';
 import { stock, heldOf, nameOf as goodName } from '../town.js';
-import { cutStones, fullName, worthLine } from '../charm.js';
+import { cutStones, fullName, worthLine, sideLine } from '../charm.js';
 import {
   forged as forgedGear, wornIn, isWorn, wear as wearGear, shelfCount, setIn,
-  firstTaking, setStone, pullStone, willTake, socketLine, allSockets,
+  firstTaking, cycleStone, willTake, socketLine, wornAll,
   fullName as gearName, worthLine as gearWorth, slotName, SLOTS,
 } from '../gear.js';
 import { MOVES, moveLine, saidCount } from '../combat.js';
@@ -523,25 +523,20 @@ export default class Quest extends Phaser.Scene {
   // One key does both halves of getting kitted out, because they are the same decision
   // made twice. On a piece it puts it on, and a second press takes it off; putting on a
   // second thing for the same slot sends the first back to the shelf rather than losing
-  // it. On a stone it sets it into the first setting that will have it — jewellery before
-  // anything else, since a ring is what a setting is for — and a second press on a stone
-  // already set pulls it back out. Nobody is asked which socket: a socket is a socket, and
-  // a question with one sensible answer is not a question.
+  // it. On a stone it walks the stone along every setting that will have it and then off
+  // the end of them — jewellery first, since a ring is what a setting is for. That matters
+  // more than it used to: a stone in a ring is a skill and the same stone in a sword is a
+  // fight, so which setting it lands in is the whole decision and not a formality.
   equip(row) {
     if (!row) return;
     if (row.gear) { wearGear(row.w.uid); return; }
-    if (!row.stone) return;
-    const held = allSockets().find((sk) => sk.key === row.key && isWorn(sk.w.uid))
-      || allSockets().find((sk) => sk.key === row.key);
-    if (held) { pullStone(held.w.uid, held.at); return; }
-    const into = firstTaking(row.key);
-    if (into) setStone(into.uid, row.key);
+    if (row.stone) cycleStone(row.key);
   }
 
   // Why a stone will not go in, said in the words of whatever is stopping it. Nothing here
   // is a mistake to be corrected — it is a thing to go and forge, or a stone to go and cut.
   stoneWhy(row) {
-    const worn = SLOTS.map((sl) => wornIn(sl)).filter(Boolean);
+    const worn = wornAll();
     if (!worn.length) return 'Nothing is on. A stone goes in something, and there is nothing to put it in.';
     if (!worn.some((w) => w.sockets.length)) {
       return 'Nothing on has a setting. Forge a ring, or bring a piece off the anvil at masterwork.';
@@ -649,13 +644,21 @@ export default class Quest extends Phaser.Scene {
     } else if (r && r.stone) {
       const set = setIn(r.key);
       ty += this.text(this.left, ty, fullName(r.gem, r.grade), TUNING.menuRowSize, COLORS.menuAccent).height + 2;
+      // A stone that is going somewhere is told what it will be worth there and nothing
+      // else — the other half of it is not the question any more. A stone with nowhere to
+      // go is told both halves, because that is what it is choosing between.
+      const into = set || (r.n > 0 ? firstTaking(r.key) : null);
+      const worth = into
+        ? `${sideLine(r.gem, r.grade, into.piece.slot)} in your ${gearName(into.piece, into.grade).toLowerCase()}`
+        : worthLine(r.gem, r.grade);
+      const next = firstTaking(r.key);
       const where = set
-        ? `Set in your ${gearName(set.piece, set.grade).toLowerCase()}. [E] to take it back out.`
-        : r.n > 0 ? (firstTaking(r.key)
-          ? `[E] to set it in your ${gearName(firstTaking(r.key).piece, firstTaking(r.key).grade).toLowerCase()}.`
-          : this.stoneWhy(r))
-          : 'Every one of them is already set in something.';
-      this.text(this.left, ty, `${worthLine(r.gem, r.grade)}. ${where}`,
+        ? (next ? `[E] to move it to your ${gearName(next.piece, next.grade).toLowerCase()}.`
+          : '[E] to take it back out.')
+        : into ? '[E] to set it there.'
+          : r.n > 0 ? this.stoneWhy(r)
+            : 'Every one of them is already set in something.';
+      this.text(this.left, ty, `${worth}. ${where}`,
         TUNING.questHintSize, COLORS.menuDim, this.wide);
     } else if (r) {
       const taking = this.bring[r.id] || 0;

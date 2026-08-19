@@ -76,7 +76,7 @@ const inventory = () => [
   // The stones are told where they are by the gear, which is the only thing that knows.
   ...cutRows((key) => {
     const w = setIn(key);
-    return w ? gearName(w.piece, w.grade) : null;
+    return w ? { name: gearName(w.piece, w.grade), slot: w.piece.slot } : null;
   }).flatMap((r) => squares(r, r.n ?? 1)),
   ...carriedRows().map(withPotion).map(withFood).flatMap((r) => squares(r, r.n)),
   ...potions.waitingRows().map((p) => ({

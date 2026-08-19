@@ -27,21 +27,33 @@ const BODY = {
 // are in a setting is src/gear.js's business, and the shelf is this less that.
 const held = new Map();
 
-// Content mistakes are said at boot, the way src/craft.js says a recipe's are: a stone
-// cut from a material that is not there, a tier that does not match what it moves, or a
-// stat that is neither one of the five nor a skill anybody could have.
+// Content mistakes are said at boot, the way src/craft.js says a recipe's are: a stone cut
+// from a material that is not there, a tier that does not match what it moves either way,
+// or a number on the wrong side of the stone — a skill in the metal or a body stat against
+// the skin. A stone has to answer both, because it will be set in both.
 const MATERIAL_IDS = new Set();
 export function validate(materialIds) {
   for (const id of materialIds) MATERIAL_IDS.add(id);
   for (const g of GEMS) {
     if (!MATERIAL_IDS.has(g.rough)) console.warn(`${g.name}: no such material — ${g.rough}`);
-    if (g.stats.length !== g.tier) {
-      console.warn(`${g.name}: tier ${g.tier} moves ${g.stats.length} stat(s); a tier is the count.`);
-    }
-    for (const s of g.stats) {
-      if (!BODY[s] && !SKILL[s]) console.warn(`${g.name}: no such stat or skill — ${s}`);
+    for (const [side, list, ok, said] of [
+      ['combat', g.combat, (x) => BODY[x], 'one of the five a body has'],
+      ['skills', g.skills, (x) => SKILL[x], 'a skill in content/skills.js'],
+    ]) {
+      if (!list) { console.warn(`${g.name}: no ${side}, so it does nothing in half the places it can go.`); continue; }
+      if (list.length !== g.tier) {
+        console.warn(`${g.name}: tier ${g.tier} names ${list.length} in ${side}; a tier is the count on both sides.`);
+      }
+      for (const x of list) if (!ok(x)) console.warn(`${g.name}: ${x} is not ${said}, so it cannot sit in ${side}.`);
     }
   }
+}
+
+// Which of a stone's two halves a socket reads. Jewellery is worn against the skin and
+// sharpens the wearer; anything else is metal, and metal does what metal does.
+export function statsFor(gem, slot) {
+  if (!gem) return [];
+  return (slot === 'jewellery' ? gem.skills : gem.combat) || [];
 }
 
 export function gemOf(id) {
@@ -101,16 +113,24 @@ export function fullName(gem, grade) {
   return `${grade.name} ${gem.name}`;
 }
 
-// what a stone does, as one line: '+2 Guard, +2 Investigation'
+// What a stone does on one side of itself, as one line: '+2 Guard, +2 Constitution'.
+export function sideLine(gem, grade, slot) {
+  return statsFor(gem, slot).map((s) => `+${grade.worth} ${nameOfStat(s)}`).join(', ');
+}
+
+// And both sides at once, for a stone nobody has decided about yet: this is the whole of
+// the question a cut stone puts to the player.
 export function worthLine(gem, grade) {
-  return gem.stats.map((s) => `+${grade.worth} ${nameOfStat(s)}`).join(', ');
+  return `in metal ${sideLine(gem, grade, 'weapon')}; against the skin ${sideLine(gem, grade, 'jewellery')}`;
 }
 
 // And the squares the Inventory tab gives them, above the materials. A readout and no
 // more: which stone goes into which setting is answered at the gate, not here. `where` is
 // the one thing this file cannot answer for itself — src/gear.js knows what is set in
-// what — so the caller hands it in rather than this reaching across for it. The icon is
-// the gem's own id — see src/icons.js — so all three grades of a stone share one picture.
+// what — so the caller hands it in rather than this reaching across for it, as
+// `{ name, slot }` or nothing. The slot is there because it decides which half of the
+// stone is doing anything. The icon is the gem's own id — see src/icons.js — so all three
+// grades of a stone share one picture.
 export function cutRows(where = () => null) {
   return cutStones().map((s) => {
     const set = where(s.key);
@@ -121,7 +141,11 @@ export function cutRows(where = () => null) {
       key: s.key,
       icon: s.gem.id,
       body: [
-        `${worthLine(s.gem, s.grade)}${set ? `, and set in your ${set.toLowerCase()}.` : '.'}`,
+        set
+          // Set in something, it is only doing one of the two things it can do, so that is
+          // the only one worth saying.
+          ? `Set in your ${set.name.toLowerCase()}: ${sideLine(s.gem, s.grade, set.slot)}.`
+          : `In metal: ${sideLine(s.gem, s.grade, 'weapon')}. Against the skin: ${sideLine(s.gem, s.grade, 'jewellery')}.`,
         ...s.gem.body,
       ],
     };

@@ -17,14 +17,19 @@
 //
 // A socket is what a masterwork piece is for. Everything short of the top grade holds
 // nothing, and the exception is jewellery, which is nothing but sockets and holds them at
-// any standard — see content/gear.js. A stone set in a ring works exactly as it worked on
-// the cord, which is what the cord used to be for and is why the cord is gone.
+// any standard — see content/gear.js.
+//
+// And where a stone is set decides what it does. Jewellery is worn against the skin and a
+// stone in it sharpens the wearer — skills, and a check rolled against them. A weapon or a
+// piece of armour is metal, and a stone in metal does what metal does — the numbers a
+// fight is decided on. The stone is the same stone; the setting is the question. See
+// content/gems.js, which is where both halves of every stone are written.
 
 import { TUNING } from '../tuning.js';
 import { GEAR } from '../content/gear.js';
 import {
   gemOf, gradeOf as gemGradeOf, countOf as cutCount, fullName as stoneName,
-  nameOfStat as statName,
+  nameOfStat as statName, statsFor, sideLine,
 } from './charm.js';
 
 const PIECE = Object.fromEntries(GEAR.map((g) => [g.id, g]));
@@ -183,19 +188,26 @@ export function setIn(stoneKey) {
   return at ? at.w : null;
 }
 
-// Whether this piece will take this stone: it has to have a socket free, and the stone has
-// to be no finer than the metal will carry. Bronze holds tier one, which is what the
-// Greywood pays out; a tier two stone in a bronze setting is a stone waiting for iron.
-export function willTake(uid, stoneKey) {
+// Whether this piece could hold this stone at all: it has to have a socket free, and the
+// stone has to be no finer than the metal will carry. Bronze holds tier one, which is what
+// the Greywood pays out; a tier two stone in a bronze setting is a stone waiting for iron.
+// This asks nothing about whether such a stone is to hand — moving one that is already set
+// is the same question, and it is already out of the drawer.
+export function couldHold(uid, stoneKey) {
   const w = pieceAt(uid);
   if (!w) return null;
-  if (shelfCount(stoneKey) < 1) return 'none';
   if (!w.sockets.length) return 'nosocket';
   if (w.sockets.every((k) => k !== null)) return 'full';
   const gem = gemOf(stoneKey.split(':')[0]);
   if (!gem) return 'nogem';
   if (gem.tier > (w.piece.holds || 0)) return 'toofine';
   return 'yes';
+}
+
+// And whether it will take one now, which is that plus having one on the shelf.
+export function willTake(uid, stoneKey) {
+  if (shelfCount(stoneKey) < 1) return 'none';
+  return couldHold(uid, stoneKey);
 }
 
 // Set a stone into the first free socket of a piece. Returns which socket took it.
@@ -217,14 +229,37 @@ export function pullStone(uid, at) {
   return key;
 }
 
-// The first thing worn that will take this stone, jewellery first: jewellery is what a
-// setting is for, and a party who has both a ring and a masterwork sword meant the ring.
-// This is what one key on the packing screen does, so nobody is asked to pick a socket.
-export function firstTaking(stoneKey) {
+// Every setting this stone could go into, jewellery first: jewellery is what a setting is
+// for, so it is the one offered before the rest. A socket already holding this stone is in
+// the list too, which is what lets one key walk it along them.
+function couldTake(stoneKey) {
   const order = [...wornAll()].sort(
     (a, b) => (b.piece.slot === 'jewellery') - (a.piece.slot === 'jewellery'),
   );
-  return order.find((w) => willTake(w.uid, stoneKey) === 'yes') || null;
+  return order.filter((w) => couldHold(w.uid, stoneKey) === 'yes'
+    || w.sockets.includes(stoneKey));
+}
+
+// Where the next press would put it. Nothing if there is nowhere for it to go.
+export function firstTaking(stoneKey) {
+  const list = couldTake(stoneKey);
+  const at = list.findIndex((w) => w.sockets.includes(stoneKey));
+  return at < 0 ? (list[0] || null) : (list[at + 1] || null);
+}
+
+// One key walks a stone along every setting that will have it and then off the end of
+// them, which is how the cord used to work and is the same reason: a player who wants the
+// stone in the sword rather than the ring should not have to be asked a question to say
+// so. Returns where it ended up, or nothing for taken out.
+export function cycleStone(stoneKey) {
+  const list = couldTake(stoneKey);
+  const at = list.findIndex((w) => w.sockets.includes(stoneKey));
+  // Out first and in second, so the shelf has it back before setStone asks for it.
+  if (at >= 0) pullStone(list[at].uid, list[at].sockets.indexOf(stoneKey));
+  const next = at < 0 ? list[0] : list[at + 1];
+  if (!next) return null;
+  setStone(next.uid, stoneKey);
+  return pieceAt(next.uid);
 }
 
 // --- what it is all worth ---------------------------------------------------
@@ -241,10 +276,10 @@ export function bonus(stat) {
       const [gemId, gradeId] = key.split(':');
       const gem = gemOf(gemId);
       const grade = gemGradeOf(gradeId);
-      // A stone is worth what it was cut to, in every number it names — the same as it was
-      // worth on the cord. The metal decides whether it may be set at all, not what it
-      // does once it is.
-      if (gem && grade && gem.stats.includes(stat)) n += grade.worth;
+      // A stone is worth what it was cut to, in whichever of its two halves this setting
+      // reads: skills against the skin, the fighting numbers in metal. So the same stone
+      // in a ring and in a sword adds to two different things and never to both.
+      if (gem && grade && statsFor(gem, w.piece.slot).includes(stat)) n += grade.worth;
     }
   }
   return n;
@@ -275,15 +310,20 @@ export function worthLine(piece, grade) {
   return `+${grade.worth * (TUNING.gear.scale[piece.stat] || 0)} ${nameOfStat(piece.stat)}`;
 }
 
-// and the sockets, said as what is in them: '[Flawless Garnet] [empty]'
+// and the sockets, said as what is in them and what it is doing there, because a stone in
+// a ring and the same stone in a sword are not the same stone to look at:
+// '[Flawless Garnet, +3 Fording] [empty]'
 export function socketLine(w) {
   if (!w.sockets.length) return '';
   return w.sockets.map((key) => {
     if (!key) return '[empty]';
     const [gemId, gradeId] = key.split(':');
-    return `[${stoneName(gemOf(gemId), gemGradeOf(gradeId))}]`;
+    const gem = gemOf(gemId);
+    const grade = gemGradeOf(gradeId);
+    return `[${stoneName(gem, grade)}, ${sideLine(gem, grade, w.piece.slot)}]`;
   }).join(' ');
 }
+
 
 // One piece, said in full: what it is, what it does, and what is in it.
 export function pieceLine(w) {
