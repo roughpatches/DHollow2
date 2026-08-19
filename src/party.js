@@ -11,7 +11,7 @@ import { PARTY } from '../content/party.js';
 import { SKILLS } from '../content/skills.js';
 import { levelCap } from './town.js';
 import * as story from './story.js';
-import { bonus as charmBonus, worn } from './charm.js';
+import { bonus as gearBonus } from './gear.js';
 
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
 
@@ -71,11 +71,12 @@ export function combatOf(id) {
   // A worn stone is worth the same to a blow as to the thing taking it, so harm moves at
   // both ends rather than widening: a Ruby makes every swing better, not luckier.
   const harm = own.harm || d.harm;
+  const worn = (stat) => gearBonus(stat); // a fight: whoever is holding it
   return {
-    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1) + charmOn(id, 'hp'),
-    hit: (own.hit ?? d.hit) + charmOn(id, 'hit'),
-    guard: (own.guard ?? d.guard) + charmOn(id, 'guard'),
-    harm: [harm[0] + charmOn(id, 'harm'), harm[1] + charmOn(id, 'harm')],
+    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1) + worn('hp'),
+    hit: (own.hit ?? d.hit) + worn('hit'),
+    guard: (own.guard ?? d.guard) + worn('guard'),
+    harm: [harm[0] + worn('harm'), harm[1] + worn('harm')],
   };
 }
 
@@ -84,10 +85,16 @@ export function combatOf(id) {
 // character they are.
 export const YOU = PARTY.find((c) => c.you).id;
 
-// Only the player wears a charm — one stone, one slot — so everybody else reads zero and
-// every number below can ask without first asking who it is asking about.
-function charmOn(id, stat) {
-  return id === YOU ? charmBonus(stat) : 0;
+// There is one set of gear and one set of stones in it, and it is read two ways because
+// it is worn two ways.
+//
+// In a fight it reads for whoever stepped up: the party owns one sword and it goes to the
+// person swinging it, since nobody stands there holding it while somebody else takes the
+// blow. Everywhere else — the constitution the party spends walking, and the skills a
+// check is rolled against — it reads for the player and nobody else, because outside a
+// fight the kit is on the player's own back and a ring cannot be worn by four people.
+function gearOn(id, stat) {
+  return id === YOU ? gearBonus(stat) : 0;
 }
 
 // what the hut scene hands back: three skills against the points put on each
@@ -140,7 +147,7 @@ export function stateOf(id) {
 // What this character is worth to a run's constitution: their own score, and what every
 // level past the first added to it.
 export function conOf(id) {
-  return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1) + charmOn(id, 'con');
+  return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1) + gearOn(id, 'con');
 }
 
 // How many slots one person is worth, and how many a crew is. The grid a run walks out
@@ -273,7 +280,7 @@ export function skillForActivity(activity) {
 // onto work the player could not otherwise take. Spending points is untouched by it; the
 // bank in stateOf is what a level hands over and a stone never goes near it.
 export function rankOf(id, skillId) {
-  return (stateOf(id).skills[skillId] || 0) + charmOn(id, skillId);
+  return (stateOf(id).skills[skillId] || 0) + gearOn(id, skillId);
 }
 
 // what a level handed over and nobody has spent yet

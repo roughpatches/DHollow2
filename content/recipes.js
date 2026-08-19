@@ -143,6 +143,184 @@ export const RECIPES = [
     ],
   },
 
+  // --- and what the bar is for ------------------------------------------------
+  // Five pieces and three slots, so the smithy is a set of questions rather than a
+  // ladder: the dagger against the sword, the mail against the plate, and the shield
+  // against the free hand Grast keeps recommending. Every one of them is bronze and
+  // bronze carries one buff, which is what keeps the question a question.
+  // These name `forges` rather than `makes`: one piece comes off the anvil however good
+  // the smith is, and what the work decides is which grade of it — the same bargain a cut
+  // stone makes at the wheel. See content/gear.js and `gear` in tuning.js.
+  // Forging is played at the anvil now — see src/minigames/ForgeEngine.js — so all five
+  // are over a fire and all five want a fuel. `hard` names one of the three signature
+  // jobs in `forge.jobs` in tuning.js rather than a difficulty: the links of a mail, the
+  // two edges of a blade, the work-hardening of raised plate. A piece naming none is
+  // plain work, which is what the first thing anybody makes should be.
+  {
+    id: 'bronzedagger',
+    name: 'Draw a bronze dagger',
+    at: 'forge',
+    stage: 1,
+    level: 1,
+    skill: 'smithing',
+    rank: 1,
+    activity: 'Forging',
+    fuel: 3,
+    costs: { bronzebar: 1 },
+    forges: 'bronzedagger',
+    xp: 20,
+    body: [
+      'One bar drawn down to a point, ground on both edges, and a scale handle riveted through the tang while it is still too warm to hold.',
+      'It is the first thing anybody is given to make, and the first thing anybody here has carried that was made for the purpose.',
+    ],
+  },
+  {
+    // Two bars, and one of them is not metal that ends up in your hand: the facing is
+    // beaten thin over wood, because a solid bronze round is a thing you put down after
+    // a mile.
+    id: 'bronzeshield',
+    name: 'Face a bronze shield',
+    at: 'forge',
+    stage: 1,
+    level: 2,
+    skill: 'smithing',
+    rank: 1,
+    activity: 'Forging',
+    fuel: 4,
+    costs: { bronzebar: 2, oaklog: 1 },
+    forges: 'bronzeshield',
+    xp: 26,
+    body: [
+      'Oak boards glued across the grain, cut round, and a sheet of bronze beaten down over the face of it until it takes the curve.',
+      'The boss is the whole of the argument. Everything else on it is there to hold the boss in front of you.',
+    ],
+  },
+  {
+    // Not a harder job than the sword — a longer one. Four bars drawn to wire is where
+    // the evening goes.
+    id: 'bronzechainmail',
+    name: 'Rivet a bronze chainmail',
+    at: 'forge',
+    stage: 1,
+    level: 4,
+    skill: 'smithing',
+    rank: 2,
+    activity: 'Forging',
+    hard: 'links',
+    fuel: 6,
+    costs: { bronzebar: 4, charcoal: 2 },
+    forges: 'bronzechainmail',
+    xp: 48,
+    body: [
+      'Wire drawn, wound round a rod, cut into rings, and every fourth one closed through four others with a rivet the size of a grain of barley.',
+      'There is no skill in any single ring of it. There are eleven thousand rings.',
+    ],
+  },
+  {
+    id: 'bronzesword',
+    name: 'Forge a bronze sword',
+    at: 'forge',
+    stage: 1,
+    level: 5,
+    skill: 'smithing',
+    rank: 2,
+    activity: 'Forging',
+    hard: 'edges',
+    fuel: 5,
+    costs: { bronzebar: 2, charcoal: 1 },
+    forges: 'bronzesword',
+    xp: 40,
+    body: [
+      'Two bars welded at the heat, drawn to a blade of a length a man can carry without thinking about it, and both edges work-hardened cold along their whole run.',
+      'Bronze will not take a temper. Everything a bronze edge is worth is put into it with the hammer, after the fire is done with it.',
+    ],
+  },
+  {
+    // The one thing in town that wants the furnace for its metal rather than its heat:
+    // six bars is two full runs of the stack, and nobody is casting six from the hearth.
+    id: 'bronzeplatemail',
+    name: 'Raise a bronze platemail',
+    at: 'forge',
+    stage: 2,
+    level: 8,
+    skill: 'smithing',
+    rank: 3,
+    activity: 'Forging',
+    hard: 'raising',
+    fuel: 8,
+    costs: { bronzebar: 6, charcoal: 3 },
+    forges: 'bronzeplatemail',
+    xp: 84,
+    body: [
+      'Sheet raised over a stake a hammer-width at a time until the breast stands the shape of a chest with nobody in it, and the whole of it strapped to a back plate cut to the same man.',
+      'It is made to fit one person. That is not a boast about the smith, it is the reason there is only ever one of them.',
+    ],
+  },
+
+  // --- and what a stone goes in ------------------------------------------------
+  // One slot, three things that fit it, and none of them worth anything empty. A ring is
+  // a setting on a band and an amulet is three settings on a disc, and that is the whole
+  // difference: what the smithy sells here is somewhere to put what the wheel cut.
+  // These are the cheap end of the anvil on purpose. A masterwork sword also takes a
+  // stone, but it has to be a masterwork sword first — a ring only has to be a ring, and
+  // that is what makes it the first thing a stone can go into.
+  {
+    id: 'bronzering',
+    name: 'Draw a bronze ring',
+    at: 'forge',
+    stage: 1,
+    level: 2,
+    skill: 'smithing',
+    rank: 1,
+    activity: 'Forging',
+    fuel: 3,
+    costs: { bronzebar: 1 },
+    forges: 'bronzering',
+    xp: 22,
+    body: [
+      'A band bent round a mandrel and closed with a weld you can only find by looking for it, and a bezel raised on the front of it with a stone-sized hollow in the middle.',
+      'The claws are bent over last, with the stone already in, and they are bent with the thumbs.',
+    ],
+  },
+  {
+    id: 'bronzebracelet',
+    name: 'Hinge a bronze bracelet',
+    at: 'forge',
+    stage: 1,
+    level: 5,
+    skill: 'smithing',
+    rank: 2,
+    activity: 'Forging',
+    hard: 'edges',
+    fuel: 5,
+    costs: { bronzebar: 2, charcoal: 1 },
+    forges: 'bronzebracelet',
+    xp: 42,
+    body: [
+      'Two halves raised to the same curve, hinged along one edge and pinned along the other, with a setting on each half so the pair sit level when it is closed.',
+      'Two halves that do not match is a cuff that will not shut. The hinge is easy and the matching is not.',
+    ],
+  },
+  {
+    id: 'bronzeamulet',
+    name: 'Raise a bronze amulet',
+    at: 'forge',
+    stage: 2,
+    level: 8,
+    skill: 'smithing',
+    rank: 3,
+    activity: 'Forging',
+    hard: 'raising',
+    fuel: 7,
+    costs: { bronzebar: 3, charcoal: 2 },
+    forges: 'bronzeamulet',
+    xp: 76,
+    body: [
+      'A disc raised from flat until it stands a little proud, three bezels set into the face of it at the points of a triangle, and a hole drilled at the top for the cord.',
+      'Three settings on one piece of metal, and every one of them has to sit flat on a face that is not flat. That is the job.',
+    ],
+  },
+
   // --- the Artisan's Studio --------------------------------------------------
   // A rough stone comes off a mining node about one time in eight, so every one of these
   // is a stone the player walked a long way for and gets one go at. Three shapes and three

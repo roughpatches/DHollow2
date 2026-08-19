@@ -22,6 +22,9 @@ import { lay, burnSeconds, layLine } from './fuel.js';
 import {
   cut, gemOf, validate, fullName, worthLine,
 } from './charm.js';
+import {
+  forge, pieceOf, fullName as gearName, worthLine as gearWorth, slotName, socketLine,
+} from './gear.js';
 
 // Where a bench spends from and pays into. A fire on the road spends the pack the party
 // carried out instead, and hands its own in — see the camp section of src/run.js. Nothing
@@ -41,8 +44,12 @@ for (const r of RECIPES) {
   if (!b) console.warn(`${r.name}: no such building — ${r.at}`);
   else if (!(b.stages[r.stage] || {}).craft) console.warn(`${r.name}: ${b.name} does not craft at stage ${r.stage}.`);
   if (!SKILL.has(r.skill)) console.warn(`${r.name}: no such skill — ${r.skill}`);
-  if (!r.makes === !r.cuts) console.warn(`${r.name}: wants exactly one of makes and cuts.`);
+  // Three ways for a bench to pay and never two at once: a count of materials, a graded
+  // stone off the wheel, or a graded piece off the anvil.
+  const pays = [r.makes, r.cuts, r.forges].filter(Boolean).length;
+  if (pays !== 1) console.warn(`${r.name}: wants exactly one of makes, cuts and forges.`);
   if (r.cuts && !gemOf(r.cuts)) console.warn(`${r.name}: no such gem — ${r.cuts}`);
+  if (r.forges && !pieceOf(r.forges)) console.warn(`${r.name}: no such gear — ${r.forges}`);
   for (const m of [...Object.keys(r.costs), ...Object.keys(r.makes || {})]) {
     if (!MATERIAL.has(m)) console.warn(`${r.name}: no such material — ${m}`);
   }
@@ -218,6 +225,13 @@ export function make(r, played, opts = {}) {
   // A cut is one stone whatever anybody's points are: what the work decides is the grade,
   // and the grade is the wheel's own reading of it and nothing else's.
   const stone = r.cuts ? cut(r.cuts, quality ?? 0) : null;
+  // And a forge is one piece, on the same bargain — except that the anvil is the one
+  // bench with a hard fail in it. A piece cracked under the hammer is no piece: the metal
+  // is in two halves on the floor and the bars that went into it are gone, which is what
+  // makes the soundness bar worth watching. Everything short of that is a piece, and how
+  // well the work went decides which grade of it.
+  const cracked = !!(played && played.failed);
+  const piece = r.forges && !cracked ? forge(r.forges, quality ?? 0) : null;
 
   const made = {};
   for (const [m, n] of Object.entries(r.makes || {})) {
@@ -231,7 +245,8 @@ export function make(r, played, opts = {}) {
   // Crafting is the player's own work and nobody else's: they are the one standing at the
   // bench, so the experience is theirs and so are the points it comes to.
   return {
-    made, stone, xp, quality, burnt, failed: !!(played && played.failed), levels: award(YOU, xp),
+    made, stone, piece, cracked: cracked && !!r.forges, xp, quality, burnt,
+    failed: cracked, levels: award(YOU, xp),
   };
 }
 
@@ -247,6 +262,7 @@ export function recipeLines(r) {
   const more = moreOf(r);
   const hard = hardLine(r.activity, r.hard);
   const gem = r.cuts && gemOf(r.cuts);
+  const kit = r.forges && pieceOf(r.forges);
   const fire = fuelFor(r) ? layLine(fuelFor(r), layFor(r)) : null;
   const out = [
     `Takes: ${list(Object.entries(r.costs))}.`,
@@ -254,7 +270,18 @@ export function recipeLines(r) {
       // Points do not make a bigger stone, so the line says what the stone is worth at
       // each grade instead: the whole of what a cut is for is which of the three it is.
       ? `Makes: one ${gem.name}, ${TUNING.gem.grades.map((g) => `${g.name} ${worthLine(gem, g)}`).join(' / ')}.`
-      : `Makes: ${list(Object.entries(r.makes))}${more ? `, and ${Math.round(more * 100)}% more for your ${skillOf(r.skill).name}` : ''}.`,
+      : kit
+        // The same for a piece off the anvil, and for the same reason: one comes off it
+        // however good the smith is, and how good the smith is decides which one. Except
+        // where it does not: jewellery is settings and nothing else, and a setting is a
+        // setting at any standard, so its line is said once rather than three times over.
+        ? (kit.sockets
+          ? `Makes: one ${kit.name} — ${kit.sockets} setting${kit.sockets === 1 ? '' : 's'}, `
+            + 'whatever it comes off the anvil like.'
+          : `Makes: one ${kit.name} for the ${slotName(kit.slot).toLowerCase()}, `
+            + `${TUNING.gear.grades.map((g) => `${g.name} ${gearWorth(kit, g)}`).join(' / ')}`
+            + `. At ${TUNING.gear.grades[0].name.toLowerCase()} it also takes a stone.`)
+        : `Makes: ${list(Object.entries(r.makes))}${more ? `, and ${Math.round(more * 100)}% more for your ${skillOf(r.skill).name}` : ''}.`,
     playedAt(r)
       ? `${r.activity}${hard ? `, ${hard}` : ''}. Worth ${r.xp} to your level, and worth doing well.`
       : `${r.activity} — worth ${r.xp} to your level. Waiting on that engine; for now it is simply done.`,
@@ -273,6 +300,16 @@ export function madeLines(r, result) {
   if (result.stone) {
     out.push(`${fullName(result.stone.gem, result.stone.grade)}. ${worthLine(result.stone.gem, result.stone.grade)} while it is worn.`);
   }
+  if (result.piece) {
+    const w = result.piece;
+    const holds = w.sockets.length
+      ? ` ${w.sockets.length} setting${w.sockets.length === 1 ? '' : 's'} in it: ${socketLine(w)}.`
+      : '';
+    out.push(`${gearName(w.piece, w.grade)}. ${gearWorth(w.piece, w.grade)} while it is on,`
+      + `${holds} It goes on at the gate.`);
+  } else if (result.cracked) {
+    out.push('It cracked. There is nothing on the anvil and the metal is gone with it.');
+  }
   // What went under it is said whichever way it went: a fire that was lit is wood that is
   // gone, and a job lost to one is the player being told what it cost them.
   if (result.burnt.length) out.push(`Burnt: ${list(result.burnt)}.`);
@@ -280,7 +317,7 @@ export function madeLines(r, result) {
   // A cut says what came off the wheel above this, so a bench that made only a stone is
   // not also told it made nothing.
   if (got.length) out.push(`You have ${list(got)}.`);
-  else if (!result.stone) out.push('Nothing came off the bench worth carrying.');
+  else if (!result.stone && !result.piece && !result.cracked) out.push('Nothing came off the bench worth carrying.');
   // Work done at the cap pays what it pays in materials and nothing to the level, and is
   // said so here rather than left to be noticed on the crew screen.
   const held = capHeldBy();
