@@ -211,8 +211,9 @@ export const TUNING = {
     skimHeatCostSet: 0.09,
     // The pour, read as the game reads work. The bar is what the charge was for, so the
     // pour is written into the judgments several times over: a run of clean skims poured
-    // half-melted is not good work, and this is what says so.
-    pourWeight: 3,
+    // half-melted is not good work, and this is what says so. Six, because at three the
+    // skims drowned it — a pot scorched to a fifth of its purity still scored 70%.
+    pourWeight: 6,
     pourPerfectAt: 0.7, // purity, docked for what never ran, above which the bar is clean
     pourGoodAt: 0.5, // and above which it is worth having
     settleMs: 900, // how long the pot is left to be looked at before the tally
