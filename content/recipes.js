@@ -137,6 +137,109 @@ export const RECIPES = [
     ],
   },
 
+  // --- and what the bar is for ------------------------------------------------
+  // Five pieces and three slots, so the smithy is a set of questions rather than a
+  // ladder: the dagger against the sword, the mail against the plate, and the shield
+  // against the free hand Grast keeps recommending. Every one of them is bronze and
+  // bronze carries one buff, which is what keeps the question a question.
+  // These name `forges` rather than `makes`: one piece comes off the anvil however good
+  // the smith is, and what the work decides is which grade of it — the same bargain a cut
+  // stone makes at the wheel. See content/gear.js and `gear` in tuning.js.
+  // Forging has no engine yet, so these are done on the spot and carry no fuel; the day
+  // ForgeEngine is imported they want one, and src/craft.js says so at boot.
+  {
+    id: 'bronzedagger',
+    name: 'Draw a bronze dagger',
+    at: 'forge',
+    stage: 1,
+    level: 1,
+    skill: 'smithing',
+    rank: 1,
+    activity: 'Forging',
+    costs: { bronzebar: 1 },
+    forges: 'bronzedagger',
+    xp: 20,
+    body: [
+      'One bar drawn down to a point, ground on both edges, and a scale handle riveted through the tang while it is still too warm to hold.',
+      'It is the first thing anybody is given to make, and the first thing anybody here has carried that was made for the purpose.',
+    ],
+  },
+  {
+    // Two bars, and one of them is not metal that ends up in your hand: the facing is
+    // beaten thin over wood, because a solid bronze round is a thing you put down after
+    // a mile.
+    id: 'bronzeshield',
+    name: 'Face a bronze shield',
+    at: 'forge',
+    stage: 1,
+    level: 2,
+    skill: 'smithing',
+    rank: 1,
+    activity: 'Forging',
+    costs: { bronzebar: 2, oaklog: 1 },
+    forges: 'bronzeshield',
+    xp: 26,
+    body: [
+      'Oak boards glued across the grain, cut round, and a sheet of bronze beaten down over the face of it until it takes the curve.',
+      'The boss is the whole of the argument. Everything else on it is there to hold the boss in front of you.',
+    ],
+  },
+  {
+    // Not a harder job than the sword — a longer one. Four bars drawn to wire is where
+    // the evening goes.
+    id: 'bronzechainmail',
+    name: 'Rivet a bronze chainmail',
+    at: 'forge',
+    stage: 1,
+    level: 4,
+    skill: 'smithing',
+    rank: 2,
+    activity: 'Forging',
+    costs: { bronzebar: 4, charcoal: 2 },
+    forges: 'bronzechainmail',
+    xp: 48,
+    body: [
+      'Wire drawn, wound round a rod, cut into rings, and every fourth one closed through four others with a rivet the size of a grain of barley.',
+      'There is no skill in any single ring of it. There are eleven thousand rings.',
+    ],
+  },
+  {
+    id: 'bronzesword',
+    name: 'Forge a bronze sword',
+    at: 'forge',
+    stage: 1,
+    level: 5,
+    skill: 'smithing',
+    rank: 2,
+    activity: 'Forging',
+    costs: { bronzebar: 2, charcoal: 1 },
+    forges: 'bronzesword',
+    xp: 40,
+    body: [
+      'Two bars welded at the heat, drawn to a blade of a length a man can carry without thinking about it, and both edges work-hardened cold along their whole run.',
+      'Bronze will not take a temper. Everything a bronze edge is worth is put into it with the hammer, after the fire is done with it.',
+    ],
+  },
+  {
+    // The one thing in town that wants the furnace for its metal rather than its heat:
+    // six bars is two full runs of the stack, and nobody is casting six from the hearth.
+    id: 'bronzeplatemail',
+    name: 'Raise a bronze platemail',
+    at: 'forge',
+    stage: 2,
+    level: 8,
+    skill: 'smithing',
+    rank: 3,
+    activity: 'Forging',
+    costs: { bronzebar: 6, charcoal: 3 },
+    forges: 'bronzeplatemail',
+    xp: 84,
+    body: [
+      'Sheet raised over a stake a hammer-width at a time until the breast stands the shape of a chest with nobody in it, and the whole of it strapped to a back plate cut to the same man.',
+      'It is made to fit one person. That is not a boast about the smith, it is the reason there is only ever one of them.',
+    ],
+  },
+
   // --- the Artisan's Studio --------------------------------------------------
   // A rough stone comes off a mining node about one time in eight, so every one of these
   // is a stone the player walked a long way for and gets one go at. Three shapes and three

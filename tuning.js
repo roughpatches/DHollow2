@@ -307,6 +307,33 @@ export const TUNING = {
     },
   },
 
+  // What comes off the smithy's anvil, and how much of it. Gear is graded rather than
+  // counted — one piece a job, and how well the work went decides what the piece is worth
+  // — so this is the whole of the difference between a poor dagger and a good one. See
+  // content/gear.js for the five pieces and src/gear.js for what wears them.
+  gear: {
+    // Read against the quality the forge scored, best first: a piece is the highest grade
+    // it clears, and the last is written at zero so there is always one it makes. `worth`
+    // is how far the piece's one stat moves while it is on.
+    grades: [
+      { id: 'masterwork', name: 'Masterwork', at: 0.85, worth: 3 },
+      { id: 'sound', name: 'Sound', at: 0.55, worth: 2 },
+      { id: 'rough', name: 'Rough', at: 0, worth: 1 },
+    ],
+    // A point of guard and a point of hit are worth the same on a d20; a point of hit
+    // points is not, against a fighter who starts with twenty-four of them. This is what
+    // one step of `worth` buys in each number, so the five pieces read against each other
+    // rather than against the die.
+    scale: {
+      hit: 1, harm: 1, guard: 1, hp: 3, con: 2,
+    },
+    // Forging has no engine yet — see the reference list in CLAUDE.md — so nothing is
+    // played and there is no quality to read. This is what an unplayed forge scores until
+    // ForgeEngine is imported, which puts every piece on the middle grade. Delete this
+    // line the day the engine lands and the number comes off the anvil instead.
+    unplayedQuality: 0.6,
+  },
+
   // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node
   // is. Every number the axe answers to lives here.
   fell: {

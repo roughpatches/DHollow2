@@ -176,6 +176,34 @@ const SHAPES = {
       g.fillTriangle(9, y, 9, y + 4, 15, y + 4);
     }
   },
+  // A blade point-up: the length is the piece, the guard and grip are the mark on it. One
+  // shape does the dagger and the sword — what tells them apart on the shelf is the name
+  // under the square, and both of them are the same object at two lengths anyway.
+  blade: (g, [a, b]) => {
+    fill(g, a, 7, 2, 2, 9);
+    g.fillStyle(a, 1);
+    g.fillTriangle(6, 3, 10, 3, 8, 1); // the point
+    fill(g, b, 4, 11, 8, 1); // the guard
+    fill(g, b, 7, 12, 2, 3); // and the grip
+  },
+  // Rings, drawn as the only thing sixteen pixels can say about eleven thousand of them.
+  mail: (g, [a, b]) => {
+    fill(g, a, 3, 3, 10, 10);
+    for (let y = 4; y < 13; y += 3) {
+      for (let x = 4; x < 13; x += 3) fill(g, b, x, y, 1, 1);
+    }
+    fill(g, b, 3, 2, 10, 1); // the collar
+  },
+  // A round with a boss in the middle of it, which is the whole of what a shield is.
+  shield: (g, [a, b]) => {
+    fill(g, a, 6, 1, 4, 1); // the round, stepped in from the top and out to the waist
+    fill(g, a, 4, 2, 8, 2);
+    fill(g, a, 2, 4, 12, 5);
+    fill(g, a, 3, 9, 10, 2);
+    fill(g, a, 5, 11, 6, 2);
+    fill(g, a, 7, 13, 2, 1); // and down to a point, which is where a shield sheds a blow
+    fill(g, b, 6, 5, 4, 4); // the boss
+  },
   axe: (g, [a, b]) => {
     fill(g, b, 9, 1, 2, 14);
     g.fillStyle(a, 1);
@@ -303,6 +331,11 @@ const ICONS = {
   steadyhand: ['pot', 'glass'],
   bitterwash: ['flask', 'shell'],
   bronzebar: ['log', 'bronze'],
+  bronzedagger: ['blade', 'bronze'],
+  bronzesword: ['blade', 'bronze'],
+  bronzeshield: ['shield', 'bronze'],
+  bronzechainmail: ['mail', 'bronze'],
+  bronzeplatemail: ['mail', 'bronze'],
   ironbar: ['log', 'iron'],
   friedfish: ['fish', 'food'],
   woodstew: ['pot', 'food'],

@@ -12,6 +12,7 @@ import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
 import { drawSlots, shapeOf } from '../slots.js';
 import { cutRows } from '../charm.js';
+import { gearRows } from '../gear.js';
 import * as potions from '../potions.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
@@ -55,6 +56,9 @@ const withPotion = (r) => (potions.isPotion(r.mid) ? {
 } : r);
 
 const inventory = () => [
+  // Gear above the stones and the stones above the pack, which is the order they are
+  // decided in at the gate: what is on the body, what is on the cord, what is carried.
+  ...gearRows().flatMap((r) => squares(r, r.n ?? 1)),
   ...cutRows().flatMap((r) => squares(r, r.n ?? 1)),
   ...carriedRows().map(withPotion).flatMap((r) => squares(r, r.n)),
   ...potions.waitingRows().map((p) => ({

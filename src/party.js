@@ -12,6 +12,7 @@ import { SKILLS } from '../content/skills.js';
 import { levelCap } from './town.js';
 import * as story from './story.js';
 import { bonus as charmBonus, worn } from './charm.js';
+import { bonus as gearBonus } from './gear.js';
 
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
 
@@ -71,11 +72,12 @@ export function combatOf(id) {
   // A worn stone is worth the same to a blow as to the thing taking it, so harm moves at
   // both ends rather than widening: a Ruby makes every swing better, not luckier.
   const harm = own.harm || d.harm;
+  const worn = (stat) => charmOn(id, stat) + gearOn(id, stat);
   return {
-    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1) + charmOn(id, 'hp'),
-    hit: (own.hit ?? d.hit) + charmOn(id, 'hit'),
-    guard: (own.guard ?? d.guard) + charmOn(id, 'guard'),
-    harm: [harm[0] + charmOn(id, 'harm'), harm[1] + charmOn(id, 'harm')],
+    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1) + worn('hp'),
+    hit: (own.hit ?? d.hit) + worn('hit'),
+    guard: (own.guard ?? d.guard) + worn('guard'),
+    harm: [harm[0] + worn('harm'), harm[1] + worn('harm')],
   };
 }
 
@@ -88,6 +90,13 @@ export const YOU = PARTY.find((c) => c.you).id;
 // every number below can ask without first asking who it is asking about.
 function charmOn(id, stat) {
   return id === YOU ? charmBonus(stat) : 0;
+}
+
+// Gear is the exception, and reads for everybody who fights: the party owns one sword and
+// it goes to whoever steps up, because nobody stands there holding it while somebody else
+// takes the blow. So this asks nothing about who it is asking about.
+function gearOn(id, stat) {
+  return gearBonus(stat);
 }
 
 // what the hut scene hands back: three skills against the points put on each
