@@ -1,21 +1,16 @@
-// Everything the player carries: what buildings are repaired with, and what the nodes
-// of a run pay out. Buildings name these ids in their costs; encounters name them in
-// their spoils.
-//   id    — how content/buildings.js, content/encounters.js and src/town.js refer to it.
+import { GEMS } from './gems.js';
+
+// Everything the player carries: what the nodes of a run pay out, and what a bench turns
+// it into. Encounters name these ids in their spoils; recipes name them in their costs.
+// The pack starts empty — everything in it was carried home.
+//   id    — how content/recipes.js, content/encounters.js and src/town.js refer to it.
 //   name  — shown wherever a cost or a stock is listed, and under its square in the pack.
-//   start — how much the player is carrying at the start of the game.
 //   body  — what it is, in the world's voice. Yours to write.
 // The square a thing takes on the Inventory tab is drawn for its id in src/icons.js.
 // One with no icon there gets a blank square rather than nothing.
 // Add a material by adding an entry. Nothing reads this list by position.
 
 export const MATERIALS = [
-  { id: 'timber', name: 'Timber', start: 6, body: ['[Placeholder Text]'] },
-  { id: 'stone', name: 'Cut stone', start: 4, body: ['[Placeholder Text]'] },
-  { id: 'nails', name: 'Nails', start: 12, body: ['[Placeholder Text]'] },
-  { id: 'pitch', name: 'Pitch', start: 0, body: ['[Placeholder Text]'] },
-  { id: 'canvas', name: 'Canvas', start: 0, body: ['[Placeholder Text]'] },
-
   // --- what comes off a face -------------------------------------------------
   // Mining pays these; Smithing and Gem Cutting are what they are waiting for.
   // Ore runs in three tiers, and a tier is a place rather than a number: everything in a
@@ -34,7 +29,6 @@ export const MATERIALS = [
   {
     id: 'copperore',
     name: 'Copper Ore',
-    start: 0,
     body: [
       'Green-crusted lumps the colour of a church roof, breaking salmon-pink where the hammer has been at them.',
       'Soft, common, and worth nothing much on its own. It is what it is put with that matters.',
@@ -43,7 +37,6 @@ export const MATERIALS = [
   {
     id: 'tinore',
     name: 'Tin Ore',
-    start: 0,
     body: [
       'Small black pebbles out of the stream gravel, dull as slag and twice the weight they look.',
       'The other half of bronze, and the half nobody notices is short until the bar comes out soft.',
@@ -52,7 +45,6 @@ export const MATERIALS = [
   {
     id: 'coal',
     name: 'Coal',
-    start: 0,
     body: [
       'Dull black, light in the hand, and it marks everything it is carried next to.',
       'It burns hotter than a clamp of charcoal and nobody has to sit up two nights making it.',
@@ -63,7 +55,6 @@ export const MATERIALS = [
   {
     id: 'ironore',
     name: 'Iron Ore',
-    start: 0,
     body: [
       'Rusty-brown lumps with the grain of the seam still on them, heavy out of all proportion to their size.',
       'There is none of it in the Greywood. Whatever ground it comes out of, nobody here has walked it.',
@@ -72,7 +63,6 @@ export const MATERIALS = [
   {
     id: 'mithrilore',
     name: 'Mithril Ore',
-    start: 0,
     body: [
       'Pale rock with a bright thread running through it that has not tarnished in whatever time it has been lying there.',
       'A full sack of it carries like a half one. Men have killed each other over a half one.',
@@ -81,7 +71,6 @@ export const MATERIALS = [
   {
     id: 'adamantiumore',
     name: 'Adamantium Ore',
-    start: 0,
     body: [
       'Blue-black, and the pick comes off it ringing with nothing to show for the swing.',
       'It holds its edge in ground where every other rock has gone to gravel. No fire in Dreadhollow will touch it.',
@@ -92,7 +81,6 @@ export const MATERIALS = [
   {
     id: 'dwarvenore',
     name: 'Dwarven Ore',
-    start: 0,
     body: [
       'Squared blocks of ore, cut rather than broken, out of ground that was being worked before anybody here had a word for working ground.',
       'Whoever raised it stacked it and left it stacked. They did not come back.',
@@ -101,7 +89,6 @@ export const MATERIALS = [
   {
     id: 'elvishore',
     name: 'Elvish Ore',
-    start: 0,
     body: [
       'Ore, or root, or whatever it was before the rock closed over it — green in the grain and warm to hold.',
       'It was grown and not laid down, and it has not stopped behaving like something grown.',
@@ -110,24 +97,11 @@ export const MATERIALS = [
   {
     id: 'holyore',
     name: 'Holy Ore',
-    start: 0,
     body: [
       'White stone shot through with a metal that stays bright in the wet and takes the cold off the hand holding it.',
       'There is one thing in the world it gets made into. This town had one, once, and it hung in the chapel.',
     ],
   },
-  {
-    id: 'roughgem',
-    name: 'Rough Stone',
-    start: 0,
-    body: [
-      'A clouded lump with one face that catches the light and five that do not.',
-      'It is worth nothing at all until somebody who knows where it wants to break has broken it.',
-    ],
-  },
-  // Everything above is what a building is repaired with, and comes off the road's own
-  // encounters. Everything below is what a node of the first job hands over by name.
-
   // --- what comes off a bench ------------------------------------------------
   // Nothing on the road pays these out: they are made in town, at a workstation, out of
   // what a run brought home. See content/recipes.js.
@@ -139,7 +113,6 @@ export const MATERIALS = [
   {
     id: 'charcoal',
     name: 'Charcoal',
-    start: 0,
     body: [
       'Light, black, and ringing when two pieces knock together — wood with everything but the burning taken out of it.',
       'It is half the weight of what went into the clamp and four times the heat.',
@@ -148,7 +121,6 @@ export const MATERIALS = [
   {
     id: 'bronzebar',
     name: 'Bronze Bar',
-    start: 0,
     body: [
       'A hand\'s length of cast bronze, gold where the light is on it and dull brown where it is not, with the mould line still down one side.',
       'This is the first metal anybody has drawn in Dreadhollow since the smithy went cold.',
@@ -158,43 +130,14 @@ export const MATERIALS = [
     // Waiting on tier-two ore, the way the ore is waiting on its ground.
     id: 'ironbar',
     name: 'Iron Bar',
-    start: 0,
     body: [
       'A hand\'s length of worked iron, square in section, with the hammer still legible along it.',
       'Harder than bronze, cheaper than bronze wherever there is iron to be had, and there is none to be had here.',
     ],
   },
   {
-    id: 'cabochon',
-    name: 'Cabochon',
-    start: 0,
-    body: [
-      'A domed stone worked to eight soft flats, polished until it holds the light rather than throwing it.',
-      'Worth having. Not worth what the same stone would have been in better hands.',
-    ],
-  },
-  {
-    id: 'tablegem',
-    name: 'Table-Cut Stone',
-    start: 0,
-    body: [
-      'Six faces and a broad flat top, cut to be looked into rather than looked at.',
-      'The first thing off that wheel in a generation that anybody would call a gem.',
-    ],
-  },
-  {
-    id: 'brilliant',
-    name: 'Brilliant',
-    start: 0,
-    body: [
-      'Twelve faces, and every one of them doing something to the light on its way back out.',
-      'Somebody who can cut one of these does not stay in a town like this. That is the usual order of it.',
-    ],
-  },
-  {
     id: 'tonic',
     name: 'Steeped Tonic',
-    start: 0,
     drink: { con: 6 },
     body: [
       'A stoppered bottle of something dark that smells of the forest floor and tastes worse than it smells.',
@@ -204,7 +147,6 @@ export const MATERIALS = [
   {
     id: 'salve',
     name: 'Field Salve',
-    start: 0,
     // Two, where the copse broth below it holds off one: the broth is what a party boils
     // in the wood, and this is what a bench and a pot of pitch are for.
     drink: { guard: 2 },
@@ -216,7 +158,6 @@ export const MATERIALS = [
   {
     id: 'cordial',
     name: 'Heartwood Cordial',
-    start: 0,
     drink: { steady: 2 },
     body: [
       'Clear, amber, and heavier in the hand than a bottle that size ought to be.',
@@ -231,7 +172,6 @@ export const MATERIALS = [
   {
     id: 'woodsdraught',
     name: 'Woodsman\'s Draught',
-    start: 0,
     drink: { con: 10 },
     body: [
       'Trumpets and oyster caps boiled down together and drunk hot out of whatever is nearest.',
@@ -241,7 +181,6 @@ export const MATERIALS = [
   {
     id: 'copsebroth',
     name: 'Copse Broth',
-    start: 0,
     drink: { guard: 1 },
     body: [
       'Thin, grey, and more caps than water, kept simmering while whoever made it decided what else was going in.',
@@ -251,7 +190,6 @@ export const MATERIALS = [
   {
     id: 'blackdraught',
     name: 'Black Draught',
-    start: 0,
     drink: { rally: 0.5 },
     body: [
       'Trumpets steeped black with the root ground through them, thick enough to coat the glass.',
@@ -261,7 +199,6 @@ export const MATERIALS = [
   {
     id: 'nightwash',
     name: 'Nightshade Wash',
-    start: 0,
     drink: { daylight: true },
     body: [
       'Rubbed round the eyes and the back of the neck, cold, and stinging for a good while after.',
@@ -271,7 +208,6 @@ export const MATERIALS = [
   {
     id: 'steadyhand',
     name: 'Steady Hand',
-    start: 0,
     drink: { sure: true },
     body: [
       'Pale caps and white root worked to a paste and taken off the back of a knife.',
@@ -281,7 +217,6 @@ export const MATERIALS = [
   {
     id: 'bitterwash',
     name: 'Bitter Wash',
-    start: 0,
     drink: { steady: 1 },
     body: [
       'Almost all root, barely cut, and it is drunk in one because it cannot be drunk in two.',
@@ -292,7 +227,6 @@ export const MATERIALS = [
   {
     id: 'friedfish',
     name: 'Fried Fish',
-    start: 0,
     body: [
       'Crisped on the skin side, folded onto a board, and eaten standing up before it stops being hot.',
     ],
@@ -300,7 +234,6 @@ export const MATERIALS = [
   {
     id: 'woodstew',
     name: 'Forager\'s Stew',
-    start: 0,
     body: [
       'Fish and fungus cooked down together until neither is arguing with the other.',
       'Thin, dark, and the best-smelling thing to come out of that kitchen in years.',
@@ -309,7 +242,6 @@ export const MATERIALS = [
   {
     id: 'shorepie',
     name: 'Shore Pie',
-    start: 0,
     body: [
       'Brown on top, heavy in the hand, and still too hot in the middle an hour after it came out.',
       'Cut in four, it is a day\'s walking for four people. Whole, it is an argument.',
@@ -318,7 +250,6 @@ export const MATERIALS = [
   {
     id: 'smokedfish',
     name: 'Smoked Trout',
-    start: 0,
     body: [
       'Stiff, mahogany-dark, and dry enough to carry in a pocket for a week.',
       'Food that keeps is the difference between a day out and a night out.',
@@ -329,7 +260,6 @@ export const MATERIALS = [
   {
     id: 'brooktrout',
     name: 'Brook Trout',
-    start: 0,
     body: [
       'Cold-water fish, red-spotted along the flank, none of them longer than a hand.',
       'The stream is full of them, which tells you how long it has been since anybody walked out there to fish it.',
@@ -338,7 +268,6 @@ export const MATERIALS = [
   {
     id: 'perch',
     name: 'Yellow Perch',
-    start: 0,
     body: [
       'Barred down the side, spiny along the back, and bonier than it looks on the plate.',
       'Keeps three days salted and two without.',
@@ -347,7 +276,6 @@ export const MATERIALS = [
   {
     id: 'bluegill',
     name: 'Bluegill',
-    start: 0,
     body: [
       'A palm-sized panfish with a black tab at the gill. Caught in numbers or not at all.',
     ],
@@ -357,7 +285,6 @@ export const MATERIALS = [
   {
     id: 'oakbranch',
     name: 'Oak Branch',
-    start: 0,
     body: [
       'Limb wood off the storm-torn shoulder, cut down to arm lengths.',
       'Burns hot and quick. Too knotted to build with, which nobody minds in a village this cold.',
@@ -366,7 +293,6 @@ export const MATERIALS = [
   {
     id: 'oaklog',
     name: 'Oak Log',
-    start: 0,
     body: [
       'Trunk wood, squared enough at the ends to be carried and no further.',
       'This is what a roof beam is before anyone has decided that is what it is.',
@@ -375,7 +301,6 @@ export const MATERIALS = [
   {
     id: 'heartwood',
     name: 'Oak Heartwood',
-    start: 0,
     body: [
       'The dark dry core out of the middle of the break, sound the whole way through.',
       'Harder than the rest of the tree and worth more than the rest of the tree.',
@@ -386,7 +311,6 @@ export const MATERIALS = [
   {
     id: 'blacktrumpet',
     name: 'Black Trumpets',
-    start: 0,
     body: [
       'Funnels of near-black, easier to smell than to see, growing where the light already gave up.',
       'They dry down to nothing and come back with water.',
@@ -395,7 +319,6 @@ export const MATERIALS = [
   {
     id: 'oystermushroom',
     name: 'Oyster Mushrooms',
-    start: 0,
     body: [
       'Pale shelf caps cut where they meet the bark of a fallen trunk.',
       'The ones that bruised blue under the knife were buried deep enough that nothing else finds them.',
@@ -408,7 +331,6 @@ export const MATERIALS = [
     // table it is in, which is what points in the skill are for.
     id: 'bitterroot',
     name: 'Bitterroot',
-    start: 0,
     body: [
       'A pale forked root out of wet ground, snapping white and wet, and the smell of it comes up the moment it is broken.',
       'It is in every second thing an apothecary ever wrote down, and nobody has ever claimed to like it.',
@@ -419,7 +341,6 @@ export const MATERIALS = [
   {
     id: 'heronfeather',
     name: 'Heron Feathers',
-    start: 0,
     body: [
       'Long grey flight feathers, trimmed at the quill by somebody who wanted them whole.',
       'Somebody is shooting the Greywood for these, and they are not eating what they shoot.',
@@ -428,7 +349,6 @@ export const MATERIALS = [
   {
     id: 'eggshell',
     name: 'Egg Shell',
-    start: 0,
     body: [
       'Pale green, thick as a thumbnail, and broken open from the outside.',
       'Whatever emptied that nest had no use for the shells and left them where they fell.',
@@ -437,7 +357,6 @@ export const MATERIALS = [
   {
     id: 'greyarrow',
     name: 'Grey Arrows',
-    start: 0,
     body: [
       'Grey-fletched, iron-headed, set low on the body where they would not spoil the plumage.',
       'The fletching is heron. Whoever makes these is paying for them twice out of the same bird.',
@@ -448,10 +367,15 @@ export const MATERIALS = [
   {
     id: 'bone',
     name: 'Bone',
-    start: 0,
     body: [
       'Taken off something that was standing up an hour ago and is not standing now.',
       'Not all of it is the shape bone is supposed to be.',
     ],
   },
+
+  // --- what comes out of the ground as a stone --------------------------------
+  // Not written here: a rough stone is whatever content/gems.js says its gem is, so a
+  // tenth stone is added by adding a gem rather than by writing it down twice. Tier one
+  // comes off Greywood mining; the other six are dug somewhere that is not written yet.
+  ...GEMS.map((g) => ({ id: g.rough, name: `Rough ${g.name}`, body: g.raw })),
 ];

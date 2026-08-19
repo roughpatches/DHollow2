@@ -27,6 +27,11 @@
 import { MATERIALS } from '../content/materials.js';
 import { heldOf, give, nameOf } from './town.js';
 
+// Where the bottle comes from. In town it is the shelves; at a camp on the road it is the
+// pack the party is carrying, which src/run.js hands in — a potion left at home is not a
+// potion you can drink out there. Nothing else about drinking one changes with the store.
+const SHELF = { heldOf, take: (mid, n) => give(mid, -n) };
+
 const POTION = Object.fromEntries(MATERIALS.filter((m) => m.drink).map((m) => [m.id, m]));
 
 // Drunk in town and waiting on the next job out, and drunk on the road and working now.
@@ -47,9 +52,10 @@ export function potions() {
   return Object.values(POTION);
 }
 
-// What is in the pack that could be drunk at all, whether or not it can be drunk now.
-export function carried() {
-  return Object.keys(POTION).filter((mid) => heldOf(mid) > 0);
+// What is in the given store that could be drunk at all, whether or not it can be drunk
+// now.
+export function carried(store = SHELF) {
+  return Object.keys(POTION).filter((mid) => store.heldOf(mid) > 0);
 }
 
 // Already drunk and not yet spent: a second one would do nothing, so it is not offered.
@@ -57,16 +63,16 @@ export function taken(mid) {
   return waiting.has(mid) || working.has(mid);
 }
 
-export function canDrink(mid) {
-  return isPotion(mid) && heldOf(mid) > 0 && !taken(mid);
+export function canDrink(mid, store = SHELF) {
+  return isPotion(mid) && store.heldOf(mid) > 0 && !taken(mid);
 }
 
 // Drink one. `onRun` is the party standing at a camp with a run under them: it goes to
 // work now. Otherwise it is drunk in town and goes to work at the gate of the next job.
 // Returns what it did, so the screen that asked can say so.
-export function drink(mid, onRun = false) {
-  if (!canDrink(mid)) return null;
-  give(mid, -1);
+export function drink(mid, onRun = false, store = SHELF) {
+  if (!canDrink(mid, store)) return null;
+  store.take(mid, 1);
   (onRun ? working : waiting).add(mid);
   return { mid, name: nameOf(mid), effect: effectOf(mid), now: onRun };
 }

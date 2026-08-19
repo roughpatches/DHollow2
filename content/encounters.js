@@ -267,7 +267,6 @@ export const ENCOUNTERS = [
           "It doesn't look back.",
         ],
         leaves: true, // the only way through it where the bird actually goes
-        spoils: { timber: [1, 2] }, // the nest is a cartload of branches and nobody is coming back for it
       },
       {
         id: 'tooslow',
@@ -409,7 +408,6 @@ export const ENCOUNTERS = [
           'Grey, most of them.',
           '[Placeholder Text]', // companion bark — the realisation
         ],
-        spoils: { nails: [2, 4] },
         flag: 'poacher-clue', // the same clue the heron's second bird raises
       },
       {
@@ -418,7 +416,6 @@ export const ENCOUNTERS = [
           '{skillActor} walks the rim and comes back with a coil of wire and a broken arrow.',
           "A broken arrow tells you somebody stood here. It doesn't tell you when, or how many, or what for.",
         ],
-        spoils: { nails: [1, 2] }, // salvage, and nothing to make of it
       },
 
       // and the way past

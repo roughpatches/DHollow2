@@ -220,6 +220,15 @@ export const TUNING = {
     cutGouge: 0.09, // a cut that took this much from under the line is called a bad one
     cutTook: 0.05, // and one that took this much excess off is called a good one
     settleMs: 900, // how long the finished stone is left on the wheel to be looked at
+    // What a cut stone comes out as, read against the quality the wheel scored — best
+    // first, and a cut is the highest grade it clears. `worth` is how far one of the
+    // gem's stats moves while it is worn; a tier three stone moves three of them, so a
+    // Flawless Ruby is +3 to each of hit, harm and hit points. See content/gems.js.
+    grades: [
+      { id: 'flawless', name: 'Flawless', at: 0.85, worth: 3 },
+      { id: 'fine', name: 'Fine', at: 0.6, worth: 2 },
+      { id: 'regular', name: 'Regular', at: 0, worth: 1 },
+    ],
     // What makes one stone harder than another. A recipe names one in `hard`.
     //   sides   — the shape it is cut to, and so how many faces it is scored on.
     //   cuts    — how many cuts there are. Never quite enough to be careful with them all.
@@ -230,8 +239,10 @@ export const TUNING = {
     //             wheel touched to it barely does. That is the trade — deep clears a face
     //             in one and costs a little of it, shallow costs nothing and costs cuts.
     //   facePerfect / faceGood — how near a face has to sit to the shape to be called
-    //             clean, and to be called a face at all. A brilliant is read harder than a
-    //             cabochon: it is the same wheel and a different standard.
+    //             clean, and to be called a face at all. A tier three stone is read harder
+    //             than a tier one: it is the same wheel and a different standard. Which
+    //             tier a stone is cut at is its `hard` in content/recipes.js — basic for
+    //             a tier one gem, fine for a tier two, master for a tier three.
     tiers: {
       basic: {
         sides: 8, cuts: 18, rough: 0.26,
@@ -362,6 +373,26 @@ export const TUNING = {
   // Woodcutting takes more heartwood off an oak than branches.
   skillOddsPerPoint: 0.06,
   skillOddsMost: 0.6, // and this is as flat as any table gets, at any score
+
+  // What one person carries, where their block in content/party.js does not say, counted
+  // in slots. A run's pack is everybody's slots added together and it is drawn as a grid
+  // of exactly that many squares: a full pack is a grid with no empty square in it. What
+  // is worn on the cord is not carried and takes no slot. See src/run.js.
+  carryDefault: 3,
+  // How many of one thing go in a slot. Past this it takes another square, so a bulk haul
+  // fills the grid and a handful of everything fills it faster. One number for everything
+  // on purpose — the day a log should stack shallower than ore, this becomes a column in
+  // content/materials.js and nothing else changes.
+  stackMax: 20,
+
+  // A stone is not part of what a face pays. It is a chance at the end of a shift that
+  // went well, rolled once against the `stones` table a harvest carries — see
+  // content/nodes.js. Work below stoneFloor finds nothing at all, and the chance climbs
+  // from there to stoneBest at perfect work. Which stone it is, where one is found, is
+  // the same tilt every other table is read with: how well it went says whether, and who
+  // was brought says which.
+  stoneFloor: 0.5,
+  stoneBest: 0.35,
 
   // Fighting. What is fought and what it takes to fight it is in content/foes.js; these
   // are the numbers the system itself runs on, and they are the same for every fight.
@@ -615,6 +646,16 @@ export const COLORS = {
     soot: [0x33302f, 0x57514c],
     ash: [0x8f9298, 0xc2c5cb],
     shell: [0xa8bfa2, 0x6d8069],
+    // the nine stones, rough and cut off the same pair — see content/gems.js
+    garnet: [0x6e1b22, 0xa8323b],
+    agate: [0x8a8378, 0xd6cfc2],
+    amethyst: [0x59407e, 0x9b7fc4],
+    topaz: [0xa8752a, 0xe0b45c],
+    sapphire: [0x27456f, 0x5b86bd],
+    onyx: [0x1d1c20, 0x6a6870],
+    diamond: [0x9fb4bd, 0xe6f1f5],
+    emerald: [0x1f5a3c, 0x4f9a70],
+    ruby: [0x7d1220, 0xc63347],
   },
 
   // The minigame UI kit, drawn into the generated 'ui' atlas at boot. Retint here and

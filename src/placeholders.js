@@ -3,7 +3,7 @@
 // from inside the thing rather than tracked in a document that goes stale.
 
 import { NPCS } from '../content/npcs.js';
-import { CHARACTER, EQUIPMENT, INVENTORY, COMPANIONS } from '../content/character.js';
+import { CHARACTER, INVENTORY, COMPANIONS } from '../content/character.js';
 import { BESTIARY, QUESTS } from '../content/codex.js';
 import { PLACES } from '../content/places.js';
 import { SETTINGS } from '../content/settings.js';
@@ -88,7 +88,6 @@ const SOURCES = [
   // own, and an encounter node's is spent on the cards its two ways are asked from
   ['Nodes', DRAWN_KINDS, (e) => e.name, encounterSlots],
   ['Fears', FEARS, (f) => f.name, proseSlots],
-  ['Equipment', EQUIPMENT, (e) => e.label, entrySlots],
   ['Character', CHARACTER, (e) => e.label, entrySlots],
   ['Companions', COMPANIONS, (e) => e.label, entrySlots],
   ['Inventory', INVENTORY, (e) => e.label, entrySlots],

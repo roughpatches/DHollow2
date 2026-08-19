@@ -16,8 +16,9 @@ import {
   roster, charOf, award, levelOf, raiseBond, conOf, conTotal, combatOf,
   rankOf, scoreOf, check, bestAt, skillOf, skillForActivity, walking, fighters, YOU,
   nameOf as whoIs, // town.js has a nameOf of its own, for materials
+  carryTotal,
 } from './party.js';
-import { give, nameOf } from './town.js';
+import { give, nameOf, heldOf } from './town.js';
 import * as potions from './potions.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
@@ -222,6 +223,19 @@ function offTable(table, take, tilt) {
   return out;
 }
 
+// A stone at the end of a shift. Not part of the yield and not multiplied by anything:
+// one roll, and either there is a stone in the spoil or there is not. How well the work
+// went is the whole of whether — nothing under stoneFloor, climbing to stoneBest at
+// perfect — and the table it is drawn from is read on the same tilt as any other, so who
+// was brought decides which stone it is. Work no engine was played for finds none: a
+// stone is what a good shift turns up, and nobody had a good shift they did not have.
+function stoneFrom(table, quality, tilt) {
+  if (!(quality > TUNING.stoneFloor)) return null;
+  const chance = TUNING.stoneBest * (quality - TUNING.stoneFloor) / (1 - TUNING.stoneFloor);
+  if (Math.random() >= chance) return null;
+  return Object.keys(offTable({ odds: table, count: [1, 1] }, 1, tilt))[0] || null;
+}
+
 export function questOf(id) {
   return QUESTS.find((q) => q.id === id);
 }
@@ -395,7 +409,7 @@ export function groundCon(ids, terrain) {
 
 // `choice` is what the player picked on the way in — the length and the place — for work
 // off the board. A written job carries its own and ignores both.
-export function start(id, when, party, choice = {}) {
+export function start(id, when, party, choice = {}, bring = {}) {
   const quest = questOf(id);
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
   const size = quest.size || choice.size || 'short';
@@ -412,9 +426,29 @@ export function start(id, when, party, choice = {}) {
   // is in the pool at the gate and nowhere else: it is the next job out it was for.
   const dosed = potions.takeUp();
   const con = conTotal(who) + groundCon(who, terrainOf(quest, where)) + dosed;
+  // What the crew can shift between them, and what of the town's stock is going out on
+  // their backs. Counted in squares — see carryOf in src/party.js — with stackMax of one
+  // thing to a square, and what is worn on the cord is on the cord, not in the pack.
+  const room = carryTotal(who);
+  const pack = {};
+  const squares = () => Object.values(pack).reduce((a, v) => a + Math.ceil(v / TUNING.stackMax), 0);
+  for (const [m, n] of Object.entries(bring)) {
+    const have = pack[m] || 0;
+    const inLast = have % TUNING.stackMax;
+    const spare = inLast ? TUNING.stackMax - inLast : 0;
+    const take = Math.max(0, Math.min(n, heldOf(m), spare + (room - squares()) * TUNING.stackMax));
+    if (take > 0) {
+      pack[m] = have + take;
+      give(m, -take); // it is off the shelf in town the moment they walk out with it
+    }
+  }
   run = {
     quest, size, where, when: at, party: who, nodes, at: -1, state: 'running',
     used: new Set(), // the kinds this run has had that it is only allowed one of
+    // The pack is the whole of what comes home: nothing reaches the town's stock until
+    // the party does. `brought` is what of it was carried out rather than found, so the
+    // tally can tell one from the other.
+    pack, brought: { ...pack }, room, left: {}, offer: null, delivered: false,
     spoils: {}, xp: 0, con, conMax: con, dosed,
     // Hit points are the fighters' own and are not pooled: the party shares a
     // constitution and nobody shares a rib. Full at the gate, spent down by whatever
@@ -452,9 +486,137 @@ function drawn(size) {
   }));
 }
 
+// A potion drunk at a camp comes out of the pack, not off the town's shelves: what was
+// left at home is no use out here. src/potions.js takes this and does not otherwise care
+// which of the two stores it is spending.
+const fromPack = {
+  heldOf: (m) => (run ? run.pack[m] || 0 : 0),
+  take: (m, n) => {
+    if (!run) return;
+    run.pack[m] = (run.pack[m] || 0) - n;
+    if (run.pack[m] <= 0) delete run.pack[m];
+  },
+};
+
+// --- the pack ---------------------------------------------------------------
+// Counted in things and not in kinds: seven iron ore is seven of it. A run pays the town
+// nothing until it is over, so what is in here at the gate is the whole of what the walk
+// was worth.
+
+export function packOf() {
+  return run ? run.pack : {};
+}
+
+// How many squares a count of one thing takes up. Everything is stacked the same way, so
+// this is the whole of the arithmetic: stackMax to a square and the remainder takes one
+// more of its own.
+export function slotsFor(n) {
+  return Math.ceil(Math.max(0, n) / TUNING.stackMax);
+}
+
+export function packUsed() {
+  return run ? Object.values(run.pack).reduce((n, v) => n + slotsFor(v), 0) : 0;
+}
+
+// Squares with nothing in them. What the grid draws empty, and what a full pack has none
+// of.
+export function packRoom() {
+  return run ? Math.max(0, run.room - packUsed()) : 0;
+}
+
+// How many more of one particular thing will go in: whatever is left in its own part-filled
+// square, plus a whole square for every empty one. Asked per thing rather than in general
+// because a pack with one square left has room for twenty ore and no room at all for one
+// of anything else it is not already carrying.
+export function roomFor(m) {
+  if (!run) return 0;
+  const have = run.pack[m] || 0;
+  const inLast = have % TUNING.stackMax;
+  const spare = inLast ? TUNING.stackMax - inLast : 0;
+  return spare + packRoom() * TUNING.stackMax;
+}
+
+// What is standing in front of them that will not go in. Held on the run rather than paid
+// or dropped, because which of the two it is is the player's to say.
+export function offering() {
+  return run && run.offer ? run.offer : null;
+}
+
+function putIn(m, n) {
+  const fits = Math.max(0, Math.min(n, roomFor(m)));
+  if (fits > 0) run.pack[m] = (run.pack[m] || 0) + fits;
+  return fits;
+}
+
+// The pack as the grid draws it: one entry per square, and then the empty squares that
+// are left over. A stack past stackMax is more than one square and is drawn as more than
+// one, so what is on the screen is what the arithmetic says and not a summary of it.
+export function packCells() {
+  if (!run) return [];
+  const cells = [];
+  for (const [m, n] of Object.entries(run.pack)) {
+    for (let left = n; left > 0; left -= TUNING.stackMax) {
+      cells.push({ id: m, n: Math.min(left, TUNING.stackMax) });
+    }
+  }
+  while (cells.length < run.room) cells.push(null);
+  return cells;
+}
+
+// A square emptied onto the ground, and whatever was waiting for the room goes straight
+// into it. The whole square goes rather than one thing off it: the point of the prompt is
+// that a square is what is short, so freeing one is what answering it means.
+export function dropSquare(i) {
+  if (!run) return null;
+  const cell = packCells()[i];
+  if (!cell) return run;
+  run.pack[cell.id] -= cell.n;
+  if (run.pack[cell.id] <= 0) delete run.pack[cell.id];
+  run.left[cell.id] = (run.left[cell.id] || 0) + cell.n;
+  fillFromOffer();
+  return run;
+}
+
+function fillFromOffer() {
+  if (!run.offer) return;
+  for (const [m, n] of Object.entries(run.offer)) {
+    const took = putIn(m, n);
+    if (took > 0) {
+      run.offer[m] = n - took;
+      if (run.offer[m] <= 0) delete run.offer[m];
+    }
+  }
+  if (!Object.keys(run.offer).length) leaveOffer();
+}
+
+// The rest of it stays where it is. Said at the node afterwards, because a thing left on
+// the ground is worth a line the same way work left standing is.
+export function leaveOffer() {
+  if (!run || !run.offer) return run;
+  const node = run.nodes[run.at];
+  for (const [m, n] of Object.entries(run.offer)) {
+    if (n <= 0) continue;
+    run.left[m] = (run.left[m] || 0) + n;
+    if (node) node.left = { ...(node.left || {}), [m]: n };
+  }
+  run.offer = null;
+  run.phase = 'node';
+  return run;
+}
+
+// Everything on their backs, handed over at the town gate. Called on every way a run can
+// end and guarded, because a run pays exactly once however it finished.
+function carryHome() {
+  if (!run || run.delivered) return;
+  run.delivered = true;
+  for (const [m, n] of Object.entries(run.pack)) if (n > 0) give(m, n);
+}
+
 export function abandon() {
   if (!run) return null;
+  leaveOffer();
   run.state = 'abandoned';
+  carryHome(); // they turned back, but they turned back carrying it
   return run;
 }
 
@@ -482,15 +644,15 @@ export function atCamp() {
 
 // What can be drunk here and now, in the order the pack lists it.
 export function drinkable() {
-  return atCamp() ? potions.carried().filter((mid) => potions.canDrink(mid)) : [];
+  return atCamp() ? potions.carried(fromPack).filter((mid) => potions.canDrink(mid, fromPack)) : [];
 }
 
 // Drunk at the fire: the constitution lands now, and anything standing goes to work for
 // the rest of the run. Returns the line the card says about it, or null if it could not
 // be drunk at all.
 export function drink(mid) {
-  if (!atCamp() || !potions.canDrink(mid)) return null;
-  const took = potions.drink(mid, true);
+  if (!atCamp() || !potions.canDrink(mid, fromPack)) return null;
+  const took = potions.drink(mid, true, fromPack);
   if (!took) return null;
   const con = took.effect.con || 0;
   if (con) {
@@ -652,7 +814,7 @@ function drawNode(from) {
 // node with a single piece of work whose yield is the kind's own.
 function harvestsOf(e) {
   const listed = e.harvests || (e.harvest
-    ? [{ skill: e.harvest, activity: e.activity, spoils: e.spoils, draw: e.draw, whole: true }]
+    ? [{ skill: e.harvest, activity: e.activity, spoils: e.spoils, draw: e.draw, stones: e.stones, whole: true }]
     : []);
   return listed.map((h) => {
     const score = scoreOf(run.party, h.skill);
@@ -1076,16 +1238,33 @@ export function settle(played) {
         for (const [m, n] of Object.entries(offTable(took.draw, take, tiltOf(took.score)))) put(m, n);
       }
     }
-  }
-
-  node.spoils = {};
-  for (const [m, n] of Object.entries(paid)) {
-    if (n > 0) {
-      node.spoils[m] = n;
-      run.spoils[m] = (run.spoils[m] || 0) + n;
-      give(m, n);
+    // And the one thing the face does not owe anybody. A check lost on the way in does
+    // not cost it — the stone is in the rock or it is not — but botched work finds
+    // nothing, the same as work that went badly enough not to clear the floor.
+    if (took && took.stones && !node.failed) {
+      const stone = stoneFrom(took.stones, node.quality, tiltOf(took.score));
+      if (stone) {
+        node.stone = stone;
+        put(stone, 1);
+      }
     }
   }
+
+  // What the node gave up, and then how much of it there was room for. Nothing goes to
+  // the town here: it goes on their backs, and what will not fit is held in front of them
+  // until the player says which of it they would rather have. See `offer` above.
+  node.spoils = {};
+  node.packed = {};
+  const over = {};
+  for (const [m, n] of Object.entries(paid)) {
+    if (n <= 0) continue;
+    node.spoils[m] = n;
+    run.spoils[m] = (run.spoils[m] || 0) + n;
+    const took = putIn(m, n);
+    if (took > 0) node.packed[m] = took;
+    if (n > took) over[m] = n - took;
+  }
+  if (Object.keys(over).length) run.offer = over;
   node.xp = node.passed ? 0 : Math.round(roll(e.xp)
     * (night ? TUNING.questNightXp : 1)
     * (node.check && node.check.pass ? TUNING.checkPassXp : 1)
@@ -1120,35 +1299,45 @@ export function settle(played) {
 
   run.con = Math.max(0, Math.min(run.conMax, run.con + node.con));
   node.conAfter = run.con;
-  // Nothing left in them: they turn for home from wherever they are standing.
-  if (run.con <= 0) spend();
+  // Nothing left in them: they turn for home from wherever they are standing, and what
+  // they were still deciding about is left where it stands.
+  if (run.con <= 0) { leaveOffer(); spend(); return run; }
+  // A pack with something standing in front of it that will not fit is answered before
+  // the tally is read: the decision is about the thing in your hands, not about a list.
+  if (run.offer) run.phase = 'pack';
   return run;
 }
 
 // A run that ran out of constitution is over where it stands. Half of everything the
 // party was carrying goes back — they came home light, and it is not a finished job.
+// Nothing left in them. What they were carrying comes home short: a party helped back
+// down that road did not carry all of it, and the pack is where that is felt now.
 function spend() {
   run.state = 'spent';
   run.lost = {};
-  for (const [m, n] of Object.entries(run.spoils)) {
+  for (const [m, n] of Object.entries(run.pack)) {
     const back = n - Math.floor(n * TUNING.questSpentKeep);
     if (back > 0) {
       run.lost[m] = back;
-      run.spoils[m] = n - back;
-      give(m, -back);
+      run.pack[m] = n - back;
+      if (run.pack[m] <= 0) delete run.pack[m];
     }
   }
+  carryHome();
 }
 
 // --- finishing -------------------------------------------------------------
 
 function finish() {
   run.state = 'done';
+  carryHome();
   walked.set(run.quest.id, timesWalked(run.quest.id) + 1);
   story.set(run.quest.sets);
 
+  // Paid over the counter rather than carried, so it is not against the pack: this is
+  // what the job was worth on top of what came out of the ground.
   run.bonus = { spoils: {}, xp: TUNING.questBonusXp[run.size] };
-  for (const [m, n] of Object.entries(run.spoils)) {
+  for (const [m, n] of Object.entries(run.pack)) {
     const extra = n * TUNING.questBonusFactor;
     run.bonus.spoils[m] = extra;
     give(m, extra);
@@ -1211,6 +1400,35 @@ export function doneLine(node) {
   if (node.failed) return said.botched;
   if (node.quality === undefined) return said.well;
   return node.quality >= TUNING.workWellAt ? said.well : said.middling;
+}
+
+// How full they are, said wherever the pack is shown.
+export function packLine() {
+  if (!run) return null;
+  const spare = packRoom();
+  return `Pack ${packUsed()} of ${run.room} squares${spare ? '' : ' — full'}.`;
+}
+
+// What would not go in and was left where it fell. Said at the node, in the same voice
+// as work left standing: it is the same kind of regret.
+export function leftLine(node) {
+  const left = node && node.left;
+  return left && Object.keys(left).length ? `Left on the ground: ${listOf(left)}.` : null;
+}
+
+// The thing standing in front of a full pack, and the sentence that says what the choice
+// is. Nobody is asked to read a table to work out that they are out of room.
+export function offerLine() {
+  const o = offering();
+  if (!o) return null;
+  return `No room for ${listOf(o)}.`;
+}
+
+// The one thing out of the spoil worth saying by name. A stone is not part of what the
+// face owed and it is not turned up often, so it is said where it happened rather than
+// left to be picked out of a list of ore.
+export function stoneLine(node) {
+  return node.stone ? `And something in the spoil that is not ore: ${nameOf(node.stone)}.` : null;
 }
 
 // What the work they chose was worth to them, in the one line that says why they chose it

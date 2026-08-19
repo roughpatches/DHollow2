@@ -75,7 +75,7 @@ export const FOES = [
     hit: 4,
     guard: 14, // fast, and hard to put a hand on
     harm: [3, 6],
-    spoils: { canvas: [1, 3], bone: [1, 2] },
+    spoils: { bone: [1, 2] },
     body: [
       'It comes out of the quiet all at once and low to the ground, and it is the wrong shape the whole way in.',
     ],
@@ -98,7 +98,7 @@ export const FOES = [
     hit: 2,
     guard: 10,
     harm: [2, 5],
-    spoils: { nails: [2, 4], bone: [2, 3] },
+    spoils: { bone: [2, 3] },
     body: [
       'The nearest mound comes apart and what is under it stands up in the earth it was buried in, and it is in no hurry at all.',
     ],
@@ -123,7 +123,7 @@ export const FOES = [
     harm: [3, 5],
     pulls: true, // he has done this before, and he did not get old out here by standing still
     // the fletching from the heron and the stag, on the man who has been leaving it
-    spoils: { greyarrow: [2, 5], nails: [1, 2] },
+    spoils: { greyarrow: [2, 5] },
     body: [
       'He does not run and he does not talk. He puts the bow down where he can reach it again and comes at you with what is on his belt.',
     ],
@@ -149,7 +149,7 @@ export const FOES = [
     guard: 13,
     harm: [2, 4],
     pulls: true, // it is worked to a whistle, and the whistle knows what a hurt dog is worth
-    spoils: { canvas: [0, 1], bone: [1, 2] },
+    spoils: { bone: [1, 2] },
     body: [
       'A long grey dog comes off the picket at the edge of the firelight, low and silent, and it was silent the whole time you were walking up.',
     ],

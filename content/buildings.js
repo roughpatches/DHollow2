@@ -13,7 +13,11 @@
 //       craft — whether the workstation inside works at this level. A building with this
 //               on a stage is a workstation from that stage on, and standing at it opens
 //               what can be made there; see content/recipes.js.
-//       cost  — materials to reach the NEXT stage. The last stage has none.
+//       cost  — materials to reach the NEXT stage. The last stage has none, and no stage
+//               has one at the moment: the materials repairs used to be written in are
+//               gone and the new ones are not written yet, so nothing levels until they
+//               are. Every stage below is what a building IS at that level; what it takes
+//               to get there is the hole.
 //       cap   — the level nobody can pass while the building stands like this. It is how
 //               a repair is worth something to a character rather than only to the town:
 //               the highest cap standing anywhere is the party's, and rebuilding is the
@@ -55,13 +59,11 @@ export const BUILDINGS = [
         name: 'Burnt out',
         note: 'The roof is in the nave and the door is boarded over.',
         cap: 3,
-        cost: { timber: 14, nails: 30, canvas: 4 },
       },
       {
         name: 'Shored up',
         note: 'Scaffolded, sheeted, and dry for the first winter in years.',
         cap: 6,
-        cost: { timber: 22, stone: 16, nails: 40, pitch: 6 },
       },
       {
         name: 'Roofed and lit',
@@ -88,13 +90,11 @@ export const BUILDINGS = [
       {
         name: 'Cold',
         note: 'The roof is off the shed and the hearth is full of rain.',
-        cost: { timber: 10, stone: 12, nails: 20 },
       },
       {
         name: 'Hearth lit',
         note: 'Sheeted over, the hearth swept, the bellows patched, and a fire in it that will hold all day.',
         craft: true,
-        cost: { stone: 18, bronzebar: 3, pitch: 4 },
       },
       {
         name: 'Furnace standing',
@@ -120,13 +120,11 @@ export const BUILDINGS = [
       {
         name: 'Shuttered',
         note: 'Boarded at the front and going green at the back. The shelves are still up.',
-        cost: { timber: 8, stone: 6, canvas: 4, nails: 10 },
       },
       {
         name: 'Bench and stove',
         note: 'Swept, glazed, and warm enough to hold a steep at temperature.',
         craft: true,
-        cost: { stone: 12, bronzebar: 2, canvas: 6 },
       },
       {
         name: 'Still standing',
@@ -155,13 +153,11 @@ export const BUILDINGS = [
       {
         name: 'Cold hearth',
         note: 'The range is out and has been out long enough to be a shelf.',
-        cost: { timber: 8, nails: 12, pitch: 2 },
       },
       {
         name: 'Lit',
         note: 'Drawing properly, with a pan on it and somebody willing to lend you the pan.',
         craft: true,
-        cost: { timber: 12, stone: 8, ironbar: 2, canvas: 4 },
       },
       {
         name: 'Range and smokehouse',
@@ -188,13 +184,11 @@ export const BUILDINGS = [
       {
         name: 'Windows out',
         note: 'Glass gone from the front and the weather coming in where the light should.',
-        cost: { timber: 8, canvas: 5, nails: 16 },
       },
       {
         name: 'Bench and hand wheel',
         note: 'Glazed, swept, and a wheel on the bench that turns as fast as an arm can turn it.',
         craft: true,
-        cost: { stone: 10, ironbar: 3, pitch: 3 },
       },
       {
         name: 'Treadle mill standing',
@@ -220,12 +214,10 @@ export const BUILDINGS = [
       {
         name: 'Washed out',
         note: 'Half the piles are down and the deck of it is on the mud in pieces.',
-        cost: { timber: 20, stone: 18, nails: 40 },
       },
       {
         name: 'Piled and decked',
         note: 'Driven, decked and railed, and it will take a man walking out to the end of it.',
-        cost: { timber: 26, ironbar: 6, pitch: 8, canvas: 6 },
       },
       {
         name: 'Working wharf',

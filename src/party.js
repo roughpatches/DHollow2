@@ -9,12 +9,11 @@
 import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
 import { SKILLS } from '../content/skills.js';
-import { FEARS } from '../content/fears.js';
-import { levelCap, capHeldBy } from './town.js';
+import { levelCap } from './town.js';
 import * as story from './story.js';
+import { bonus as charmBonus, worn } from './charm.js';
 
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
-const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
 
 // Skills live here rather than in content/party.js because the player's are chosen in
 // the hut and everyone's could move later; content says what they start as.
@@ -69,11 +68,14 @@ export function combatOf(id) {
   if (!c || !c.combat) return null;
   const d = TUNING.combat.fighter;
   const own = c.combat === true ? {} : c.combat;
+  // A worn stone is worth the same to a blow as to the thing taking it, so harm moves at
+  // both ends rather than widening: a Ruby makes every swing better, not luckier.
+  const harm = own.harm || d.harm;
   return {
-    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1),
-    hit: own.hit ?? d.hit,
-    guard: own.guard ?? d.guard,
-    harm: own.harm || d.harm,
+    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1) + charmOn(id, 'hp'),
+    hit: (own.hit ?? d.hit) + charmOn(id, 'hit'),
+    guard: (own.guard ?? d.guard) + charmOn(id, 'guard'),
+    harm: [harm[0] + charmOn(id, 'harm'), harm[1] + charmOn(id, 'harm')],
   };
 }
 
@@ -81,6 +83,12 @@ export function combatOf(id) {
 // left out of every list of who might come. This is the only place that knows which
 // character they are.
 export const YOU = PARTY.find((c) => c.you).id;
+
+// Only the player wears a charm — one stone, one slot — so everybody else reads zero and
+// every number below can ask without first asking who it is asking about.
+function charmOn(id, stat) {
+  return id === YOU ? charmBonus(stat) : 0;
+}
 
 // what the hut scene hands back: three skills against the points put on each
 export function setSkills(id, skills) {
@@ -132,7 +140,19 @@ export function stateOf(id) {
 // What this character is worth to a run's constitution: their own score, and what every
 // level past the first added to it.
 export function conOf(id) {
-  return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1);
+  return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1) + charmOn(id, 'con');
+}
+
+// How many slots one person is worth, and how many a crew is. The grid a run walks out
+// with is everybody's added together: taking a fourth walker is squares as much as it is
+// what they can do.
+export function carryOf(id) {
+  const c = charOf(id);
+  return (c && c.carry) ?? TUNING.carryDefault;
+}
+
+export function carryTotal(ids) {
+  return ids.reduce((n, id) => n + carryOf(id), 0);
 }
 
 // what a set of people are worth as a body — the number a run starts with
@@ -247,8 +267,13 @@ export function skillForActivity(activity) {
   return (activity && SKILLS.find((t) => t.activities.includes(activity))) || null;
 }
 
+// A rank is what was spent there plus what is worn. Everything downstream — whether the
+// skill is had at all, what a check rolls, what a node pays, who speaks at a fork — reads
+// this one function, so a stone that grants a point grants all of it: a Sapphire is a way
+// onto work the player could not otherwise take. Spending points is untouched by it; the
+// bank in stateOf is what a level hands over and a stone never goes near it.
 export function rankOf(id, skillId) {
-  return stateOf(id).skills[skillId] || 0;
+  return (stateOf(id).skills[skillId] || 0) + charmOn(id, skillId);
 }
 
 // what a level handed over and nobody has spent yet
@@ -274,11 +299,16 @@ export function worthOf(rank) {
   return rank * TUNING.skillBonusPerPoint;
 }
 
-// best first, because a sheet is read for what somebody is good at
+// best first, because a sheet is read for what somebody is good at. A skill the worn
+// stone grants and nobody spent a point on is on the sheet too — it is a skill they have.
 export function skillsOf(id) {
-  return Object.entries(stateOf(id).skills)
-    .filter(([t]) => SKILL[t])
-    .map(([t, rank]) => ({ ...SKILL[t], rank }))
+  const ids = new Set(Object.keys(stateOf(id).skills));
+  const w = id === YOU ? worn() : null;
+  if (w) for (const st of w.gem.stats) if (SKILL[st]) ids.add(st);
+  return [...ids]
+    .filter((t) => SKILL[t])
+    .map((t) => ({ ...SKILL[t], rank: rankOf(id, t) }))
+    .filter((t) => t.rank > 0)
     .sort((a, b) => b.rank - a.rank);
 }
 
@@ -350,45 +380,6 @@ export function scoreLine(ids) {
 // the player first, because they are on every run, then whoever else can be asked
 export function walking() {
   return [charOf(YOU), ...roster()];
-}
-
-// What the XP column says at a level nobody can leave: the building holding everybody at
-// this one, named so it can be gone and repaired; the game's last level; or — when the town
-// has been rebuilt as far as it goes and that is still short of the game's ceiling — that
-// there is nothing left standing to go and repair for it.
-function heldLine(xp) {
-  const by = capHeldBy();
-  if (by) return `XP ${xp}  (nothing counts until ${by.name} is rebuilt)`;
-  if (capNow() < TUNING.maxLevel) return `XP ${xp}  (nothing left in town levels anybody past ${capNow()})`;
-  return `XP ${xp}  (max level)`;
-}
-
-export function partyRows() {
-  return walking().map((c) => {
-    const s = stateOf(c.id);
-    const next = xpToNext(s.level);
-    const skills = skillsOf(c.id);
-    const fears = (c.fears || []).map((f) => FEAR[f]).filter(Boolean);
-    return {
-      label: nameOf(c.id),
-      note: `Lv ${s.level} · Con ${conOf(c.id)}`,
-      body: [
-        `Level ${s.level}    Constitution ${conOf(c.id)}    `
-          + (next === Infinity ? heldLine(s.xp) : `XP ${s.xp} of ${next}`)
-          + (s.points ? `    ${s.points} unspent` : ''),
-        c.you
-          ? 'On every run. Nobody has to be asked to bring you.'
-          : `Bond: ${bandName(bandOf(c.id))} (${s.bond} points).`,
-        skills.length
-          ? skills.map((t) => `${t.name} ${t.rank} — +${worthOf(t.rank)} to ${t.activities.join(', ')}`).join('\n')
-          : 'Nothing settled yet. Every roll is the die on its own.',
-        fears.length
-          ? fears.map((f) => `${f.name} — ${f.kind === 'scruple' ? 'will not do it' : 'will not face it'}`).join('\n')
-          : `Nothing ${c.you ? 'you' : 'they'} will not walk into.`,
-        ...c.body,
-      ],
-    };
-  });
 }
 
 // Who has the points is the thing worth knowing about a skill, so the tab is rebuilt

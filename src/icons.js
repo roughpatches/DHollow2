@@ -8,7 +8,7 @@
 // still gets a square, drawn as UNKNOWN.
 
 import { COLORS } from '../tuning.js';
-import { SKILL_ART } from '../content/looks.js';
+import { SKILL_ART, ITEM_ART } from '../content/looks.js';
 
 const PX = 16; // drawn small and scaled up in the menu, like every other placeholder here
 
@@ -65,6 +65,14 @@ const SHAPES = {
     g.fillStyle(a, 1);
     g.fillTriangle(3, 14, 9, 2, 14, 12);
     fill(g, b, 8, 7, 2, 5);
+  },
+  gem: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillTriangle(2, 7, 14, 7, 8, 15); // the pavilion, coming to a point
+    fill(g, a, 3, 3, 10, 4); // and the table across the top of it
+    g.fillStyle(b, 1); // the two facets the light is actually doing something on
+    g.fillTriangle(3, 7, 8, 7, 5, 12);
+    fill(g, b, 5, 4, 6, 2);
   },
   coil: (g, [a, b]) => {
     for (const y of [4, 8, 12]) {
@@ -242,11 +250,6 @@ const SHAPES = {
 // [shape, ink]. Ink names a pair in COLORS.icon, so retinting every wooden thing at
 // once is one edit in tuning.js.
 const ICONS = {
-  timber: ['planks', 'wood'],
-  stone: ['block', 'stone'],
-  nails: ['spikes', 'iron'],
-  pitch: ['pot', 'pitch'],
-  canvas: ['sheet', 'cloth'],
   brooktrout: ['fish', 'trout'],
   perch: ['fish', 'perch'],
   bluegill: ['fish', 'bluegill'],
@@ -269,11 +272,27 @@ const ICONS = {
   dwarvenore: ['block', 'dwarf'],
   elvishore: ['grain', 'elf'],
   holyore: ['grain', 'holy'],
-  roughgem: ['shard', 'glass'],
   charcoal: ['block', 'soot'],
-  cabochon: ['shard', 'glass'],
-  tablegem: ['block', 'glass'],
-  brilliant: ['shard', 'bronze'],
+  // The nine stones: the rough lump out of the ground, and the same stone cut. All three
+  // grades of a cut stone share its square — a Flawless Ruby is a ruby.
+  roughgarnet: ['shard', 'garnet'],
+  roughagate: ['shard', 'agate'],
+  roughamethyst: ['shard', 'amethyst'],
+  roughtopaz: ['shard', 'topaz'],
+  roughsapphire: ['shard', 'sapphire'],
+  roughonyx: ['shard', 'onyx'],
+  roughdiamond: ['shard', 'diamond'],
+  roughemerald: ['shard', 'emerald'],
+  roughruby: ['shard', 'ruby'],
+  garnet: ['gem', 'garnet'],
+  agate: ['gem', 'agate'],
+  amethyst: ['gem', 'amethyst'],
+  topaz: ['gem', 'topaz'],
+  sapphire: ['gem', 'sapphire'],
+  onyx: ['gem', 'onyx'],
+  diamond: ['gem', 'diamond'],
+  emerald: ['gem', 'emerald'],
+  ruby: ['gem', 'ruby'],
   tonic: ['flask', 'herb'],
   salve: ['pot', 'bone'],
   cordial: ['flask', 'bronze'],
@@ -336,24 +355,31 @@ export function iconKeyFor(name) {
 }
 
 export function preloadIcons(scene) {
-  const { sheet } = SKILL_ART;
-  if (sheet && !scene.textures.exists(sheet)) scene.load.image(sheet, sheet);
+  for (const { sheet } of [SKILL_ART, ITEM_ART]) {
+    if (sheet && !scene.textures.exists(sheet)) scene.load.image(sheet, sheet);
+  }
 }
 
-// One cell off the painted sheet, under the name the drawn shape would have had. Returns
-// false if there is no cell for this one or the sheet is not in the repo yet, which is
-// what sends it back to the generator.
-function cutIcon(scene, name) {
-  const at = SKILL_ART.at[name];
-  if (!at || !scene.textures.exists(SKILL_ART.sheet)) return false;
-  const px = SKILL_ART.cell;
+// One cell off a painted sheet, under the name the drawn shape would have had. Two sheets
+// are read — the things a pack holds first, then the skills — and either is allowed not to
+// exist yet: a name with no cell on either, or a sheet not in the repo, goes back to the
+// generator and gets the shape drawn for it. That is how the whole set is placeholder
+// today and how it stops being one a sheet at a time.
+function cutFrom(scene, spec, name) {
+  const at = spec.at[name];
+  if (!at || !spec.sheet || !scene.textures.exists(spec.sheet)) return false;
+  const px = spec.cell;
   const tex = scene.textures.createCanvas(keyOf(name), px, px);
   const ctx = tex.getContext();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(scene.textures.get(SKILL_ART.sheet).getSourceImage(),
+  ctx.drawImage(scene.textures.get(spec.sheet).getSourceImage(),
     (at[0] - 1) * px, (at[1] - 1) * px, px, px, 0, 0, px, px);
   tex.refresh();
   return true;
+}
+
+function cutIcon(scene, name) {
+  return cutFrom(scene, ITEM_ART, name) || cutFrom(scene, SKILL_ART, name);
 }
 
 // Painted where there is paint for it, drawn where there is not, and the same key either

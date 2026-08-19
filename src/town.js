@@ -13,9 +13,9 @@ const MATERIAL = Object.fromEntries(MATERIALS.map((m) => [m.id, m]));
 // pack of trout is not an answer to what the chapel wants, and the panel below says so.
 const BUILDABLE = new Set(BUILDINGS.flatMap((b) => b.stages.flatMap((s) => Object.keys(s.cost || {}))));
 
-const held = new Map(MATERIALS.map((m) => [m.id, m.start]));
+const held = new Map(MATERIALS.map((m) => [m.id, 0])); // the pack starts empty
 const level = new Map(BUILDINGS.map((b) => [b.id, b.level]));
-// part-paid stages persist: you can bring four timber now and the rest tomorrow
+// part-paid stages persist: you can bring four of something now and the rest tomorrow
 const paid = new Map(BUILDINGS.map((b) => [b.id, {}]));
 
 for (const b of BUILDINGS) {
@@ -84,6 +84,7 @@ export function carriedRows() {
   return MATERIALS.filter((m) => held.get(m.id) > 0).map((m) => ({
     label: m.name,
     note: `x${held.get(m.id)}`,
+    n: held.get(m.id), // what the grid splits into squares; see stackMax in tuning.js
     icon: m.id,
     mid: m.id, // what it is, for the one tab that does something to a thing rather than list it
     body: m.body,
@@ -131,6 +132,17 @@ export function contribute(id) {
     paid.set(id, {});
   }
   return { taken, levelled };
+}
+
+// A stage put up without paying for it. No building has a repair cost written at the
+// moment, so nothing levels by playing — this is how one is moved from the console while
+// that is true, the same hook town.give and party.award are: town.raise('forge').
+export function raise(id) {
+  const b = buildingOf(id);
+  if (!b || levelOf(id) >= b.stages.length - 1) return null;
+  level.set(id, levelOf(id) + 1);
+  paid.set(id, {});
+  return stageOf(id).name;
 }
 
 // --- text -----------------------------------------------------------------

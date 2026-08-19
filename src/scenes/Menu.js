@@ -1,15 +1,17 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { MAPS } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
-import { CHARACTER, EQUIPMENT, INVENTORY, COMPANIONS } from '../../content/character.js';
+import { CHARACTER, INVENTORY, COMPANIONS } from '../../content/character.js';
 import { BESTIARY, QUESTS } from '../../content/codex.js';
 import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
 import { SCRIPT } from '../placeholders.js';
-import { partyRows, skillRows, fill, pointsOf, YOU } from '../party.js';
+import { skillRows, fill, pointsOf, YOU } from '../party.js';
 import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
+import { drawSlots, shapeOf } from '../slots.js';
+import { cutRows } from '../charm.js';
 import * as potions from '../potions.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
@@ -21,23 +23,40 @@ const PLATE = 'plate'; // and a picture on it is set in the square off the same 
 // above the log of everything else the village has told you it wants.
 const questLog = () => [...questRows(), ...QUESTS];
 
-// What the party is carrying comes off town.js as it changes, and sits above the kit
-// the character started the game with. One list, two sources.
+// What is in the town's stock, and above it the cut stones. Mostly a readout: what goes
+// out on a run and which stone goes on the cord are decided at the gate, on the packing
+// screen in src/scenes/Quest.js, because they are decisions about a job rather than about
+// a shelf. The one exception is a potion, which is drunk where it is standing.
+//
+// One row per SQUARE rather than per thing: a stack past stackMax is more than one square
+// and is listed as more than one, so the cursor walks what is drawn. Every square of a
+// stack points at the same entry, so the detail pane reads the same either way.
+const squares = (entry, n) => {
+  const out = [];
+  for (let left = n; left > 0; left -= TUNING.stackMax) {
+    out.push({ ...entry, n: Math.min(left, TUNING.stackMax), note: `${Math.min(left, TUNING.stackMax)}` });
+  }
+  return out;
+};
+
 // A potion is the one square on the tab that does something: Enter drinks it, and drunk
 // in town it takes the next job out rather than this afternoon. Once it is drunk the
 // bottle is gone from the pack, so what is waiting is listed after it — otherwise the
 // square would simply vanish and the player would be told nothing.
+const withPotion = (r) => (potions.isPotion(r.mid) ? {
+  ...r,
+  body: [
+    ...r.body,
+    ...potions.linesFor(r.mid),
+    potions.taken(r.mid)
+      ? 'One of these is already working. A second would do nothing.'
+      : 'Drink it here and it takes the next job out. [Enter]',
+  ],
+} : r);
+
 const inventory = () => [
-  ...carriedRows().map((r) => (potions.isPotion(r.mid) ? {
-    ...r,
-    body: [
-      ...r.body,
-      ...potions.linesFor(r.mid),
-      potions.taken(r.mid)
-        ? 'One of these is already working. A second would do nothing.'
-        : 'Drink it here and it takes the next job out. [Enter]',
-    ],
-  } : r)),
+  ...cutRows().flatMap((r) => squares(r, r.n ?? 1)),
+  ...carriedRows().map(withPotion).flatMap((r) => squares(r, r.n)),
   ...potions.waitingRows().map((p) => ({
     label: p.name,
     note: 'Drunk',
@@ -63,15 +82,13 @@ const locations = () => PLACES.filter((p) => p.id);
 // A tab marked 'grid' draws its rows as squares of icons instead of a column of names;
 // everything else about it — cursor, scrolling, detail pane — is the same.
 const TABS = [
-  ['Equipment', EQUIPMENT],
   ['Character', CHARACTER],
-  ['Party', partyRows],
   ['Skills', skillRows],
   ['Companions', COMPANIONS],
   ['Inventory', inventory, 'grid'],
   ['Bestiary', BESTIARY],
-  // one word each: at eleven tabs the spacing is tighter than a space inside a name,
-  // and 'Quest Log' read as two tabs
+  // one word each: the strip gives up its spacing before it gives up a name, and
+  // 'Quest Log' read as two tabs
   ['Quests', questLog],
   ['Map', locations],
   ['Script', SCRIPT],
@@ -308,17 +325,16 @@ export default class Menu extends Phaser.Scene {
   // The same rows and the same cursor as a list tab, laid out as squares. Up and down
   // step one square in reading order rather than a whole line, because left and right
   // belong to the tab strip and a grid has no third axis to give them.
+  // The grid is padded out to a full rectangle with empty squares: how much is in a pack
+  // is read off how much of it is not, so a ragged last row would be saying the wrong
+  // thing even here, where the town's shelves have no bottom.
   grid() {
     const rows = this.rows();
     const sel = this.row[this.tab];
     const cell = TUNING.menuIconCell;
-    const x0 = this.listX - 8;
-    const y0 = this.bodyY - 10;
-
-    const cols = Math.max(1, Math.floor(TUNING.menuListWidth / cell));
-    // the panel's grey column ends 44 above the bottom of the box — see panel() — and the
-    // count of squares wants 20 of that for itself, so the grid takes what is left
-    const lines = Math.max(1, Math.floor((this.box.y + this.box.h - 64 - y0) / cell));
+    const at = { x: this.listX - 8, y: this.bodyY - 10, w: TUNING.menuListWidth };
+    const { cols } = shapeOf(at.w, rows.length, cell);
+    const lines = Math.max(1, Math.floor((this.box.y + this.box.h - 64 - at.y) / cell));
     const visible = cols * lines;
 
     // scroll a whole line at a time, and only far enough to bring the cursor back
@@ -328,31 +344,22 @@ export default class Menu extends Phaser.Scene {
     top = Math.max(0, Math.min(top, Math.max(0, (Math.ceil(rows.length / cols) - lines) * cols)));
     this.top[this.tab] = top;
 
-    for (let i = top; i < Math.min(rows.length, top + visible); i++) {
-      const x = x0 + ((i - top) % cols) * cell;
-      const y = y0 + Math.floor((i - top) / cols) * cell;
-      const on = i === sel;
+    const page = rows.slice(top, top + visible)
+      .map((r) => ({ id: r.icon, n: r.n, note: noteOf(r) }));
+    while (page.length < visible) page.push(null);
 
-      const g = this.add.graphics();
-      g.fillStyle(this.ink(on ? COLORS.menuSelectFill : COLORS.menuFill), 1);
-      g.fillRect(x + 2, y + 2, cell - 4, cell - 4);
-      g.lineStyle(1, this.ink(on ? COLORS.menuAccent : COLORS.menuRule), 1);
-      g.strokeRect(x + 2, y + 2, cell - 4, cell - 4);
-      this.layer.add(g);
-
-      const px = TUNING.menuIconPx;
-      const icon = this.add.image(x + cell / 2, y + 6 + px / 2, iconKeyFor(rows[i].icon));
-      icon.setDisplaySize(px, px);
-      this.layer.add(icon);
-
-      // the count sits under the icon rather than across it; the name is the detail
-      // pane's job. A cell of 60 leaves the icon 6 to 38 and this line 40 to 57.
-      this.text(x + cell - 8, y + cell - 20, noteOf(rows[i]), TUNING.menuHintSize,
-        on ? COLORS.menuAccent : COLORS.menuDim).setOrigin(1, 0);
-    }
+    drawSlots(this, {
+      at,
+      cell,
+      cells: page,
+      sel: sel - top,
+      ink: (c) => this.ink(c),
+      add: (o) => this.layer.add(o),
+      text: (x, y, str, size, colour) => this.text(x, y, str, size, colour),
+    });
 
     if (rows.length > visible) {
-      this.text(x0 + 12, y0 + lines * cell + 4, `${sel + 1} / ${rows.length}`,
+      this.text(at.x + 12, at.y + lines * cell + 4, `${sel + 1} / ${rows.length}`,
         TUNING.menuHintSize, COLORS.menuDim);
     }
   }

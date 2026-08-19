@@ -54,7 +54,13 @@
 //             luck — `count` things come off it, each one drawn against `odds`. Odds are
 //             read against each other and need not add up to a hundred. Points in the
 //             skill take more off it and bend the table toward its scarce end; see
-//             tuning.js. Write two of them and the node becomes a question the party is
+//             tuning.js.
+//             `stones` is the third and is not part of the yield at all: one roll at the
+//             end of work that went well, against a table read like any other. How well
+//             the work was played decides whether anything is found — nothing under
+//             stoneFloor in tuning.js, and work no engine was played for finds none —
+//             and the party's points decide which of them it is. It is what a gem drops
+//             off; see content/gems.js. Write two of them and the node becomes a question the party is
 //             asked where they stand, so write two the same crew would want differently
 //             — not two spellings of one job.
 //             Each harvest carries its own three lines as well:
@@ -132,7 +138,6 @@ export const RESOURCE_NODES = [
           middling: 'It hung up on the way over and sat there a moment before it dropped. Half the crown is broken off into the brash.',
           botched: 'It went the wrong way, into standing timber, and jammed there at an angle above your heads. You took what came free by hand and left the rest of it hanging.',
         },
-        spoils: { timber: [2, 4] },
         draw: { count: [1, 3], odds: { oakbranch: 50, oaklog: 30, heartwood: 12 } },
       },
       {
@@ -178,7 +183,6 @@ export const RESOURCE_NODES = [
           middling: 'The trunk rolls twice while you are in it and the axe glances off both times. You get your lengths, shorter than you wanted them.',
           botched: 'You are a foot into it when the weight shifts and the whole trunk settles onto the blade. You get the axe back out. You take what was already off.',
         },
-        spoils: { timber: [2, 4] },
         draw: { count: [2, 3], odds: { oaklog: 45, oakbranch: 40, heartwood: 10 } },
       },
     ],
@@ -283,7 +287,6 @@ export const RESOURCE_NODES = [
           middling: 'The first two go where you expect. The third comes round on you, and you spend the rest of the light digging the axe out of the ground.',
           botched: 'You cut one that was holding two others. All three go, and a good deal of the side with them. You get clear with what was already cut.',
         },
-        spoils: { timber: [1, 3] },
         draw: { count: [1, 2], odds: { oaklog: 40, oakbranch: 45 } },
       },
       {
@@ -296,8 +299,8 @@ export const RESOURCE_NODES = [
           middling: 'You get stone, all of it broken small. Twice you have to come out from under the face and wait for it to stop coming down.',
           botched: 'The face lets go above where you are working. You are out from under it before the worst of it lands. What you had is under it now.',
         },
-        spoils: { stone: [1, 3] },
-        draw: { count: [0, 2], odds: { copperore: 30, tinore: 12, coal: 10, roughgem: 7 } },
+        draw: { count: [0, 2], odds: { copperore: 30, tinore: 12, coal: 10 } },
+        stones: { roughgarnet: 3, roughagate: 3, roughamethyst: 1 },
       },
     ],
     xp: [10, 16],
@@ -339,7 +342,8 @@ export const RESOURCE_NODES = [
           middling: 'You get down through the gravel and into the ledge and it does not want to come. You take what breaks off the top of it.',
           botched: 'You are working in a foot of moving water and it carries the spoil off as fast as you free it. Most of what you break goes downstream.',
         },
-        draw: { count: [1, 3], odds: { tinore: 34, copperore: 10, stone: 35, roughgem: 6 } },
+        draw: { count: [1, 3], odds: { tinore: 34, copperore: 10 } },
+        stones: { roughgarnet: 3, roughagate: 2, roughamethyst: 1 },
       },
     ],
     xp: [10, 16],
@@ -401,7 +405,6 @@ export const RESOURCE_NODES = [
           middling: 'It lets go while you are still standing in it. You get out. Half of what you cut goes downstream ahead of you.',
           botched: 'Wrong log first. The whole face of it goes at once and takes the axe with it. The narrows are clear and you have nothing to show for them.',
         },
-        spoils: { timber: [2, 4] },
         draw: { count: [1, 2], odds: { oaklog: 45, oakbranch: 35 } },
       },
       {
@@ -443,8 +446,8 @@ export const RESOURCE_NODES = [
           middling: 'It rings hollow in two places and you work round them. What you get is good, and there is not much of it.',
           botched: 'You strike wide of the vein and it splits the way it wanted to instead of the way you wanted it to. It is all rubble, and half of it is on the ground you were standing on.',
         },
-        spoils: { stone: [2, 4] },
-        draw: { count: [0, 2], odds: { copperore: 38, coal: 8, roughgem: 8 } },
+        draw: { count: [0, 2], odds: { copperore: 38, coal: 8 } },
+        stones: { roughgarnet: 3, roughagate: 3, roughamethyst: 2 },
       },
     ],
     xp: [8, 14],
@@ -472,7 +475,8 @@ export const RESOURCE_NODES = [
           middling: 'It thins a stride down and you are chasing it through cold stone after that. You come out with some of it and a good deal of gravel.',
           botched: 'One half of it shifts while you are standing between them. Nobody is hurt. Everything you had loosened is under everything that was above it.',
         },
-        draw: { count: [1, 3], odds: { coal: 34, copperore: 18, stone: 30, roughgem: 10 } },
+        draw: { count: [1, 3], odds: { coal: 34, copperore: 18 } },
+        stones: { roughgarnet: 4, roughagate: 4, roughamethyst: 2 },
       },
       {
         skill: 'herblore',
@@ -551,7 +555,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Steel into standing wood, low down where the stems come out of the ground.',
         held: 'It opens in three cuts and the party walks it upright.',
         lost: 'Nothing you cut falls. Every stem is held up by the ones either side of it, and the party comes out the far side having pushed the whole width.',
-        spoils: { timber: [0, 1] },
         lostCon: 3,
       },
       {
@@ -618,7 +621,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Nobody names a price first, which is the whole of the game.',
         held: 'They name it first, and it is a good deal better than the one you were going to name.',
         lost: 'You name it first.',
-        spoils: { nails: [2, 4] },
         lostCon: 1,
       },
       {
@@ -628,7 +630,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Two of them talking and one of them doing all of it.',
         held: 'The quiet one has come from somewhere with cut stone in it, and the talker says where without being asked.',
         lost: 'They are pleasant, and they are pleasant the whole way through, and you learn nothing at all.',
-        spoils: { stone: [1, 2] },
         lostCon: 1,
       },
     ],
@@ -653,7 +654,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Loudly, and about nothing, and without ever stopping walking.',
         held: 'They decide, out loud, that you are nobody worth the trouble.',
         lost: 'They decide the other thing, and they decide it first.',
-        spoils: { nails: [1, 3] },
         lostCon: 3,
       },
       {
@@ -731,7 +731,6 @@ export const ENCOUNTER_NODES = [
         held: 'The turned earth is noticed while it is still only turned earth, and the party is a field away before the first of it opens.',
         avoids: true,
         lost: 'It is noticed afterwards, from the far side of it.',
-        spoils: { nails: [0, 2] },
         lostCon: 4,
       },
       {
@@ -743,7 +742,6 @@ export const ENCOUNTER_NODES = [
         thins: 2, // talked back down to whatever was never listening
         weakens: 4, // and that one comes up slower for having thought about it
         lost: 'It was never deciding. It was only slow.',
-        spoils: { nails: [1, 3] },
         lostCon: 4,
       },
       {
@@ -819,7 +817,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Downwind, slowly, and stopping every time it stops.',
         held: 'It stands still long enough to be worth the standing still.',
         // a cured hide is the same material as sailcloth to anyone patching a roof with it
-        spoils: { canvas: [1, 2] },
         lost: 'It bolts, and it does not bolt away from you first.',
         lostCon: 3,
       },
@@ -830,7 +827,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Straight at it, upright, and nobody looking away.',
         held: 'It goes back into the trees and leaves most of what it had been eating.',
         lost: 'It does not go anywhere, and it was not eating on its own.',
-        spoils: { canvas: [1, 2] },
         lostCon: 3,
       },
     ],
@@ -894,7 +890,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Everything out, laid in a line, and looked at in the order it came out.',
         held: 'Somebody walked out of this meaning to come back, and did not, and there is enough left inside to say why.',
         lost: 'It is a wet floor and some nails.',
-        spoils: { timber: [1, 2], nails: [1, 3] },
         lostCon: 0,
       },
       {
@@ -904,7 +899,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Not what is in it. How the door was left, and how much of a hurry that was.',
         held: 'They meant to be an hour. Whatever they are still carrying, they are carrying it light.',
         lost: 'It could be anybody. It probably was.',
-        spoils: { nails: [1, 2] },
         lostCon: 0,
       },
     ],
@@ -964,7 +958,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Boards off the frame, the sound ones stacked and the rest left where they fall.',
         held: 'Oak, under twenty years of weather, and dry the whole way through the middle of it.',
         lost: 'Every board comes off in three pieces and none of the three is worth carrying.',
-        spoils: { timber: [1, 3], nails: [2, 4] },
         lostCon: 1,
       },
       {
@@ -974,7 +967,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Which way the ruts run, how deep they are loaded, and where they stop being ruts.',
         held: 'It was loaded going out and it never came back at all, and what it was carrying is lying where it fell.',
         lost: 'The ground has had twenty years to lose the answer and it has used all of them.',
-        spoils: { nails: [1, 3] },
         lostCon: 1,
       },
     ],
@@ -1040,7 +1032,7 @@ export const ENCOUNTER_NODES = [
         tried: 'How it is anchored, which way it faces, and how long it has been down.',
         held: 'Set for the run and left too long. Half of what is in it is still worth lifting.',
         lost: 'It has been down a fortnight. What is in it comes up in pieces.',
-        spoils: { bluegill: [2, 3], canvas: [0, 1] },
+        spoils: { bluegill: [2, 3] },
         lostCon: 1,
       },
       {
@@ -1050,7 +1042,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Nobody sets a net this carefully and abandons it. So either they are coming, or they cannot.',
         held: 'Nobody is coming. Whatever stopped them stopped them a while ago, and the net is salvage.',
         lost: 'You take it, and you spend the rest of the walk wondering.',
-        spoils: { canvas: [1, 2], nails: [0, 2] },
         lostCon: 1,
       },
     ],
@@ -1075,7 +1066,7 @@ export const ENCOUNTER_NODES = [
         tried: 'The haft of a pick against the back of it, one pace at a time, listening for the note to go dead.',
         held: 'It rings sound for thirty feet and then it does not, and thirty feet is enough.',
         lost: 'The note goes dead a pace after somebody has already taken it.',
-        spoils: { coal: [1, 2], stone: [1, 2] },
+        spoils: { coal: [1, 2] },
         lostCon: 4,
       },
       {
@@ -1085,7 +1076,7 @@ export const ENCOUNTER_NODES = [
         tried: 'Tools left or tools taken, spoil stacked or spoil scattered, and how tidily the last day ended.',
         held: 'They stopped in an afternoon and took nothing with them. What they left is still worth carrying.',
         lost: 'They stopped. The hill is not saying anything else about it.',
-        spoils: { nails: [1, 3], roughgem: [0, 1] },
+        spoils: { roughagate: [0, 1] },
         lostCon: 2,
       },
     ],
@@ -1110,7 +1101,6 @@ export const ENCOUNTER_NODES = [
         tried: 'The big ones first, split where they want to split, and rolled rather than lifted.',
         held: 'It comes apart along its own lines and goes over the edge in an hour.',
         lost: 'The wrong one goes first and takes the rest of the side down onto the path behind it.',
-        spoils: { stone: [2, 3] },
         lostCon: 3,
       },
       {
@@ -1120,7 +1110,6 @@ export const ENCOUNTER_NODES = [
         tried: 'A trunk down, limbed, and set under the worst of it with a stone for a fulcrum.',
         held: 'One at a time and all of it, and the lever is still good enough to carry off afterwards.',
         lost: 'The lever goes before the stone does, and it goes across somebody.',
-        spoils: { timber: [1, 2] },
         lostCon: 3,
       },
     ],
@@ -1265,7 +1254,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Grain, colour and how it has weathered, one course at a time.',
         held: 'Not one course of it came off the boulder it is leaning on. All of it was carried here, from a bed two valleys east.',
         lost: 'It is stone. It has been stone for a long time.',
-        spoils: { stone: [1, 2] },
         lostCon: 2,
       },
       {
@@ -1309,7 +1297,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Nobody says whose wood it is. Everybody stands as though they know.',
         held: 'The saw goes down, and what is already cut is stacked and nobody carries it home but you.',
         lost: 'The saw does not go down, and there are more of them behind the stand than in front of it.',
-        spoils: { timber: [1, 3] },
         lostCon: 3,
       },
       {
@@ -1319,7 +1306,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Which of them looks at which before speaking, and how long they take about it.',
         held: 'They answer to somebody who is not here, and hearing you say his name is enough.',
         lost: 'They answer to nobody, which is worse, and they say so at length.',
-        spoils: { nails: [1, 2] },
         lostCon: 2,
       },
       {
@@ -1329,7 +1315,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Which trees they have taken, in what order, and what that has done to the ones left.',
         held: 'They did not know. They are not glad to be told, but they stop, and they leave the cut.',
         lost: 'They knew. They are cutting it out and moving on, and they say so without looking up.',
-        spoils: { timber: [2, 3] },
         lostCon: 2,
       },
     ],
@@ -1354,7 +1339,7 @@ export const ENCOUNTER_NODES = [
         tried: 'Four of you on the bank above them, and nobody in a hurry to explain.',
         held: 'They go downstream. What is in the pans when they go stays where it is.',
         lost: 'They do not go, and one of them has been waiting all week for somebody to try.',
-        spoils: { roughgem: [0, 1], stone: [1, 2] },
+        spoils: { roughgarnet: [0, 1] },
         lostCon: 3,
       },
       {
@@ -1399,7 +1384,6 @@ export const ENCOUNTER_NODES = [
         tried: 'He has not spoken to anybody in nine days and is pretending he does not mind.',
         held: 'He minds. Once he starts he does not stop, and half of it is worth hearing.',
         lost: 'He answers everything and tells you nothing, which takes an hour.',
-        spoils: { pitch: [1, 2] },
         lostCon: 1,
       },
       {
@@ -1409,7 +1393,6 @@ export const ENCOUNTER_NODES = [
         tried: 'How many bowls, how much bedding, and how much of what is on those racks is one man\'s work.',
         held: 'He is not out here alone, and he is not out here for what is drying on the racks.',
         lost: 'A man, a tent and nine days of firewood. Nothing that is not what it looks like.',
-        spoils: { nails: [1, 3] },
         lostCon: 1,
       },
       {
@@ -1455,7 +1438,6 @@ export const ENCOUNTER_NODES = [
         held: 'A fire that had gone out is going again inside ten minutes, and it burns to morning, and everybody sleeps at it.',
         lost: 'What you bring is green and it smokes them out of their own camp.',
         con: 2,
-        spoils: { timber: [0, 1] },
         lostCon: 1,
       },
       {
@@ -1490,7 +1472,6 @@ export const ENCOUNTER_NODES = [
         tried: 'How they are lying, how far apart, and which of them has been opened already.',
         held: 'A cart went in upstream and not long ago, and there is more of it up there than down here.',
         lost: 'Barrels. In a stream. For some time.',
-        spoils: { nails: [1, 3], canvas: [0, 1] },
         lostCon: 1,
       },
       {
@@ -1500,7 +1481,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Roped, worked to the slack water, and floated rather than lifted.',
         held: 'All of them, dry side up, on the bank, and nobody in the water past a knee.',
         lost: 'Two of them go past you at walking pace and are not seen again.',
-        spoils: { pitch: [1, 2], canvas: [1, 2] },
         lostCon: 2,
       },
       {
@@ -1574,7 +1554,6 @@ export const ENCOUNTER_NODES = [
         held: 'It goes round six where it was made for four, and it is still worth eating.',
         lost: 'It goes round six. It is not worth eating and there is none of it left.',
         con: 2,
-        spoils: { nails: [0, 2] },
         lostCon: 2,
       },
       {
@@ -1608,7 +1587,6 @@ export const ENCOUNTER_NODES = [
         tried: 'The grain of it, where it has already parted, and one place to point at.',
         held: 'It looks where you are pointing for a long moment. Then it hits there, and the boulder comes apart in three pieces, and it is pleased in a way that does not need saying.',
         lost: 'It hits where you point. Nothing happens. It turns round and looks at you for a while.',
-        spoils: { stone: [1, 3] },
         lostCon: 3,
       },
       {
@@ -1652,7 +1630,6 @@ export const ENCOUNTER_NODES = [
         tried: 'Not what is in it. How carefully it was tied, and how far somebody carried it to leave it here.',
         held: 'They were frightened when they tied it and they were frightened of something specific.',
         lost: 'Somebody wanted something. Everybody does.',
-        spoils: { nails: [1, 2] },
         lostCon: 2,
       },
     ],
@@ -1721,7 +1698,6 @@ export const ENCOUNTER_NODES = [
         tried: 'An alder on the near bank, dropped along the path rather than across it.',
         held: 'It goes where it was told and it is dry the whole length.',
         lost: 'It goes in the water, and now the water has a tree in it.',
-        spoils: { timber: [0, 1] },
         lostCon: 2,
       },
     ],
@@ -1746,7 +1722,6 @@ export const ENCOUNTER_NODES = [
         tried: 'A cut above the wound rather than into it, and something under it to catch what comes.',
         held: 'It runs clean for an hour and the tree closes over behind it.',
         lost: 'It runs for ten minutes and then it runs somewhere you are not holding anything.',
-        spoils: { pitch: [2, 3] },
         lostCon: 1,
       },
       {
@@ -1756,7 +1731,7 @@ export const ENCOUNTER_NODES = [
         tried: 'The bad wood cut back to sound wood, which is further in than it looks.',
         held: 'The rot comes out in one piece and what is under it is dark and dry and sound.',
         lost: 'The rot goes further than the axe does, and the tree will be down by spring.',
-        spoils: { timber: [1, 2], heartwood: [0, 1] },
+        spoils: { heartwood: [0, 1] },
         lostCon: 1,
       },
     ],
@@ -1792,7 +1767,7 @@ export const ENCOUNTER_NODES = [
         held: 'It comes out above the vein and never touches it. Clean rock the whole way, and nothing over it but more rock.',
         lost: 'It comes out of the vein itself. Whatever is in that rock is in the water, and there is no telling what.',
         con: 3,
-        spoils: { roughgem: [0, 1] },
+        spoils: { roughamethyst: [0, 1] },
         lostCon: 2,
       },
     ],
@@ -1827,7 +1802,6 @@ export const ENCOUNTER_NODES = [
         tried: 'The arch first, because the arch is what the rest of it is holding up.',
         held: 'It comes down course by course and every block of it is worth carrying.',
         lost: 'It comes down all at once and most of it is rubble on the way.',
-        spoils: { stone: [2, 4] },
         lostCon: 1,
       },
     ],
@@ -1855,7 +1829,6 @@ export const ENCOUNTER_NODES = [
         tried: 'The set of her on the mud, and what the tide is doing to it while you look.',
         held: 'She holds while you strip her, and you are off her before she stops holding.',
         lost: 'She shifts on the tide with the party still aboard her.',
-        spoils: { canvas: [1, 3], timber: [1, 2] },
         lostCon: 3,
       },
       {
@@ -1865,7 +1838,6 @@ export const ENCOUNTER_NODES = [
         tried: 'What is lashed down, what is not, and what has already been taken off her by somebody else.',
         held: 'Somebody has been aboard her before you, and they left the heavy half.',
         lost: 'Everything aboard is under everything else aboard.',
-        spoils: { canvas: [1, 2], nails: [1, 3] },
         lostCon: 2,
       },
     ],
