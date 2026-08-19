@@ -1525,9 +1525,9 @@ export default class Quest extends Phaser.Scene {
   }
 
   // The roll the die is thrown for right now, or nothing. A node's own check is thrown
-  // when the node settles; a scene's is thrown on the way into the beat the roll picked
-  // — see advance in src/run.js — so the party reads what they tried, and the die and
-  // the word come between that and what came of it.
+  // when the node settles; a scene's is thrown on the beat that reads it back — the one
+  // carrying `result` — so the way is chosen, the die answers it, and the account of the
+  // attempt comes up behind the word.
   // The die brought down where it stands, because somebody pressed a key rather than
   // watching it. What was going to be said is not said; the card comes up instead.
   landRoll() {
@@ -1541,7 +1541,7 @@ export default class Quest extends Phaser.Scene {
     const n = r.nodes[r.at];
     if (!n || !n.check) return null;
     if (r.phase === 'node') return n.check;
-    if (r.phase === 'beat' && n.beat && n.beat.id === n.rollAt) return n.check;
+    if (r.phase === 'beat' && n.beat && n.beat.result) return n.check;
     return null;
   }
 

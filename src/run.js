@@ -1156,9 +1156,6 @@ export function advance() {
   const next = b.result
     ? (node.check && node.check.pass ? b.result.hit : b.result.miss)
     : (b.toss ? pick(b.toss) : b.then);
-  // The beat the roll picked is the beat the die is thrown on the way into: the attempt
-  // is read first, then the throw, then what came of it. See rollShown in Quest.js.
-  if (b.result) node.rollAt = next;
   if (!next) outOfBeats(node);
   else toBeat(node, next);
   return run;
