@@ -20,6 +20,7 @@ import {
 } from './party.js';
 import { give, nameOf, heldOf } from './town.js';
 import * as potions from './potions.js';
+import * as food from './food.js';
 import {
   packedStones, packedKeys, packedTotal, drop as dropStone, clearPack,
   cycle as cycleCord, fullName as stoneName, worn,
@@ -686,6 +687,48 @@ export function drink(mid) {
     run.con = Math.max(0, Math.min(run.conMax, run.con + con));
   }
   return took;
+}
+
+// And what can be eaten here, by the same rule and out of the same pack. A meal is not a
+// potion — see src/food.js — so nothing is held off because something like it is already
+// working: a party carrying four dinners may eat four dinners.
+export function edible() {
+  return atCamp() ? food.carried(fromPack) : [];
+}
+
+// Eaten at the fire. The constitution goes back into the pool, capped at what the run set
+// out with, and the hit points go back to everybody still on their feet, each capped at
+// their own. Nobody is got up off the ground by a meal: that is a black draught's job, and
+// somebody being carried is not somebody eating.
+export function eat(mid) {
+  if (!atCamp() || !food.canEat(mid, fromPack)) return null;
+  const ate = food.eat(mid, fromPack);
+  if (!ate) return null;
+  const { con = 0, hp = 0 } = ate.effect;
+  if (con) run.con = Math.max(0, Math.min(run.conMax, run.con + con));
+  if (hp) {
+    for (const id of standing()) {
+      run.hp[id] = Math.min(hpMaxOf(id), run.hp[id] + hp);
+    }
+  }
+  return ate;
+}
+
+// The pack at a fire, as one numbered list: the bottles first and then the food, because
+// that is the order they were added to the game and the numbers should not move under the
+// player's hand. The screen asks for this and does not have to know which is which.
+export function atHand() {
+  return [...drinkable(), ...edible()];
+}
+
+export function takeAtHand(mid) {
+  return food.isFood(mid) ? eat(mid) : drink(mid);
+}
+
+export function handRow(mid) {
+  return food.isFood(mid)
+    ? { mid, name: nameOf(mid), body: food.linesFor(mid) }
+    : drinkRow(mid);
 }
 
 export function inForce() {

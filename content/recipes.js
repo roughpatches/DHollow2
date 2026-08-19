@@ -356,6 +356,70 @@ export const RECIPES = [
   // --- the Sea Hag's kitchen -------------------------------------------------
   // Everything the Greywood pays out in fish and fungus arrives raw. This is the only
   // place in town it stops being raw.
+  // The tier-one kitchen is a lit range and a borrowed pan, and these are the three ranks
+  // it asks for: one fish apiece, in the order the stream gives them up. Everything cooked
+  // here is eaten on the road rather than sold — see `eat` in content/materials.js — so a
+  // rank is a decision about how much of a day's fishing goes back out in the pack.
+  {
+    // Cooking 1. Three bluegill and a fire, which is the least a kitchen can be asked for.
+    id: 'coalfish',
+    name: 'Bake bluegill on the coals',
+    at: 'kitchen',
+    stage: 1,
+    level: 1,
+    skill: 'cooking',
+    rank: 1,
+    activity: 'Cooking',
+    fuel: 2,
+    costs: { bluegill: 3 },
+    makes: { coalfish: 2 },
+    xp: 9,
+    body: [
+      'Split down the back, laid on the embers with nothing on them, and taken off the moment the skin lifts.',
+      'It is the first thing anybody cooks and the last thing anybody stops being able to eat.',
+    ],
+  },
+  {
+    // Cooking 2. Two things out of two places, and the pan has to be hot for one of them
+    // and off the heat for the other.
+    id: 'panperch',
+    name: 'Perch and trumpets',
+    at: 'kitchen',
+    stage: 1,
+    level: 3,
+    skill: 'cooking',
+    rank: 2,
+    activity: 'Cooking',
+    fuel: 3,
+    costs: { perch: 3, blacktrumpet: 2 },
+    makes: { panperch: 2 },
+    xp: 20,
+    body: [
+      'Trumpets down first until they have given up their water, the fillets in after them skin-side down, and neither of them moved again.',
+      'A perch has forty bones in it. Somebody has to take them out, and it is going to be you.',
+    ],
+  },
+  {
+    // Cooking 3. The top of what a pan does. Three trout is a stream fished properly and
+    // the root is dug rather than picked, so this is the one dish that wants a party who
+    // went out for it.
+    id: 'troutsupper',
+    name: 'Lay out a trout supper',
+    at: 'kitchen',
+    stage: 1,
+    level: 5,
+    skill: 'cooking',
+    rank: 3,
+    activity: 'Cooking',
+    fuel: 3,
+    costs: { brooktrout: 3, bitterroot: 1 },
+    makes: { troutsupper: 1 },
+    xp: 38,
+    body: [
+      'Three fish opened flat and held over the heat together, with the root shaved through them at the end so it does not cook out.',
+      'The root is what stops it being three fish. Whoever first put it in was not cooking, and it worked anyway.',
+    ],
+  },
   {
     id: 'friedperch',
     name: 'Pan-fried perch',

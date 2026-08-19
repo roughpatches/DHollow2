@@ -295,12 +295,12 @@ export default class Quest extends Phaser.Scene {
     }
 
     // The pack, at a camp. A number key and not the cursor: the cursor belongs to the
-    // ways, and a party that stopped for a drink has not answered the node yet.
+    // ways, and a party that stopped to eat has not answered the node yet.
     if (/^[1-9]$/.test(k) && !this.approaching) {
-      const can = run.drinkable();
+      const can = run.atHand();
       const mid = can[Number(k) - 1];
       if (mid) {
-        run.drink(mid);
+        run.takeAtHand(mid);
         this.draw();
         return;
       }
@@ -1088,7 +1088,7 @@ export default class Quest extends Phaser.Scene {
   // What a fire adds to the hint line, and what nowhere else on the road does: the pack
   // is open here, and the stone on the cord can be changed here.
   campKeys() {
-    return (run.drinkable().length ? '    [1-9] Drink' : '')
+    return (run.atHand().length ? '    [1-9] Eat or drink' : '')
       + (run.cordable().length ? '    [C] Change the stone' : '');
   }
 
@@ -1656,11 +1656,11 @@ export default class Quest extends Phaser.Scene {
     return [...out, ...this.packLines()];
   }
 
-  // The pack, on the card, at a camp and nowhere else: what can be drunk, numbered, and
-  // what is already working. The ways keep the cursor — a potion is a number key, so
-  // drinking one never costs the party the choice they walked up to.
+  // The pack, on the card, at a camp and nowhere else: what can be drunk or eaten,
+  // numbered, and what is already working. The ways keep the cursor — the pack is a number
+  // key, so stopping for a meal never costs the party the choice they walked up to.
   packLines() {
-    const can = run.drinkable();
+    const can = run.atHand();
     const force = run.inForce();
     const cord = run.cordRows();
     if (!can.length && !force.length && !run.cordable().length) return [];
@@ -1668,7 +1668,7 @@ export default class Quest extends Phaser.Scene {
     if (can.length) {
       out.push(['Somebody has the pack open.', TUNING.questHintSize, COLORS.menuDim]);
       can.forEach((mid, i) => {
-        const p = run.drinkRow(mid);
+        const p = run.handRow(mid);
         out.push([`  [${i + 1}] ${p.name} — ${p.body.join(' ')}`,
           TUNING.questHintSize, COLORS.menuText]);
       });
