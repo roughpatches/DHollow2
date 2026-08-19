@@ -205,7 +205,9 @@ export const MATERIALS = [
     id: 'salve',
     name: 'Field Salve',
     start: 0,
-    drink: { guard: 1 },
+    // Two, where the copse broth below it holds off one: the broth is what a party boils
+    // in the wood, and this is what a bench and a pot of pitch are for.
+    drink: { guard: 2 },
     body: [
       'Grey-black, stiff at the top of the pot and softer underneath, and it goes on cold.',
       'Made to be carried by somebody who is going to need it a long way from the person who made it.',
@@ -221,6 +223,72 @@ export const MATERIALS = [
       'The first thing to come off that still in twenty years, and the shop it came out of is not open.',
     ],
   },
+
+  // --- the six the wood pays for ---------------------------------------------
+  // Tier one at the still: two ingredients apiece, both of them out of the Greywood, and
+  // between them the three things Herblore brings home. Three pairs and six potions,
+  // because a pair reads two ways depending on which of them there is more of.
+  {
+    id: 'woodsdraught',
+    name: 'Woodsman\'s Draught',
+    start: 0,
+    drink: { con: 10 },
+    body: [
+      'Trumpets and oyster caps boiled down together and drunk hot out of whatever is nearest.',
+      'It is not medicine and nobody has ever called it that. It is an hour of daylight nobody had.',
+    ],
+  },
+  {
+    id: 'copsebroth',
+    name: 'Copse Broth',
+    start: 0,
+    drink: { guard: 1 },
+    body: [
+      'Thin, grey, and more caps than water, kept simmering while whoever made it decided what else was going in.',
+      'It puts nothing back. It stops so much of it going, which is cheaper and is the whole point of it.',
+    ],
+  },
+  {
+    id: 'blackdraught',
+    name: 'Black Draught',
+    start: 0,
+    drink: { rally: 0.5 },
+    body: [
+      'Trumpets steeped black with the root ground through them, thick enough to coat the glass.',
+      'Somebody who has stopped will get up on this. What it costs them is not paid on the day they drink it.',
+    ],
+  },
+  {
+    id: 'nightwash',
+    name: 'Nightshade Wash',
+    start: 0,
+    drink: { daylight: true },
+    body: [
+      'Rubbed round the eyes and the back of the neck, cold, and stinging for a good while after.',
+      'The dark stops being something that is happening to you. It is still dark.',
+    ],
+  },
+  {
+    id: 'steadyhand',
+    name: 'Steady Hand',
+    start: 0,
+    drink: { sure: true },
+    body: [
+      'Pale caps and white root worked to a paste and taken off the back of a knife.',
+      'It does not make anybody better at anything. It makes the worst thing that can happen stop happening.',
+    ],
+  },
+  {
+    id: 'bitterwash',
+    name: 'Bitter Wash',
+    start: 0,
+    drink: { steady: 1 },
+    body: [
+      'Almost all root, barely cut, and it is drunk in one because it cannot be drunk in two.',
+      'Everything gets a little further away and a little clearer, and the hand goes where it is sent.',
+    ],
+  },
+
   {
     id: 'friedfish',
     name: 'Fried Fish',

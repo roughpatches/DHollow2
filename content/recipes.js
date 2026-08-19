@@ -225,6 +225,129 @@ export const RECIPES = [
     ],
   },
 
+  // Tier one at the still: two ingredients apiece, both out of the Greywood, and between
+  // them the three things Herblore brings home. The three older potions above are one and
+  // three ingredients and stay as they were — these are the pairs, and a pair reads two
+  // ways depending on which of the two there is more of.
+  {
+    // Trumpets and oysters, weighted to the oysters. The cheap one, and the one a party
+    // that has not got as far as the still yet can still make.
+    id: 'copsebroth',
+    name: 'Set a copse broth',
+    at: 'stillroom',
+    stage: 1,
+    level: 1,
+    skill: 'alchemy',
+    rank: 1,
+    activity: 'Brewing',
+    hard: 'simple',
+    costs: { oystermushroom: 4, blacktrumpet: 2 },
+    makes: { copsebroth: 1 },
+    xp: 12,
+    body: [
+      'Caps in first and left to give up what they have, trumpets in at the end so they are not cooked to nothing, and the pot never allowed to boil.',
+      'It is the first thing anybody is taught and the last thing anybody bothers to do well.',
+    ],
+  },
+  {
+    // The same two the other way up, and hot rather than warm.
+    id: 'woodsdraught',
+    name: 'Boil a woodsman\'s draught',
+    at: 'stillroom',
+    stage: 1,
+    level: 2,
+    skill: 'alchemy',
+    rank: 1,
+    activity: 'Brewing',
+    hard: 'simple',
+    costs: { blacktrumpet: 3, oystermushroom: 2 },
+    makes: { woodsdraught: 1 },
+    xp: 18,
+    body: [
+      'Trumpets down hard until the water is black, the caps in after them, and the whole of it taken off before it catches.',
+      'Four people can drink one of these standing in the rain and go on. That is all it is for.',
+    ],
+  },
+  {
+    // Root and oyster: the pale pair, and the only potion in the game that touches how
+    // the work itself goes rather than how the party stands up to it.
+    id: 'steadyhand',
+    name: 'Work a steady hand',
+    at: 'stillroom',
+    stage: 2,
+    level: 5,
+    skill: 'alchemy',
+    rank: 2,
+    activity: 'Brewing',
+    hard: 'tricky',
+    costs: { oystermushroom: 2, bitterroot: 2 },
+    makes: { steadyhand: 1 },
+    xp: 34,
+    body: [
+      'Caps and root ground together dry and let down with as little water as will carry it, until it is a paste and not a drink.',
+      'Five measures and none of them forgiving. There is a joke in the trade about what it takes to make one of these.',
+    ],
+  },
+  {
+    // Mostly root. Expensive in the scarce half of the pantry, which is the price of a
+    // check that was going to be lost being held instead.
+    id: 'bitterwash',
+    name: 'Draw a bitter wash',
+    at: 'stillroom',
+    stage: 1,
+    level: 3,
+    skill: 'alchemy',
+    rank: 2,
+    activity: 'Brewing',
+    hard: 'tricky',
+    costs: { bitterroot: 3, oystermushroom: 1 },
+    makes: { bitterwash: 1 },
+    xp: 22,
+    body: [
+      'Root cut coarse, drawn cold over a day, and one cap in it for no reason anybody has ever been able to give.',
+      'Nothing is added to make it drinkable. Adding something is how it stops working.',
+    ],
+  },
+  {
+    // Trumpets and root, the dark pair. Trumpets grow where the light gave up, and this
+    // is what that is for.
+    id: 'nightwash',
+    name: 'Steep a nightshade wash',
+    at: 'stillroom',
+    stage: 1,
+    level: 4,
+    skill: 'alchemy',
+    rank: 2,
+    activity: 'Brewing',
+    hard: 'tricky',
+    costs: { blacktrumpet: 3, bitterroot: 1 },
+    makes: { nightwash: 1 },
+    xp: 28,
+    body: [
+      'Trumpets steeped until the water will not go any darker, and a finger of root in it to hold it there.',
+      'It is not drunk so much as worn. Whoever made the first one was not trying to make this.',
+    ],
+  },
+  {
+    // The strong one, and the still is what it is waiting for.
+    id: 'blackdraught',
+    name: 'Draw a black draught',
+    at: 'stillroom',
+    stage: 2,
+    level: 6,
+    skill: 'alchemy',
+    rank: 3,
+    activity: 'Brewing',
+    hard: 'wicked',
+    costs: { blacktrumpet: 2, bitterroot: 1 },
+    makes: { blackdraught: 1 },
+    xp: 40,
+    body: [
+      'Trumpets drawn off the still black as tar with the root ground in at the last, and taken off the heat at a moment nobody can describe.',
+      'Two ingredients and seven measures. What is difficult about it is not what is in it.',
+    ],
+  },
+
   // --- the Sea Hag's kitchen -------------------------------------------------
   // Everything the Greywood pays out in fish and fungus arrives raw. This is the only
   // place in town it stops being raw.

@@ -970,6 +970,17 @@ function afterTurn(node) {
 function faint(id) {
   const node = run.nodes[run.at];
   run.fight.who = null; // nothing standing in front of it, and the fight still going on
+  // A black draught in force: the first one carried this run is got back on their feet
+  // instead, on what the bottle has in it. The pool pays nothing, the thing in front of
+  // them is still there, and the party is asked again who is going to stand in front of
+  // it — which may well be the one who just got up.
+  const rally = potions.spendRally();
+  if (rally) {
+    run.hp[id] = Math.max(1, Math.round(hpMaxOf(id) * rally));
+    node.rallied = [...(node.rallied || []), whoIs(id)];
+    run.phase = 'fighter';
+    return;
+  }
   const lost = Math.round(conOf(id) * TUNING.combat.faintCon);
   run.conMax = Math.max(0, run.conMax - lost);
   run.con = Math.max(0, Math.min(run.conMax, run.con - lost));
@@ -1027,7 +1038,10 @@ export function settle(played) {
   const failed = node.check && !node.check.pass;
   if (played) {
     node.played = true;
-    node.failed = !!played.failed;
+    // A hard fail held off by what somebody drank. The floor comes up and the ceiling
+    // stays where it was: the work is not botched, and it is not good either.
+    node.saved = !!played.failed && potions.sure();
+    node.failed = !!played.failed && !node.saved;
     node.quality = played.failed ? 0 : qualityOf(played.judgments);
     node.swings = (played.judgments || []).length;
   }
@@ -1091,7 +1105,8 @@ export function settle(played) {
   // well they did the work. They are kept apart so the readout can say which was which.
   const taken = node.passed ? 0 : roll(e.con); // a node walked past takes nothing but the road
   node.conRoad = -TUNING.questConDecay;
-  node.conKind = taken < 0 && night ? -Math.round(-taken * TUNING.questNightCon) : taken;
+  node.conKind = taken < 0 && night && !potions.daylight()
+    ? -Math.round(-taken * TUNING.questNightCon) : taken;
   node.conCheck = node.check ? (node.check.pass ? TUNING.questConHeld : -TUNING.questConLost) : 0;
   node.conWork = !played ? 0
     : node.failed ? TUNING.activityConWorst
@@ -1254,7 +1269,10 @@ export function wonLine(node) {
 
 // and who was carried out of it, and what the pool lost with them
 export function faintLines(node) {
-  return (node.fainted || []).map((f) => `${f.who} is carried. ${f.con} constitution off the pool.`);
+  return [
+    ...(node.rallied || []).map((who) => `${who} goes down, and gets up again on what they drank.`),
+    ...(node.fainted || []).map((f) => `${f.who} is carried. ${f.con} constitution off the pool.`),
+  ];
 }
 
 // who is walking it and what each of them is worth to the pool — the readout under the

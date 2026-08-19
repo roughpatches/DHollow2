@@ -4,12 +4,19 @@
 // out, and at a camp on the road, where it takes the rest of the one being walked. The
 // bottle is gone either way, and nothing that has been drunk is carried home.
 //
-// A potion is a material in content/materials.js carrying `drink`, and `drink` is three
-// numbers, all of them optional:
-//   con    — constitution straight into the pool. On the road it lands the moment it is
-//            drunk; drunk in town it is in the pool at the gate.
-//   guard  — this much less off the pool at every node for the rest of the run.
-//   steady — this much on every skill check the party rolls for the rest of the run.
+// A potion is a material in content/materials.js carrying `drink`, and `drink` is what it
+// does, all of it optional:
+//   con      — constitution straight into the pool. On the road it lands the moment it is
+//              drunk; drunk in town it is in the pool at the gate.
+//   guard    — this much less off the pool at every node for the rest of the run.
+//   steady   — this much on every skill check the party rolls for the rest of the run.
+//   daylight — the dark stops costing extra: a node at night takes what it would take by
+//              day for the rest of the run.
+//   sure     — work cannot be botched for the rest of the run. It raises the floor and
+//              never the ceiling: nobody is made good at anything by drinking something.
+//   rally    — the first fighter carried this run gets up instead, on this much of their
+//              hit points. Once a run however many are drunk, because a party that can
+//              stand everybody back up twice is not in a fight.
 // Nothing else in the game reads a potion. A new potion is one entry in
 // content/materials.js and a recipe to make it; a new kind of potion is a field here and
 // the one line in src/run.js that reads it.
@@ -26,6 +33,7 @@ const POTION = Object.fromEntries(MATERIALS.filter((m) => m.drink).map((m) => [m
 // Nothing here survives the run it was drunk into; see clear().
 const waiting = new Set();
 const working = new Set();
+let rallied = false; // whether the one getting-up this run has been spent
 
 export function isPotion(mid) {
   return !!POTION[mid];
@@ -79,6 +87,7 @@ export function takeUp() {
 // and so is everything that was ever going to change it.
 export function clear() {
   working.clear();
+  rallied = false;
 }
 
 function sum(field) {
@@ -91,6 +100,28 @@ export function guard() {
 
 export function steady() {
   return sum('steady');
+}
+
+function any(field) {
+  return [...working].some((mid) => effectOf(mid)[field]);
+}
+
+export function daylight() {
+  return any('daylight');
+}
+
+export function sure() {
+  return any('sure');
+}
+
+// The best getting-up in force, handed over once and then gone. Spent rather than read,
+// because a rally that could be read twice is a party that never falls over.
+export function spendRally() {
+  if (rallied) return 0;
+  const best = [...working].reduce((n, mid) => Math.max(n, effectOf(mid).rally || 0), 0);
+  if (!best) return 0;
+  rallied = true;
+  return best;
 }
 
 // What is in force, and what is drunk and waiting — both as rows the pack and the card
@@ -110,5 +141,8 @@ export function linesFor(mid) {
   if (e.con) out.push(`${e.con} constitution back into the pool.`);
   if (e.guard) out.push(`${e.guard} less off the pool at every node.`);
   if (e.steady) out.push(`${e.steady} on every check the party rolls.`);
+  if (e.daylight) out.push('The dark stops costing extra.');
+  if (e.sure) out.push('The work cannot be botched.');
+  if (e.rally) out.push('The first one carried gets up again.');
   return out;
 }
