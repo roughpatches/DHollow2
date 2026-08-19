@@ -378,6 +378,7 @@ const PAINTED_ITEMS = {
   oakbranch: 'art/items/oakbranch/An_Oak_log/rotations/An_Oak_log.png',
   oaklog: 'art/items/oaklog/An_Oak_log/rotations/An_Oak_log.png',
   heartwood: 'art/items/heartwood/An_Oak_log/rotations/An_Oak_log.png',
+  copperore: 'art/items/copperore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   tinore: 'art/items/tinore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
 };
 
