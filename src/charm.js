@@ -1,10 +1,15 @@
-// The stones that have been cut, and the one being worn. A rough stone comes off a mining
-// node and goes in the pack with everything else; the moment it is cut it stops being a
-// material and becomes one of these, because a worn thing is not a stack of anything.
-// content/gems.js says what a stone is worth; this says which ones exist and which one is
-// on. Only the player wears a charm — one at a time, and which one is chosen at the gate,
-// on the packing screen in src/scenes/Quest.js, because it is a decision about the job
-// you are about to walk rather than about a shelf in town.
+// The stones that have been cut, which of them went out on this job, and the one being
+// worn. A rough stone comes off a mining node and goes in the pack with everything else;
+// the moment it is cut it stops being a material and becomes one of these, because a worn
+// thing is not a stack of anything. content/gems.js says what a stone is worth; this says
+// which ones exist and where each one is.
+//
+// A stone is carried before it is worn. Taking one out of town costs a square of the pack
+// the same as a stack of ore does — it is a thing, and things are carried — and only what
+// is in the pack can go on the cord. Both are decided at the gate, on the packing screen
+// in src/scenes/Quest.js, because they are decisions about the job you are about to walk
+// rather than about a shelf in town. What is packed and what is worn are emptied when the
+// run ends: the next job out is packed for on its own terms.
 
 import { TUNING } from '../tuning.js';
 import { GEMS } from '../content/gems.js';
@@ -20,8 +25,10 @@ const BODY = {
 };
 
 // Cut stones, by gem and grade: 'sapphire:fine'. Counted, because two identical stones are
-// two stones — one can be worn and the other kept.
+// two stones — one can be carried and the other left at home. `inPack` is however many of
+// each went out on this job, so the shelf is what is held less what is packed.
 const held = new Map();
+const inPack = new Map();
 let wornKey = null;
 
 // Content mistakes are said at boot, the way src/craft.js says a recipe's are: a stone
@@ -87,14 +94,79 @@ export function cutStones() {
     .sort((a, b) => b.grade.worth - a.grade.worth || b.gem.tier - a.gem.tier);
 }
 
+// --- the pack -------------------------------------------------------------
+// One square per stone, whatever grade it is: a stone does not stack, so two of them are
+// two squares. The screen that packs is the one that counts the squares — see
+// src/scenes/Quest.js at the gate and src/run.js out on the road — and this only says
+// where each stone is.
+
+export function packedCount(key) {
+  return inPack.get(key) || 0;
+}
+
+// How many squares the stones are worth altogether, which is what a pack has less of.
+export function packedTotal() {
+  return [...inPack.values()].reduce((n, v) => n + v, 0);
+}
+
+export function shelfCount(key) {
+  return countOf(key) - packedCount(key);
+}
+
+// And what went out, best first, one entry per stone rather than per kind: the pack draws
+// a square for each.
+export function packedStones() {
+  return cutStones()
+    .filter((s) => packedCount(s.key) > 0)
+    .flatMap((s) => Array.from({ length: packedCount(s.key) }, () => ({
+      key: s.key, gem: s.gem, grade: s.grade,
+    })));
+}
+
+// Off the shelf and into the pack. The caller has already decided there is a square for
+// it: room is the pack's arithmetic, not the stone's.
+export function take(key) {
+  if (shelfCount(key) < 1) return false;
+  inPack.set(key, packedCount(key) + 1);
+  return true;
+}
+
+// And back onto it. Putting the last one back takes it off the cord with it: you cannot
+// wear what you did not bring.
+export function putBack(key) {
+  if (packedCount(key) < 1) return false;
+  const left = packedCount(key) - 1;
+  if (left) inPack.set(key, left); else inPack.delete(key);
+  if (wornKey === key && !packedCount(key)) wornKey = null;
+  return true;
+}
+
+// Tipped out on the ground to make a square, which is the one way a cut stone is lost.
+// It does not come home, so it comes off the count of what is owned as well.
+export function drop(key) {
+  if (packedCount(key) < 1) return false;
+  putBack(key); // out of the pack, and off the cord if that was the last one
+  const rest = countOf(key) - 1;
+  if (rest > 0) held.set(key, rest); else held.delete(key);
+  return true;
+}
+
+// The run is over however it ended: everything carried is home on the shelf and the cord
+// is empty. Packing is per job, so nothing about it survives the job.
+export function clearPack() {
+  inPack.clear();
+  wornKey = null;
+}
+
 export function worn() {
   return wornKey ? { key: wornKey, ...partsOf(wornKey) } : null;
 }
 
 // Wearing is not spending: the stone stays in the pack and the pack is where it goes back
-// to. Wearing the one already on takes it off, so one key does both.
+// to. Only what is in the pack can be worn — a charm left in town is doing nothing for
+// anybody. Wearing the one already on takes it off, so one key does both.
 export function wear(key) {
-  if (!held.has(key) || countOf(key) < 1) return null;
+  if (packedCount(key) < 1) return null;
   wornKey = wornKey === key ? null : key;
   return worn();
 }
@@ -134,12 +206,13 @@ export function worthLine(gem, grade) {
 export function cutRows() {
   return cutStones().map((s) => ({
     label: fullName(s.gem, s.grade),
-    note: s.key === wornKey ? 'Worn' : `x${s.n}`,
+    note: s.key === wornKey ? 'Worn' : packedCount(s.key) ? 'Packed' : `x${s.n}`,
     n: s.n,
     key: s.key,
     icon: s.gem.id,
     body: [
-      worthLine(s.gem, s.grade) + (s.key === wornKey ? ', and on.' : '.'),
+      worthLine(s.gem, s.grade)
+        + (s.key === wornKey ? ', and on the cord.' : packedCount(s.key) ? ', and out on the road.' : '.'),
       ...s.gem.body,
     ],
   }));
