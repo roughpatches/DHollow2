@@ -1690,6 +1690,13 @@ export default class Quest extends Phaser.Scene {
         out.push([`  [${i + 1}] ${row.kind === 'cook' ? 'Cook — ' : ''}${row.name} — ${row.body.join(' ')}`,
           TUNING.questHintSize, COLORS.menuText]);
       });
+      // Not dropped quietly: there are nine number keys, and a pack with more in it than
+      // that says so rather than leaving the rest of itself out of the list unexplained.
+      const over = run.handOver();
+      if (over) {
+        out.push([`  And ${over} more in the pack than there are numbers for. Take one and the next comes up.`,
+          TUNING.questHintSize, COLORS.menuDim]);
+      }
     }
     // Said rather than left to be noticed: the food went out of the numbered list when it
     // was eaten, and a square that simply vanishes tells the player nothing.

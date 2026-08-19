@@ -780,24 +780,42 @@ export function cookPlayed(played) {
   return run;
 }
 
-// The pack at a fire, as one numbered list: the bottles, then what is already cooked, then
-// what could be. One shape for all three, so the card numbers them without knowing what
-// any of them is — and the row is handed back on the way in, because a recipe and a dish
-// may well share an id.
-//   kind — 'drink', 'eat' or 'cook'
-//   id   — the material to drink or eat, or the recipe to put on
-export function atHand() {
+// The pack at a fire, as one numbered list: what could go on the fire, then what is
+// already cooked, then the bottles. One shape for all three, so the card numbers them
+// without knowing what any of them is — and the row is handed back on the way in, because
+// a recipe and a dish may well share an id.
+//   kind — 'cook', 'eat' or 'drink'
+//   id   — the recipe to put on, or the material to eat or drink
+// The meal comes before the bottles because the meal is the perishable choice: there is
+// one of it to a fire, and a bottle left in the pack can still be drunk at the next one or
+// over the bar at home.
+function handRows() {
   return [
-    ...drinkable().map((mid) => ({
-      kind: 'drink', id: mid, name: nameOf(mid), body: potions.linesFor(mid),
+    ...cookable().map((r) => ({
+      kind: 'cook', id: r.id, name: r.name, body: cookLines(r, fromPack),
     })),
     ...edible().map((mid) => ({
       kind: 'eat', id: mid, name: nameOf(mid), body: food.linesFor(mid),
     })),
-    ...cookable().map((r) => ({
-      kind: 'cook', id: r.id, name: r.name, body: cookLines(r, fromPack),
+    ...drinkable().map((mid) => ({
+      kind: 'drink', id: mid, name: nameOf(mid), body: potions.linesFor(mid),
     })),
   ];
+}
+
+// Nine of them, because nine is how many number keys there are. A row past that would be
+// drawn with a number nobody can press, which is worse than not drawing it: what does not
+// fit is counted instead — see handOver — and the next of it comes up as soon as something
+// above it is taken.
+const HAND = 9;
+
+export function atHand() {
+  return handRows().slice(0, HAND);
+}
+
+// and how much of the pack did not fit under a number
+export function handOver() {
+  return Math.max(0, handRows().length - HAND);
 }
 
 export function takeAtHand(row) {
