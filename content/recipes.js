@@ -130,6 +130,24 @@ export const RECIPES = [
   // tiers; what the stone is worth is how near it ends up to the shape it was given.
   // The hand wheel does the cabochon. The two faceted shapes want the treadle mill, which
   // is the studio's second repair.
+  // The nine are not written out one at a time. A tier is what a stone costs, what it is
+  // gated on and how hard the wheel reads it; edit the three rows in CUTTING to retune
+  // all nine, and a tenth gem in content/gems.js arrives here with no line written.
+  ...GEMS.map((g) => ({
+    id: `cut${g.id}`,
+    name: `Cut ${'aeiou'.includes(g.name[0].toLowerCase()) ? 'an' : 'a'} ${g.name.toLowerCase()}`,
+    at: 'studio',
+    skill: 'gemcutting',
+    activity: 'Cutting',
+    cuts: g.id,
+    costs: { [g.rough]: 1, ...CUTTING[g.tier].also },
+    stage: CUTTING[g.tier].stage,
+    level: CUTTING[g.tier].level,
+    rank: CUTTING[g.tier].rank,
+    hard: CUTTING[g.tier].hard,
+    xp: CUTTING[g.tier].xp,
+    body: CUTTING[g.tier].body(g),
+  })),
 
   // --- the still room --------------------------------------------------------
   // Three potions and three tiers, which is what the pot is for: the same hands at three
@@ -386,27 +404,4 @@ export const RECIPES = [
       'A pie is the only cooking in this town nobody stands over. That is the whole difficulty of it.',
     ],
   },
-
-  // --- the wheel, in the corner of the smithy --------------------------------
-  // Nine stones and one job: put the rough on the wheel and bring it down onto the shape.
-  // What comes off is the same stone at Regular, Fine or Flawless, and that is what the
-  // work is for — there is no cutting a garnet badly into something else.
-  // The nine are not written out one at a time. A tier is what a stone costs, what it is
-  // gated on and how hard the wheel reads it; edit the three rows in CUTTING to retune
-  // all nine, and a tenth gem in content/gems.js arrives here with no line written.
-  ...GEMS.map((g) => ({
-    id: `cut${g.id}`,
-    name: `Cut ${'aeiou'.includes(g.name[0].toLowerCase()) ? 'an' : 'a'} ${g.name.toLowerCase()}`,
-    at: 'forge',
-    skill: 'gemcutting',
-    activity: 'Cutting',
-    cuts: g.id,
-    costs: { [g.rough]: 1, ...CUTTING[g.tier].also },
-    stage: CUTTING[g.tier].stage,
-    level: CUTTING[g.tier].level,
-    rank: CUTTING[g.tier].rank,
-    hard: CUTTING[g.tier].hard,
-    xp: CUTTING[g.tier].xp,
-    body: CUTTING[g.tier].body(g),
-  })),
 ];
