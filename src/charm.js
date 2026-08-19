@@ -158,6 +158,23 @@ export function clearPack() {
   wornKey = null;
 }
 
+// The distinct stones in the pack, which is the whole of what can go on the cord: two of
+// one stone are two squares and one choice.
+export function packedKeys() {
+  return [...new Set(packedStones().map((s) => s.key))];
+}
+
+// Changing the cord out on the road, at a fire. The next stone in the pack takes the
+// place of the one on it, and past the last of them is nothing — so a party at a camp can
+// put a charm on, swap it for another, or take it off, with one key and no list to walk.
+export function cycle() {
+  const keys = packedKeys();
+  if (!keys.length) return worn();
+  const at = keys.indexOf(wornKey);
+  wornKey = at < 0 ? keys[0] : keys[at + 1] || null;
+  return worn();
+}
+
 export function worn() {
   return wornKey ? { key: wornKey, ...partsOf(wornKey) } : null;
 }

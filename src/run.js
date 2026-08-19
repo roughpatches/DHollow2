@@ -21,7 +21,8 @@ import {
 import { give, nameOf, heldOf } from './town.js';
 import * as potions from './potions.js';
 import {
-  packedStones, packedTotal, drop as dropStone, clearPack, fullName as stoneName, worn,
+  packedStones, packedKeys, packedTotal, drop as dropStone, clearPack,
+  cycle as cycleCord, fullName as stoneName, worn,
 } from './charm.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
@@ -695,6 +696,28 @@ export function inForce() {
 // or the card at the fire. Neither of them has to know what a potion is.
 export function drinkRow(mid) {
   return { mid, name: nameOf(mid), body: potions.linesFor(mid) };
+}
+
+// The cord at a camp, for the same reason the pack is only opened at one: they have
+// stopped, and nobody changes a stone over standing in front of a boar. What is on offer
+// is what they packed — the charm left in town is still in town — so this is the gate's
+// choice made again with better information about the road.
+export function cordable() {
+  return atCamp() ? packedKeys() : [];
+}
+
+// One press moves the cord on: the next stone they are carrying, and past the last of
+// them, nothing.
+export function changeCord() {
+  if (!atCamp() || !cordable().length) return null;
+  return cycleCord();
+}
+
+// What the card says about it: every stone in the pack, and which of them is on.
+export function cordRows() {
+  const on = worn();
+  return packedStones().filter((s, i, all) => all.findIndex((o) => o.key === s.key) === i)
+    .map((s) => ({ key: s.key, gem: s.gem, grade: s.grade, on: !!on && on.key === s.key }));
 }
 
 // --- walking ---------------------------------------------------------------

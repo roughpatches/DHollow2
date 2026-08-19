@@ -285,6 +285,15 @@ export default class Quest extends Phaser.Scene {
       return;
     }
 
+    // The cord, at a camp, for the same reason and by the same rule: one key, no cursor.
+    // It walks the stones in the pack and then off the end of them, so putting one on,
+    // swapping it, and taking it off are all the same press.
+    if (k === 'c' && !this.approaching && run.cordable().length) {
+      run.changeCord();
+      this.draw();
+      return;
+    }
+
     // The pack, at a camp. A number key and not the cursor: the cursor belongs to the
     // ways, and a party that stopped for a drink has not answered the node yet.
     if (/^[1-9]$/.test(k) && !this.approaching) {
@@ -1058,22 +1067,29 @@ export default class Quest extends Phaser.Scene {
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
     else if (r.phase === 'choose' && !this.approaching) {
       // one thing to do here is not a question, so it is not asked as one
-      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      const pack = this.campKeys();
       this.hint((r.nodes[r.at].worked.length > 1
         ? '[Up/Down] Choose    [Enter] Work it'
         : '[Enter] Get to work') + `${pack}    [Esc] Turn back`);
     }
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.playing()) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
-      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      const pack = this.campKeys();
       this.hint((r.nodes[r.at].beat.choose
         ? '[Up/Down] Choose    [Enter] Do it'
         : `[E] ${this.page < this.pages - 1 ? 'Read on' : 'Go on'}`) + `${pack}    [Esc] Turn back`);
     }
     else {
-      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      const pack = this.campKeys();
       this.hint(`${this.page < this.pages - 1 ? '[E] Read on' : '[E] Press on'}${pack}    [Esc] Turn back`);
     }
+  }
+
+  // What a fire adds to the hint line, and what nowhere else on the road does: the pack
+  // is open here, and the stone on the cord can be changed here.
+  campKeys() {
+    return (run.drinkable().length ? '    [1-9] Drink' : '')
+      + (run.cordable().length ? '    [C] Change the stone' : '');
   }
 
   // The constitution, and nothing else on the band with it. It is the one readout that
@@ -1646,7 +1662,8 @@ export default class Quest extends Phaser.Scene {
   packLines() {
     const can = run.drinkable();
     const force = run.inForce();
-    if (!can.length && !force.length) return [];
+    const cord = run.cordRows();
+    if (!can.length && !force.length && !run.cordable().length) return [];
     const out = [['', TUNING.questHintSize, COLORS.menuRule]];
     if (can.length) {
       out.push(['Somebody has the pack open.', TUNING.questHintSize, COLORS.menuDim]);
@@ -1659,6 +1676,19 @@ export default class Quest extends Phaser.Scene {
     for (const p of force) {
       out.push([`  ${p.name} is working. ${p.body.join(' ')}`,
         TUNING.questHintSize, COLORS.menuMapMark]);
+    }
+    // And the stones they packed, with the one on the cord marked. [C] walks them, so the
+    // list is a readout of where the key is rather than something to point a cursor at.
+    if (run.cordable().length) {
+      out.push(['And the cord, which can be changed here.', TUNING.questHintSize, COLORS.menuDim]);
+      for (const st of cord) {
+        out.push([`  ${st.on ? '>' : ' '} ${fullName(st.gem, st.grade)} — ${worthLine(st.gem, st.grade)}`,
+          TUNING.questHintSize, st.on ? COLORS.menuAccent : COLORS.menuText]);
+      }
+      if (!cord.some((st) => st.on)) {
+        out.push(['    Nothing on it. Whatever they are carrying is doing nothing for them.',
+          TUNING.questHintSize, COLORS.menuMapFolk]);
+      }
     }
     return out;
   }
