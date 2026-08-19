@@ -369,11 +369,14 @@ const STONE_ART = {
 const ROUGH_STONE = 'An_uncut_gem_recently_mined/rotations/An_uncut_gem_recently_mined.png';
 const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
 
-// And the things a pack holds that are not stones: icon name → the export. No ink named,
-// so these go up as painted — a thing painted in its own colour has nothing to be put
-// through. Only a stone is one shape in nine colours; everything else is itself.
+// And the things a pack holds that are not stones: icon name → the export, each under its
+// own folder in art/items because two exports asked for at different times come back under
+// the same name often enough. No ink named, so these go up as painted — a thing painted in
+// its own colour has nothing to be put through. Only a stone is one shape in nine colours;
+// everything else is itself.
 const PAINTED_ITEMS = {
-  heartwood: 'art/oak/An_Oak_log/rotations/An_Oak_log.png',
+  heartwood: 'art/items/heartwood/An_Oak_log/rotations/An_Oak_log.png',
+  oakbranch: 'art/items/oakbranch/An_Oak_log/rotations/An_Oak_log.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
