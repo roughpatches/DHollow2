@@ -145,8 +145,11 @@ export const RECIPES = [
   // These name `forges` rather than `makes`: one piece comes off the anvil however good
   // the smith is, and what the work decides is which grade of it — the same bargain a cut
   // stone makes at the wheel. See content/gear.js and `gear` in tuning.js.
-  // Forging has no engine yet, so these are done on the spot and carry no fuel; the day
-  // ForgeEngine is imported they want one, and src/craft.js says so at boot.
+  // Forging is played at the anvil now — see src/minigames/ForgeEngine.js — so all five
+  // are over a fire and all five want a fuel. `hard` names one of the three signature
+  // jobs in `forge.jobs` in tuning.js rather than a difficulty: the links of a mail, the
+  // two edges of a blade, the work-hardening of raised plate. A piece naming none is
+  // plain work, which is what the first thing anybody makes should be.
   {
     id: 'bronzedagger',
     name: 'Draw a bronze dagger',
@@ -156,6 +159,7 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 1,
     activity: 'Forging',
+    fuel: 3,
     costs: { bronzebar: 1 },
     forges: 'bronzedagger',
     xp: 20,
@@ -176,6 +180,7 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 1,
     activity: 'Forging',
+    fuel: 4,
     costs: { bronzebar: 2, oaklog: 1 },
     forges: 'bronzeshield',
     xp: 26,
@@ -195,6 +200,8 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 2,
     activity: 'Forging',
+    hard: 'links',
+    fuel: 6,
     costs: { bronzebar: 4, charcoal: 2 },
     forges: 'bronzechainmail',
     xp: 48,
@@ -212,6 +219,8 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 2,
     activity: 'Forging',
+    hard: 'edges',
+    fuel: 5,
     costs: { bronzebar: 2, charcoal: 1 },
     forges: 'bronzesword',
     xp: 40,
@@ -231,6 +240,8 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 3,
     activity: 'Forging',
+    hard: 'raising',
+    fuel: 8,
     costs: { bronzebar: 6, charcoal: 3 },
     forges: 'bronzeplatemail',
     xp: 84,

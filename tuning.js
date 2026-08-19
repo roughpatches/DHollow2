@@ -217,6 +217,72 @@ export const TUNING = {
     settleMs: 900, // how long the pot is left to be looked at before the tally
   },
 
+  // The anvil (src/minigames/ForgeEngine.js), which is what a Forging recipe is. Three
+  // things at once: the same bellows fire the crucible works, a hammer wound and released
+  // against a sweeping zone, and the piece's soundness draining the whole time it is hot.
+  // Everything above `jobs` is the anvil and is the same whatever is on it.
+  forge: {
+    // The fire, on the crucible's numbers so a smith who has smelted already knows it.
+    sweetBand: { low: 0.5, high: 0.78 },
+    warmTolerance: 0.1,
+    decayPerSec: 0.05,
+    pumpBurst: 0.11,
+    pumpFuelSec: 0.8, // what a pump costs the bench's fire, in seconds off its clock
+    // One key does the bellows and the hammer, and this is the line between them: a hold
+    // that never got this far up the bar was a tap, and a tap is a pump.
+    pumpBelow: 0.12,
+    // The hammer. It winds slowly and vents fast, so the rhythm is wind, strike, wind.
+    chargeDurationMs: 1500, // a full wind, from nothing to the top
+    ventPerSec: 3.0,
+    overchargeAt: 1.0, // held past this and the blow goes wild
+    windHoldScale: 0.25, // what the fire and the stress run at while a blow is being wound
+    // The zone the blow wants, sweeping end to end at one pace — the same pass every time,
+    // so what is learnt is the rhythm and not the pattern.
+    powerZone: { min: 0.22, max: 0.86, width: 0.2 },
+    sweepSpeed: 0.34, // of the bar per second
+    perfectWithin: 0.5, // how near the middle of the zone a blow has to be released
+    perfectHeatWithin: 0.6, // and how near the middle of the band the fire has to be
+    // What a blow does, and what a bad one costs.
+    progressPerStrike: 0.1, // ten clean blows shape a piece
+    heatPerStrike: 0.06, // and every one of them draws heat out of it
+    stressPerSec: 0.05, // what being held hot costs the piece's soundness
+    scorchChip: 0.16, // a blow struck off a burning piece
+    coldChip: 0.06, // and off a cold one, which is cheaper and gets nothing done
+    wildChip: 0.1, // a swing wound past the top of the bar
+    // The tub. It gives the soundness back and takes the heat with it, which is the whole
+    // of the decision: nobody quenches for free.
+    quenchCoolPerSec: 0.5,
+    quenchRegenPerSec: 0.14,
+    settleMs: 900, // how long a finished piece is left to be looked at
+    crackMs: 1200, // and how long a cracked one is
+    // The three signature jobs. A recipe names one in `hard`, and a recipe naming none is
+    // a plain piece: wind, strike, keep it hot, keep it whole.
+    //   links   — a mail. Blows landed inside `windowMs` of each other chain, and every
+    //             link in the chain is worth more, up to `maxBonus`. One off the beat and
+    //             it starts again.
+    //   edges   — a blade. The work turns over at halfway and the second edge is compared
+    //             with the first; the gap between them is written into the judgments as
+    //             `mismatchWeight` misses at worst.
+    //   raising — plate. Every blow leaves the metal harder and doing less, up to `max`,
+    //             and only the tub anneals it soft again.
+    // `say` is the one line the bench puts in front of the player before they commit the
+    // bars, the way a brew's tier says how many shapes are going in the pot.
+    jobs: {
+      links: {
+        say: 'blows on the beat chain, and every link is worth more',
+        windowMs: 1400, bonusPerLink: 0.12, maxBonus: 0.6,
+      },
+      edges: {
+        say: 'it turns over at halfway, and the second edge is marked against the first',
+        mismatchWeight: 6,
+      },
+      raising: {
+        say: 'the metal hardens under the hammer, and only the tub softens it',
+        perStrike: 0.07, max: 0.6, annealPerSec: 0.5,
+      },
+    },
+  },
+
   // Alchemy (src/minigames/BrewEngine.js), which is what a Brewing recipe is: a shape
   // swelling in the pot and an outline to stop it inside, one for every ingredient going
   // in. Everything above the tiers is the pot itself and is the same at any difficulty.
@@ -327,11 +393,6 @@ export const TUNING = {
     scale: {
       hit: 1, harm: 1, guard: 1, hp: 3, con: 2,
     },
-    // Forging has no engine yet — see the reference list in CLAUDE.md — so nothing is
-    // played and there is no quality to read. This is what an unplayed forge scores until
-    // ForgeEngine is imported, which puts every piece on the middle grade. Delete this
-    // line the day the engine lands and the number comes off the anvil instead.
-    unplayedQuality: 0.6,
   },
 
   // The Fell minigame (src/minigames/FellEngine.js), which is what a Woodcutting node

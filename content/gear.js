@@ -12,10 +12,12 @@
 //           and no more, which is what makes a slot a question rather than a sum.
 //   body  — what it is, in the world's voice. Yours to write.
 //
-// How far that one number moves is not written here: it is how well the forging went. See
-// `gear` in tuning.js for the grades and what each is worth. A poor piece is still a
-// piece — there is no failing into nothing — and a masterwork is the same object made by
-// somebody who was paying attention.
+// How far that one number moves is not written here: it is how well the forging went at
+// the anvil. See `gear` in tuning.js for the grades and what each is worth. A piece that
+// was finished badly is still a piece, and a masterwork is the same object made by
+// somebody who was paying attention. A piece cracked under the hammer is no piece at all
+// and the bars are gone with it — the one hard fail at a bench, and the only reason the
+// soundness bar is worth watching. See src/minigames/ForgeEngine.js.
 //
 // Everything below is tier one, because tier one is all the Greywood has in it. Iron gear
 // is the same five entries with a different bar in front of them, the day that ground is

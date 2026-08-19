@@ -172,11 +172,13 @@ export function make(r, played) {
   // A cut is one stone whatever anybody's points are: what the work decides is the grade,
   // and the grade is the wheel's own reading of it and nothing else's.
   const stone = r.cuts ? cut(r.cuts, quality ?? 0) : null;
-  // And a forge is one piece, on the same bargain. Until Forging has an engine there is
-  // no quality to read, so it takes what tuning.js says an unplayed forge is worth rather
-  // than the bottom of the table: a piece nobody was allowed to play for should not be
-  // the worst piece in town.
-  const piece = r.forges ? forge(r.forges, quality ?? TUNING.gear.unplayedQuality) : null;
+  // And a forge is one piece, on the same bargain — except that the anvil is the one
+  // bench with a hard fail in it. A piece cracked under the hammer is no piece: the metal
+  // is in two halves on the floor and the bars that went into it are gone, which is what
+  // makes the soundness bar worth watching. Everything short of that is a piece, and how
+  // well the work went decides which grade of it.
+  const cracked = !!(played && played.failed);
+  const piece = r.forges && !cracked ? forge(r.forges, quality ?? 0) : null;
 
   const made = {};
   for (const [m, n] of Object.entries(r.makes || {})) {
@@ -190,7 +192,8 @@ export function make(r, played) {
   // Crafting is the player's own work and nobody else's: they are the one standing at the
   // bench, so the experience is theirs and so are the points it comes to.
   return {
-    made, stone, piece, xp, quality, burnt, failed: !!(played && played.failed), levels: award(YOU, xp),
+    made, stone, piece, cracked: cracked && !!r.forges, xp, quality, burnt,
+    failed: cracked, levels: award(YOU, xp),
   };
 }
 
@@ -242,6 +245,8 @@ export function madeLines(r, result) {
     const { piece, grade } = result.piece;
     out.push(`${gearName(piece, grade)}. ${gearWorth(piece, grade)} while it is on, `
       + `and it goes on at the gate.`);
+  } else if (result.cracked) {
+    out.push('It cracked. There is nothing on the anvil and the metal is gone with it.');
   }
   // What went under it is said whichever way it went: a fire that was lit is wood that is
   // gone, and a job lost to one is the player being told what it cost them.
@@ -250,7 +255,7 @@ export function madeLines(r, result) {
   // A cut says what came off the wheel above this, so a bench that made only a stone is
   // not also told it made nothing.
   if (got.length) out.push(`You have ${list(got)}.`);
-  else if (!result.stone && !result.piece) out.push('Nothing came off the bench worth carrying.');
+  else if (!result.stone && !result.piece && !result.cracked) out.push('Nothing came off the bench worth carrying.');
   // Work done at the cap pays what it pays in materials and nothing to the level, and is
   // said so here rather than left to be noticed on the crew screen.
   const held = capHeldBy();

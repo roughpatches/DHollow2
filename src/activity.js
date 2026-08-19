@@ -14,6 +14,7 @@ import { MineEngine } from './minigames/MineEngine.js';
 import { BrewEngine } from './minigames/BrewEngine.js';
 import { GemEngine } from './minigames/GemEngine.js';
 import { SmeltEngine } from './minigames/SmeltEngine.js';
+import { ForgeEngine } from './minigames/ForgeEngine.js';
 import { TensionBarEngine } from './minigames/TensionBarEngine.js';
 import { Fired } from './minigames/Fired.js';
 
@@ -99,6 +100,22 @@ const ENGINES = {
     make: (scene, layout, opts) => new SmeltEngine(scene, { ...TUNING.smelt, fire: opts.fire, layout }),
     // Three keys and no aiming: the fire, the surface, and the decision to stop.
     hint: '[Space] Pump the bellows    [Up] Skim the oldest clump    [Down] Pour',
+    fired: true,
+  },
+  // The anvil. One key does the bellows and the hammer — a tap is a pump, a hold is a
+  // swing — because a smith has two hands and the player has one space bar.
+  Forging: {
+    // `hard` names one of the three signature jobs rather than a difficulty, and the
+    // engine reads it by its own name: see `forge.jobs` in tuning.js.
+    make: (scene, layout, opts) => new ForgeEngine(scene, {
+      ...TUNING.forge,
+      ...(TUNING.forge.jobs[opts.hard] ? { [opts.hard]: TUNING.forge.jobs[opts.hard] } : {}),
+      fire: opts.fire,
+      layout,
+    }),
+    hint: '[Space] Tap for the bellows, hold to swing    [Down] Quench',
+    tiers: TUNING.forge.jobs,
+    says: (t) => t.say,
     fired: true,
   },
   Cutting: {
