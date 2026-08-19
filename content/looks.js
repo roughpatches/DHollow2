@@ -369,6 +369,13 @@ const STONE_ART = {
 const ROUGH_STONE = 'An_uncut_gem_recently_mined/rotations/An_uncut_gem_recently_mined.png';
 const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
 
+// And the things a pack holds that are not stones: icon name → the export. No ink named,
+// so these go up as painted — a thing painted in its own colour has nothing to be put
+// through. Only a stone is one shape in nine colours; everything else is itself.
+const PAINTED_ITEMS = {
+  heartwood: 'art/oak/An_Oak_log/rotations/An_Oak_log.png',
+};
+
 // And the same for the things a pack holds: materials by their id from
 // content/materials.js, cut stones by their gem id from content/gems.js. Same shape as
 // SKILL_ART and read by the same code, so a sheet dropped under art/ and a column of
@@ -383,11 +390,14 @@ export const ITEM_ART = {
   // And art that came back as its own file rather than as a cell on a sheet: icon name →
   // the painting, and the ink out of COLORS.icon to put it through. Read before `at`, so a
   // name with a painting of its own wins over the same name on a sheet.
-  files: Object.fromEntries(Object.entries(STONE_ART).flatMap(([shape, stones]) => stones
-    .flatMap((id) => [
-      [`rough${id}`, [`art/gems/${shape}/${ROUGH_STONE}`, id]],
-      [id, [`art/gems/${shape}/${CUT_STONE}`, id]],
-    ]))),
+  files: {
+    ...Object.fromEntries(Object.entries(PAINTED_ITEMS).map(([id, path]) => [id, [path]])),
+    ...Object.fromEntries(Object.entries(STONE_ART).flatMap(([shape, stones]) => stones
+      .flatMap((id) => [
+        [`rough${id}`, [`art/gems/${shape}/${ROUGH_STONE}`, id]],
+        [id, [`art/gems/${shape}/${CUT_STONE}`, id]],
+      ]))),
+  },
 };
 
 // What is standing at a node, for the encounters that have art instead of the silhouette
