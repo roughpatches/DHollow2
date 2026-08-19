@@ -18,7 +18,6 @@ import {
   isOpen, contribute, contributeLines, statusLines, remaining,
 } from '../town.js';
 import { worksAt } from '../craft.js';
-import { catchUpLines } from '../party.js';
 import { applyToWorld } from '../settings.js';
 import { SCENES, START } from '../../content/scenes.js';
 import { play, hasPlayed, holdBack } from '../script.js';
@@ -343,15 +342,9 @@ export default class World extends Phaser.Scene {
       return;
     }
     const result = contribute(b.id);
-    const lines = contributeLines(b.id, result);
-    if (result.levelled) {
-      // a panel has no tiles for a stage to lay down; the picture is the whole of it
-      restate(this.built, b.id);
-      // and where the repair moved the level cap, whoever it moved is said here rather
-      // than found later on the crew screen
-      lines.push(...catchUpLines());
-    }
-    this.say(b.name, lines, null);
+    // a panel has no tiles for a stage to lay down; the picture is the whole of it
+    if (result.levelled) restate(this.built, b.id);
+    this.say(b.name, contributeLines(b.id, result), null);
   }
 
 }

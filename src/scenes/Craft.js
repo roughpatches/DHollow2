@@ -5,7 +5,6 @@ import {
 } from '../town.js';
 import { engineFor, hintFor } from '../activity.js';
 import { framed, padOf, inkOf } from '../frames.js';
-import { catchUpLines } from '../party.js';
 
 const PANEL = 'parchment'; // a bench is stood at in the town, so it is the town's paper
 
@@ -148,12 +147,8 @@ export default class Craft extends Phaser.Scene {
   // building takes, said at the bench because that is where you are standing.
   rebuild() {
     const result = contribute(this.at);
-    const lines = contributeLines(this.at, result);
-    if (result.levelled) {
-      this.game.events.emit('craft:built', this.at);
-      lines.push(...catchUpLines()); // a cap that moved pays out where it was paid for
-    }
-    this.done = { title: buildingOf(this.at).name, lines };
+    if (result.levelled) this.game.events.emit('craft:built', this.at);
+    this.done = { title: buildingOf(this.at).name, lines: contributeLines(this.at, result) };
     this.row = 0;
     this.draw();
   }

@@ -10,7 +10,7 @@ import { RECIPES } from '../content/recipes.js';
 import { MATERIALS } from '../content/materials.js';
 import { SKILLS } from '../content/skills.js';
 import {
-  award, levelOf as levelYou, rankOf, skillOf, YOU,
+  award, atCap, levelOf as levelYou, rankOf, skillOf, YOU,
 } from './party.js';
 import {
   buildingOf, levelOf as stageAt, give, heldOf, nameOf, remaining, levelCap, capHeldBy,
@@ -164,7 +164,12 @@ export function madeLines(r, result) {
   else if (result.quality !== null) out.push(`${Math.round(result.quality * 100)}% of what the work was worth.`);
   const got = Object.entries(result.made);
   out.push(got.length ? `You have ${list(got)}.` : 'Nothing came off the bench worth carrying.');
-  out.push(`${result.xp} toward your level.`);
+  // Work done at the cap pays what it pays in materials and nothing to the level, and is
+  // said so here rather than left to be noticed on the crew screen.
+  const held = capHeldBy();
+  out.push(atCap(YOU) && held
+    ? `Worth ${result.xp} to your level, and nothing counts until ${held.name} is rebuilt.`
+    : `${result.xp} toward your level.`);
   if (result.levels) {
     out.push(`Level ${levelYou(YOU)}. ${result.levels * TUNING.skillPointsPerLevel} points to spend.`);
   }
