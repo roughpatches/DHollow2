@@ -381,6 +381,7 @@ const PAINTED_ITEMS = {
   copperore: 'art/items/copperore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   tinore: 'art/items/tinore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   coal: 'art/items/coal/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
+  bronzebar: 'art/items/bronzebar/A_metal_bar_for_use_in_blacksm/rotations/A_metal_bar_for_use_in_blacksm.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
