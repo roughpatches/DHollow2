@@ -28,8 +28,11 @@
 
 export const RECIPES = [
   // --- the smithy ------------------------------------------------------------
-  // Iron is the one chain in town that runs end to end: the wood pays for the fire, the
-  // fire pays for the bar, and the bar is what the chapel roof is nailed on with.
+  // Bronze is the one chain in town that runs end to end: the wood and the coal pay for
+  // the fire, the fire pays for the bar, and the bar is what the chapel roof is nailed on
+  // with. It is tier-one work, because tier one is all the Greywood has in it — copper
+  // and tin and coal. Iron is written and unreachable until its ground is; see
+  // content/materials.js.
   {
     id: 'charcoal',
     name: 'Burn a clamp',
@@ -48,20 +51,22 @@ export const RECIPES = [
     ],
   },
   {
-    id: 'ironbar',
-    name: 'Smelt a bar',
+    // Two ores in one crucible, which is why the wood pays for both halves of a run: a
+    // party that only came home with copper has come home with half a bar.
+    id: 'bronzebar',
+    name: 'Cast a bronze bar',
     at: 'forge',
     stage: 1,
     level: 1,
     skill: 'smithing',
     rank: 1,
     activity: 'Smelting',
-    costs: { ironore: 3, charcoal: 2 },
-    makes: { ironbar: 1 },
+    costs: { copperore: 3, tinore: 1, charcoal: 2 },
+    makes: { bronzebar: 1 },
     xp: 16,
     body: [
-      'Ore and charcoal fed in by turns until what is left at the bottom is a bloom, and the bloom beaten out until what is left is iron.',
-      'Most of what goes in comes out as slag. That is not a fault in the method.',
+      'Copper down first and held there, the tin in last so it does not burn off, and the whole of it poured before anybody has time to argue about the proportion.',
+      'Nine parts to one. Get it wrong the other way and what comes out is a bar that bends.',
     ],
   },
   {
@@ -73,7 +78,7 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 1,
     activity: 'Forging',
-    costs: { ironbar: 1, charcoal: 1 },
+    costs: { bronzebar: 1, charcoal: 1 },
     makes: { nails: 10 },
     xp: 14,
     body: [
@@ -82,22 +87,23 @@ export const RECIPES = [
     ],
   },
   {
-    // The second stage of the smithy in one line: the same ore, and twice as much of it
-    // comes out as iron. This is what rebuilding the bloomery bought.
-    id: 'bloomery',
-    name: 'Run the bloomery',
+    // The second stage of the smithy in one line: the same ore, and half again as much of
+    // it comes out as metal. This is what rebuilding the furnace bought, and it is the
+    // first thing in town that coal is burnt in rather than charcoal.
+    id: 'furnace',
+    name: 'Run the furnace',
     at: 'forge',
     stage: 2,
     level: 4,
     skill: 'smithing',
     rank: 2,
     activity: 'Smelting',
-    costs: { ironore: 6, charcoal: 3 },
-    makes: { ironbar: 3 },
+    costs: { copperore: 6, tinore: 2, coal: 3 },
+    makes: { bronzebar: 3 },
     xp: 34,
     body: [
-      'A stack tall enough to hold its own heat, tapped at the bottom and fed for as long as there is anybody to feed it.',
-      'One man can work it. Two men can work it properly.',
+      'A stack tall enough to hold its own heat, charged from the top and tapped at the bottom, and fed for as long as there is anybody to feed it.',
+      'Coal takes it further than charcoal ever did. One man can work it. Two men can work it properly.',
     ],
   },
 

@@ -18,13 +18,102 @@ export const MATERIALS = [
 
   // --- what comes off a face -------------------------------------------------
   // Mining pays these; Smithing and Gem Cutting are what they are waiting for.
+  // Ore runs in three tiers, and a tier is a place rather than a number: everything in a
+  // tier comes out of the same ground, so finding the ground is what unlocks the metal.
+  //   Tier one is the Greywood — copper, tin and coal, which is bronze and the fire to
+  //     melt it, and it is all the smithy can reach today.
+  //   Tier two is iron, mithril and adamantium, and tier three is dwarven, elvish and
+  //     holy. Neither has its zone yet. They are written and carried and craftable at
+  //     nothing, the way a node zoned to a place that is not open is content waiting on
+  //     the place. Give them a zone in content/places.js and a node in content/nodes.js
+  //     that draws them, and they are in the game the same hour.
+  // Nothing in code reads a tier: what makes an ore second-tier is that only second-tier
+  // ground pays it out. Add the recipes when the ground lands.
+
+  // tier one — the Greywood
+  {
+    id: 'copperore',
+    name: 'Copper Ore',
+    start: 0,
+    body: [
+      'Green-crusted lumps the colour of a church roof, breaking salmon-pink where the hammer has been at them.',
+      'Soft, common, and worth nothing much on its own. It is what it is put with that matters.',
+    ],
+  },
+  {
+    id: 'tinore',
+    name: 'Tin Ore',
+    start: 0,
+    body: [
+      'Small black pebbles out of the stream gravel, dull as slag and twice the weight they look.',
+      'The other half of bronze, and the half nobody notices is short until the bar comes out soft.',
+    ],
+  },
+  {
+    id: 'coal',
+    name: 'Coal',
+    start: 0,
+    body: [
+      'Dull black, light in the hand, and it marks everything it is carried next to.',
+      'It burns hotter than a clamp of charcoal and nobody has to sit up two nights making it.',
+    ],
+  },
+
+  // tier two — somewhere not yet open
   {
     id: 'ironore',
     name: 'Iron Ore',
     start: 0,
     body: [
       'Rusty-brown lumps with the grain of the seam still on them, heavy out of all proportion to their size.',
-      'Nobody in Dreadhollow has lit a smelter in living memory. The ore does not care.',
+      'There is none of it in the Greywood. Whatever ground it comes out of, nobody here has walked it.',
+    ],
+  },
+  {
+    id: 'mithrilore',
+    name: 'Mithril Ore',
+    start: 0,
+    body: [
+      'Pale rock with a bright thread running through it that has not tarnished in whatever time it has been lying there.',
+      'A full sack of it carries like a half one. Men have killed each other over a half one.',
+    ],
+  },
+  {
+    id: 'adamantiumore',
+    name: 'Adamantium Ore',
+    start: 0,
+    body: [
+      'Blue-black, and the pick comes off it ringing with nothing to show for the swing.',
+      'It holds its edge in ground where every other rock has gone to gravel. No fire in Dreadhollow will touch it.',
+    ],
+  },
+
+  // tier three — somewhere not yet open
+  {
+    id: 'dwarvenore',
+    name: 'Dwarven Ore',
+    start: 0,
+    body: [
+      'Squared blocks of ore, cut rather than broken, out of ground that was being worked before anybody here had a word for working ground.',
+      'Whoever raised it stacked it and left it stacked. They did not come back.',
+    ],
+  },
+  {
+    id: 'elvishore',
+    name: 'Elvish Ore',
+    start: 0,
+    body: [
+      'Ore, or root, or whatever it was before the rock closed over it — green in the grain and warm to hold.',
+      'It was grown and not laid down, and it has not stopped behaving like something grown.',
+    ],
+  },
+  {
+    id: 'holyore',
+    name: 'Holy Ore',
+    start: 0,
+    body: [
+      'White stone shot through with a metal that stays bright in the wet and takes the cold off the hand holding it.',
+      'There is one thing in the world it gets made into. This town had one, once, and it hung in the chapel.',
     ],
   },
   {
@@ -52,12 +141,22 @@ export const MATERIALS = [
     ],
   },
   {
+    id: 'bronzebar',
+    name: 'Bronze Bar',
+    start: 0,
+    body: [
+      'A hand\'s length of cast bronze, gold where the light is on it and dull brown where it is not, with the mould line still down one side.',
+      'This is the first metal anybody has drawn in Dreadhollow since the smithy went cold.',
+    ],
+  },
+  {
+    // Waiting on tier-two ore, the way the ore is waiting on its ground.
     id: 'ironbar',
     name: 'Iron Bar',
     start: 0,
     body: [
       'A hand\'s length of worked iron, square in section, with the hammer still legible along it.',
-      'This is the first iron anybody has drawn in Dreadhollow since the smithy went cold.',
+      'Harder than bronze, cheaper than bronze wherever there is iron to be had, and there is none to be had here.',
     ],
   },
   {
