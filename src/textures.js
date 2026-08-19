@@ -4,7 +4,7 @@
 // downstream cares which they are.
 
 import { TUNING, COLORS, PALETTES } from '../tuning.js';
-import { LOOKS } from '../content/looks.js';
+import { LOOKS, STRUCTURES } from '../content/looks.js';
 import { buildUiAtlas } from './uiatlas.js';
 
 // A palette can have drawn art under the same name — the player does. What the export
@@ -111,6 +111,84 @@ export function actorFrame(palette, dir, frame) {
 
 export function walkAnim(palette, dir) {
   return `${palette}_walk_${dir}`;
+}
+
+// --- buildings with no export yet -------------------------------------------
+// A building named in STRUCTURES with a `shell` instead of a folder of pictures is drawn
+// here, one texture per stage of repair, in the same spirit as the bodies above: enough
+// shape to read at a glance and no more. It is deliberately see-through and hatched — it
+// stands over a painted town, and a placeholder that hid the painting behind it would be
+// worse than none. The finished footprint is outlined from the first stage, so what a
+// repair is going to put there is visible before any of it is standing.
+// Swap `shell` for `path` and `stages` when the export arrives; nothing else changes.
+
+const SHELL_BAY = 11; // pixels between one upright and the next
+
+export function stageKey(s, i) {
+  return `built_${s.id}_${i}`;
+}
+
+// how many pictures a building has, painted or drawn
+export function stagesIn(s) {
+  return s.stages ? s.stages.length : s.shell.built.length;
+}
+
+function drawShell(g, spec, built) {
+  const [w, h] = spec.size;
+  // A thing with a roof is drawn walls-then-roof, so the top of the frame is left for the
+  // roof to go in and the walls stop short of it.
+  const cap = spec.roof ? Math.round(h * 0.2) : 0;
+  const up = Math.max(4, Math.round((h - cap - 2) * built)); // how much of it is standing
+  const top = h - up;
+
+  // What has gone up so far: dark, so the painting behind it goes quiet, and hatched in
+  // the gold this game marks everything unfinished in.
+  fill(g, COLORS.bg, 1, top, w - 2, up - 1, 0.55);
+  for (let d = -h; d < w; d += 6) {
+    for (let i = 0; i < up - 1; i++) {
+      const x = d + i;
+      if (x > 0 && x < w - 1) fill(g, COLORS.menuAccent, x, h - 2 - i, 1, 1, 0.32);
+    }
+  }
+
+  // Uprights, standing the whole height at every stage: what goes up first on a site, and
+  // the one part of it that does not change as the walls come.
+  for (let x = 1; x < w - 2; x += SHELL_BAY) fill(g, COLORS.menuAccent, x, cap, 1, h - cap - 1, 0.35);
+  fill(g, COLORS.menuAccent, 1, top, w - 2, 1, 0.95); // and the head of what is standing
+
+  // The footprint it will fill when it is finished, dashed, so the first stage says how
+  // big the last one is going to be.
+  for (let x = 0; x < w; x += 4) fill(g, COLORS.menuAccent, x, cap, 2, 1, 0.7);
+  for (let y = cap; y < h; y += 4) {
+    fill(g, COLORS.menuAccent, 0, y, 1, 2, 0.7);
+    fill(g, COLORS.menuAccent, w - 1, y, 1, 2, 0.7);
+  }
+
+  // A roof once it is all the way up, where the thing is the sort that has one. A jetty is
+  // not, and gets a rail along the head of it instead.
+  if (built >= 1) {
+    if (spec.roof) {
+      g.lineStyle(1, COLORS.menuAccent, 0.9);
+      g.strokeTriangle(0, cap, (w - 1) / 2, 0, w - 1, cap);
+    } else {
+      fill(g, COLORS.menuAccent, 0, top - 3, w, 1, 0.75);
+    }
+  }
+
+  fill(g, 0x000000, 0, h - 2, w, 2, 0.4); // and what it throws on the ground it stands on
+}
+
+function buildShells(scene) {
+  for (const s of STRUCTURES.filter((q) => q.shell)) {
+    s.shell.built.forEach((built, i) => {
+      const key = stageKey(s, i);
+      if (scene.textures.exists(key)) return;
+      const g = scene.make.graphics({ x: 0, y: 0 }, false);
+      drawShell(g, s.shell, built);
+      g.generateTexture(key, s.shell.size[0], s.shell.size[1]);
+      g.destroy();
+    });
+  }
 }
 
 // --- the crawl's landscape --------------------------------------------------
@@ -222,6 +300,7 @@ function buildLandscape(scene) {
 
 export function buildTextures(scene) {
   buildLandscape(scene);
+  buildShells(scene);
   // the minigame kit's atlas is drawn here too, so an imported activity engine works
   // without any wiring of its own
   buildUiAtlas(scene);
