@@ -13,6 +13,7 @@ import { iconKeyFor } from '../icons.js';
 import { drawSlots, shapeOf } from '../slots.js';
 import { cutRows } from '../charm.js';
 import * as potions from '../potions.js';
+import * as food from '../food.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
@@ -54,9 +55,21 @@ const withPotion = (r) => (potions.isPotion(r.mid) ? {
   ],
 } : r);
 
+// Food says what it is worth for the same reason a potion does: a number nobody can see
+// is a number nobody cooks for. It answers to nothing here — a meal is eaten at a fire on
+// the road and not standing in a tavern — so the line is a readout and not an offer.
+const withFood = (r) => (food.isFood(r.mid) ? {
+  ...r,
+  body: [
+    ...r.body,
+    ...food.linesFor(r.mid),
+    'Carry it out and it is eaten at a camp.',
+  ],
+} : r);
+
 const inventory = () => [
   ...cutRows().flatMap((r) => squares(r, r.n ?? 1)),
-  ...carriedRows().map(withPotion).flatMap((r) => squares(r, r.n)),
+  ...carriedRows().map(withPotion).map(withFood).flatMap((r) => squares(r, r.n)),
   ...potions.waitingRows().map((p) => ({
     label: p.name,
     note: 'Drunk',

@@ -21,6 +21,17 @@ import { rewardToast, clearToast } from '../toast.js';
 import { markKey } from '../textures.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
+// What a pan on a camp fire came to, in the few words the card has room for. Nothing is
+// said about a pan that is still on it — the engine is drawing that.
+function mealResult(meal) {
+  if (!meal.result) return ' went on the fire';
+  if (meal.result.failed) return ' — botched';
+  const got = Object.entries(meal.result.made || {});
+  return got.length
+    ? ` — ${got.map(([m, n]) => `${n} ${goodName(m)}`).join(', ')}`
+    : ' — and nothing came off it worth eating';
+}
+
 const CARD = 'plaque'; // the panel a node's account is written on
 const COLUMN = 'band'; // and the one stood on its end beside the road
 const PIP = 'plate'; // and the small square a walked node is hung in, down on the trail
@@ -295,12 +306,11 @@ export default class Quest extends Phaser.Scene {
     }
 
     // The pack, at a camp. A number key and not the cursor: the cursor belongs to the
-    // ways, and a party that stopped for a drink has not answered the node yet.
+    // ways, and a party that stopped to eat has not answered the node yet.
     if (/^[1-9]$/.test(k) && !this.approaching) {
-      const can = run.drinkable();
-      const mid = can[Number(k) - 1];
-      if (mid) {
-        run.drink(mid);
+      const row = run.atHand()[Number(k) - 1];
+      if (row) {
+        run.takeAtHand(row);
         this.draw();
         return;
       }
@@ -1088,7 +1098,7 @@ export default class Quest extends Phaser.Scene {
   // What a fire adds to the hint line, and what nowhere else on the road does: the pack
   // is open here, and the stone on the cord can be changed here.
   campKeys() {
-    return (run.drinkable().length ? '    [1-9] Drink' : '')
+    return (run.atHand().length ? '    [1-9] Cook, eat or drink' : '')
       + (run.cordable().length ? '    [C] Change the stone' : '');
   }
 
@@ -1432,6 +1442,7 @@ export default class Quest extends Phaser.Scene {
     // a blow being played rather than a piece of work: the same handover, and a
     // different thing waiting at the end of it
     const blow = !!run.fightingAt();
+    const pan = !blow && !!run.cookingAt();
     const band = this.bands().walk;
     // the landscape drops below the engine's own drawing, with a scrim between them so
     // the readouts are read against something rather than against a hedge
@@ -1453,6 +1464,9 @@ export default class Quest extends Phaser.Scene {
       this.walk.depth(28900);
       if (blow) {
         run.fightPlayed({ judgments, failed });
+      } else if (pan) {
+        // A dinner is not a node: nothing was felled and nothing paid out but the pan.
+        run.cookPlayed({ judgments, failed });
       } else {
         this.walk.felled(); // whatever was standing there is not standing any more
         run.settle({ judgments, failed });
@@ -1466,9 +1480,11 @@ export default class Quest extends Phaser.Scene {
   activityHead(r, rect) {
     const n = r.nodes[r.at];
     const f = run.fightingAt();
+    const pan = run.cookingAt();
     const said = f
       ? `${nameOf(f.who)} — ${f.foe.name}    ${run.hpOf(f.who)}/${run.hpMaxOf(f.who)} against ${f.foeHp}/${f.foeMax}`
-      : `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`;
+      : pan ? `At the fire — ${pan.r.name}`
+        : `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`;
     this.text(rect.x + 12, rect.y + 4, said, TUNING.questBodySize + 2, COLORS.menuText);
   }
 
@@ -1656,22 +1672,39 @@ export default class Quest extends Phaser.Scene {
     return [...out, ...this.packLines()];
   }
 
-  // The pack, on the card, at a camp and nowhere else: what can be drunk, numbered, and
-  // what is already working. The ways keep the cursor — a potion is a number key, so
-  // drinking one never costs the party the choice they walked up to.
+  // The pack, on the card, at a camp and nowhere else: what can be drunk or eaten,
+  // numbered, and what is already working. The ways keep the cursor — the pack is a number
+  // key, so stopping for a meal never costs the party the choice they walked up to.
   packLines() {
-    const can = run.drinkable();
+    const can = run.atHand();
     const force = run.inForce();
     const cord = run.cordRows();
-    if (!can.length && !force.length && !run.cordable().length) return [];
+    const ate = run.mealAt();
+    if (!can.length && !force.length && !ate && !run.cordable().length) return [];
     const out = [['', TUNING.questHintSize, COLORS.menuRule]];
     if (can.length) {
-      out.push(['Somebody has the pack open.', TUNING.questHintSize, COLORS.menuDim]);
-      can.forEach((mid, i) => {
-        const p = run.drinkRow(mid);
-        out.push([`  [${i + 1}] ${p.name} — ${p.body.join(' ')}`,
+      out.push(['Somebody has the pack open, and the fire is in.', TUNING.questHintSize, COLORS.menuDim]);
+      can.forEach((row, i) => {
+        // A pan going on says so: it is the one row on this list that hands the controls
+        // over rather than simply being done.
+        out.push([`  [${i + 1}] ${row.kind === 'cook' ? 'Cook — ' : ''}${row.name} — ${row.body.join(' ')}`,
           TUNING.questHintSize, COLORS.menuText]);
       });
+      // Not dropped quietly: there are nine number keys, and a pack with more in it than
+      // that says so rather than leaving the rest of itself out of the list unexplained.
+      const over = run.handOver();
+      if (over) {
+        out.push([`  And ${over} more in the pack than there are numbers for. Take one and the next comes up.`,
+          TUNING.questHintSize, COLORS.menuDim]);
+      }
+    }
+    // Said rather than left to be noticed: the food went out of the numbered list when it
+    // was eaten, and a square that simply vanishes tells the player nothing.
+    if (ate) {
+      out.push([ate.how === 'cooked'
+        ? `  ${ate.name}${mealResult(ate)}. There is one meal in a fire, and this fire has had it.`
+        : `  They have eaten — ${ate.name}. There is one meal in a fire, and this fire has had it.`,
+      TUNING.questHintSize, COLORS.menuMapFolk]);
     }
     for (const p of force) {
       out.push([`  ${p.name} is working. ${p.body.join(' ')}`,
