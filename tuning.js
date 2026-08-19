@@ -102,6 +102,35 @@ export const TUNING = {
   questToastStepMs: 90, // how long between one line landing and the next
   questToastHoldMs: 2800, // how long the whole tally stays up once it has landed
 
+  // The die thrown at a check, watched as it lands (src/roll.js). It is raised at the
+  // near corner of the road while the tally goes up at the far one.
+  questRollWidth: 380,
+  questRollInset: 14, // how far in from the corner of the road it hangs
+  questRollDial: 56, // the square the face turns up in
+  questRollFaceSize: 26,
+  questRollBandSize: 20, // how hard it was, said in words beside the dial
+  questRollRow: 24, // one thing the party brought to it, and how much room it gets
+  questRollChipGap: 16,
+  questRollTicks: 20, // faces turned over before it settles
+  questRollSpinMs: 900, // and how long the whole spin takes, slowing as it goes
+  questRollLandScale: 1.25, // the thump when it stops
+  questRollPauseMs: 220, // a beat before what the party brought starts coming in
+  questRollStepMs: 260, // and how long between one line of it and the next
+  questRollHoldMs: 1800, // how long the throw stays up once it has all landed
+
+  // How hard a check is, in words rather than in its DC: a party reads a climb, not a
+  // number. Lightest green at the bottom, dark red at the top, and the last band takes
+  // everything above it. Edit the thresholds, the names or the colours here and the dial
+  // follows — nothing else reads this table.
+  checkBands: [
+    { upTo: 5, name: 'Very Easy', colour: 0xa9d98b },
+    { upTo: 10, name: 'Easy', colour: 0x7fbf5c },
+    { upTo: 15, name: 'Medium', colour: 0xc9b74a },
+    { upTo: 20, name: 'Hard', colour: 0xd18b3c },
+    { upTo: 25, name: 'Very Hard', colour: 0xc2532c },
+    { upTo: 30, name: 'Legendary', colour: 0x8e2018 },
+  ],
+
   // Mining (src/minigames/QuarryEngine.js): sound the face, then break it. StarScape
   // read these off a per-deposit richness table; there is one seam here and these are its
   // numbers.

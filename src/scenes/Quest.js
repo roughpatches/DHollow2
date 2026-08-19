@@ -18,6 +18,7 @@ import { drawSlots, shapeOf } from '../slots.js';
 import { createWalk } from '../walk.js';
 import { framed, padOf, minOf, inkOf, hangOf } from '../frames.js';
 import { rewardToast, clearToast } from '../toast.js';
+import { rollCard, clearRoll } from '../roll.js';
 import { markKey } from '../textures.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
@@ -146,6 +147,7 @@ export default class Quest extends Phaser.Scene {
     this.walk?.destroy();
     this.walk = null;
     clearToast();
+    clearRoll();
     run.clear();
     this.game.events.emit('quest:close');
   }
@@ -651,6 +653,7 @@ export default class Quest extends Phaser.Scene {
     this.con = null;
     this.shownAt = -1;
     this.toasted = -1;
+    this.thrown = null;
     this.approaching = false;
   }
 
@@ -1017,7 +1020,9 @@ export default class Quest extends Phaser.Scene {
     this.pages = 1;
     // what the card is showing, in one string: when it changes, it is read from the top
     const sig = `${r.state}:${r.at}:${r.phase}:${r.nodes[r.at]?.beat?.id || ''}`;
-    if (sig !== this.cardSig) { this.cardSig = sig; this.page = 0; }
+    // and a throw still in the air belonged to the card that was showing when it was
+    // made, so moving on takes it down with that card
+    if (sig !== this.cardSig) { this.cardSig = sig; this.page = 0; clearRoll(); }
 
     // A node the party has not walked up to yet is not a node they know anything about,
     // so the approach runs first and the card only opens when it has arrived.
@@ -1044,6 +1049,15 @@ export default class Quest extends Phaser.Scene {
     if (r.state === 'running' && r.phase === 'node' && !this.approaching && this.toasted !== r.at) {
       this.toasted = r.at;
       rewardToast(this, band.walk, r.nodes[r.at], r.when === 'night');
+    }
+
+    // And the die, thrown the first time the card showing it is drawn. Kept by the check
+    // itself rather than by which node it was: every roll is its own object, so a beat
+    // that rolls a second time at the same node is a second throw and a redraw is not.
+    const throwing = !this.approaching ? this.rollShown(r) : null;
+    if (throwing && this.thrown !== throwing) {
+      this.thrown = throwing;
+      rollCard(this, band.walk, throwing, r.when === 'night');
     }
 
     this.conBar(r, band.bar);
@@ -1494,6 +1508,19 @@ export default class Quest extends Phaser.Scene {
     const n = r.nodes[r.at];
     const e = run.kindOf(n.kind);
     return `${e.name}${n.goal ? ' — the goal' : ''}`;
+  }
+
+  // The roll the card is showing right now, or nothing. A node's own check is read out
+  // when the node is settled; a scene's is read out on the beat that reads it back, and
+  // not on the beat that made it — the party is told what they tried before they are
+  // told how it went.
+  rollShown(r) {
+    if (r.state !== 'running') return null;
+    const n = r.nodes[r.at];
+    if (!n || !n.check) return null;
+    if (r.phase === 'node') return n.check;
+    if (r.phase === 'beat' && n.beat && n.beat.result) return n.check;
+    return null;
   }
 
   nodeLines(r) {
