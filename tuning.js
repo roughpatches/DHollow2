@@ -185,12 +185,10 @@ export const TUNING = {
     warmTolerance: 0.1, // how far past the band is merely hot rather than scorching
     decayPerSec: 0.055, // an untended fire falls away in about twenty seconds
     pumpBurst: 0.1, // and a pump puts a tenth of the gauge back
-    pumpFuelCost: 0.018, // what a pump costs on top of the drain: working it has a price
-    // The clock, and the only one. A full reserve is about eighty seconds of fire, which
-    // is a comfortable melt and a hurried one if the heat was let go early.
-    fuelReserve: 1,
-    fuelDrainPerSec: 0.0115,
-    fuelWarnAt: 0.25, // the fraction left when the fire is said to be guttering
+    // What a pump costs the fire, in seconds off the clock every bench keeps — see
+    // `fuel` above. Working the bellows has a price, and it is paid out of the same
+    // wood everything else is paid out of.
+    pumpFuelSec: 0.9,
     // The charge.
     purity0: 0.35, // what the ore is before anything is taken off it
     purityCeiling: 0.98, // and the best skimming alone will ever get it to
@@ -380,6 +378,28 @@ export const TUNING = {
   // this it went well, under it middling, and a botched activity says the third whatever
   // the number. See `done` in content/nodes.js.
   workWellAt: 0.75,
+
+  // The fire under a bench. Smelting, Cooking and Brewing are all somebody standing over
+  // heat, so all three are on one clock: the work has to be finished before what was put
+  // on the fire burns through. Gem cutting is a wheel and is not on it.
+  //   worth        — what one of a thing is worth on the fire. Wood goes up with its tier
+  //                  because a branch is kindling and heartwood is not, and coal is worth
+  //                  a whole armful of branches, which is what makes it worth carrying
+  //                  home off a face. Anything not written here does not burn.
+  //   secondsPerUnit — how long one unit of that burns for. This and a recipe's `fuel` in
+  //                  content/recipes.js are the whole of how long a job is allowed to take.
+  //   spare        — fuel loaded over what the recipe asked for, as a fraction: a fire is
+  //                  laid with a little more than the job needs, because a job that ends
+  //                  the same second the fuel does is a job nobody ever finishes.
+  fuel: {
+    worth: {
+      oakbranch: 1, oaklog: 3, heartwood: 5, charcoal: 6, coal: 10,
+    },
+    secondsPerUnit: 12,
+    spare: 0.25,
+    warnAt: 0.25, // the fraction left when the fire is said to be going
+    outMs: 1100, // how long the dead fire is left in front of the player before the tally
+  },
 
   questPipSize: 32, // a node on the trail; they spread across the band and close up at this
   questPipGap: 18, // the least road left between two of them before they start to shrink

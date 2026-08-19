@@ -15,6 +15,7 @@ import { BrewEngine } from './minigames/BrewEngine.js';
 import { GemEngine } from './minigames/GemEngine.js';
 import { SmeltEngine } from './minigames/SmeltEngine.js';
 import { TensionBarEngine } from './minigames/TensionBarEngine.js';
+import { Fired } from './minigames/Fired.js';
 
 // The crawl presses and releases in the axe's names, because that is what it had first.
 // A continuous hold answers to setHolding instead, so it is wrapped here rather than
@@ -79,6 +80,7 @@ const ENGINES = {
   Cooking: {
     make: (scene, layout) => new MealEngine(scene, { ...TUNING.meal, layout }),
     hint: '[Space] Cut, and pull it off the fire    [Arrows] Tend it',
+    fired: true,
   },
   Brewing: {
     // `hard` is the tier and `labels` are what goes in, both off the recipe; see
@@ -89,11 +91,15 @@ const ENGINES = {
     hint: '[Space] Stop the shape inside the outline',
     tiers: TUNING.brew.tiers,
     says: (t) => `${t.shapes} shapes, ${sec(t.periodMs[0])} to ${sec(t.periodMs[1])} apiece`,
+    fired: true,
   },
   Smelting: {
-    make: (scene, layout) => new SmeltEngine(scene, { ...TUNING.smelt, layout }),
+    // The crucible is the one engine that spends the bench's fire itself: `fire` is how the
+    // bellows are charged to it. See src/minigames/Fired.js.
+    make: (scene, layout, opts) => new SmeltEngine(scene, { ...TUNING.smelt, fire: opts.fire, layout }),
     // Three keys and no aiming: the fire, the surface, and the decision to stop.
     hint: '[Space] Pump the bellows    [Up] Skim the oldest clump    [Down] Pour',
+    fired: true,
   },
   Cutting: {
     make: (scene, layout, opts) => new GemEngine(scene, {
@@ -131,11 +137,25 @@ export function hasEngine(name) {
   return !!(name && ENGINES[name]);
 }
 
+// Whether this work is done over a fire — the crucible, the kitchen fire and the still.
+// Work that is is put on the bench's fuel clock and cannot be started without one; a wheel
+// and everything on the road is not. See src/fuel.js.
+export function firedWork(name) {
+  return !!(name && ENGINES[name] && ENGINES[name].fired);
+}
+
 // `opts` is whatever the work itself has to say about how it is played — a brew's tier and
 // its ingredients. Work that has nothing to say passes nothing, which is every node on the
 // road: an engine reached from the crawl is the same engine at the same difficulty.
 export function engineFor(name, scene, layout, opts = {}) {
-  return ENGINES[name].make(scene, layout, opts);
+  const e = ENGINES[name];
+  // Fired work runs under a fuel bar, and the bar is the whole of what having a fire means:
+  // finish inside `burnSeconds` or the work is lost. Everything else is handed over bare.
+  if (e.fired && opts.burnSeconds) {
+    return new Fired(scene, layout, opts.burnSeconds,
+      (inner, fire) => e.make(scene, inner, { ...opts, fire }));
+  }
+  return e.make(scene, layout, opts);
 }
 
 export function hintFor(name) {
