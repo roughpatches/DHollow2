@@ -18,6 +18,7 @@ import {
   nameOf as whoIs, // town.js has a nameOf of its own, for materials
 } from './party.js';
 import { give, nameOf } from './town.js';
+import * as potions from './potions.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
@@ -406,12 +407,15 @@ export function start(id, when, party, choice = {}) {
     .filter((id, i, all) => all.indexOf(id) === i)
     .slice(0, TUNING.partyMax); // four walk out and no more, however they were picked
   const nodes = quest.line ? authored(quest.line) : drawn(size);
-  // everyone's own constitution, and what knowing this ground adds to it
-  const con = conTotal(who) + groundCon(who, terrainOf(quest, where));
+  // everyone's own constitution, what knowing this ground adds to it, and whatever was
+  // drunk in town waiting on this job — see src/potions.js. A potion drunk at the bar
+  // is in the pool at the gate and nowhere else: it is the next job out it was for.
+  const dosed = potions.takeUp();
+  const con = conTotal(who) + groundCon(who, terrainOf(quest, where)) + dosed;
   run = {
     quest, size, where, when: at, party: who, nodes, at: -1, state: 'running',
     used: new Set(), // the kinds this run has had that it is only allowed one of
-    spoils: {}, xp: 0, con, conMax: con,
+    spoils: {}, xp: 0, con, conMax: con, dosed,
     // Hit points are the fighters' own and are not pooled: the party shares a
     // constitution and nobody shares a rib. Full at the gate, spent down by whatever
     // they trade blows with, and forgotten when the run ends — the same as the pool.
@@ -458,7 +462,51 @@ export function abandon() {
 // a run asks is whether the party has enough left to finish this one, not whether they
 // have been worn down since the first. Move this the day beds and food cost something.
 export function clear() {
+  potions.clear(); // nothing drunk survives the run it was drunk into
   run = null;
+}
+
+// --- the pack, on the road -------------------------------------------------
+// A camp is the one node a party can open a pack at: they have stopped, there is a fire,
+// and nobody drinks anything standing in front of a boar. Which nodes are camps is
+// content — `camp: true` in content/nodes.js — so the day a second one is written this
+// works there too.
+
+export function atCamp() {
+  if (!run || run.state !== 'running' || run.at < 0) return false;
+  const node = run.nodes[run.at];
+  if (!node || !KIND[node.kind] || !KIND[node.kind].camp) return false;
+  // standing at it, rather than walking up to it or fighting something on it
+  return run.phase === 'beat' || run.phase === 'node' || run.phase === 'choose';
+}
+
+// What can be drunk here and now, in the order the pack lists it.
+export function drinkable() {
+  return atCamp() ? potions.carried().filter((mid) => potions.canDrink(mid)) : [];
+}
+
+// Drunk at the fire: the constitution lands now, and anything standing goes to work for
+// the rest of the run. Returns the line the card says about it, or null if it could not
+// be drunk at all.
+export function drink(mid) {
+  if (!atCamp() || !potions.canDrink(mid)) return null;
+  const took = potions.drink(mid, true);
+  if (!took) return null;
+  const con = took.effect.con || 0;
+  if (con) {
+    run.con = Math.max(0, Math.min(run.conMax, run.con + con));
+  }
+  return took;
+}
+
+export function inForce() {
+  return potions.forceRows();
+}
+
+// One potion, named and said in words, for whichever screen is asking — the pack in town
+// or the card at the fire. Neither of them has to know what a potion is.
+export function drinkRow(mid) {
+  return { mid, name: nameOf(mid), body: potions.linesFor(mid) };
 }
 
 // --- walking ---------------------------------------------------------------
@@ -661,7 +709,7 @@ function toWork(node) {
 function checkOf(node, e) {
   const spec = (node.goal && run.quest.check) || e.check;
   if (!spec) return null;
-  return { ...check(run.party, spec.skill, spec.dc), held: spec.held, lost: spec.lost };
+  return { ...check(run.party, spec.skill, spec.dc, potions.steady()), held: spec.held, lost: spec.lost };
 }
 
 // An encounter that hands the party a choice is a scene rather than a job: it is walked
@@ -956,7 +1004,7 @@ export function pickBeat(i) {
   if (!opt || shutTo(opt)) return run;
   if (opt.skill) {
     node.actorId = bestAt(run.party, opt.skill);
-    node.check = check(run.party, opt.skill, opt.dc);
+    node.check = check(run.party, opt.skill, opt.dc, potions.steady());
   }
   toBeat(node, opt.then);
   return run;
@@ -1050,6 +1098,10 @@ export function settle(played) {
       : node.quality >= TUNING.activityConGood ? TUNING.activityConBest : 0;
   node.conBeat = node.conBeat || 0; // what an authored beat did on the way through
   node.con = node.conRoad + node.conKind + node.conCheck + node.conWork + node.conBeat;
+  // And what a potion in force held off the whole of it. It never turns a node that took
+  // something into a node that gave something back: the most it does is nothing happened.
+  node.conGuard = node.con < 0 ? Math.min(potions.guard(), -node.con) : 0;
+  node.con += node.conGuard;
 
   run.con = Math.max(0, Math.min(run.conMax, run.con + node.con));
   node.conAfter = run.con;
@@ -1116,7 +1168,7 @@ export function placeLines(id) {
 // a roll, said the way a table says it: die, what the skill added, and what it came to
 export function checkLine(c) {
   return `${c.skill.name} DC ${c.dc} — ${c.name} ${c.you ? 'roll' : 'rolls'} ${c.die}${c.rank ? ` +${c.rank}` : ''}`
-    + ` = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
+    + `${c.steady ? ` +${c.steady}` : ''} = ${c.total}. ${c.pass ? 'Held.' : 'Lost.'}`;
 }
 
 // What the ground is worth to a given crew, said where the crew is picked. Null when the
@@ -1220,6 +1272,7 @@ export function conLines(node) {
   say(node.conBeat, node.conBeat > 0 ? 'put back in it' : 'taken in it');
   say(node.conCheck, node.conCheck > 0 ? 'for holding' : 'for losing it');
   say(node.conWork, node.conWork > 0 ? 'for good work' : 'for botching it');
+  say(node.conGuard, 'held off by what you drank');
   return out.length ? `${out.join('    ')}    →  ${node.conAfter}` : '';
 }
 

@@ -43,6 +43,9 @@
 //   con     — what standing here does to the party's constitution, [least, most].
 //             Negative takes and positive gives. Night multiplies what it takes.
 //   body    — what it is, in the world's voice. Yours to write.
+//   camp    — true if the party can open a pack standing here. It is the only place on a
+//             run a potion can be drunk: they have stopped, there is a fire, and nobody
+//             drinks anything standing in front of a boar. See src/potions.js.
 //
 // A resource node also has:
 //   harvests — one or two of them. Each names the gathering skill the work is done with,
@@ -840,6 +843,7 @@ export const ENCOUNTER_NODES = [
     name: 'A fire, and what you carry',
     zones: ['greywood'],
     nature: 'gather',
+    camp: true, // stopped, with a fire on: the one place on the road a potion is drunk
     weight: { day: 2, night: 4 }, // mostly a thing done after dark, when it is wanted most
     read: { skill: 'woodcraft', line: 'Somebody laid a fire on that ground, and did not come back for the wood they left beside it.' },
     xp: [8, 14],

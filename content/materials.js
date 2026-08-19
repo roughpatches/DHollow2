@@ -131,6 +131,11 @@ export const MATERIALS = [
   // --- what comes off a bench ------------------------------------------------
   // Nothing on the road pays these out: they are made in town, at a workstation, out of
   // what a run brought home. See content/recipes.js.
+  // A material carrying `drink` is a potion, and drinking one is the only thing in the
+  // game that spends a material anywhere but a building or a bench. It is drunk in town,
+  // where it takes the next job out, or at a camp on the road, where it takes the rest of
+  // the one being walked — see src/potions.js for what the three numbers do. Tune them
+  // here: a potion is content, the way a node's constitution is.
   {
     id: 'charcoal',
     name: 'Charcoal',
@@ -190,6 +195,7 @@ export const MATERIALS = [
     id: 'tonic',
     name: 'Steeped Tonic',
     start: 0,
+    drink: { con: 6 },
     body: [
       'A stoppered bottle of something dark that smells of the forest floor and tastes worse than it smells.',
       'It does what it does whether or not anybody enjoys it.',
@@ -199,6 +205,7 @@ export const MATERIALS = [
     id: 'salve',
     name: 'Field Salve',
     start: 0,
+    drink: { guard: 1 },
     body: [
       'Grey-black, stiff at the top of the pot and softer underneath, and it goes on cold.',
       'Made to be carried by somebody who is going to need it a long way from the person who made it.',
@@ -208,6 +215,7 @@ export const MATERIALS = [
     id: 'cordial',
     name: 'Heartwood Cordial',
     start: 0,
+    drink: { steady: 2 },
     body: [
       'Clear, amber, and heavier in the hand than a bottle that size ought to be.',
       'The first thing to come off that still in twenty years, and the shop it came out of is not open.',

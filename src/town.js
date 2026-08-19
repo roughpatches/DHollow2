@@ -66,6 +66,7 @@ export function carriedRows() {
     label: m.name,
     note: `x${held.get(m.id)}`,
     icon: m.id,
+    mid: m.id, // what it is, for the one tab that does something to a thing rather than list it
     body: m.body,
   }));
 }

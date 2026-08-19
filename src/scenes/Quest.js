@@ -238,6 +238,17 @@ export default class Quest extends Phaser.Scene {
       else if (k === 'escape') this.close();
       return;
     }
+    // The pack, at a camp. A number key and not the cursor: the cursor belongs to the
+    // ways, and a party that stopped for a drink has not answered the node yet.
+    if (/^[1-9]$/.test(k) && !this.approaching) {
+      const can = run.drinkable();
+      const mid = can[Number(k) - 1];
+      if (mid) {
+        run.drink(mid);
+        this.draw();
+        return;
+      }
+    }
     // Who steps up. The only choice a party gets about a fight before it starts, and the
     // one they get again the moment somebody is carried.
     if (r.phase === 'fighter') {
@@ -746,18 +757,22 @@ export default class Quest extends Phaser.Scene {
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
     else if (r.phase === 'choose' && !this.approaching) {
       // one thing to do here is not a question, so it is not asked as one
-      this.hint(r.nodes[r.at].worked.length > 1
-        ? '[Up/Down] Choose    [Enter] Work it    [Esc] Turn back'
-        : '[Enter] Get to work    [Esc] Turn back');
+      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      this.hint((r.nodes[r.at].worked.length > 1
+        ? '[Up/Down] Choose    [Enter] Work it'
+        : '[Enter] Get to work') + `${pack}    [Esc] Turn back`);
     }
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.playing()) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
-      this.hint(r.nodes[r.at].beat.choose
-        ? '[Up/Down] Choose    [Enter] Do it    [Esc] Turn back'
-        : `[E] ${this.page < this.pages - 1 ? 'Read on' : 'Go on'}    [Esc] Turn back`);
+      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      this.hint((r.nodes[r.at].beat.choose
+        ? '[Up/Down] Choose    [Enter] Do it'
+        : `[E] ${this.page < this.pages - 1 ? 'Read on' : 'Go on'}`) + `${pack}    [Esc] Turn back`);
     }
-    else if (this.page < this.pages - 1) this.hint('[E] Read on    [Esc] Turn back');
-    else this.hint('[E] Press on    [Esc] Turn back');
+    else {
+      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      this.hint(`${this.page < this.pages - 1 ? '[E] Read on' : '[E] Press on'}${pack}    [Esc] Turn back`);
+    }
   }
 
   // The constitution, and nothing else on the band with it. It is the one readout that
@@ -1194,7 +1209,7 @@ export default class Quest extends Phaser.Scene {
       out.push([`${doing} — waiting on that engine. For now the party works it out and moves on.`,
         TUNING.questHintSize, COLORS.menuDim]);
     }
-    return out;
+    return [...out, ...this.packLines()];
   }
 
   // Who goes and stands in front of it. Asked when a fight starts with more than one
@@ -1313,6 +1328,29 @@ export default class Quest extends Phaser.Scene {
       out.push([`    ${skillOf(o.skill).name} DC ${o.dc} — ${nameOf(who)} would try it`,
         TUNING.questHintSize, on ? COLORS.menuText : COLORS.menuRule]);
     });
+    return [...out, ...this.packLines()];
+  }
+
+  // The pack, on the card, at a camp and nowhere else: what can be drunk, numbered, and
+  // what is already working. The ways keep the cursor — a potion is a number key, so
+  // drinking one never costs the party the choice they walked up to.
+  packLines() {
+    const can = run.drinkable();
+    const force = run.inForce();
+    if (!can.length && !force.length) return [];
+    const out = [['', TUNING.questHintSize, COLORS.menuRule]];
+    if (can.length) {
+      out.push(['Somebody has the pack open.', TUNING.questHintSize, COLORS.menuDim]);
+      can.forEach((mid, i) => {
+        const p = run.drinkRow(mid);
+        out.push([`  [${i + 1}] ${p.name} — ${p.body.join(' ')}`,
+          TUNING.questHintSize, COLORS.menuText]);
+      });
+    }
+    for (const p of force) {
+      out.push([`  ${p.name} is working. ${p.body.join(' ')}`,
+        TUNING.questHintSize, COLORS.menuMapMark]);
+    }
     return out;
   }
 
@@ -1347,7 +1385,7 @@ export default class Quest extends Phaser.Scene {
         : `    ${named}${h.skill.name} ${h.score} between you, ${Math.round(h.more * 100)}% more off it.`,
       TUNING.questHintSize, shut ? COLORS.menuRule : COLORS.menuDim]);
     });
-    return out;
+    return [...out, ...this.packLines()];
   }
 
   forkLines(r) {
