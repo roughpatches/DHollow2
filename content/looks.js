@@ -81,6 +81,60 @@ export const LOOKS = [
     down: '../aldis/Collapsed_in_a_heap/rotations/south.png',
   },
   {
+    // Melovia, the herbalist with the staff and the leather satchel, out on the road. Her
+    // export carries no face — the room-sized one below has it — so she talks with that,
+    // the way Aldis does.
+    id: 'melovia',
+    path: 'art/melovia',
+    size: 64,
+    foot: 64, // her boots reach the bottom row of the frame, so the ground is below it
+    head: 2, // and the crown of her head, which the staff tips out over and is not
+    walk: { folder: 'Idle/animations/Walk', frames: 6 },
+    still: 'Idle/rotations',
+    portrait: '../melovia-indoors/Idle/portrait.png',
+    indoors: 'melovia-indoors',
+  },
+  {
+    // The same herbalist at the size a room is painted at, painted all eight ways and
+    // walking none of them: indoors she stands where she is put. The face is hers.
+    id: 'melovia-indoors',
+    path: 'art/melovia-indoors',
+    size: 128,
+    foot: 125,
+    head: 3, // the crown of her head; the staff tops out level with it
+    still: 'Idle/rotations',
+    portrait: 'Idle/portrait.png',
+  },
+  {
+    // Aethelwynn, the blacksmith with the hammer on her shoulder, out on the road. Her
+    // walk was exported on a bigger canvas than her rotations — 88 and 92 pixels against
+    // 64 — and one frame size per look is what stands a character still while she walks,
+    // so every frame of this export was re-canvassed to 66 about its own centre. Nothing
+    // was painted over or cut: 66 is simply the smallest square the widest swing of the
+    // hammer fits in. Like Melovia she talks with the room-sized export's face.
+    id: 'aethelwynn',
+    path: 'art/aethelwynn',
+    size: 66,
+    foot: 64,
+    head: 2,
+    walk: { folder: 'Walking/animations/The_character_walks_forward_with_a_steady_rhythmic', frames: 9 },
+    still: 'Idle/rotations',
+    portrait: '../aethelwynn-indoors/Idle/portrait.png',
+    indoors: 'aethelwynn-indoors',
+  },
+  {
+    // The same smith at the size a room is painted at, painted all eight ways, standing
+    // still. Bigger in the frame than the other indoor exports — 148 against 128 — which
+    // is only the canvas she came on; `head` and `foot` are what she is drawn by.
+    id: 'aethelwynn-indoors',
+    path: 'art/aethelwynn-indoors',
+    size: 148,
+    foot: 137,
+    head: 12,
+    still: 'Idle/rotations',
+    portrait: 'Idle/portrait.png',
+  },
+  {
     id: 'gregorious',
     path: 'art/gregorious',
     size: 60,

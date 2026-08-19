@@ -1,0 +1,112 @@
+{
+  "group_id": "39aba751-3a58-4e3a-a2f3-3a3062bb0199",
+  "states": [
+    {
+      "character": {
+        "id": "09b41f80-f474-4c90-919d-7e6f5c1f07dd",
+        "name": "Idle",
+        "prompt": "A sturdy blacksmith woman with a powerful, broad-shouldered build, standing in a confident side-profile stance. She wears a soot-stained leather apron over a rolled-up tunic, heavy-duty work gloves, and thick boots. Her thick blonde braid hangs over one shoulder, and she holds a heavy iron smithing hammer resting against her shoulder. Her expression is focused and capable, with subtle muscle definition in her arms and a clean, selective outline style.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-08-17T00:57:48.422678+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "5a81a4f3-c4a7-4d02-8f86-5462005d378e",
+        "name": "Walking",
+        "prompt": "A sturdy blacksmith woman with a powerful, broad-shouldered build, standing in a confident side-profile stance. She wears a soot-stained leather apron over a rolled-up tunic, heavy-duty work gloves, and thick boots. Her thick blonde braid hangs over one shoulder, and she holds a heavy iron smithing hammer resting against her shoulder. Her expression is focused and capable, with subtle muscle definition in her arms and a clean, selective outline style.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-08-19T00:13:06.491821+00:00"
+      },
+      "folder": "Walking",
+      "frames": {
+        "rotations": {
+          "south": "Walking/rotations/south.png",
+          "south-east": "Walking/rotations/south-east.png",
+          "east": "Walking/rotations/east.png",
+          "north-east": "Walking/rotations/north-east.png",
+          "north": "Walking/rotations/north.png",
+          "north-west": "Walking/rotations/north-west.png",
+          "west": "Walking/rotations/west.png",
+          "south-west": "Walking/rotations/south-west.png"
+        },
+        "animations": {
+          "The_character_walks_forward_with_a_steady_rhythmic": {
+            "east": [
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_000.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_001.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_002.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_003.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_004.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_005.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_006.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_007.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/east/frame_008.png"
+            ],
+            "west": [
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_000.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_001.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_002.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_003.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_004.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_005.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_006.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_007.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/west/frame_008.png"
+            ],
+            "south": [
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_000.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_001.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_002.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_003.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_004.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_005.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_006.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_007.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/south/frame_008.png"
+            ],
+            "north": [
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_000.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_001.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_002.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_003.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_004.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_005.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_006.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_007.png",
+              "Walking/animations/The_character_walks_forward_with_a_steady_rhythmic/north/frame_008.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-19T00:26:33.162942"
+}

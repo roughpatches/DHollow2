@@ -1,0 +1,41 @@
+{
+  "group_id": "80a3b2a5-b2b8-4d6a-af43-9219b4761e69",
+  "states": [
+    {
+      "character": {
+        "id": "5fec9dcf-7bee-4fe3-957b-3fdcaf4a0448",
+        "name": "Idle",
+        "prompt": "A sturdy blacksmith woman with a powerful, broad-shouldered build, standing in a confident side-profile stance. She wears a soot-stained leather apron over a rolled-up tunic, heavy-duty work gloves, and thick boots. Her thick blonde braid hangs over one shoulder, and she holds a heavy iron smithing hammer resting against her shoulder. Her expression is focused and capable, with subtle muscle definition in her arms and a clean, selective outline style.",
+        "size": {
+          "width": 148,
+          "height": 148
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-08-16T23:58:20.636776+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      },
+      "portrait": {
+        "path": "Idle/portrait.png",
+        "size": 128,
+        "generated_at": "2026-08-17T00:58:29.958112"
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-19T00:26:33.932064"
+}

@@ -42,9 +42,11 @@
 // Level, XP and the bond as it stands now live in src/party.js; the constitution a run
 // has left lives on the run, in src/run.js. This file is only what a character starts as.
 //
-// Aldis and Ivo are the recruits for now: the rest of the cast is being written. Everyone
-// still standing around town in content/npcs.js is somebody to talk to, not somebody to
-// take — a character becomes recruitable by getting a block here.
+// Aldis, Ivo, Melovia and Aethelwynn are the recruits for now: the rest of the cast is
+// being written. Everyone still standing around town in content/npcs.js is somebody to
+// talk to, not somebody to take — a character becomes recruitable by getting a block here.
+// The last two have their art and their numbers and nowhere to be met: nothing in
+// content/npcs.js stands either of them anywhere yet.
 
 export const PARTY = [
   {
@@ -97,6 +99,39 @@ export const PARTY = [
     combat: true,
     needs: 'firstday-done', // they turn up once the first job is walked, and so does night work
     bond: 3, // acquainted: enough to come out on ordinary work without being courted first
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // The herbalist. Herblore is the one gathering skill with no minigame behind it yet
+    // and nobody else has a point of it, so she is what makes a Foraging node worth
+    // walking to; the alchemy recipes already written have no other way in. The fording
+    // point is worth a con apiece to everyone setting out over wetland.
+    id: 'melovia',
+    name: 'Melovia',
+    palette: 'melovia',
+    con: 11, // the cast's, until the drain a run costs is tuned end to end
+    skills: { herblore: 3, alchemy: 2, fording: 1 },
+    // Nothing written carries this tag, so it costs her nothing today and bites the first
+    // time a job is tagged for ending badly. That is what it is for.
+    fears: ['harm'],
+    bond: 2, // a stranger one point off acquainted: she comes on herb work, not on the north road
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // The blacksmith, and the whole of the iron in one person: neither smithing nor
+    // mining is anywhere else in the cast. Persuasion rather than a fourth terrain point
+    // because no zone is mountain yet and a point that buys nothing is not a point.
+    id: 'aethelwynn',
+    name: 'Aethelwynn',
+    palette: 'aethelwynn',
+    con: 11,
+    skills: { smithing: 3, mining: 2, persuasion: 1 },
+    // No fear. `leavingtown` is the lever if she should be the reluctant one, and it is a
+    // heavy one: every quest written carries that tag, so it would shut her out of all but
+    // the north road until she is sworn.
+    // And no `combat` line: a smith with a hammer is the obvious second fighter, but Ivo
+    // above is written as the only one, and a second changes what a night job is.
+    bond: 3, // acquainted: she walks out on ordinary work without being courted first
     body: ['[Placeholder Text]'],
   },
 ];
