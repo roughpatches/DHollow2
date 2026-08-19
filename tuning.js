@@ -11,12 +11,18 @@ export const TUNING = {
   // The town seen from the side (see `street` in content/maps.js). It is drawn further
   // back than a grid map because a painted street is 384 pixels tall and a room is not:
   // at the grid's own zoom you would never see a roofline.
-  gridBodyPx: 34, // how tall anybody standing on a grid map is drawn, feet to head. The
-  // same height as the town's, so a room and the street outside it are the same world;
-  // the generated placeholders are drawn at 22 and come up to meet it.
+  gridBodyPx: 34, // how tall anybody standing on a grid map is drawn, feet to head.
+  // Nothing draws a grid map at present — every map in content/maps.js is a painted
+  // panel — so this waits for the first one that does rather than matching the street.
 
   streetZoom: 2,
-  streetBodyPx: 34, // how tall anybody standing on a street is drawn, feet to head
+  // How tall anybody standing on a street is drawn, feet to head. Measured off the
+  // paintings rather than picked: a doorway in DH2 is 45 pixels of opening, and a door
+  // is a little over a person tall, so a person on the cobbles in front of one is about
+  // this. It also draws the 64-pixel road exports at 1:1 — they are painted 62 pixels
+  // from boot to crown — so their pixels land on the panel's pixels rather than being
+  // resampled, which is most of why they used to read small.
+  streetBodyPx: 62,
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
