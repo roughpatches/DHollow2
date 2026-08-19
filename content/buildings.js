@@ -14,6 +14,11 @@
 //               on a stage is a workstation from that stage on, and standing at it opens
 //               what can be made there; see content/recipes.js.
 //       cost  — materials to reach the NEXT stage. The last stage has none.
+//       cap   — the level nobody can pass while the building stands like this. It is how
+//               a repair is worth something to a character rather than only to the town:
+//               the highest cap standing anywhere is the party's, and rebuilding is the
+//               only thing that moves it. See levelCap in src/town.js. A stage without one
+//               holds nobody back.
 //   body    — what the place is, in the world's voice. Yours to write.
 // A building whose id is also in STRUCTURES in content/looks.js has a picture per stage,
 // and repairing it changes the picture where it stands.
@@ -37,6 +42,8 @@ export const BUILDINGS = [
   {
     // Three stages, three pictures. The door is shut until the roof is back on: there is
     // nothing inside a burnt chapel but weather.
+    // It is also what holds the party's level down. Nothing else in town carries a `cap`,
+    // so the chapel is the whole of it: three at a ruin, six shored up, nine roofed.
     id: 'chapel',
     name: 'The chapel',
     map: 'woodend',
@@ -47,16 +54,19 @@ export const BUILDINGS = [
       {
         name: 'Burnt out',
         note: 'The roof is in the nave and the door is boarded over.',
+        cap: 3,
         cost: { timber: 14, nails: 30, canvas: 4 },
       },
       {
         name: 'Shored up',
         note: 'Scaffolded, sheeted, and dry for the first winter in years.',
+        cap: 6,
         cost: { timber: 22, stone: 16, nails: 40, pitch: 6 },
       },
       {
         name: 'Roofed and lit',
         note: 'Slated, swept, and open. You can hear how big it is from the door.',
+        cap: 9,
         open: true,
       },
     ],

@@ -13,7 +13,7 @@ import {
   award, levelOf as levelYou, rankOf, skillOf, YOU,
 } from './party.js';
 import {
-  buildingOf, levelOf as stageAt, give, heldOf, nameOf, remaining,
+  buildingOf, levelOf as stageAt, give, heldOf, nameOf, remaining, levelCap, capHeldBy,
 } from './town.js';
 import { hasEngine, qualityOf, hardLine } from './activity.js';
 
@@ -54,7 +54,13 @@ export function blockers(r) {
   const out = [];
   const b = buildingOf(r.at);
   if (stageAt(r.at) < r.stage) out.push(`Wants ${b.name} rebuilt to ${b.stages[r.stage].name}.`);
-  if (levelYou(YOU) < r.level) out.push(`Wants level ${r.level}; you are ${levelYou(YOU)}.`);
+  if (levelYou(YOU) < r.level) {
+    out.push(`Wants level ${r.level}; you are ${levelYou(YOU)}.`);
+    // and where the town is what is stopping the levelling rather than the walking, say so:
+    // no amount of work in the wood answers a cap.
+    const held = capHeldBy();
+    if (r.level > levelCap() && held) out.push(`Nobody passes level ${levelCap()} until ${held.name} is rebuilt.`);
+  }
   const want = r.rank || 0;
   if (rankOf(YOU, r.skill) < want) {
     out.push(`Wants ${want} point${want === 1 ? '' : 's'} of ${skillOf(r.skill).name}; you have ${rankOf(YOU, r.skill)}.`);

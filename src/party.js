@@ -10,6 +10,7 @@ import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
 import { SKILLS } from '../content/skills.js';
 import { FEARS } from '../content/fears.js';
+import { levelCap, capHeldBy } from './town.js';
 import * as story from './story.js';
 
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
@@ -139,9 +140,16 @@ export function conTotal(ids) {
   return ids.reduce((n, id) => n + conOf(id), 0);
 }
 
-// leaving a level costs more than leaving the one before it
+// The level nobody can pass at the moment: the game's own ceiling, or the lower one the
+// town has not been rebuilt past yet. See levelCap in src/town.js.
+export function capNow() {
+  return Math.min(TUNING.maxLevel, levelCap());
+}
+
+// leaving a level costs more than leaving the one before it, and costs everything at the
+// cap, which is what a cap is
 export function xpToNext(level) {
-  return level >= TUNING.maxLevel ? Infinity : TUNING.xpBase * level;
+  return level >= capNow() ? Infinity : TUNING.xpBase * level;
 }
 
 // Experience goes to the level and to nothing else: no skill is ever practised into
@@ -150,7 +158,9 @@ export function xpToNext(level) {
 // Returns how many levels were gained, so a caller can say so.
 export function award(id, xp) {
   const s = stateOf(id);
-  if (s.level >= TUNING.maxLevel) return 0; // XP past the last level has nowhere to go
+  if (s.level >= TUNING.maxLevel) return 0; // XP past the last level in the game is lost
+  // XP earned against the town's cap is kept rather than thrown away: the work was done,
+  // and the day the chapel goes up it is worth what it was always worth. See catchUp.
   s.xp += xp;
   let gained = 0;
   while (s.xp >= xpToNext(s.level)) {
@@ -163,6 +173,20 @@ export function award(id, xp) {
     if (id !== YOU) autoSpend(id);
   }
   return gained;
+}
+
+// What a repair just handed everybody. A cap that has moved turns the XP that had nowhere
+// to go into the levels it was worth, for the whole party at once — called wherever a
+// building levels, so a rebuilt chapel pays out where you are standing rather than on the
+// next thing anybody happens to earn. [[id, levels], ...] for whoever gained any.
+export function catchUp() {
+  return PARTY.map((c) => [c.id, award(c.id, 0)]).filter(([, n]) => n > 0);
+}
+
+// ...and what to say about it: one line for whoever moved, and nothing at all when nobody
+// did, so a repair that changed no levels says nothing about levels.
+export function catchUpLines() {
+  return catchUp().map(([id, n]) => `${nameOf(id)} is level ${levelOf(id)}${n > 1 ? `, ${n} at once` : ''}.`);
 }
 
 // There is one character sheet the player fills in, and it is theirs. Everyone else
@@ -330,6 +354,17 @@ export function walking() {
   return [charOf(YOU), ...roster()];
 }
 
+// What the XP column says at a level nobody can leave: the building holding everybody at
+// this one, named so it can be gone and repaired; the game's last level; or — when the town
+// has been rebuilt as far as it goes and that is still short of the game's ceiling — that
+// there is nothing left standing to go and repair for it.
+function heldLine(xp) {
+  const by = capHeldBy();
+  if (by) return `XP ${xp}  (held at the cap until ${by.name} is rebuilt)`;
+  if (capNow() < TUNING.maxLevel) return `XP ${xp}  (nothing left in town levels anybody past ${capNow()})`;
+  return `XP ${xp}  (max level)`;
+}
+
 export function partyRows() {
   return walking().map((c) => {
     const s = stateOf(c.id);
@@ -341,7 +376,7 @@ export function partyRows() {
       note: `Lv ${s.level} · Con ${conOf(c.id)}`,
       body: [
         `Level ${s.level}    Constitution ${conOf(c.id)}    `
-          + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`)
+          + (next === Infinity ? heldLine(s.xp) : `XP ${s.xp} of ${next}`)
           + (s.points ? `    ${s.points} unspent` : ''),
         c.you
           ? 'On every run. Nobody has to be asked to bring you.'
