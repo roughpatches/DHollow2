@@ -106,6 +106,35 @@ export const LOOKS = [
     portrait: 'Idle/portrait.png',
   },
   {
+    // Aethelwynn, the blacksmith with the hammer on her shoulder, out on the road. Her
+    // walk was exported on a bigger canvas than her rotations — 88 and 92 pixels against
+    // 64 — and one frame size per look is what stands a character still while she walks,
+    // so every frame of this export was re-canvassed to 66 about its own centre. Nothing
+    // was painted over or cut: 66 is simply the smallest square the widest swing of the
+    // hammer fits in. Like Melovia she talks with the room-sized export's face.
+    id: 'aethelwynn',
+    path: 'art/aethelwynn',
+    size: 66,
+    foot: 65,
+    head: 2,
+    walk: { folder: 'Walking/animations/The_character_walks_forward_with_a_steady_rhythmic', frames: 9 },
+    still: 'Idle/rotations',
+    portrait: '../aethelwynn-indoors/Idle/portrait.png',
+    indoors: 'aethelwynn-indoors',
+  },
+  {
+    // The same smith at the size a room is painted at, painted all eight ways, standing
+    // still. Bigger in the frame than the other indoor exports — 148 against 128 — which
+    // is only the canvas she came on; `head` and `foot` are what she is drawn by.
+    id: 'aethelwynn-indoors',
+    path: 'art/aethelwynn-indoors',
+    size: 148,
+    foot: 137,
+    head: 12,
+    still: 'Idle/rotations',
+    portrait: 'Idle/portrait.png',
+  },
+  {
     id: 'gregorious',
     path: 'art/gregorious',
     size: 60,
