@@ -66,6 +66,14 @@ const SHAPES = {
     g.fillTriangle(3, 14, 9, 2, 14, 12);
     fill(g, b, 8, 7, 2, 5);
   },
+  gem: (g, [a, b]) => {
+    g.fillStyle(a, 1);
+    g.fillTriangle(2, 7, 14, 7, 8, 15); // the pavilion, coming to a point
+    fill(g, a, 3, 3, 10, 4); // and the table across the top of it
+    g.fillStyle(b, 1); // the two facets the light is actually doing something on
+    g.fillTriangle(3, 7, 8, 7, 5, 12);
+    fill(g, b, 5, 4, 6, 2);
+  },
   coil: (g, [a, b]) => {
     for (const y of [4, 8, 12]) {
       g.fillStyle(a, 1);
@@ -246,11 +254,27 @@ const ICONS = {
   greyarrow: ['arrows', 'ash'],
   bone: ['shard', 'bone'],
   ironore: ['grain', 'iron'],
-  roughgem: ['shard', 'glass'],
   charcoal: ['block', 'soot'],
-  cabochon: ['shard', 'glass'],
-  tablegem: ['block', 'glass'],
-  brilliant: ['shard', 'bronze'],
+  // The nine stones: the rough lump out of the ground, and the same stone cut. All three
+  // grades of a cut stone share its square — a Flawless Ruby is a ruby.
+  roughgarnet: ['shard', 'garnet'],
+  roughagate: ['shard', 'agate'],
+  roughamethyst: ['shard', 'amethyst'],
+  roughtopaz: ['shard', 'topaz'],
+  roughsapphire: ['shard', 'sapphire'],
+  roughonyx: ['shard', 'onyx'],
+  roughdiamond: ['shard', 'diamond'],
+  roughemerald: ['shard', 'emerald'],
+  roughruby: ['shard', 'ruby'],
+  garnet: ['gem', 'garnet'],
+  agate: ['gem', 'agate'],
+  amethyst: ['gem', 'amethyst'],
+  topaz: ['gem', 'topaz'],
+  sapphire: ['gem', 'sapphire'],
+  onyx: ['gem', 'onyx'],
+  diamond: ['gem', 'diamond'],
+  emerald: ['gem', 'emerald'],
+  ruby: ['gem', 'ruby'],
   tonic: ['flask', 'herb'],
   salve: ['pot', 'bone'],
   cordial: ['flask', 'bronze'],

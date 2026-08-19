@@ -6,6 +6,8 @@
 // Add, delete, or rewrite entries freely. The menu reads whatever is here.
 // An Inventory entry also names an `icon`, which is a picture in src/icons.js. One
 // naming an icon that isn't there gets a blank square rather than nothing.
+// The Charm slot is not written here: what is on the cord is whatever src/charm.js says
+// is worn, and it is added to the end of EQUIPMENT by the menu.
 
 export const CHARACTER = [
   {
@@ -140,14 +142,6 @@ export const EQUIPMENT = [
     body: [
       'Good boots. Better than yours were. Half a size large, packed out with rag.',
       'You took them off a man on the south road who had stopped needing them. You would tell that story if anyone asked and nobody has.',
-    ],
-  },
-  {
-    label: 'Charm',
-    note: 'Empty',
-    body: [
-      'The loop of cord at your throat where something used to hang.',
-      'Every third villager has glanced at it. Father Emeric looked at it for a long moment and then very deliberately looked at your face instead.',
     ],
   },
 ];

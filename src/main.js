@@ -17,6 +17,7 @@ import * as craft from './craft.js';
 // does it yet: party.award('aldis', 40)
 window.party = party;
 // and so materials can be handed out before any activity produces them: town.give('ironore', 20)
+// and so a building can be put up a stage while no repair cost is written: town.raise('forge')
 window.town = town;
 // and so a run can be started without walking to the Sea Hag: run.start('fenedge')
 window.run = run;

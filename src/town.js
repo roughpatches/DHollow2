@@ -113,6 +113,17 @@ export function contribute(id) {
   return { taken, levelled };
 }
 
+// A stage put up without paying for it. No building has a repair cost written at the
+// moment, so nothing levels by playing — this is how one is moved from the console while
+// that is true, the same hook town.give and party.award are: town.raise('forge').
+export function raise(id) {
+  const b = buildingOf(id);
+  if (!b || levelOf(id) >= b.stages.length - 1) return null;
+  level.set(id, levelOf(id) + 1);
+  paid.set(id, {});
+  return stageOf(id).name;
+}
+
 // --- text -----------------------------------------------------------------
 // Flat and mechanical on purpose: this is a readout, not a voice. Rewrite freely.
 

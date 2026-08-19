@@ -11,6 +11,7 @@ import { PARTY } from '../content/party.js';
 import { SKILLS } from '../content/skills.js';
 import { FEARS } from '../content/fears.js';
 import * as story from './story.js';
+import { bonus as charmBonus, worn } from './charm.js';
 
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
 const FEAR = Object.fromEntries(FEARS.map((f) => [f.id, f]));
@@ -68,11 +69,14 @@ export function combatOf(id) {
   if (!c || !c.combat) return null;
   const d = TUNING.combat.fighter;
   const own = c.combat === true ? {} : c.combat;
+  // A worn stone is worth the same to a blow as to the thing taking it, so harm moves at
+  // both ends rather than widening: a Ruby makes every swing better, not luckier.
+  const harm = own.harm || d.harm;
   return {
-    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1),
-    hit: own.hit ?? d.hit,
-    guard: own.guard ?? d.guard,
-    harm: own.harm || d.harm,
+    hp: (own.hp ?? d.hp) + TUNING.combat.hpPerLevel * (stateOf(id).level - 1) + charmOn(id, 'hp'),
+    hit: (own.hit ?? d.hit) + charmOn(id, 'hit'),
+    guard: (own.guard ?? d.guard) + charmOn(id, 'guard'),
+    harm: [harm[0] + charmOn(id, 'harm'), harm[1] + charmOn(id, 'harm')],
   };
 }
 
@@ -80,6 +84,12 @@ export function combatOf(id) {
 // left out of every list of who might come. This is the only place that knows which
 // character they are.
 export const YOU = PARTY.find((c) => c.you).id;
+
+// Only the player wears a charm — one stone, one slot — so everybody else reads zero and
+// every number below can ask without first asking who it is asking about.
+function charmOn(id, stat) {
+  return id === YOU ? charmBonus(stat) : 0;
+}
 
 // what the hut scene hands back: three skills against the points put on each
 export function setSkills(id, skills) {
@@ -131,7 +141,7 @@ export function stateOf(id) {
 // What this character is worth to a run's constitution: their own score, and what every
 // level past the first added to it.
 export function conOf(id) {
-  return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1);
+  return charOf(id).con + TUNING.conPerLevel * (stateOf(id).level - 1) + charmOn(id, 'con');
 }
 
 // what a set of people are worth as a body — the number a run starts with
@@ -228,8 +238,13 @@ export function skillForActivity(activity) {
   return (activity && SKILLS.find((t) => t.activities.includes(activity))) || null;
 }
 
+// A rank is what was spent there plus what is worn. Everything downstream — whether the
+// skill is had at all, what a check rolls, what a node pays, who speaks at a fork — reads
+// this one function, so a stone that grants a point grants all of it: a Sapphire is a way
+// onto work the player could not otherwise take. Spending points is untouched by it; the
+// bank in stateOf is what a level hands over and a stone never goes near it.
 export function rankOf(id, skillId) {
-  return stateOf(id).skills[skillId] || 0;
+  return (stateOf(id).skills[skillId] || 0) + charmOn(id, skillId);
 }
 
 // what a level handed over and nobody has spent yet
@@ -255,11 +270,16 @@ export function worthOf(rank) {
   return rank * TUNING.skillBonusPerPoint;
 }
 
-// best first, because a sheet is read for what somebody is good at
+// best first, because a sheet is read for what somebody is good at. A skill the worn
+// stone grants and nobody spent a point on is on the sheet too — it is a skill they have.
 export function skillsOf(id) {
-  return Object.entries(stateOf(id).skills)
-    .filter(([t]) => SKILL[t])
-    .map(([t, rank]) => ({ ...SKILL[t], rank }))
+  const ids = new Set(Object.keys(stateOf(id).skills));
+  const w = id === YOU ? worn() : null;
+  if (w) for (const st of w.gem.stats) if (SKILL[st]) ids.add(st);
+  return [...ids]
+    .filter((t) => SKILL[t])
+    .map((t) => ({ ...SKILL[t], rank: rankOf(id, t) }))
+    .filter((t) => t.rank > 0)
     .sort((a, b) => b.rank - a.rank);
 }
 

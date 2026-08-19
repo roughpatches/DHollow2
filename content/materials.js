@@ -1,3 +1,5 @@
+import { GEMS } from './gems.js';
+
 // Everything the player carries: what the nodes of a run pay out, and what a bench turns
 // it into. Encounters name these ids in their spoils; recipes name them in their costs.
 // The pack starts empty — everything in it was carried home.
@@ -10,21 +12,14 @@
 
 export const MATERIALS = [
   // --- what comes off a face -------------------------------------------------
-  // Mining pays these; Smithing and Gem Cutting are what they are waiting for.
+  // Mining pays this; the smelter is what it is waiting for. What mining pays in stones
+  // is at the bottom of this file.
   {
     id: 'ironore',
     name: 'Iron Ore',
     body: [
       'Rusty-brown lumps with the grain of the seam still on them, heavy out of all proportion to their size.',
       'Nobody in Dreadhollow has lit a smelter in living memory. The ore does not care.',
-    ],
-  },
-  {
-    id: 'roughgem',
-    name: 'Rough Stone',
-    body: [
-      'A clouded lump with one face that catches the light and five that do not.',
-      'It is worth nothing at all until somebody who knows where it wants to break has broken it.',
     ],
   },
   // --- what comes off a bench ------------------------------------------------
@@ -44,30 +39,6 @@ export const MATERIALS = [
     body: [
       'A hand\'s length of worked iron, square in section, with the hammer still legible along it.',
       'This is the first iron anybody has drawn in Dreadhollow since the smithy went cold.',
-    ],
-  },
-  {
-    id: 'cabochon',
-    name: 'Cabochon',
-    body: [
-      'A domed stone worked to eight soft flats, polished until it holds the light rather than throwing it.',
-      'Worth having. Not worth what the same stone would have been in better hands.',
-    ],
-  },
-  {
-    id: 'tablegem',
-    name: 'Table-Cut Stone',
-    body: [
-      'Six faces and a broad flat top, cut to be looked into rather than looked at.',
-      'The first thing off that wheel in a generation that anybody would call a gem.',
-    ],
-  },
-  {
-    id: 'brilliant',
-    name: 'Brilliant',
-    body: [
-      'Twelve faces, and every one of them doing something to the light on its way back out.',
-      'Somebody who can cut one of these does not stay in a town like this. That is the usual order of it.',
     ],
   },
   {
@@ -222,4 +193,10 @@ export const MATERIALS = [
       'Not all of it is the shape bone is supposed to be.',
     ],
   },
+
+  // --- what comes out of the ground as a stone --------------------------------
+  // Not written here: a rough stone is whatever content/gems.js says its gem is, so a
+  // tenth stone is added by adding a gem rather than by writing it down twice. Tier one
+  // comes off Greywood mining; the other six are dug somewhere that is not written yet.
+  ...GEMS.map((g) => ({ id: g.rough, name: `Rough ${g.name}`, body: g.raw })),
 ];

@@ -1,3 +1,5 @@
+import { GEMS } from './gems.js';
+
 // What can be made in town, and what it takes to make it. A recipe is offered at one
 // workstation, and a workstation is a building with `craft` on the stage it works at —
 // so bringing the smithy back up a stage is what puts new work in front of the player.
@@ -22,9 +24,40 @@
 //              and how fast and how evenly they swell. Left out, it is the first tier.
 //   costs    — what is taken out of the pack, and taken before anything is played.
 //   makes    — what goes back into it, before the maker's points and how well it went.
+//   cuts     — a gem id from content/gems.js, for work that grades its output instead of
+//              counting it. A recipe has this or `makes`, never both: one stone goes on
+//              the wheel and one stone comes off, and what the work decides is which
+//              grade it is. See src/charm.js.
 //   xp       — what finishing it is worth to the player's level, at full quality.
 //   body     — what the work is, in the world's voice. Yours to write.
 // Add a recipe by adding an entry. Nothing reads this list by position.
+
+// What a tier costs the player before the wheel is even turned on. `hard` is the tier in
+// `gem` in tuning.js — how many faces the stone is cut to and how near each has to sit.
+//   also  — anything the rough stone is not, added to the cost.
+const CUTTING = {
+  1: {
+    stage: 1, level: 2, rank: 1, hard: 'basic', xp: 18, also: {},
+    body: (g) => [
+      `Eight flats worked round a ${g.name.toLowerCase()} until the light stops catching on the corners.`,
+      'The shape a stone is given when nobody is sure yet what is inside it. It is also the only shape anybody in Dreadhollow has cut in twenty years.',
+    ],
+  },
+  2: {
+    stage: 2, level: 4, rank: 2, hard: 'fine', xp: 32, also: { charcoal: 1 },
+    body: (g) => [
+      `Six faces on a ${g.name.toLowerCase()}, worked wide and taken down flat, with the top left broad enough to look into.`,
+      'Six faces means six corners, and a wheel that runs past one of them has taken it.',
+    ],
+  },
+  3: {
+    stage: 2, level: 7, rank: 3, hard: 'master', xp: 60, also: { charcoal: 2 },
+    body: (g) => [
+      `Twelve faces on a ${g.name.toLowerCase()}, none of them wide, every one of them wanted.`,
+      'There is no second stone if this one goes. That is the whole of what makes it the work it is.',
+    ],
+  },
+};
 
 export const RECIPES = [
   // --- the smithy ------------------------------------------------------------
@@ -81,65 +114,6 @@ export const RECIPES = [
     body: [
       'A stack tall enough to hold its own heat, tapped at the bottom and fed for as long as there is anybody to feed it.',
       'One man can work it. Two men can work it properly.',
-    ],
-  },
-
-  // --- the wheel, in the corner of the smithy --------------------------------
-  // A rough stone comes off a mining node about one time in eight, so every one of these
-  // is a stone the player walked a long way for and gets one go at. Three shapes and three
-  // tiers; what the stone is worth is how near it ends up to the shape it was given.
-  {
-    id: 'cabochon',
-    name: 'Grind a cabochon',
-    at: 'forge',
-    stage: 1,
-    level: 2,
-    skill: 'gemcutting',
-    rank: 1,
-    activity: 'Cutting',
-    hard: 'basic',
-    costs: { roughgem: 1 },
-    makes: { cabochon: 1 },
-    xp: 18,
-    body: [
-      'No facets to speak of — eight flats worked round until the light stops catching on the corners.',
-      'The shape a stone is given when nobody is sure yet what is inside it.',
-    ],
-  },
-  {
-    id: 'tablegem',
-    name: 'Cut a table stone',
-    at: 'forge',
-    stage: 2,
-    level: 4,
-    skill: 'gemcutting',
-    rank: 2,
-    activity: 'Cutting',
-    hard: 'fine',
-    costs: { roughgem: 1, charcoal: 1 },
-    makes: { tablegem: 1 },
-    xp: 32,
-    body: [
-      'Six faces, worked wide and taken down flat, with the top left broad enough to look into.',
-      'Six faces means six corners, and a wheel that runs past one of them has taken it.',
-    ],
-  },
-  {
-    id: 'brilliant',
-    name: 'Cut a brilliant',
-    at: 'forge',
-    stage: 2,
-    level: 7,
-    skill: 'gemcutting',
-    rank: 3,
-    activity: 'Cutting',
-    hard: 'master',
-    costs: { roughgem: 2, charcoal: 2 },
-    makes: { brilliant: 1 },
-    xp: 60,
-    body: [
-      'Twelve faces, none of them wide, every one of them wanted.',
-      'Two stones go on the wheel because one of them is expected not to come off it.',
     ],
   },
 
@@ -256,4 +230,27 @@ export const RECIPES = [
       'A fish smoked properly keeps until the weather turns. A fish smoked badly keeps until somebody eats it.',
     ],
   },
+
+  // --- the wheel, in the corner of the smithy --------------------------------
+  // Nine stones and one job: put the rough on the wheel and bring it down onto the shape.
+  // What comes off is the same stone at Regular, Fine or Flawless, and that is what the
+  // work is for — there is no cutting a garnet badly into something else.
+  // The nine are not written out one at a time. A tier is what a stone costs, what it is
+  // gated on and how hard the wheel reads it; edit the three rows in CUTTING to retune
+  // all nine, and a tenth gem in content/gems.js arrives here with no line written.
+  ...GEMS.map((g) => ({
+    id: `cut${g.id}`,
+    name: `Cut ${'aeiou'.includes(g.name[0].toLowerCase()) ? 'an' : 'a'} ${g.name.toLowerCase()}`,
+    at: 'forge',
+    skill: 'gemcutting',
+    activity: 'Cutting',
+    cuts: g.id,
+    costs: { [g.rough]: 1, ...CUTTING[g.tier].also },
+    stage: CUTTING[g.tier].stage,
+    level: CUTTING[g.tier].level,
+    rank: CUTTING[g.tier].rank,
+    hard: CUTTING[g.tier].hard,
+    xp: CUTTING[g.tier].xp,
+    body: CUTTING[g.tier].body(g),
+  })),
 ];

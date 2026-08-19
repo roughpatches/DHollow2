@@ -10,6 +10,7 @@ import { SCRIPT } from '../placeholders.js';
 import { partyRows, skillRows, fill, pointsOf, YOU } from '../party.js';
 import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
+import { charmRow, cutRows, wear } from '../charm.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
@@ -21,8 +22,13 @@ const PLATE = 'plate'; // and a picture on it is set in the square off the same 
 const questLog = () => [...questRows(), ...QUESTS];
 
 // What the party is carrying comes off town.js as it changes, and sits above the kit
-// the character started the game with. One list, two sources.
-const inventory = () => [...carriedRows(), ...INVENTORY];
+// the character started the game with. Cut stones come first, because a stone is the one
+// thing in the pack that does something: they are what the tab is opened for.
+const inventory = () => [...cutRows(), ...carriedRows(), ...INVENTORY];
+
+// The worn slots the character set out in, and the one slot that is live: whatever stone
+// is on the cord. It goes last because that is where it sits on the sheet.
+const equipment = () => [...EQUIPMENT, charmRow()];
 
 // The Map tab is where the party can go, not everywhere they have stood: a place with an
 // id is a zone a job is walked in, and everything else in content/places.js is town
@@ -40,7 +46,7 @@ const locations = () => PLACES.filter((p) => p.id);
 // A tab marked 'grid' draws its rows as squares of icons instead of a column of names;
 // everything else about it — cursor, scrolling, detail pane — is the same.
 const TABS = [
-  ['Equipment', EQUIPMENT],
+  ['Equipment', equipment],
   ['Character', CHARACTER],
   ['Party', partyRows],
   ['Skills', skillRows],
@@ -123,6 +129,13 @@ export default class Menu extends Phaser.Scene {
       if (!pointsOf(YOU)) return;
       this.close();
       this.game.events.emit('skills:spend', entry.skill);
+      return;
+    }
+    // A stone goes on where it is standing, and the same key takes it off again — the
+    // pack is where it lives either way, so nothing is spent by wearing it.
+    if (entry.gem) {
+      wear(entry.gem);
+      this.draw();
       return;
     }
     if (!entry.options) return;
@@ -546,6 +559,7 @@ export default class Menu extends Phaser.Scene {
     let change = rows.some((r) => r.options) ? '    [Enter] Change' : '';
     if (rows.some((r) => r.quest)) change = '    [Enter] Set out';
     if (rows.some((r) => r.skill)) change = pointsOf(YOU) ? '    [Enter] Spend a point' : '';
+    if (rows.some((r) => r.gem)) change = '    [Enter] Wear';
     this.text(
       this.listX,
       this.box.y + this.box.h - 26,
