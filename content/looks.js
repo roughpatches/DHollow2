@@ -372,8 +372,8 @@ const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
 // And the things a pack holds that are not stones: icon name → the export, each under its
 // own folder in art/items because two exports asked for at different times come back under
 // the same name often enough. No ink named, so these go up as painted — a thing painted in
-// its own colour has nothing to be put through. Only a stone is one shape in nine colours;
-// everything else is itself.
+// its own colour has nothing to be put through. A stone is a shape any number of stones
+// can be cut to; everything else is only itself.
 const PAINTED_ITEMS = {
   oakbranch: 'art/items/oakbranch/An_Oak_log/rotations/An_Oak_log.png',
   oaklog: 'art/items/oaklog/An_Oak_log/rotations/An_Oak_log.png',
