@@ -175,6 +175,49 @@ export const TUNING = {
     },
   },
 
+  // Smithing (src/minigames/SmeltEngine.js): the crucible, which is what a Smelting recipe
+  // is. StarScape scaled these by the ore's tier and the tongs the smith had on; there is
+  // one charge here and these are its numbers.
+  smelt: {
+    // The fire. The band is where the charge runs cleanest, and it sits under the gold
+    // stretch of the painted gauge so the good heat is where the gauge says it is.
+    sweetBand: { low: 0.5, high: 0.78 },
+    warmTolerance: 0.1, // how far past the band is merely hot rather than scorching
+    decayPerSec: 0.055, // an untended fire falls away in about twenty seconds
+    pumpBurst: 0.1, // and a pump puts a tenth of the gauge back
+    pumpFuelCost: 0.018, // what a pump costs on top of the drain: working it has a price
+    // The clock, and the only one. A full reserve is about eighty seconds of fire, which
+    // is a comfortable melt and a hurried one if the heat was let go early.
+    fuelReserve: 1,
+    fuelDrainPerSec: 0.0115,
+    fuelWarnAt: 0.25, // the fraction left when the fire is said to be guttering
+    // The charge.
+    purity0: 0.35, // what the ore is before anything is taken off it
+    purityCeiling: 0.98, // and the best skimming alone will ever get it to
+    meltRatePerSec: 0.032, // at the band; see HEAT_FACTOR in the engine for the rest
+    oxidePerSec: 0.055, // what being held above the band costs the pool
+    minMoltenToPour: 0.5, // below this the pot will not tip: half a charge is the least bar
+    // The surface. A clump left past drossSetMs has set, and a set clump is half the
+    // purity for twice the heat — the whole of why a skim is a thing to be prompt about.
+    drossIntervalMs: 2500,
+    drossJitterMs: 300, // so the rhythm cannot be counted
+    drossSetMs: 2200,
+    maxSurfaceDross: 4, // places on the surface; the fifth clump sinks the oldest
+    drossSinkPenalty: 0.06, // and that is a purity loss nothing takes back
+    baseSkims: 5, // how many skims are in a charge
+    skimPurityGain: 0.09,
+    skimPurityGainSet: 0.045,
+    skimHeatCost: 0.045,
+    skimHeatCostSet: 0.09,
+    // The pour, read as the game reads work. The bar is what the charge was for, so the
+    // pour is written into the judgments several times over: a run of clean skims poured
+    // half-melted is not good work, and this is what says so.
+    pourWeight: 3,
+    pourPerfectAt: 0.7, // purity, docked for what never ran, above which the bar is clean
+    pourGoodAt: 0.5, // and above which it is worth having
+    settleMs: 900, // how long the pot is left to be looked at before the tally
+  },
+
   // Alchemy (src/minigames/BrewEngine.js), which is what a Brewing recipe is: a shape
   // swelling in the pot and an outline to stop it inside, one for every ingredient going
   // in. Everything above the tiers is the pot itself and is the same at any difficulty.

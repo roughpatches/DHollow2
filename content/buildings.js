@@ -81,11 +81,13 @@ export const BUILDINGS = [
     // The first workstation. Two working stages: a hearth anybody can smelt at, and the
     // furnace behind it, which is what the second repair buys and what the recipes gated
     // at stage 2 are waiting for.
+    // It starts at the hearth rather than cold, because no stage in town has a repair cost
+    // written yet: left at stage 0 the crucible would be a thing nobody could reach.
     id: 'forge',
     name: 'The smithy',
     map: 'searow',
     site: [31], // the open-fronted shed at the east end of the row, off the cobbles
-    level: 0,
+    level: 1,
     stages: [
       {
         name: 'Cold',

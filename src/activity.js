@@ -13,6 +13,7 @@ import { MealEngine } from './minigames/MealEngine.js';
 import { MineEngine } from './minigames/MineEngine.js';
 import { BrewEngine } from './minigames/BrewEngine.js';
 import { GemEngine } from './minigames/GemEngine.js';
+import { SmeltEngine } from './minigames/SmeltEngine.js';
 import { TensionBarEngine } from './minigames/TensionBarEngine.js';
 
 // The crawl presses and releases in the axe's names, because that is what it had first.
@@ -88,6 +89,11 @@ const ENGINES = {
     hint: '[Space] Stop the shape inside the outline',
     tiers: TUNING.brew.tiers,
     says: (t) => `${t.shapes} shapes, ${sec(t.periodMs[0])} to ${sec(t.periodMs[1])} apiece`,
+  },
+  Smelting: {
+    make: (scene, layout) => new SmeltEngine(scene, { ...TUNING.smelt, layout }),
+    // Three keys and no aiming: the fire, the surface, and the decision to stop.
+    hint: '[Space] Pump the bellows    [Up] Skim the oldest clump    [Down] Pour',
   },
   Cutting: {
     make: (scene, layout, opts) => new GemEngine(scene, {
