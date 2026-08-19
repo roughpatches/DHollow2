@@ -375,8 +375,9 @@ const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
 // its own colour has nothing to be put through. Only a stone is one shape in nine colours;
 // everything else is itself.
 const PAINTED_ITEMS = {
-  heartwood: 'art/items/heartwood/An_Oak_log/rotations/An_Oak_log.png',
   oakbranch: 'art/items/oakbranch/An_Oak_log/rotations/An_Oak_log.png',
+  oaklog: 'art/items/oaklog/An_Oak_log/rotations/An_Oak_log.png',
+  heartwood: 'art/items/heartwood/An_Oak_log/rotations/An_Oak_log.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
