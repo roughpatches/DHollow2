@@ -113,9 +113,17 @@ export function fullName(gem, grade) {
   return `${grade.name} ${gem.name}`;
 }
 
-// What a stone does on one side of itself, as one line: '+2 Guard, +2 Constitution'.
+// How far one step of a grade moves one number. A skill moves by the step itself; the five
+// a body has move by whatever `gear.scale` in tuning.js says they are worth, because a
+// point of hit points is not a point of guard. This is the same arithmetic src/gear.js
+// does when it adds them up, kept here so a readout can never disagree with a total.
+export function stepOf(grade, stat) {
+  return grade.worth * (TUNING.gear.scale[stat] ?? 1);
+}
+
+// What a stone does on one side of itself, as one line: '+2 Guard, +4 Constitution'.
 export function sideLine(gem, grade, slot) {
-  return statsFor(gem, slot).map((s) => `+${grade.worth} ${nameOfStat(s)}`).join(', ');
+  return statsFor(gem, slot).map((s) => `+${stepOf(grade, s)} ${nameOfStat(s)}`).join(', ');
 }
 
 // And both sides at once, for a stone nobody has decided about yet: this is the whole of

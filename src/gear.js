@@ -279,7 +279,13 @@ export function bonus(stat) {
       // A stone is worth what it was cut to, in whichever of its two halves this setting
       // reads: skills against the skin, the fighting numbers in metal. So the same stone
       // in a ring and in a sword adds to two different things and never to both.
-      if (gem && grade && statsFor(gem, w.piece.slot).includes(stat)) n += grade.worth;
+      // A body stat is scaled the same way the piece's own is — a point of hit points is
+      // not a point of guard, and a stone in the metal is moving the metal's numbers, so
+      // it moves them in the metal's units. A skill has no scale and takes none: a point
+      // of Insight is a point of Insight wherever it came from.
+      if (gem && grade && statsFor(gem, w.piece.slot).includes(stat)) {
+        n += grade.worth * (TUNING.gear.scale[stat] ?? 1);
+      }
     }
   }
   return n;
