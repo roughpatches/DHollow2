@@ -1,6 +1,7 @@
-// Everyone in the world and everything they say. Three people so far: the hunter who
-// pulled you off the strand, and the landlord who has the work. The rest of the town is
-// still to be written. Plain strings — rewrite any of it.
+// Everyone in the world and everything they say. Four people so far: the hunter who
+// pulled you off the strand, the landlord who has the work, and the two women standing
+// at the ends of the town — the herbalist among the graves and the smith at her shed.
+// The rest of the town is still to be written. Plain strings — rewrite any of it.
 // palette names come from PALETTES in tuning.js, or from content/looks.js for anyone
 // with drawn art instead of a generated placeholder. x/y are tile coordinates on the map.
 // The palette also picks the portrait shown while they speak; add `portrait: 'name'` to
@@ -81,6 +82,33 @@ export const NPCS = [
     takes: { mug: [210, 229, 21, 24], counter: [231, 229], from: 2 },
     quests: true,
     lines: ['Fancy a drink, or looking to make a little coin?'],
+  },
+
+  {
+    // Melovia, outside the chapel: at the west corner of it, in the burying ground the
+    // wood end is painted with. The chapel's own door is at 37 and its picture is 128
+    // pixels wide, so standing here is beside it rather than in front of it, and the
+    // doorway stays inside [E] reach from the road. She faces east, which is both the
+    // chapel and the way anybody walks in from the field road.
+    id: 'melovia',
+    name: 'Melovia',
+    map: 'woodend',
+    x: 33,
+    facing: 'right',
+    palette: 'melovia', // real art; see content/looks.js
+    // No lines yet. src/placeholders.js gives her one for free and the Script tab in the
+    // menu lists it, which is where it wants writing.
+  },
+  {
+    // Aethelwynn at the forge: two tiles east of the shed, so the hearth at 31 is still
+    // reachable with her standing there. She faces west, back down the row at whoever is
+    // coming up it from the harbour road.
+    id: 'aethelwynn',
+    name: 'Aethelwynn',
+    map: 'searow',
+    x: 33,
+    facing: 'left',
+    palette: 'aethelwynn', // real art; see content/looks.js
   },
 
   // The six townsfolk who stood on the old map — Mother Cray, Ned Salt, Wick, Tallow,
