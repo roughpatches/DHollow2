@@ -109,7 +109,9 @@ export function rollCard(scene, rect, check, night, onDone = () => {}) {
   named.setWordWrapWidth(wrap - dial - 14);
   const how = write(band.name, TUNING.questRollBandSize, band.colour);
   const chips = bonuses.map((b) => write(`+${b.n} ${b.label}`, TUNING.questBodySize, COLORS.menuAccent));
-  const sum = write(`= ${check.total}`, TUNING.questBodySize + 2, COLORS.menuText);
+  // A roll with nothing behind it is its own total, and a panel that says 16 and then
+  // = 16 is a panel saying it twice.
+  const sum = bonuses.length ? write(`= ${check.total}`, TUNING.questBodySize + 2, COLORS.menuText) : null;
 
   // The chips run left to right under the dial and wrap when the panel runs out, so a
   // party carrying more than the two things there are today still fits inside its frame.
@@ -126,7 +128,7 @@ export function rollCard(scene, rect, check, night, onDone = () => {}) {
   // The sum is the tallest line on the panel and the last one, so the frame is built to
   // the height it actually came out rather than to a row's worth: a line measured short
   // is a line written on the bottom rail.
-  const tail = sum.height + 6;
+  const tail = sum ? sum.height + 6 : 0;
   const h = Math.max(minOf(FRAME).h,
     pad.t + head + 4 + chipRows * TUNING.questRollRow + tail + pad.b);
   const x = rect.x + TUNING.questRollInset;
@@ -154,12 +156,14 @@ export function rollCard(scene, rect, check, night, onDone = () => {}) {
     if (row.length) ty += TUNING.questRollRow;
   });
   for (const chip of chips) box.add(chip);
-  sum.setPosition(dx, ty);
-  box.add(sum);
+  if (sum) {
+    sum.setPosition(dx, ty);
+    box.add(sum);
+  }
 
   // Nothing behind the dial is showing yet: the panel comes up with a face turning over
   // in it and fills in from there.
-  for (const o of [...chips, sum]) o.setAlpha(0);
+  for (const o of [...chips, sum].filter(Boolean)) o.setAlpha(0);
   how.setAlpha(0);
   box.setAlpha(0);
   scene.tweens.add({ targets: box, alpha: 1, duration: TUNING.questToastFadeMs, ease: 'Sine.out' });
@@ -193,13 +197,18 @@ export function rollCard(scene, rect, check, night, onDone = () => {}) {
       delay: after + i * TUNING.questRollStepMs,
     });
   });
-  scene.tweens.add({
-    targets: sum, alpha: 1, duration: TUNING.questToastFadeMs,
-    delay: after + chips.length * TUNING.questRollStepMs,
-  });
 
-  // and then the word, and the panel stands a while behind it before it goes
-  const done = after + (chips.length + 1) * TUNING.questRollStepMs;
+  if (sum) {
+    scene.tweens.add({
+      targets: sum, alpha: 1, duration: TUNING.questToastFadeMs,
+      delay: after + chips.length * TUNING.questRollStepMs,
+    });
+  }
+
+  // And then the word — after the last line of the panel has finished coming in rather
+  // than across the end of it, so the sum is read before it is answered.
+  const last = after + (chips.length + (sum ? 1 : 0)) * TUNING.questRollStepMs;
+  const done = last + TUNING.questToastFadeMs + TUNING.questRollPauseMs;
   scene.time.delayedCall(done, () => {
     if (live !== box) return;
     flash(scene, rect, check, onDone);
