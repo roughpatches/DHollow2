@@ -87,8 +87,8 @@ export const LOOKS = [
     id: 'melovia',
     path: 'art/melovia',
     size: 64,
-    foot: 63,
-    head: 1,
+    foot: 64, // her boots reach the bottom row of the frame, so the ground is below it
+    head: 2, // and the crown of her head, which the staff tips out over and is not
     walk: { folder: 'Idle/animations/Walk', frames: 6 },
     still: 'Idle/rotations',
     portrait: '../melovia-indoors/Idle/portrait.png',
@@ -100,7 +100,7 @@ export const LOOKS = [
     id: 'melovia-indoors',
     path: 'art/melovia-indoors',
     size: 128,
-    foot: 126,
+    foot: 125,
     head: 3, // the crown of her head; the staff tops out level with it
     still: 'Idle/rotations',
     portrait: 'Idle/portrait.png',
@@ -115,7 +115,7 @@ export const LOOKS = [
     id: 'aethelwynn',
     path: 'art/aethelwynn',
     size: 66,
-    foot: 65,
+    foot: 64,
     head: 2,
     walk: { folder: 'Walking/animations/The_character_walks_forward_with_a_steady_rhythmic', frames: 9 },
     still: 'Idle/rotations',
