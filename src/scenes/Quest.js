@@ -9,6 +9,8 @@ import {
 import { stock, heldOf, nameOf as goodName } from '../town.js';
 import {
   cutStones, worn, wear, fullName, worthLine,
+  shelfCount, packedCount, packedStones,
+  take as takeStone, putBack as putBackStone, clearPack,
 } from '../charm.js';
 import { MOVES, moveLine, saidCount } from '../combat.js';
 import { iconKeyFor } from '../icons.js';
@@ -233,13 +235,14 @@ export default class Quest extends Phaser.Scene {
       const n = Math.max(1, rows.length);
       const { cols } = this.shelfShape();
       const step = (d) => { this.row = ((this.row + d) % n + n) % n; };
-      if (k === 'escape') { this.mode = 'party'; this.row = 0; }
+      if (k === 'escape') { clearPack(); this.mode = 'party'; this.row = 0; }
       else if (k === 'arrowup' || k === 'w') step(-cols);
       else if (k === 'arrowdown' || k === 's') step(cols);
       else if (k === 'arrowleft' || k === 'a') step(-1);
       else if (k === 'arrowright' || k === 'd') step(1);
       else if (k === ' ') this.packMore(rows[this.row], 1);
       else if (k === 'backspace') this.packMore(rows[this.row], -1);
+      else if (k === 'e') this.equip(rows[this.row]);
       else if (k === 'enter') this.begin(this.when_);
       this.draw();
       return;
@@ -278,6 +281,15 @@ export default class Quest extends Phaser.Scene {
         run.dropSquare(this.row);
         this.row = Math.min(this.row, Math.max(0, run.packCells().length - 1));
       } else if (k === 'escape' || k === 'e') { run.leaveOffer(); this.row = 0; }
+      this.draw();
+      return;
+    }
+
+    // The cord, at a camp, for the same reason and by the same rule: one key, no cursor.
+    // It walks the stones in the pack and then off the end of them, so putting one on,
+    // swapping it, and taking it off are all the same press.
+    if (k === 'c' && !this.approaching && run.cordable().length) {
+      run.changeCord();
       this.draw();
       return;
     }
@@ -425,18 +437,26 @@ export default class Quest extends Phaser.Scene {
   // room is left is the whole question.
   toPacking() {
     this.bring = {};
+    clearPack(); // nothing is packed until it is packed for this job
     this.mode = 'pack';
     this.row = 0;
   }
 
-  // What is still on the shelves, a square at a time, with the cut stones first: one of
-  // those goes on the cord rather than in a square and is the only thing here that is not
-  // weight. What has been packed has left the shelf and is drawn in the other grid, so the
-  // two together always add up to what the town owns — except for a thing taken down to
-  // none, which keeps one empty square so there is somewhere to put it back to.
+  // What is still on the shelves, a square at a time, with the cut stones first: a stone
+  // is packed like anything else and costs a square like anything else, and then one of
+  // the packed ones can go on the cord. What has been packed has left the shelf and is
+  // drawn in the other grid, so the two together always add up to what the town owns —
+  // except for a thing taken down to none, which keeps one empty square so there is
+  // somewhere to put it back to. A stone keeps its square for the same reason and for one
+  // more: the cord is chosen from this grid, so a packed stone has to stay pointable at.
   packRows() {
     const out = [];
-    for (const c of cutStones()) out.push({ stone: true, key: c.key, gem: c.gem, grade: c.grade, n: c.n });
+    for (const c of cutStones()) {
+      out.push({
+        stone: true, key: c.key, gem: c.gem, grade: c.grade,
+        n: shelfCount(c.key), packed: packedCount(c.key),
+      });
+    }
     for (const [id, n] of stock()) {
       const taken = (this.bring || {})[id] || 0;
       const shelf = n - taken;
@@ -455,6 +475,12 @@ export default class Quest extends Phaser.Scene {
   // square's worth, because a square is the unit the screen is drawn in.
   packSquares() {
     const cells = [];
+    const on = worn();
+    // A stone does not stack, so it is one square each, and it is the same square whether
+    // it is on the cord or lying in the bottom of the pack.
+    for (const s of packedStones()) {
+      cells.push({ id: s.gem.id, n: 1, note: on && on.key === s.key ? 'cord' : '' });
+    }
     for (const [m, n] of Object.entries(this.bring)) {
       for (let left = n; left > 0; left -= TUNING.stackMax) {
         cells.push({ id: m, n: Math.min(left, TUNING.stackMax) });
@@ -482,9 +508,10 @@ export default class Quest extends Phaser.Scene {
   packMore(row, by) {
     if (!row) return;
     if (row.stone) {
-      const on = worn();
-      if (by > 0) { if (!on || on.key !== row.key) wear(row.key); }
-      else if (on && on.key === row.key) wear(row.key);
+      // In and out of the pack, the same as a stack of ore: a square is a square, and a
+      // stone that will not fit is a stone that stays in town.
+      if (by > 0) { if (this.packRoom() > 0) takeStone(row.key); }
+      else putBackStone(row.key);
       return;
     }
     const have = this.bring[row.id] || 0;
@@ -498,6 +525,14 @@ export default class Quest extends Phaser.Scene {
       this.bring[row.id] = have - back;
       if (!this.bring[row.id]) delete this.bring[row.id];
     }
+  }
+
+  // And what goes on the cord, out of what is going out with them. Only a packed stone
+  // can be worn — the charm you left on the shelf is doing nobody any good — so this is
+  // a second press on a square that is already in the pack. Pressing it on the one that
+  // is on takes it off.
+  equip(row) {
+    if (row && row.stone && packedCount(row.key) > 0) wear(row.key);
   }
 
   // Where the two grids sit and how wide they are. The renderer draws to it and the keys
@@ -521,7 +556,7 @@ export default class Quest extends Phaser.Scene {
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 4;
     y += this.text(this.left, y,
       `${crew.map((id) => nameOf(id)).join(', ')} — ${room} squares between them, `
-      + `${TUNING.stackMax} of a thing to a square.`,
+      + `${TUNING.stackMax} of a thing to a square, and a stone a square of its own.`,
       TUNING.questBodySize, COLORS.menuDim, this.wide).height + 12;
 
     // the two headings, and under each of them its grid
@@ -533,11 +568,12 @@ export default class Quest extends Phaser.Scene {
       this.packRoom() ? COLORS.menuText : COLORS.menuMapMark);
     y += 24;
 
-    const draw = (at, cells, sel) => drawSlots(this, {
+    const draw = (at, cells, sel, dimmed) => drawSlots(this, {
       at,
       cell,
       cells,
       sel,
+      dimmed,
       ink: (c) => this.ink(c),
       add: (o) => this.layer.add(o),
       text: (x, ty, str, size, colour) => this.text(x, ty, str, size, colour),
@@ -545,11 +581,18 @@ export default class Quest extends Phaser.Scene {
 
     const on = worn();
     const shelf = rows.map((r) => (r.stone
-      ? { id: r.gem.id, note: on && on.key === r.key ? 'cord' : '' }
+      ? {
+        id: r.gem.id,
+        n: r.n,
+        note: on && on.key === r.key ? 'cord' : r.packed ? 'pack' : r.n > 1 ? `x${r.n}` : '',
+      }
       : { id: r.id, n: r.n, note: `${r.n}` }));
     const { cols: shelfCols } = this.shelfShape();
     while (!shelf.length || shelf.length % shelfCols) shelf.push(null);
-    const bottom = draw({ x: this.left, y, w: shelfWide }, shelf, this.row);
+    // A stone with none left in town is drawn faint: it is still pointed at, because the
+    // cord is chosen here, but there is nothing of it left to take.
+    const bottom = draw({ x: this.left, y, w: shelfWide }, shelf, this.row,
+      (c, i) => !!(rows[i] && rows[i].stone && rows[i].n < 1));
 
     const packed = this.packSquares();
     while (packed.length < room) packed.push(null);
@@ -559,8 +602,13 @@ export default class Quest extends Phaser.Scene {
     const r = rows[this.row];
     let ty = Math.max(bottom, y + Math.ceil(room / Math.max(1, shapeOf(packWide, room, cell).cols)) * cell) + 10;
     if (r && r.stone) {
+      const cord = on && on.key === r.key;
       ty += this.text(this.left, ty, fullName(r.gem, r.grade), TUNING.menuRowSize, COLORS.menuAccent).height + 2;
-      this.text(this.left, ty, `${worthLine(r.gem, r.grade)}. Worn on the cord, not carried — it takes no square.`,
+      const where = cord ? 'On the cord, and a square of the pack with it.'
+        : r.packed ? 'In the pack, and nothing yet. [E] to put it on the cord.'
+          : r.n > 0 ? 'On the shelf. A square of the pack to take it, and then [E] to wear it.'
+            : 'Nothing of it left in town.';
+      this.text(this.left, ty, `${worthLine(r.gem, r.grade)}. ${where}`,
         TUNING.questHintSize, COLORS.menuDim, this.wide);
     } else if (r) {
       const taking = this.bring[r.id] || 0;
@@ -573,7 +621,8 @@ export default class Quest extends Phaser.Scene {
         TUNING.questHintSize, COLORS.menuMapFolk, this.wide);
     }
 
-    this.hint('[Arrows] Look    [Space] Take a stack, or wear a stone    [Backspace] Put it back    [Enter] Set out    [Esc] Back');
+    this.hint('[Arrows] Look    [Space] Take a square    [Backspace] Put it back    '
+      + '[E] Wear a packed stone    [Enter] Set out    [Esc] Back');
   }
 
   begin(when) {
@@ -942,7 +991,12 @@ export default class Quest extends Phaser.Scene {
     const on = cells[this.row];
     if (on) {
       const brought = (r0) => ((run.active().brought || {})[r0] ? '  — carried out with you' : '');
-      this.text(box.x + pad.l, bottom + 10, `${on.n} ${goodName(on.id)}${brought(on.id)}`,
+      // A stone is named in full and told plainly what tipping it out means: it is not
+      // stock, so nothing about it comes back up the road afterwards.
+      const said = on.stone
+        ? `${on.name}${on.note === 'cord' ? ', on the cord' : ''}  — tipped out, it stays out here`
+        : `${on.n} ${goodName(on.id)}${brought(on.id)}`;
+      this.text(box.x + pad.l, bottom + 10, said,
         TUNING.questBodySize, on_(COLORS.menuText), box.w - pad.l - pad.r);
     }
   }
@@ -1013,22 +1067,29 @@ export default class Quest extends Phaser.Scene {
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
     else if (r.phase === 'choose' && !this.approaching) {
       // one thing to do here is not a question, so it is not asked as one
-      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      const pack = this.campKeys();
       this.hint((r.nodes[r.at].worked.length > 1
         ? '[Up/Down] Choose    [Enter] Work it'
         : '[Enter] Get to work') + `${pack}    [Esc] Turn back`);
     }
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.playing()) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
-      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      const pack = this.campKeys();
       this.hint((r.nodes[r.at].beat.choose
         ? '[Up/Down] Choose    [Enter] Do it'
         : `[E] ${this.page < this.pages - 1 ? 'Read on' : 'Go on'}`) + `${pack}    [Esc] Turn back`);
     }
     else {
-      const pack = run.drinkable().length ? '    [1-9] Drink' : '';
+      const pack = this.campKeys();
       this.hint(`${this.page < this.pages - 1 ? '[E] Read on' : '[E] Press on'}${pack}    [Esc] Turn back`);
     }
+  }
+
+  // What a fire adds to the hint line, and what nowhere else on the road does: the pack
+  // is open here, and the stone on the cord can be changed here.
+  campKeys() {
+    return (run.drinkable().length ? '    [1-9] Drink' : '')
+      + (run.cordable().length ? '    [C] Change the stone' : '');
   }
 
   // The constitution, and nothing else on the band with it. It is the one readout that
@@ -1601,7 +1662,8 @@ export default class Quest extends Phaser.Scene {
   packLines() {
     const can = run.drinkable();
     const force = run.inForce();
-    if (!can.length && !force.length) return [];
+    const cord = run.cordRows();
+    if (!can.length && !force.length && !run.cordable().length) return [];
     const out = [['', TUNING.questHintSize, COLORS.menuRule]];
     if (can.length) {
       out.push(['Somebody has the pack open.', TUNING.questHintSize, COLORS.menuDim]);
@@ -1614,6 +1676,19 @@ export default class Quest extends Phaser.Scene {
     for (const p of force) {
       out.push([`  ${p.name} is working. ${p.body.join(' ')}`,
         TUNING.questHintSize, COLORS.menuMapMark]);
+    }
+    // And the stones they packed, with the one on the cord marked. [C] walks them, so the
+    // list is a readout of where the key is rather than something to point a cursor at.
+    if (run.cordable().length) {
+      out.push(['And the cord, which can be changed here.', TUNING.questHintSize, COLORS.menuDim]);
+      for (const st of cord) {
+        out.push([`  ${st.on ? '>' : ' '} ${fullName(st.gem, st.grade)} — ${worthLine(st.gem, st.grade)}`,
+          TUNING.questHintSize, st.on ? COLORS.menuAccent : COLORS.menuText]);
+      }
+      if (!cord.some((st) => st.on)) {
+        out.push(['    Nothing on it. Whatever they are carrying is doing nothing for them.',
+          TUNING.questHintSize, COLORS.menuMapFolk]);
+      }
     }
     return out;
   }
@@ -1684,8 +1759,18 @@ export default class Quest extends Phaser.Scene {
     // The pack at the gate, which is the whole of what the walk was worth: nothing reached
     // the town's stock until they did.
     out.push([`Carried out of it: ${run.listOf(r.pack)}.    ${r.xp} xp each.`, TUNING.questBodySize, COLORS.menuText]);
+    // And the stones, which were carried rather than found: they go back on the shelf and
+    // come off the cord, so the next job out is packed for from scratch.
+    const stones = packedStones();
+    if (stones.length) {
+      out.push([`Back on the shelf: ${stones.map((st) => fullName(st.gem, st.grade)).join(', ')}.`,
+        TUNING.questBodySize, COLORS.menuText]);
+    }
     if (Object.keys(r.left || {}).length) {
       out.push([`Left on the road: ${run.listOf(r.left)}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
+    }
+    if ((r.stonesLeft || []).length) {
+      out.push([`Tipped out and left there: ${r.stonesLeft.join(', ')}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
     }
     if (r.lost && Object.keys(r.lost).length) {
       out.push([`Half of it went down on the road: ${run.listOf(r.lost)}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
