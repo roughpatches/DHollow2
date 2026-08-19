@@ -26,6 +26,11 @@ import {
   forge, pieceOf, fullName as gearName, worthLine as gearWorth, slotName, socketLine,
 } from './gear.js';
 
+// Where a bench spends from and pays into. A fire on the road spends the pack the party
+// carried out instead, and hands its own in — see the camp section of src/run.js. Nothing
+// else about making a thing changes with the store.
+const SHELF = { heldOf, give };
+
 const MATERIAL = new Set(MATERIALS.map((m) => m.id));
 // and the stones are checked against the same list, from the other end
 validate(MATERIAL);
@@ -52,6 +57,10 @@ for (const r of RECIPES) {
   // way a fired recipe can be wrong and still run.
   if (firedWork(r.activity) && !r.fuel) console.warn(`${r.name}: ${r.activity} is done over a fire and wants a fuel.`);
   if (r.fuel && !firedWork(r.activity)) console.warn(`${r.name}: ${r.activity} is not done over a fire, so its fuel is never burnt.`);
+  // A camp is a fire and nothing else. Work that is not done over one could not be done
+  // at a camp whatever the recipe says, and a stone cannot be cut by firelight.
+  if (r.fire && !firedWork(r.activity)) console.warn(`${r.name}: ${r.activity} is not done over a fire, so it cannot be made at a camp.`);
+  if (r.fire && r.cuts) console.warn(`${r.name}: a camp grades nothing; drop its fire.`);
 }
 
 // Whether standing at this building hands the player a bench at all. It is the stage and
@@ -115,6 +124,46 @@ export function canMake(r) {
   return blockers(r).length === 0;
 }
 
+// The same recipe, at a fire on the road. Three things are different and nothing else is:
+// what is spent is the pack rather than the town's shelves; there is no building out there
+// to be rebuilt, because a fire is a fire; and nothing is burnt, because the fire is
+// already lit and there is no clock on it. The character still has to be levelled and
+// still has to know the work — sitting down beside a fire teaches nobody anything.
+export function campBlockers(r, store) {
+  const out = [];
+  if (levelYou(YOU) < r.level) out.push(`Wants level ${r.level}; you are ${levelYou(YOU)}.`);
+  const want = r.rank || 0;
+  if (rankOf(YOU, r.skill) < want) {
+    out.push(`Wants ${want} point${want === 1 ? '' : 's'} of ${skillOf(r.skill).name}; you have ${rankOf(YOU, r.skill)}.`);
+  }
+  const short = Object.entries(r.costs).filter(([m, n]) => store.heldOf(m) < n);
+  if (short.length) {
+    out.push(`Short of ${short.map(([m, n]) => `${n - store.heldOf(m)} ${nameOf(m)}`).join(', ')}.`);
+  }
+  return out;
+}
+
+// Whether it can be cooked here and now. `fire` on the recipe is the first half of it and
+// content's half: an oven and a smokehouse are not a campfire.
+export function canCook(r, store) {
+  return !!r.fire && campBlockers(r, store).length === 0;
+}
+
+// What the fire says about a dish before the pan goes on. Shorter than a bench's account
+// because there is nothing to decide out there: what it takes, what it makes, and what
+// eating it is worth, which is the only reason anybody is cooking on a road.
+export function cookLines(r, store) {
+  const more = moreOf(r);
+  const dish = MATERIALS.find((m) => m.id === Object.keys(r.makes)[0]);
+  const eat = (dish || {}).eat;
+  return [
+    `${list(Object.entries(r.costs))} — ${list(Object.entries(r.makes))}${more ? ` and ${Math.round(more * 100)}% more for your points` : ''}.`,
+    eat ? `${eat.con || 0} constitution and ${eat.hp || 0} hit points a helping.` : '',
+    `Worth ${r.xp} to your level, and worth doing well.`,
+    ...campBlockers(r, store),
+  ].filter(Boolean);
+}
+
 // Whether anything in the pack is wanted toward the stage above this bench's. A stage can
 // be part-paid, here as at any door in town, so this asks for one of anything rather than
 // for the whole cost.
@@ -152,13 +201,17 @@ export function optionsFor(r) {
 // Make it. `played` is what an engine handed back — { judgments, failed } — or null for
 // work there is no engine for. The costs are already gone by then: they are taken here,
 // before anything is played, because a botched smelt is ore lost and not ore returned.
-export function make(r, played) {
-  if (!canMake(r)) return null;
+export function make(r, played, opts = {}) {
+  // A store passed in is a fire on the road: it is spent and paid instead of the town's
+  // shelves, and there is nothing under it to burn.
+  const store = opts.store || SHELF;
+  const camp = !!opts.store;
+  if (camp ? !canCook(r, store) : !canMake(r)) return null;
   // The fire is laid before the pot is charged, so what is burnt is what the bench quoted
   // and not what is left after the ingredients have gone. Both go whether the work came
-  // off or not: wood burnt is wood burnt.
-  const burnt = fuelFor(r) ? layFor(r).take : [];
-  for (const [m, n] of Object.entries(r.costs)) give(m, -n);
+  // off or not: wood burnt is wood burnt. A camp burns nothing — it was already alight.
+  const burnt = !camp && fuelFor(r) ? layFor(r).take : [];
+  for (const [m, n] of Object.entries(r.costs)) store.give(m, -n);
   for (const [m, n] of burnt) give(m, -n);
 
   const quality = !played ? null : (played.failed ? 0 : qualityOf(played.judgments));
@@ -185,7 +238,7 @@ export function make(r, played) {
     const got = Math.round(n * take);
     if (got > 0) {
       made[m] = got;
-      give(m, got);
+      store.give(m, got);
     }
   }
   const xp = Math.round(r.xp * worth);

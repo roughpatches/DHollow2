@@ -363,6 +363,9 @@ const ICONS = {
   bronzebracelet: ['ring', 'bronze'],
   bronzeamulet: ['amulet', 'bronze'],
   ironbar: ['log', 'iron'],
+  coalfish: ['fish', 'ash'],
+  panperch: ['cap', 'food'],
+  troutsupper: ['fish', 'heart'],
   friedfish: ['fish', 'food'],
   woodstew: ['pot', 'food'],
   smokedfish: ['fish', 'soot'],
@@ -417,6 +420,11 @@ export function preloadIcons(scene) {
   for (const { sheet } of [SKILL_ART, ITEM_ART]) {
     if (sheet && !scene.textures.exists(sheet)) scene.load.image(sheet, sheet);
   }
+  // A painting is loaded once under its own path, however many names wear it: one stone
+  // is painted and nine stones are drawn from it.
+  for (const [path] of Object.values(ITEM_ART.files || {})) {
+    if (!scene.textures.exists(path)) scene.load.image(path, path);
+  }
 }
 
 // One cell off a painted sheet, under the name the drawn shape would have had. Two sheets
@@ -437,8 +445,71 @@ function cutFrom(scene, spec, name) {
   return true;
 }
 
+// Hue and depth of colour out of an ink, and nothing else out of it: the light is the
+// painting's own. Colours as 0xrrggbb here and as h,s,l in 0..1 everywhere below.
+function toHsl(r, g, b) {
+  const [R, G, B] = [r / 255, g / 255, b / 255];
+  const hi = Math.max(R, G, B);
+  const lo = Math.min(R, G, B);
+  const l = (hi + lo) / 2;
+  if (hi === lo) return [0, 0, l];
+  const d = hi - lo;
+  const h = hi === R ? ((G - B) / d + (G < B ? 6 : 0))
+    : hi === G ? (B - R) / d + 2
+      : (R - G) / d + 4;
+  return [h / 6, d / (1 - Math.abs(2 * l - 1)), l];
+}
+
+function fromHsl(h, s, l) {
+  if (!s) return [l, l, l].map((v) => Math.round(v * 255));
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const at = (t) => {
+    const x = (t + 1) % 1;
+    if (x < 1 / 6) return p + (q - p) * 6 * x;
+    if (x < 1 / 2) return q;
+    if (x < 2 / 3) return p + (q - p) * (2 / 3 - x) * 6;
+    return p;
+  };
+  return [at(h + 1 / 3), at(h), at(h - 1 / 3)].map((v) => Math.round(v * 255));
+}
+
+// The painting repainted in somebody else's colour. Every pixel keeps its own lightness
+// and takes the ink's hue and saturation, so the shading, the outline and the highlight
+// that were painted into the stone survive being made a different stone. Fully clear
+// pixels are left alone — there is no colour in them to change.
+function recolour(ctx, w, h, ink) {
+  const img = ctx.getImageData(0, 0, w, h);
+  const d = img.data;
+  const [hue, sat] = toHsl((ink >> 16) & 255, (ink >> 8) & 255, ink & 255);
+  for (let i = 0; i < d.length; i += 4) {
+    if (!d[i + 3]) continue;
+    const [, , l] = toHsl(d[i], d[i + 1], d[i + 2]);
+    [d[i], d[i + 1], d[i + 2]] = fromHsl(hue, sat, l);
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// One painting, under the name the drawn shape would have had. The same fallback rule the
+// sheets get: a painting not in the repo yet leaves the name to the generator.
+function paintFrom(scene, spec, name) {
+  const named = spec.files && spec.files[name];
+  if (!named) return false;
+  const [path, ink] = named;
+  if (!scene.textures.exists(path)) return false;
+  const src = scene.textures.get(path).getSourceImage();
+  const tex = scene.textures.createCanvas(keyOf(name), src.width, src.height);
+  const ctx = tex.getContext();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(src, 0, 0);
+  if (ink && COLORS.icon[ink]) recolour(ctx, src.width, src.height, COLORS.icon[ink][1]);
+  tex.refresh();
+  return true;
+}
+
 function cutIcon(scene, name) {
-  return cutFrom(scene, ITEM_ART, name) || cutFrom(scene, SKILL_ART, name);
+  return paintFrom(scene, ITEM_ART, name)
+    || cutFrom(scene, ITEM_ART, name) || cutFrom(scene, SKILL_ART, name);
 }
 
 // Painted where there is paint for it, drawn where there is not, and the same key either

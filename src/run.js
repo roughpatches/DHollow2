@@ -20,7 +20,11 @@ import {
 } from './party.js';
 import { give, nameOf, heldOf } from './town.js';
 import * as potions from './potions.js';
-
+import * as food from './food.js';
+import { RECIPES } from '../content/recipes.js';
+import {
+  canCook, cookLines, make as makeAt, playedAt,
+} from './craft.js';
 import * as story from './story.js';
 import { asked } from './recruit.js';
 import { hasEngine, qualityOf } from './activity.js';
@@ -456,6 +460,7 @@ export function start(id, when, party, choice = {}, bring = {}) {
     // they trade blows with, and forgotten when the run ends — the same as the pool.
     hp: Object.fromEntries(fighters(who).map((id) => [id, combatOf(id).hp])),
     fight: null, // the one going on right now, and null the rest of the time
+    cooking: null, // and the pan on the camp fire, the same
   };
   step();
   return run;
@@ -492,9 +497,14 @@ function drawn(size) {
 // which of the two stores it is spending.
 const fromPack = {
   heldOf: (m) => (run ? run.pack[m] || 0 : 0),
-  take: (m, n) => {
+  take: (m, n) => fromPack.give(m, -n),
+  // Paid into as well as spent, because a fire on the road cooks into the same pack it
+  // cooked out of. Nothing here argues with the room: what comes out of a pan is smaller
+  // than what went into it, and a party who cannot fit their own dinner is a joke rather
+  // than a rule.
+  give: (m, n) => {
     if (!run) return;
-    run.pack[m] = (run.pack[m] || 0) - n;
+    run.pack[m] = (run.pack[m] || 0) + n;
     if (run.pack[m] <= 0) delete run.pack[m];
   },
 };
@@ -661,6 +671,131 @@ export function drink(mid) {
     run.con = Math.max(0, Math.min(run.conMax, run.con + con));
   }
   return took;
+}
+
+// One meal to a fire. A camp is a party sitting down once, not a party eating their way
+// down the pack until the pool is full: they get a dinner here, and the next one waits for
+// the next fire. It is written on the node rather than on the run because that is what
+// makes it a rule about the fire — a longer road is more fires and more dinners, which is
+// the whole reason a party takes the longer road.
+export function mealAt() {
+  const node = run && run.at >= 0 ? run.nodes[run.at] : null;
+  return (node && node.meal) || null;
+}
+
+// And what can be eaten here, by the same rule and out of the same pack. A meal is not a
+// potion — see src/food.js — so nothing is held off because something like it is already
+// working; what holds a second one off is that the first one was eaten at this fire.
+export function edible() {
+  return atCamp() && !mealAt() ? food.carried(fromPack) : [];
+}
+
+// Eaten at the fire. The constitution goes back into the pool, capped at what the run set
+// out with, and the hit points go back to everybody still on their feet, each capped at
+// their own. Nobody is got up off the ground by a meal: that is a black draught's job, and
+// somebody being carried is not somebody eating.
+export function eat(mid) {
+  if (!atCamp() || mealAt() || !food.canEat(mid, fromPack)) return null;
+  const ate = food.eat(mid, fromPack);
+  if (!ate) return null;
+  // and that is this fire's meal gone, whether it was carried out cooked or cooked here
+  run.nodes[run.at].meal = { how: 'ate', name: ate.name };
+  const { con = 0, hp = 0 } = ate.effect;
+  if (con) run.con = Math.max(0, Math.min(run.conMax, run.con + con));
+  if (hp) {
+    for (const id of standing()) {
+      run.hp[id] = Math.min(hpMaxOf(id), run.hp[id] + hp);
+    }
+  }
+  return ate;
+}
+
+// --- cooking at the fire ----------------------------------------------------
+// A camp is a fire, and a fire is a pan. What can be cooked at one is content — `fire` on
+// a recipe in content/recipes.js — because a recipe is the only thing that knows whether
+// it wants an oven. Nothing is burnt out of the pack and there is no clock on the work:
+// the fire is already alight, which is what makes it a camp.
+//
+// Cooking and eating share the fire's one meal. A party can put a pan on or open something
+// they carried, and either way they have had their hour here: turning three trout into a
+// supper and then eating it is two sittings, and there is one to a fire.
+
+// What could be cooked here, out of what is in the pack.
+export function cookable() {
+  if (!atCamp() || mealAt()) return [];
+  return RECIPES.filter((r) => canCook(r, fromPack));
+}
+
+export function cookingAt() {
+  return run ? run.cooking : null;
+}
+
+// Put the pan on. The meal is spent the moment it goes on and not when it comes off: a
+// party who botched a supper have still sat here as long as one takes.
+export function startCook(id) {
+  const r = RECIPES.find((x) => x.id === id);
+  if (!r || !atCamp() || mealAt() || !canCook(r, fromPack)) return null;
+  run.cooking = { r, was: run.phase };
+  run.nodes[run.at].meal = { how: 'cooked', name: r.name };
+  if (!playedAt(r)) return cookPlayed(null);
+  run.phase = 'activity';
+  return run;
+}
+
+// And what came off it. The costs and the produce are the pack's, and the experience is
+// the player's, the same as at any bench — see make in src/craft.js.
+export function cookPlayed(played) {
+  if (!run || !run.cooking) return run;
+  const { r, was } = run.cooking;
+  run.cooking = null;
+  run.phase = was;
+  const result = makeAt(r, played, { store: fromPack });
+  run.nodes[run.at].meal = { how: 'cooked', name: r.name, result };
+  return run;
+}
+
+// The pack at a fire, as one numbered list: what could go on the fire, then what is
+// already cooked, then the bottles. One shape for all three, so the card numbers them
+// without knowing what any of them is — and the row is handed back on the way in, because
+// a recipe and a dish may well share an id.
+//   kind — 'cook', 'eat' or 'drink'
+//   id   — the recipe to put on, or the material to eat or drink
+// The meal comes before the bottles because the meal is the perishable choice: there is
+// one of it to a fire, and a bottle left in the pack can still be drunk at the next one or
+// over the bar at home.
+function handRows() {
+  return [
+    ...cookable().map((r) => ({
+      kind: 'cook', id: r.id, name: r.name, body: cookLines(r, fromPack),
+    })),
+    ...edible().map((mid) => ({
+      kind: 'eat', id: mid, name: nameOf(mid), body: food.linesFor(mid),
+    })),
+    ...drinkable().map((mid) => ({
+      kind: 'drink', id: mid, name: nameOf(mid), body: potions.linesFor(mid),
+    })),
+  ];
+}
+
+// Nine of them, because nine is how many number keys there are. A row past that would be
+// drawn with a number nobody can press, which is worse than not drawing it: what does not
+// fit is counted instead — see handOver — and the next of it comes up as soon as something
+// above it is taken.
+const HAND = 9;
+
+export function atHand() {
+  return handRows().slice(0, HAND);
+}
+
+// and how much of the pack did not fit under a number
+export function handOver() {
+  return Math.max(0, handRows().length - HAND);
+}
+
+export function takeAtHand(row) {
+  if (!row) return null;
+  if (row.kind === 'cook') return startCook(row.id);
+  return row.kind === 'eat' ? eat(row.id) : drink(row.id);
 }
 
 export function inForce() {
@@ -1087,6 +1222,7 @@ export function fightPlayed(played) {
 export function playing() {
   const held = run && run.fight && run.fight.move;
   if (held) return (MOVES.find((m) => m.id === held) || {}).play;
+  if (run && run.cooking) return run.cooking.r.activity;
   return run && run.at >= 0 ? activityOf(run.nodes[run.at]) : null;
 }
 
@@ -1316,8 +1452,8 @@ export function settle(played) {
 // down that road did not carry all of it, and the pack is where that is felt now.
 function spend() {
   run.state = 'spent';
-  // What is on the cord is on a person, not on their back: the stones come home whole
-  // however light the rest of it is.
+  // Only the pack is spilled. Gear and the stones set in it are on a person and not on
+  // their back, so they come home whole however light the rest of it is.
   run.lost = {};
   for (const [m, n] of Object.entries(run.pack)) {
     const back = n - Math.floor(n * TUNING.questSpentKeep);

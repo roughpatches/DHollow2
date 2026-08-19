@@ -22,6 +22,17 @@ import { rewardToast, clearToast } from '../toast.js';
 import { markKey } from '../textures.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
 
+// What a pan on a camp fire came to, in the few words the card has room for. Nothing is
+// said about a pan that is still on it — the engine is drawing that.
+function mealResult(meal) {
+  if (!meal.result) return ' went on the fire';
+  if (meal.result.failed) return ' — botched';
+  const got = Object.entries(meal.result.made || {});
+  return got.length
+    ? ` — ${got.map(([m, n]) => `${n} ${goodName(m)}`).join(', ')}`
+    : ' — and nothing came off it worth eating';
+}
+
 const CARD = 'plaque'; // the panel a node's account is written on
 const COLUMN = 'band'; // and the one stood on its end beside the road
 const PIP = 'plate'; // and the small square a walked node is hung in, down on the trail
@@ -288,12 +299,11 @@ export default class Quest extends Phaser.Scene {
 
 
     // The pack, at a camp. A number key and not the cursor: the cursor belongs to the
-    // ways, and a party that stopped for a drink has not answered the node yet.
+    // ways, and a party that stopped to eat has not answered the node yet.
     if (/^[1-9]$/.test(k) && !this.approaching) {
-      const can = run.drinkable();
-      const mid = can[Number(k) - 1];
-      if (mid) {
-        run.drink(mid);
+      const row = run.atHand()[Number(k) - 1];
+      if (row) {
+        run.takeAtHand(row);
         this.draw();
         return;
       }
@@ -434,13 +444,12 @@ export default class Quest extends Phaser.Scene {
     this.row = 0;
   }
 
-  // What is still on the shelves, a square at a time, with the cut stones first: a stone
-  // is packed like anything else and costs a square like anything else, and then one of
-  // the packed ones can go on the cord. What has been packed has left the shelf and is
-  // drawn in the other grid, so the two together always add up to what the town owns —
-  // except for a thing taken down to none, which keeps one empty square so there is
-  // somewhere to put it back to. A stone keeps its square for the same reason and for one
-  // more: the cord is chosen from this grid, so a packed stone has to stay pointable at.
+  // What is still on the shelves, a square at a time: the gear, then the stones, then what
+  // the town has in stock. What has been packed has left the shelf and is drawn in the
+  // other grid, so the two together always add up to what the town owns — except for a
+  // thing taken down to none, which keeps one empty square so there is somewhere to put it
+  // back to. A stone set in something keeps its square for the same reason: it is chosen
+  // from this grid, so it has to stay pointable at.
   packRows() {
     const out = [];
     // Gear first and stones second, because neither of them costs a square and the two
@@ -595,8 +604,8 @@ export default class Quest extends Phaser.Scene {
     });
     const { cols: shelfCols } = this.shelfShape();
     while (!shelf.length || shelf.length % shelfCols) shelf.push(null);
-    // A stone with none left in town is drawn faint: it is still pointed at, because the
-    // cord is chosen here, but there is nothing of it left to take.
+    // A stone with none left on the shelf and none set in anything is drawn faint: it is
+    // still pointed at, because settings are chosen here, but there is nothing to set.
     const bottom = draw({ x: this.left, y, w: shelfWide }, shelf, this.row,
       (c, i) => !!(rows[i] && rows[i].stone && rows[i].n < 1 && !setIn(rows[i].key)));
 
@@ -1029,11 +1038,7 @@ export default class Quest extends Phaser.Scene {
     const on = cells[this.row];
     if (on) {
       const brought = (r0) => ((run.active().brought || {})[r0] ? '  — carried out with you' : '');
-      // A stone is named in full and told plainly what tipping it out means: it is not
-      // stock, so nothing about it comes back up the road afterwards.
-      const said = on.stone
-        ? `${on.name}${on.note === 'cord' ? ', on the cord' : ''}  — tipped out, it stays out here`
-        : `${on.n} ${goodName(on.id)}${brought(on.id)}`;
+      const said = `${on.n} ${goodName(on.id)}${brought(on.id)}`;
       this.text(box.x + pad.l, bottom + 10, said,
         TUNING.questBodySize, on_(COLORS.menuText), box.w - pad.l - pad.r);
     }
@@ -1124,10 +1129,9 @@ export default class Quest extends Phaser.Scene {
   }
 
   // What a fire adds to the hint line, and what nowhere else on the road does: the pack
-  // is open here, and the stone on the cord can be changed here.
+  // is open here.
   campKeys() {
-    return (run.drinkable().length ? '    [1-9] Drink' : '')
-;
+    return run.atHand().length ? '    [1-9] Cook, eat or drink' : '';
   }
 
   // The constitution, and nothing else on the band with it. It is the one readout that
@@ -1470,6 +1474,7 @@ export default class Quest extends Phaser.Scene {
     // a blow being played rather than a piece of work: the same handover, and a
     // different thing waiting at the end of it
     const blow = !!run.fightingAt();
+    const pan = !blow && !!run.cookingAt();
     const band = this.bands().walk;
     // the landscape drops below the engine's own drawing, with a scrim between them so
     // the readouts are read against something rather than against a hedge
@@ -1491,6 +1496,9 @@ export default class Quest extends Phaser.Scene {
       this.walk.depth(28900);
       if (blow) {
         run.fightPlayed({ judgments, failed });
+      } else if (pan) {
+        // A dinner is not a node: nothing was felled and nothing paid out but the pan.
+        run.cookPlayed({ judgments, failed });
       } else {
         this.walk.felled(); // whatever was standing there is not standing any more
         run.settle({ judgments, failed });
@@ -1504,9 +1512,11 @@ export default class Quest extends Phaser.Scene {
   activityHead(r, rect) {
     const n = r.nodes[r.at];
     const f = run.fightingAt();
+    const pan = run.cookingAt();
     const said = f
       ? `${nameOf(f.who)} — ${f.foe.name}    ${run.hpOf(f.who)}/${run.hpMaxOf(f.who)} against ${f.foeHp}/${f.foeMax}`
-      : `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`;
+      : pan ? `At the fire — ${pan.r.name}`
+        : `${run.kindOf(n.kind).name} — ${run.activityOf(n)}`;
     this.text(rect.x + 12, rect.y + 4, said, TUNING.questBodySize + 2, COLORS.menuText);
   }
 
@@ -1694,21 +1704,38 @@ export default class Quest extends Phaser.Scene {
     return [...out, ...this.packLines()];
   }
 
-  // The pack, on the card, at a camp and nowhere else: what can be drunk, numbered, and
-  // what is already working. The ways keep the cursor — a potion is a number key, so
-  // drinking one never costs the party the choice they walked up to.
+  // The pack, on the card, at a camp and nowhere else: what can be drunk or eaten,
+  // numbered, and what is already working. The ways keep the cursor — the pack is a number
+  // key, so stopping for a meal never costs the party the choice they walked up to.
   packLines() {
-    const can = run.drinkable();
+    const can = run.atHand();
     const force = run.inForce();
-    if (!can.length && !force.length) return [];
+    const ate = run.mealAt();
+    if (!can.length && !force.length && !ate) return [];
     const out = [['', TUNING.questHintSize, COLORS.menuRule]];
     if (can.length) {
-      out.push(['Somebody has the pack open.', TUNING.questHintSize, COLORS.menuDim]);
-      can.forEach((mid, i) => {
-        const p = run.drinkRow(mid);
-        out.push([`  [${i + 1}] ${p.name} — ${p.body.join(' ')}`,
+      out.push(['Somebody has the pack open, and the fire is in.', TUNING.questHintSize, COLORS.menuDim]);
+      can.forEach((row, i) => {
+        // A pan going on says so: it is the one row on this list that hands the controls
+        // over rather than simply being done.
+        out.push([`  [${i + 1}] ${row.kind === 'cook' ? 'Cook — ' : ''}${row.name} — ${row.body.join(' ')}`,
           TUNING.questHintSize, COLORS.menuText]);
       });
+      // Not dropped quietly: there are nine number keys, and a pack with more in it than
+      // that says so rather than leaving the rest of itself out of the list unexplained.
+      const over = run.handOver();
+      if (over) {
+        out.push([`  And ${over} more in the pack than there are numbers for. Take one and the next comes up.`,
+          TUNING.questHintSize, COLORS.menuDim]);
+      }
+    }
+    // Said rather than left to be noticed: the food went out of the numbered list when it
+    // was eaten, and a square that simply vanishes tells the player nothing.
+    if (ate) {
+      out.push([ate.how === 'cooked'
+        ? `  ${ate.name}${mealResult(ate)}. There is one meal in a fire, and this fire has had it.`
+        : `  They have eaten — ${ate.name}. There is one meal in a fire, and this fire has had it.`,
+      TUNING.questHintSize, COLORS.menuMapFolk]);
     }
     for (const p of force) {
       out.push([`  ${p.name} is working. ${p.body.join(' ')}`,
@@ -1783,8 +1810,6 @@ export default class Quest extends Phaser.Scene {
     // The pack at the gate, which is the whole of what the walk was worth: nothing reached
     // the town's stock until they did.
     out.push([`Carried out of it: ${run.listOf(r.pack)}.    ${r.xp} xp each.`, TUNING.questBodySize, COLORS.menuText]);
-    // And the stones, which were carried rather than found: they go back on the shelf and
-    // come off the cord, so the next job out is packed for from scratch.
     if (Object.keys(r.left || {}).length) {
       out.push([`Left on the road: ${run.listOf(r.left)}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
     }

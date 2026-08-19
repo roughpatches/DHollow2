@@ -110,6 +110,11 @@ export const MATERIALS = [
   // where it takes the next job out, or at a camp on the road, where it takes the rest of
   // the one being walked — see src/potions.js for what the three numbers do. Tune them
   // here: a potion is content, the way a node's constitution is.
+  // A material carrying `eat` is food, and food is the other one: cooked at the kitchen
+  // out of what the stream paid, carried out in the pack, and eaten at a camp. `con` goes
+  // back into the pool and `hp` goes back to everybody still on their feet — see
+  // src/food.js. The ladder runs by what the dish cost to cook, which is why a trout
+  // supper is worth three bluegill on the coals: tune it here, one dish at a time.
   {
     id: 'charcoal',
     name: 'Charcoal',
@@ -224,9 +229,49 @@ export const MATERIALS = [
     ],
   },
 
+  // --- what the kitchen sends out with them ----------------------------------
+  // Seven dishes and one ladder. What a dish puts back is what it cost to cook, and what
+  // it cost to cook is which fish went in it: bluegill are caught in numbers, perch are
+  // caught, and a brook trout is walked a long way for. Eaten at a camp — see src/food.js
+  // — so the question the kitchen asks is how much of a day's fishing a party is willing
+  // to carry back out instead of selling.
+  {
+    // Cooking 1. The whole of what a lit range and a borrowed pan will do, and it is done
+    // to the fish nobody was saving for anything.
+    id: 'coalfish',
+    name: 'Coal-Baked Bluegill',
+    eat: { con: 3, hp: 2 },
+    body: [
+      'Gutted, laid straight on the embers, and turned once by somebody who has done it before.',
+      'Two of them is a meal and one of them is an argument about who is having the other.',
+    ],
+  },
+  {
+    // Cooking 2. The first dish in the kitchen with two things in it that had to be
+    // brought back from two different places.
+    id: 'panperch',
+    name: 'Perch and Trumpets',
+    eat: { con: 7, hp: 5 },
+    body: [
+      'Fillets laid over trumpets gone black and soft in the pan, and the pan not washed between.',
+      'The fish is dry and the fungus is not, which is the whole idea and took somebody twenty years to have.',
+    ],
+  },
+  {
+    // Cooking 3. Three trout and a root out of wet ground: the top of what a pan can do,
+    // and the only thing on the shelf that costs the still something.
+    id: 'troutsupper',
+    name: 'Trout Supper',
+    eat: { con: 11, hp: 8 },
+    body: [
+      'Three fish opened flat over the heat with the root shaved through them, and eaten off the board they were cut on.',
+      'Nobody eats this on the way out. It is carried until the night somebody admits how far they still have to go.',
+    ],
+  },
   {
     id: 'friedfish',
     name: 'Fried Fish',
+    eat: { con: 4, hp: 3 },
     body: [
       'Crisped on the skin side, folded onto a board, and eaten standing up before it stops being hot.',
     ],
@@ -234,6 +279,7 @@ export const MATERIALS = [
   {
     id: 'woodstew',
     name: 'Forager\'s Stew',
+    eat: { con: 6, hp: 4 },
     body: [
       'Fish and fungus cooked down together until neither is arguing with the other.',
       'Thin, dark, and the best-smelling thing to come out of that kitchen in years.',
@@ -242,6 +288,7 @@ export const MATERIALS = [
   {
     id: 'shorepie',
     name: 'Shore Pie',
+    eat: { con: 9, hp: 7 },
     body: [
       'Brown on top, heavy in the hand, and still too hot in the middle an hour after it came out.',
       'Cut in four, it is a day\'s walking for four people. Whole, it is an argument.',
@@ -250,6 +297,7 @@ export const MATERIALS = [
   {
     id: 'smokedfish',
     name: 'Smoked Trout',
+    eat: { con: 5, hp: 4 },
     body: [
       'Stiff, mahogany-dark, and dry enough to carry in a pocket for a week.',
       'Food that keeps is the difference between a day out and a night out.',

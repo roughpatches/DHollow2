@@ -14,6 +14,7 @@ import { drawSlots, shapeOf } from '../slots.js';
 import { cutRows } from '../charm.js';
 import { gearRows, setIn, fullName as gearName } from '../gear.js';
 import * as potions from '../potions.js';
+import * as food from '../food.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
@@ -24,10 +25,11 @@ const PLATE = 'plate'; // and a picture on it is set in the square off the same 
 // above the log of everything else the village has told you it wants.
 const questLog = () => [...questRows(), ...QUESTS];
 
-// What is in the town's stock, and above it the cut stones. Mostly a readout: what goes
-// out on a run and which stone goes on the cord are decided at the gate, on the packing
-// screen in src/scenes/Quest.js, because they are decisions about a job rather than about
-// a shelf. The one exception is a potion, which is drunk where it is standing.
+// What is in the town's stock, and above it the gear and the cut stones. Mostly a
+// readout: what goes out on a run, what is worn, and which stone is set in it are decided
+// at the gate, on the packing screen in src/scenes/Quest.js, because they are decisions
+// about a job rather than about a shelf. The one exception is a potion, which is drunk
+// where it is standing.
 //
 // One row per SQUARE rather than per thing: a stack past stackMax is more than one square
 // and is listed as more than one, so the cursor walks what is drawn. Every square of a
@@ -55,16 +57,28 @@ const withPotion = (r) => (potions.isPotion(r.mid) ? {
   ],
 } : r);
 
+// Food says what it is worth for the same reason a potion does: a number nobody can see
+// is a number nobody cooks for. It answers to nothing here — a meal is eaten at a fire on
+// the road and not standing in a tavern — so the line is a readout and not an offer.
+const withFood = (r) => (food.isFood(r.mid) ? {
+  ...r,
+  body: [
+    ...r.body,
+    ...food.linesFor(r.mid),
+    'Carry it out and it is eaten at a camp.',
+  ],
+} : r);
+
 const inventory = () => [
   // Gear above the stones and the stones above the pack, which is the order they are
-  // decided in at the gate: what is on the body, what is on the cord, what is carried.
+  // decided in at the gate: what is on the body, what is set in it, what is carried.
   ...gearRows().flatMap((r) => squares(r, r.n ?? 1)),
   // The stones are told where they are by the gear, which is the only thing that knows.
   ...cutRows((key) => {
     const w = setIn(key);
     return w ? gearName(w.piece, w.grade) : null;
   }).flatMap((r) => squares(r, r.n ?? 1)),
-  ...carriedRows().map(withPotion).flatMap((r) => squares(r, r.n)),
+  ...carriedRows().map(withPotion).map(withFood).flatMap((r) => squares(r, r.n)),
   ...potions.waitingRows().map((p) => ({
     label: p.name,
     note: 'Drunk',

@@ -350,6 +350,39 @@ export const SKILL_ART = {
   },
 };
 
+// A stone is painted twice — the lump it comes out of the ground as, and the same stone
+// off the wheel — and both come out of one export, under the two names below. Colour is
+// not what an export decides: the painting is put through that stone's own pair from
+// COLORS.icon on the way to the screen, which is exactly how the drawn placeholders
+// already worked. So an export is a shape, and every stone cut to that shape shares it.
+//   folder under art/gems → the stones painted in it
+// A stone left off keeps the shape src/icons.js draws for it and nothing else changes.
+// Tier one is here because tier one is what is dug so far.
+const STONE_ART = {
+  // A crust of points on the rough and a faceted stone off the wheel.
+  crystal: ['amethyst'],
+  // A river-stone nodule on the rough and a domed cabochon off the wheel.
+  nodule: ['garnet'],
+  // A layered lump on the rough and a flat slab off the wheel, ringed either way.
+  banded: ['agate'],
+};
+const ROUGH_STONE = 'An_uncut_gem_recently_mined/rotations/An_uncut_gem_recently_mined.png';
+const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
+
+// And the things a pack holds that are not stones: icon name → the export, each under its
+// own folder in art/items because two exports asked for at different times come back under
+// the same name often enough. No ink named, so these go up as painted — a thing painted in
+// its own colour has nothing to be put through. A stone is a shape any number of stones
+// can be cut to; everything else is only itself.
+const PAINTED_ITEMS = {
+  oakbranch: 'art/items/oakbranch/An_Oak_log/rotations/An_Oak_log.png',
+  oaklog: 'art/items/oaklog/An_Oak_log/rotations/An_Oak_log.png',
+  heartwood: 'art/items/heartwood/An_Oak_log/rotations/An_Oak_log.png',
+  copperore: 'art/items/copperore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
+  tinore: 'art/items/tinore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
+  coal: 'art/items/coal/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
+};
+
 // And the same for the things a pack holds: materials by their id from
 // content/materials.js, cut stones by their gem id from content/gems.js. Same shape as
 // SKILL_ART and read by the same code, so a sheet dropped under art/ and a column of
@@ -361,6 +394,17 @@ export const ITEM_ART = {
   sheet: null, // 'art/…-item-icons.png' once it exists
   cell: 32,
   at: {},
+  // And art that came back as its own file rather than as a cell on a sheet: icon name →
+  // the painting, and the ink out of COLORS.icon to put it through. Read before `at`, so a
+  // name with a painting of its own wins over the same name on a sheet.
+  files: {
+    ...Object.fromEntries(Object.entries(PAINTED_ITEMS).map(([id, path]) => [id, [path]])),
+    ...Object.fromEntries(Object.entries(STONE_ART).flatMap(([shape, stones]) => stones
+      .flatMap((id) => [
+        [`rough${id}`, [`art/gems/${shape}/${ROUGH_STONE}`, id]],
+        [id, [`art/gems/${shape}/${CUT_STONE}`, id]],
+      ]))),
+  },
 };
 
 // What is standing at a node, for the encounters that have art instead of the silhouette
