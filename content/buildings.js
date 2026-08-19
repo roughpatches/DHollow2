@@ -77,7 +77,7 @@ export const BUILDINGS = [
   },
   {
     // The first workstation. Two working stages: a hearth anybody can smelt at, and the
-    // bloomery behind it, which is what the second repair buys and what the recipes gated
+    // furnace behind it, which is what the second repair buys and what the recipes gated
     // at stage 2 are waiting for.
     id: 'forge',
     name: 'The smithy',
@@ -94,11 +94,11 @@ export const BUILDINGS = [
         name: 'Hearth lit',
         note: 'Sheeted over, the hearth swept, the bellows patched, and a fire in it that will hold all day.',
         craft: true,
-        cost: { stone: 18, ironbar: 4, pitch: 4 },
+        cost: { stone: 18, bronzebar: 3, pitch: 4 },
       },
       {
-        name: 'Bloomery standing',
-        note: 'A stack tall enough to hold its heat, and iron coming out of it by the bar.',
+        name: 'Furnace standing',
+        note: 'A stack tall enough to hold its heat, coal in the top of it, and bronze coming out of the bottom by the bar.',
         craft: true,
       },
     ],
@@ -126,7 +126,7 @@ export const BUILDINGS = [
         name: 'Bench and stove',
         note: 'Swept, glazed, and warm enough to hold a steep at temperature.',
         craft: true,
-        cost: { stone: 12, ironbar: 2, canvas: 6 },
+        cost: { stone: 12, bronzebar: 2, canvas: 6 },
       },
       {
         name: 'Still standing',

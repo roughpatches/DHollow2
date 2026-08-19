@@ -309,16 +309,19 @@ export function scoreOf(ids, skillId) {
 // A check against a DC: a die, plus what the skill is worth, rolled by the party's best
 // at it. A natural top holds whatever the DC, and a natural 1 never does, so a hard
 // check is never impossible and an easy one is never free.
-export function check(ids, skillId, dc) {
+// `steady` is whatever is standing behind them that is not skill — a potion in force,
+// today — added to the total and shown on the card beside the rank.
+export function check(ids, skillId, dc, steady = 0) {
   const who = bestAt(ids, skillId);
   const rank = who ? rankOf(who, skillId) : 0;
   const die = 1 + Math.floor(Math.random() * TUNING.checkDie);
-  const total = die + rank;
+  const total = die + rank + steady;
   return {
     name: who ? nameOf(who) : 'Nobody',
     you: who === YOU, // 'You roll', not 'You rolls'
     skill: skillOf(skillId),
     rank,
+    steady,
     die,
     total,
     dc,

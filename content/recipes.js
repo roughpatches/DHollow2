@@ -28,8 +28,11 @@
 
 export const RECIPES = [
   // --- the smithy ------------------------------------------------------------
-  // Iron is the one chain in town that runs end to end: the wood pays for the fire, the
-  // fire pays for the bar, and the bar is what the chapel roof is nailed on with.
+  // Bronze is the one chain in town that runs end to end: the wood and the coal pay for
+  // the fire, the fire pays for the bar, and the bar is what the chapel roof is nailed on
+  // with. It is tier-one work, because tier one is all the Greywood has in it — copper
+  // and tin and coal. Iron is written and unreachable until its ground is; see
+  // content/materials.js.
   {
     id: 'charcoal',
     name: 'Burn a clamp',
@@ -48,20 +51,22 @@ export const RECIPES = [
     ],
   },
   {
-    id: 'ironbar',
-    name: 'Smelt a bar',
+    // Two ores in one crucible, which is why the wood pays for both halves of a run: a
+    // party that only came home with copper has come home with half a bar.
+    id: 'bronzebar',
+    name: 'Cast a bronze bar',
     at: 'forge',
     stage: 1,
     level: 1,
     skill: 'smithing',
     rank: 1,
     activity: 'Smelting',
-    costs: { ironore: 3, charcoal: 2 },
-    makes: { ironbar: 1 },
+    costs: { copperore: 2, tinore: 1, charcoal: 2 },
+    makes: { bronzebar: 1 },
     xp: 16,
     body: [
-      'Ore and charcoal fed in by turns until what is left at the bottom is a bloom, and the bloom beaten out until what is left is iron.',
-      'Most of what goes in comes out as slag. That is not a fault in the method.',
+      'Copper down first and held there, the tin in last so it does not burn off, and the whole of it poured before anybody has time to argue about the proportion.',
+      'Nine parts to one. Get it wrong the other way and what comes out is a bar that bends.',
     ],
   },
   {
@@ -73,7 +78,7 @@ export const RECIPES = [
     skill: 'smithing',
     rank: 1,
     activity: 'Forging',
-    costs: { ironbar: 1, charcoal: 1 },
+    costs: { bronzebar: 1, charcoal: 1 },
     makes: { nails: 10 },
     xp: 14,
     body: [
@@ -82,22 +87,23 @@ export const RECIPES = [
     ],
   },
   {
-    // The second stage of the smithy in one line: the same ore, and twice as much of it
-    // comes out as iron. This is what rebuilding the bloomery bought.
-    id: 'bloomery',
-    name: 'Run the bloomery',
+    // The second stage of the smithy in one line: the same ore, and half again as much of
+    // it comes out as metal. This is what rebuilding the furnace bought, and it is the
+    // first thing in town that coal is burnt in rather than charcoal.
+    id: 'furnace',
+    name: 'Run the furnace',
     at: 'forge',
     stage: 2,
     level: 4,
     skill: 'smithing',
     rank: 2,
     activity: 'Smelting',
-    costs: { ironore: 6, charcoal: 3 },
-    makes: { ironbar: 3 },
+    costs: { copperore: 4, tinore: 2, coal: 3 },
+    makes: { bronzebar: 3 },
     xp: 34,
     body: [
-      'A stack tall enough to hold its own heat, tapped at the bottom and fed for as long as there is anybody to feed it.',
-      'One man can work it. Two men can work it properly.',
+      'A stack tall enough to hold its own heat, charged from the top and tapped at the bottom, and fed for as long as there is anybody to feed it.',
+      'Coal takes it further than charcoal ever did. One man can work it. Two men can work it properly.',
     ],
   },
 
@@ -218,6 +224,129 @@ export const RECIPES = [
     body: [
       'Heartwood shavings drawn off the still with the shell in the tub to hold the bitterness down, and the trumpets in last so they are not cooked out of it.',
       'Seven measures, quick and uneven, and the still will not forgive one of them. There is a reason nobody has made this since the shop shut.',
+    ],
+  },
+
+  // Tier one at the still: two ingredients apiece, both out of the Greywood, and between
+  // them the three things Herblore brings home. The three older potions above are one and
+  // three ingredients and stay as they were — these are the pairs, and a pair reads two
+  // ways depending on which of the two there is more of.
+  {
+    // Trumpets and oysters, weighted to the oysters. The cheap one, and the one a party
+    // that has not got as far as the still yet can still make.
+    id: 'copsebroth',
+    name: 'Set a copse broth',
+    at: 'stillroom',
+    stage: 1,
+    level: 1,
+    skill: 'alchemy',
+    rank: 1,
+    activity: 'Brewing',
+    hard: 'simple',
+    costs: { oystermushroom: 3, blacktrumpet: 1 },
+    makes: { copsebroth: 1 },
+    xp: 12,
+    body: [
+      'Caps in first and left to give up what they have, trumpets in at the end so they are not cooked to nothing, and the pot never allowed to boil.',
+      'It is the first thing anybody is taught and the last thing anybody bothers to do well.',
+    ],
+  },
+  {
+    // The same two the other way up, and hot rather than warm.
+    id: 'woodsdraught',
+    name: 'Boil a woodsman\'s draught',
+    at: 'stillroom',
+    stage: 1,
+    level: 2,
+    skill: 'alchemy',
+    rank: 1,
+    activity: 'Brewing',
+    hard: 'simple',
+    costs: { blacktrumpet: 3, oystermushroom: 2 },
+    makes: { woodsdraught: 1 },
+    xp: 18,
+    body: [
+      'Trumpets down hard until the water is black, the caps in after them, and the whole of it taken off before it catches.',
+      'Four people can drink one of these standing in the rain and go on. That is all it is for.',
+    ],
+  },
+  {
+    // Root and oyster: the pale pair, and the only potion in the game that touches how
+    // the work itself goes rather than how the party stands up to it.
+    id: 'steadyhand',
+    name: 'Work a steady hand',
+    at: 'stillroom',
+    stage: 2,
+    level: 5,
+    skill: 'alchemy',
+    rank: 2,
+    activity: 'Brewing',
+    hard: 'tricky',
+    costs: { oystermushroom: 2, bitterroot: 2 },
+    makes: { steadyhand: 1 },
+    xp: 34,
+    body: [
+      'Caps and root ground together dry and let down with as little water as will carry it, until it is a paste and not a drink.',
+      'Five measures and none of them forgiving. There is a joke in the trade about what it takes to make one of these.',
+    ],
+  },
+  {
+    // Mostly root. Expensive in the scarce half of the pantry, which is the price of a
+    // check that was going to be lost being held instead.
+    id: 'bitterwash',
+    name: 'Draw a bitter wash',
+    at: 'stillroom',
+    stage: 1,
+    level: 3,
+    skill: 'alchemy',
+    rank: 2,
+    activity: 'Brewing',
+    hard: 'tricky',
+    costs: { bitterroot: 2, oystermushroom: 1 },
+    makes: { bitterwash: 1 },
+    xp: 22,
+    body: [
+      'Root cut coarse, drawn cold over a day, and one cap in it for no reason anybody has ever been able to give.',
+      'Nothing is added to make it drinkable. Adding something is how it stops working.',
+    ],
+  },
+  {
+    // Trumpets and root, the dark pair. Trumpets grow where the light gave up, and this
+    // is what that is for.
+    id: 'nightwash',
+    name: 'Steep a nightshade wash',
+    at: 'stillroom',
+    stage: 1,
+    level: 4,
+    skill: 'alchemy',
+    rank: 2,
+    activity: 'Brewing',
+    hard: 'tricky',
+    costs: { blacktrumpet: 3, bitterroot: 1 },
+    makes: { nightwash: 1 },
+    xp: 28,
+    body: [
+      'Trumpets steeped until the water will not go any darker, and a finger of root in it to hold it there.',
+      'It is not drunk so much as worn. Whoever made the first one was not trying to make this.',
+    ],
+  },
+  {
+    // The strong one, and the still is what it is waiting for.
+    id: 'blackdraught',
+    name: 'Draw a black draught',
+    at: 'stillroom',
+    stage: 2,
+    level: 6,
+    skill: 'alchemy',
+    rank: 3,
+    activity: 'Brewing',
+    hard: 'wicked',
+    costs: { blacktrumpet: 4, bitterroot: 3 },
+    makes: { blackdraught: 1 },
+    xp: 40,
+    body: [
+      'Trumpets drawn off the still black as tar with the root ground in at the last, and taken off the heat at a moment nobody can describe.',
+      'Two ingredients and seven measures. What is difficult about it is not what is in it.',
     ],
   },
 

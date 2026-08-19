@@ -10,6 +10,7 @@ import { SCRIPT } from '../placeholders.js';
 import { partyRows, skillRows, fill, pointsOf, YOU } from '../party.js';
 import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
+import * as potions from '../potions.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
 
@@ -22,7 +23,29 @@ const questLog = () => [...questRows(), ...QUESTS];
 
 // What the party is carrying comes off town.js as it changes, and sits above the kit
 // the character started the game with. One list, two sources.
-const inventory = () => [...carriedRows(), ...INVENTORY];
+// A potion is the one square on the tab that does something: Enter drinks it, and drunk
+// in town it takes the next job out rather than this afternoon. Once it is drunk the
+// bottle is gone from the pack, so what is waiting is listed after it — otherwise the
+// square would simply vanish and the player would be told nothing.
+const inventory = () => [
+  ...carriedRows().map((r) => (potions.isPotion(r.mid) ? {
+    ...r,
+    body: [
+      ...r.body,
+      ...potions.linesFor(r.mid),
+      potions.taken(r.mid)
+        ? 'One of these is already working. A second would do nothing.'
+        : 'Drink it here and it takes the next job out. [Enter]',
+    ],
+  } : r)),
+  ...potions.waitingRows().map((p) => ({
+    label: p.name,
+    note: 'Drunk',
+    icon: p.mid,
+    body: ['Drunk here, and waiting on the next job out.', ...p.body],
+  })),
+  ...INVENTORY,
+];
 
 // The Map tab is where the party can go, not everywhere they have stood: a place with an
 // id is a zone a job is walked in, and everything else in content/places.js is town
@@ -123,6 +146,12 @@ export default class Menu extends Phaser.Scene {
       if (!pointsOf(YOU)) return;
       this.close();
       this.game.events.emit('skills:spend', entry.skill);
+      return;
+    }
+    // a bottle, and the only square on the Inventory tab that answers to Enter
+    if (entry.mid && potions.canDrink(entry.mid)) {
+      potions.drink(entry.mid);
+      this.draw();
       return;
     }
     if (!entry.options) return;
@@ -546,6 +575,9 @@ export default class Menu extends Phaser.Scene {
     let change = rows.some((r) => r.options) ? '    [Enter] Change' : '';
     if (rows.some((r) => r.quest)) change = '    [Enter] Set out';
     if (rows.some((r) => r.skill)) change = pointsOf(YOU) ? '    [Enter] Spend a point' : '';
+    // said only while the cursor is on a bottle, because it is the only square that answers
+    const here = rows[this.row[this.tab]];
+    if (here && here.mid && potions.canDrink(here.mid)) change = '    [Enter] Drink it';
     this.text(
       this.listX,
       this.box.y + this.box.h - 26,
