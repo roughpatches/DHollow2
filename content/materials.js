@@ -132,6 +132,15 @@ export const MATERIALS = [
     ],
   },
   {
+    id: 'shorepie',
+    name: 'Shore Pie',
+    start: 0,
+    body: [
+      'Brown on top, heavy in the hand, and still too hot in the middle an hour after it came out.',
+      'Cut in four, it is a day\'s walking for four people. Whole, it is an argument.',
+    ],
+  },
+  {
     id: 'smokedfish',
     name: 'Smoked Trout',
     start: 0,
