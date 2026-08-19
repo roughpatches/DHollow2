@@ -263,6 +263,7 @@ const ICONS = {
   friedfish: ['fish', 'food'],
   woodstew: ['pot', 'food'],
   smokedfish: ['fish', 'soot'],
+  shorepie: ['loaf', 'food'],
   bread: ['loaf', 'food'],
   candle: ['taper', 'bone'],
   flint: ['shard', 'stone'],

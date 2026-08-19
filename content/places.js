@@ -86,14 +86,17 @@ export const PLACES = [
     ],
   },
   {
-    // The east side of town. No dock stands on it yet, which is the point of it.
+    // The east side of town, and what the docks are being put back onto. The building's
+    // state is read live, so this entry says what the foreshore has on it today without
+    // the prose having to.
     terrain: 'water',
     label: 'The foreshore',
     note: 'Shore',
     map: 'quay',
     at: [34],
+    building: 'docks',
     body: [
-      'The bank runs out into a broad muddy flat and the flat runs out into deep water. There is nothing built on any of it.',
+      'The bank runs out into a broad muddy flat and the flat runs out into deep water, with the legs of the old jetty standing up out of the middle of it.',
       'A harbour was worth cutting here once. You can see where from the shape of the ground.',
     ],
   },
@@ -172,5 +175,52 @@ export const PLACES = [
     map: 'tavern',
     building: 'tavern',
     body: ['[Placeholder Text]'],
+  },
+  {
+    label: 'The smithy',
+    note: 'Workshop',
+    map: 'searow',
+    at: [31],
+    building: 'forge',
+    body: [
+      'An open-fronted shed at the east end of the row, hard against the last cottage, with the anvil still standing where the floor is driest.',
+      'Everything iron in Dreadhollow either came out of here or is waiting on it.',
+    ],
+  },
+  {
+    label: 'The still room',
+    note: 'Workshop',
+    map: 'fieldroad',
+    at: [36],
+    building: 'stillroom',
+    body: [
+      'The last shopfront on the field road, boarded from the inside, with the sign over it worn down to the grain.',
+      'Whatever was made here was made in small quantities and sold to people who knew to ask.',
+    ],
+  },
+  {
+    // The gem cutter's, east of the Sea Hag on the same panel.
+    label: 'The Artisan\'s Studio',
+    note: 'Workshop',
+    map: 'harbourroad',
+    at: [29],
+    building: 'studio',
+    body: [
+      'A shopfront with the glass out of every window in it, which is what made it worth taking: a wheel is worked in daylight or it is not worked well.',
+      'The bench is against the window where somebody put it. The wheel that stood on it is gone.',
+    ],
+  },
+  {
+    // Inside the Sea Hag rather than on the road — the one workstation in town there is
+    // no way of seeing from the outside. Its state is read live like any other.
+    label: 'The Sea Hag\'s kitchen',
+    note: 'Indoors',
+    map: 'tavern',
+    at: [6],
+    building: 'kitchen',
+    body: [
+      'A cast range at the west end of the bar, behind the flap, with the yard door beside it and the smokehouse out in the yard.',
+      'The landlord will lend the pan. He is unwilling to be the one holding it.',
+    ],
   },
 ];

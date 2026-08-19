@@ -101,14 +101,16 @@ export const RECIPES = [
     ],
   },
 
-  // --- the wheel, in the corner of the smithy --------------------------------
+  // --- the Artisan's Studio --------------------------------------------------
   // A rough stone comes off a mining node about one time in eight, so every one of these
   // is a stone the player walked a long way for and gets one go at. Three shapes and three
   // tiers; what the stone is worth is how near it ends up to the shape it was given.
+  // The hand wheel does the cabochon. The two faceted shapes want the treadle mill, which
+  // is the studio's second repair.
   {
     id: 'cabochon',
     name: 'Grind a cabochon',
-    at: 'forge',
+    at: 'studio',
     stage: 1,
     level: 2,
     skill: 'gemcutting',
@@ -126,7 +128,7 @@ export const RECIPES = [
   {
     id: 'tablegem',
     name: 'Cut a table stone',
-    at: 'forge',
+    at: 'studio',
     stage: 2,
     level: 4,
     skill: 'gemcutting',
@@ -144,7 +146,7 @@ export const RECIPES = [
   {
     id: 'brilliant',
     name: 'Cut a brilliant',
-    at: 'forge',
+    at: 'studio',
     stage: 2,
     level: 7,
     skill: 'gemcutting',
@@ -260,7 +262,7 @@ export const RECIPES = [
     id: 'smokedtrout',
     name: 'Smoke a run of trout',
     at: 'kitchen',
-    stage: 1,
+    stage: 2,
     level: 4,
     skill: 'cooking',
     rank: 2,
@@ -271,6 +273,25 @@ export const RECIPES = [
     body: [
       'Split, salted, hung over a smother of trumpet and green wood, and left in the smoke until they go stiff.',
       'A fish smoked properly keeps until the weather turns. A fish smoked badly keeps until somebody eats it.',
+    ],
+  },
+  {
+    // What the oven is for. Everything else in this kitchen is eaten where it is cooked;
+    // this is the first thing off it that is meant to be carried out of the room.
+    id: 'shorepie',
+    name: 'Bake a shore pie',
+    at: 'kitchen',
+    stage: 2,
+    level: 5,
+    skill: 'cooking',
+    rank: 2,
+    activity: 'Cooking',
+    costs: { perch: 2, bluegill: 2, oystermushroom: 2 },
+    makes: { shorepie: 2 },
+    xp: 34,
+    body: [
+      'Fish off the bone and shelf caps under a lid of paste, and an oven hot enough that it is out of your hands the moment the door shuts.',
+      'A pie is the only cooking in this town nobody stands over. That is the whole difficulty of it.',
     ],
   },
 ];

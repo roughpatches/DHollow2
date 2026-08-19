@@ -459,7 +459,7 @@ export const TUNING = {
   // reason to take the woodsman into the wood. Zero turns the whole thing off.
   conPerTerrainPoint: 1,
 
-  maxLevel: 10,
+  maxLevel: 9, // the game's ceiling, and what the chapel's last stage caps at
   conPerLevel: 3, // added to a character's own constitution for every level past the first
   xpBase: 40, // leaving level n costs xpBase * n, so levels get longer at a steady rate
   // Experience is only ever spent on the level. What a level buys is points, and the

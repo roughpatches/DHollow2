@@ -10,6 +10,7 @@ import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
 import { SKILLS } from '../content/skills.js';
 import { FEARS } from '../content/fears.js';
+import { levelCap, capHeldBy } from './town.js';
 import * as story from './story.js';
 
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
@@ -139,9 +140,21 @@ export function conTotal(ids) {
   return ids.reduce((n, id) => n + conOf(id), 0);
 }
 
-// leaving a level costs more than leaving the one before it
+// The level nobody can pass at the moment: the game's own ceiling, or the lower one the
+// town has not been rebuilt past yet. See levelCap in src/town.js.
+export function capNow() {
+  return Math.min(TUNING.maxLevel, levelCap());
+}
+
+// leaving a level costs more than leaving the one before it, and costs everything at the
+// cap, which is what a cap is
 export function xpToNext(level) {
-  return level >= TUNING.maxLevel ? Infinity : TUNING.xpBase * level;
+  return level >= capNow() ? Infinity : TUNING.xpBase * level;
+}
+
+// whether this character is at it, which is what anything saying so reads
+export function atCap(id) {
+  return stateOf(id).level >= capNow();
 }
 
 // Experience goes to the level and to nothing else: no skill is ever practised into
@@ -150,7 +163,10 @@ export function xpToNext(level) {
 // Returns how many levels were gained, so a caller can say so.
 export function award(id, xp) {
   const s = stateOf(id);
-  if (s.level >= TUNING.maxLevel) return 0; // XP past the last level has nowhere to go
+  // XP earned at the cap has nowhere to go and is not kept for later: work done at the
+  // ceiling is work done for what it paid out at the time. Raising the cap is what makes
+  // the next day's work worth something, not what makes yesterday's worth more.
+  if (s.level >= capNow()) return 0;
   s.xp += xp;
   let gained = 0;
   while (s.xp >= xpToNext(s.level)) {
@@ -158,6 +174,9 @@ export function award(id, xp) {
     s.level += 1;
     gained += 1;
   }
+  // and whatever the last level of it overshot by goes with the rest: an award that runs
+  // into the cap is not part-credited toward the level above it.
+  if (s.level >= capNow()) s.xp = 0;
   if (gained) {
     s.points += gained * TUNING.skillPointsPerLevel;
     if (id !== YOU) autoSpend(id);
@@ -330,6 +349,17 @@ export function walking() {
   return [charOf(YOU), ...roster()];
 }
 
+// What the XP column says at a level nobody can leave: the building holding everybody at
+// this one, named so it can be gone and repaired; the game's last level; or — when the town
+// has been rebuilt as far as it goes and that is still short of the game's ceiling — that
+// there is nothing left standing to go and repair for it.
+function heldLine(xp) {
+  const by = capHeldBy();
+  if (by) return `XP ${xp}  (nothing counts until ${by.name} is rebuilt)`;
+  if (capNow() < TUNING.maxLevel) return `XP ${xp}  (nothing left in town levels anybody past ${capNow()})`;
+  return `XP ${xp}  (max level)`;
+}
+
 export function partyRows() {
   return walking().map((c) => {
     const s = stateOf(c.id);
@@ -341,7 +371,7 @@ export function partyRows() {
       note: `Lv ${s.level} · Con ${conOf(c.id)}`,
       body: [
         `Level ${s.level}    Constitution ${conOf(c.id)}    `
-          + (next === Infinity ? `XP ${s.xp}  (max level)` : `XP ${s.xp} of ${next}`)
+          + (next === Infinity ? heldLine(s.xp) : `XP ${s.xp} of ${next}`)
           + (s.points ? `    ${s.points} unspent` : ''),
         c.you
           ? 'On every run. Nobody has to be asked to bring you.'
