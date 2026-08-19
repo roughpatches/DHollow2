@@ -360,9 +360,11 @@ export const SKILL_ART = {
 // Tier one is here because tier one is what is dug so far.
 const STONE_ART = {
   // A crust of points on the rough and a faceted stone off the wheel.
-  crystal: ['agate', 'amethyst'],
+  crystal: ['amethyst'],
   // A river-stone nodule on the rough and a domed cabochon off the wheel.
   nodule: ['garnet'],
+  // A layered lump on the rough and a flat slab off the wheel, ringed either way.
+  banded: ['agate'],
 };
 const ROUGH_STONE = 'An_uncut_gem_recently_mined/rotations/An_uncut_gem_recently_mined.png';
 const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
