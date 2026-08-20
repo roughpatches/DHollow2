@@ -90,6 +90,17 @@ export const TUNING = {
   // a longer account is read a page at a time
   questScrollPxPerSec: 46, // the near ground's speed; the layers behind it run slower
   questParallax: [0.15, 0.4, 1], // far, mid, near, as a fraction of that speed
+  questIdleDrift: 0.3, // and what is left of that when the party has stopped: standing at
+  // a node the landscape keeps creeping, so a wood at rest is not a photograph. The ground
+  // under their feet is not in this — it holds still with them. See src/walk.js.
+
+  // Leaves coming down through a painted wood (src/ambient.js). Only a backdrop that says
+  // `leaves` gets them; see content/places.js.
+  questLeaves: 34, // how many are in the air at once
+  questLeafPx: [3, 2], // how big one is, across and down, at its flattest
+  questLeafFall: [10, 26], // how fast one comes down, in pixels a second, slowest to fastest
+  questLeafSway: [14, 34], // how far it swings either side of where it was let go
+  questLeafSwayMs: [1800, 3600], // and how long a swing takes
   questApproachMs: 1400, // how long a node takes to walk into view
   questConTweenMs: 500, // and how long the bar takes to catch up with it
 
@@ -815,6 +826,11 @@ export const COLORS = {
   questSkyDay: 0x2c333c, // what the party is walking under in the middle band
   questSkyNight: 0x11141d,
   questNightTint: 0x6a7590, // laid over the landscape after dark
+  // What is coming down through the Greywood. Read off the painting, but off the brightest
+  // of it: a leaf in the air has the sky behind it and the canopy it falls past is nearly
+  // black, so a leaf the colour of the canopy is a leaf nobody sees. Taken in turn rather
+  // than at random, so a handful is never all one colour by chance.
+  questLeaf: [0xa96423, 0xc24e68, 0x88422d, 0x9f435e],
 
   // What a placeholder item icon is made of (src/icons.js): the body of the thing, and
   // the mark on it. Retint here and every wooden thing changes at once.

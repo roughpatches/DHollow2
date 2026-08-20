@@ -39,7 +39,8 @@
 //              image its ground line sits. It is also the picture the Map tab shows. Drawn at 1:1 and tiled across, so it wants to
 //              be pixel art at the game's own scale; `ground` is what registers its floor
 //              to the road the party walks on. A zone without one gets the generated
-//              bands. See src/walk.js.
+//              bands. `leaves: true` sets leaves coming down through it, which a wood
+//              painted in autumn wants and a marsh does not; see src/ambient.js.
 //   terrain  — the ground a zone is: forest, water, and whatever else gets walked on.
 //              A skill that reads that ground is worth constitution to everyone who sets
 //              out here; see `terrain` in content/skills.js and conPerTerrainPoint in
@@ -141,7 +142,7 @@ export const PLACES = [
     // of it is, because after dark there is more out there to be in the way.
     trouble: { day: 40, night: 55 },
     terrain: 'forest',
-    backdrop: { image: 'art/greywood/backdrop.png', ground: 350 },
+    backdrop: { image: 'art/greywood/backdrop.png', ground: 350, leaves: true },
     label: 'The Greywood',
     note: 'Wilds',
     quest: 'firstday',

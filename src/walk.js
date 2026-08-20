@@ -10,6 +10,7 @@ import { TUNING, COLORS } from '../tuning.js';
 import { BAND, actorFrame, walkAnim, markKey } from './textures.js';
 import { bodyOf, footOf, nodeArtFor, nodeFrame, nodeAnim } from './art.js';
 import { charOf } from './party.js';
+import { createLeaves } from './ambient.js';
 
 const LAYERS = ['far', 'mid', 'near'];
 
@@ -103,6 +104,12 @@ export function createWalk(scene, rect, party, when, backdrop) {
   if (night) mark.setTint(COLORS.questNightTint);
   layer.add(mark);
 
+  // And whatever the place sheds, coming down over the lot of it: a wood is drawn with
+  // leaves already on the ground, so leaves in the air are the same wood a moment earlier.
+  // Created last, so they fall in front of the party and the node rather than behind them.
+  const leaves = painted && painted.leaves
+    ? createLeaves(scene, layer, land, land.y + land.h, night) : null;
+
   let moving = false;
   let arriving = null; // { until, total, onArrive }
   let standing = null; // the encounter whose own art is on the road, if it has any
@@ -124,8 +131,8 @@ export function createWalk(scene, rect, party, when, backdrop) {
   const api = {
     layer,
 
-    // walking or standing still: the bands only scroll and the legs only move when the
-    // party is actually going somewhere
+    // walking or standing still: the legs only move when the party is actually going
+    // somewhere, and the bands drop to their idle drift when they are not
     setMoving(on) {
       if (on === moving) return;
       moving = on;
@@ -179,9 +186,15 @@ export function createWalk(scene, rect, party, when, backdrop) {
     },
 
     update(delta) {
-      if (moving) {
-        for (const b of bands) b.t.tilePositionX += (TUNING.questScrollPxPerSec * b.rate * delta) / 1000;
+      // The wood does not stop because the party has. Standing at a node the bands behind
+      // them keep creeping, at a fraction of the walking pace, so a run at rest still has
+      // air in it. The near ground is what their feet are on and holds still with them.
+      const pace = moving ? 1 : TUNING.questIdleDrift;
+      for (const b of bands) {
+        if (!moving && b.rate >= 1) continue;
+        b.t.tilePositionX += (TUNING.questScrollPxPerSec * b.rate * pace * delta) / 1000;
       }
+      leaves?.update(delta);
       if (!arriving) return;
       arriving.until -= delta;
       const done = 1 - Math.max(0, arriving.until) / arriving.total;
@@ -205,6 +218,7 @@ export function createWalk(scene, rect, party, when, backdrop) {
     },
 
     destroy() {
+      leaves?.destroy();
       layer.destroy(true);
     },
   };
