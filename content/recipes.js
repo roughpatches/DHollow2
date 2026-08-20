@@ -59,14 +59,14 @@ const CUTTING = {
     ],
   },
   2: {
-    stage: 2, level: 4, rank: 2, hard: 'fine', xp: 32, also: { charcoal: 1 },
+    stage: 2, level: 4, rank: 2, hard: 'fine', xp: 32, also: { coal: 1 },
     body: (g) => [
       `Six faces on a ${g.name.toLowerCase()}, worked wide and taken down flat, with the top left broad enough to look into.`,
       'Six faces means six corners, and a wheel that runs past one of them has taken it.',
     ],
   },
   3: {
-    stage: 2, level: 7, rank: 3, hard: 'master', xp: 60, also: { charcoal: 2 },
+    stage: 2, level: 7, rank: 3, hard: 'master', xp: 60, also: { coal: 2 },
     body: (g) => [
       `Twelve faces on a ${g.name.toLowerCase()}, none of them wide, every one of them wanted.`,
       'There is no second stone if this one goes. That is the whole of what makes it the work it is.',
@@ -83,7 +83,7 @@ export const RECIPES = [
   // and tin and coal. Iron is written and unreachable until its ground is; see
   // content/materials.js.
   {
-    id: 'charcoal',
+    id: 'coal',
     name: 'Burn a clamp',
     at: 'forge',
     stage: 1,
@@ -93,7 +93,7 @@ export const RECIPES = [
     activity: 'Smelting',
     fuel: 4,
     costs: { oakbranch: 4 },
-    makes: { charcoal: 3 },
+    makes: { coal: 3 },
     xp: 8,
     body: [
       'Limb wood stacked round a stake, turfed over, lit from the middle and starved of air for a day and a night.',
@@ -139,7 +139,7 @@ export const RECIPES = [
     xp: 34,
     body: [
       'A stack tall enough to hold its own heat, charged from the top and tapped at the bottom, and fed for as long as there is anybody to feed it.',
-      'Coal takes it further than charcoal ever did. One man can work it. Two men can work it properly.',
+      'A stack takes it further than an open hearth ever did. One man can work it. Two men can work it properly.',
     ],
   },
 
@@ -208,7 +208,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'links',
     fuel: 6,
-    costs: { bronzebar: 4, charcoal: 2 },
+    costs: { bronzebar: 4, coal: 2 },
     forges: 'bronzechainmail',
     xp: 48,
     body: [
@@ -227,7 +227,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'edges',
     fuel: 5,
-    costs: { bronzebar: 2, charcoal: 1 },
+    costs: { bronzebar: 2, coal: 1 },
     forges: 'bronzesword',
     xp: 40,
     body: [
@@ -248,7 +248,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'raising',
     fuel: 8,
-    costs: { bronzebar: 6, charcoal: 3 },
+    costs: { bronzebar: 6, coal: 3 },
     forges: 'bronzeplatemail',
     xp: 84,
     body: [
@@ -293,7 +293,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'edges',
     fuel: 5,
-    costs: { bronzebar: 2, charcoal: 1 },
+    costs: { bronzebar: 2, coal: 1 },
     forges: 'bronzebracelet',
     xp: 42,
     body: [
@@ -312,7 +312,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'raising',
     fuel: 7,
-    costs: { bronzebar: 3, charcoal: 2 },
+    costs: { bronzebar: 3, coal: 2 },
     forges: 'bronzeamulet',
     xp: 76,
     body: [
@@ -380,11 +380,11 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { oystermushroom: 4, charcoal: 2 },
+    costs: { oystermushroom: 4, coal: 2 },
     makes: { salve: 1 },
     xp: 24,
     body: [
-      'Caps rendered down and charcoal ground through them while it is all still too hot to touch.',
+      'Caps rendered down and coal ground through them while it is all still too hot to touch.',
       'Five measures, and none of them at the pace of the one before.',
     ],
   },

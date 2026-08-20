@@ -486,7 +486,7 @@ export const TUNING = {
   //                  the same second the fuel does is a job nobody ever finishes.
   fuel: {
     worth: {
-      oakbranch: 1, oaklog: 3, heartwood: 5, charcoal: 6, coal: 10,
+      oakbranch: 1, oaklog: 3, heartwood: 5, coal: 10,
     },
     secondsPerUnit: 12,
     spare: 0.25,

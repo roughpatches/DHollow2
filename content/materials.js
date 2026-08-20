@@ -47,7 +47,7 @@ export const MATERIALS = [
     name: 'Coal',
     body: [
       'Dull black, light in the hand, and it marks everything it is carried next to.',
-      'It burns hotter than a clamp of charcoal and nobody has to sit up two nights making it.',
+      'Dug out of the Greywood, or burnt out of limb wood over a day and a night, and the forge cannot tell which it got.',
     ],
   },
 
@@ -115,14 +115,6 @@ export const MATERIALS = [
   // back into the pool and `hp` goes back to everybody still on their feet — see
   // src/food.js. The ladder runs by what the dish cost to cook, which is why a trout
   // supper is worth three bluegill on the coals: tune it here, one dish at a time.
-  {
-    id: 'charcoal',
-    name: 'Charcoal',
-    body: [
-      'Light, black, and ringing when two pieces knock together — wood with everything but the burning taken out of it.',
-      'It is half the weight of what went into the clamp and four times the heat.',
-    ],
-  },
   {
     id: 'bronzebar',
     name: 'Bronze Bar',

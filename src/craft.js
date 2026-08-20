@@ -106,7 +106,7 @@ export function blockers(r) {
 }
 
 // How much fuel this work wants. Written on the recipe, because how long a job takes is a
-// thing about the job: a clamp of charcoal is an afternoon and a furnace run is a day.
+// thing about the job: a clamp is an afternoon and a furnace run is a day.
 // Work that is not done over a fire wants none, whatever the recipe says.
 export function fuelFor(r) {
   return firedWork(r.activity) ? (r.fuel || 0) : 0;

@@ -323,7 +323,6 @@ const ICONS = {
   dwarvenore: ['block', 'dwarf'],
   elvishore: ['grain', 'elf'],
   holyore: ['grain', 'holy'],
-  charcoal: ['block', 'soot'],
   // The nine stones: the rough lump out of the ground, and the same stone cut. All three
   // grades of a cut stone share its square — a Flawless Ruby is a ruby.
   roughgarnet: ['shard', 'garnet'],
