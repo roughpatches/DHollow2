@@ -401,6 +401,13 @@ const PAINTED_ITEMS = {
   nightwash: 'art/items/nightwash/Nightshade_Wash/rotations/Nightshade_Wash.png',
   bitterwash: 'art/items/bitterwash/Bitterdraught/rotations/Bitterdraught.png',
   steadyhand: 'art/items/steadyhand/Steady_Hand/rotations/Steady_Hand.png',
+  // And the three that were on the shelf before the wood was worked. These exports came
+  // back unnamed, so each went to the potion whose own words claim its colour: the green
+  // to the tonic that smells of the forest floor, the near-black to the grey-black salve,
+  // the amber to the cordial that says it is amber.
+  tonic: 'art/items/tonic/A_single_potion/rotations/A_single_potion.png',
+  salve: 'art/items/salve/A_single_potion/rotations/A_single_potion.png',
+  cordial: 'art/items/cordial/A_single_potion/rotations/A_single_potion.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
