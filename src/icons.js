@@ -309,7 +309,7 @@ const ICONS = {
   heartwood: ['grain', 'heart'],
   blacktrumpet: ['trumpet', 'soot'],
   oystermushroom: ['cap', 'bone'],
-  bitterroot: ['root', 'herb'],
+  bittercap: ['cap', 'herb'],
   heronfeather: ['feather', 'ash'],
   eggshell: ['shell', 'shell'],
   greyarrow: ['arrows', 'ash'],
@@ -323,7 +323,6 @@ const ICONS = {
   dwarvenore: ['block', 'dwarf'],
   elvishore: ['grain', 'elf'],
   holyore: ['grain', 'holy'],
-  charcoal: ['block', 'soot'],
   // The nine stones: the rough lump out of the ground, and the same stone cut. All three
   // grades of a cut stone share its square — a Flawless Ruby is a ruby.
   roughgarnet: ['shard', 'garnet'],

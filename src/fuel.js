@@ -23,8 +23,8 @@ function ladder() {
 // it — a branch does not burn half way through and stop.
 //
 // `spoken` is anything the recipe has already claimed for itself: the clamp burns branches
-// to make charcoal out of branches, and the wood in the stack is not also the wood under
-// it. Passing the costs keeps the fire off them.
+// to make coal out of branches, and the wood in the stack is not also the wood under it.
+// Passing the costs keeps the fire off them.
 //   take  — what comes out of the pack, [id, n] each
 //   worth — what that adds up to on the fire
 //   short — how much of the want nothing in the pack can cover. Measured against the

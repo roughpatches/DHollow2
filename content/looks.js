@@ -391,6 +391,42 @@ const PAINTED_ITEMS = {
   coalfish: 'art/items/coalfish/Barbequed_for_dinner/rotations/Barbequed_for_dinner.png',
   perch: 'art/items/perch/A_single_Fish_freshly_caught/rotations/A_single_Fish_freshly_caught.png',
   friedfish: 'art/items/friedfish/Fried_for_dinner/rotations/Fried_for_dinner.png',
+  // The six the wood pays for, each in the glass it is kept in: the round amber flask, the
+  // green cone, the tall dark bottle, the purple round, the tall clear one and the squat
+  // blue. Six vessels rather than six inks on one flask, which is what a shelf of them
+  // has to be to be read at a glance.
+  copsebroth: 'art/items/copsebroth/Copse_Draught/rotations/Copse_Draught.png',
+  woodsdraught: 'art/items/woodsdraught/Woodsdraught/rotations/Woodsdraught.png',
+  blackdraught: 'art/items/blackdraught/Blackdraught/rotations/Blackdraught.png',
+  nightwash: 'art/items/nightwash/Nightshade_Wash/rotations/Nightshade_Wash.png',
+  bitterwash: 'art/items/bitterwash/Bitterdraught/rotations/Bitterdraught.png',
+  steadyhand: 'art/items/steadyhand/Steady_Hand/rotations/Steady_Hand.png',
+  // And the three that were on the shelf before the wood was worked. These exports came
+  // back unnamed, so each went to the potion whose own words claim its colour: the green
+  // to the tonic that smells of the forest floor, the near-black to the grey-black salve,
+  // the amber to the cordial that says it is amber.
+  tonic: 'art/items/tonic/A_single_potion/rotations/A_single_potion.png',
+  salve: 'art/items/salve/A_single_potion/rotations/A_single_potion.png',
+  cordial: 'art/items/cordial/A_single_potion/rotations/A_single_potion.png',
+  // What the forge turns the bars into. Both shirts came out of one export as `base` and
+  // `_2`: the ringed one is the chainmail and the plated one is the platemail.
+  bronzedagger: 'art/items/bronzedagger/Bronze_Dagger/rotations/Bronze_Dagger.png',
+  bronzesword: 'art/items/bronzesword/Bronze_Sword/rotations/Bronze_Sword.png',
+  bronzechainmail: 'art/items/bronzechainmail/Chainmail_chest_armor/rotations/Chainmail_chest_armor.png',
+  bronzeplatemail: 'art/items/bronzeplatemail/Chainmail_chest_armor_2/rotations/Chainmail_chest_armor_2.png',
+  bronzeshield: 'art/items/bronzeshield/A_single_metal_shield/rotations/A_single_metal_shield.png',
+  // The three settings, out of one export as `base`, `_2` and `_3`: the open cuff is the
+  // bracelet that closes with a pin, the closed band with a raised face is the ring, and
+  // the one hanging on a cord is the amulet.
+  bronzering: 'art/items/bronzering/A_single_piece_of_simple_bronz_2/rotations/A_single_piece_of_simple_bronz_2.png',
+  bronzebracelet: 'art/items/bronzebracelet/A_single_piece_of_simple_bronz/rotations/A_single_piece_of_simple_bronz.png',
+  bronzeamulet: 'art/items/bronzeamulet/A_single_piece_of_simple_bronz_3/rotations/A_single_piece_of_simple_bronz_3.png',
+  // The three things Herblore brings home, all of them fungus now: the flat grey trumpet,
+  // the domed oyster on its fat pale stem, and the dark red bittercap with a ring round
+  // the stem. They are one family and read as one, so the ring is what tells the third.
+  blacktrumpet: 'art/items/blacktrumpet/Black_Trumpet/rotations/Black_Trumpet.png',
+  oystermushroom: 'art/items/oystermushroom/Oyster_Mushroom/rotations/Oyster_Mushroom.png',
+  bittercap: 'art/items/bittercap/A_single_mushroom/rotations/A_single_mushroom.png',
 };
 
 // And the same for the things a pack holds: materials by their id from

@@ -59,14 +59,14 @@ const CUTTING = {
     ],
   },
   2: {
-    stage: 2, level: 4, rank: 2, hard: 'fine', xp: 32, also: { charcoal: 1 },
+    stage: 2, level: 4, rank: 2, hard: 'fine', xp: 32, also: { coal: 1 },
     body: (g) => [
       `Six faces on a ${g.name.toLowerCase()}, worked wide and taken down flat, with the top left broad enough to look into.`,
       'Six faces means six corners, and a wheel that runs past one of them has taken it.',
     ],
   },
   3: {
-    stage: 2, level: 7, rank: 3, hard: 'master', xp: 60, also: { charcoal: 2 },
+    stage: 2, level: 7, rank: 3, hard: 'master', xp: 60, also: { coal: 2 },
     body: (g) => [
       `Twelve faces on a ${g.name.toLowerCase()}, none of them wide, every one of them wanted.`,
       'There is no second stone if this one goes. That is the whole of what makes it the work it is.',
@@ -83,7 +83,7 @@ export const RECIPES = [
   // and tin and coal. Iron is written and unreachable until its ground is; see
   // content/materials.js.
   {
-    id: 'charcoal',
+    id: 'coal',
     name: 'Burn a clamp',
     at: 'forge',
     stage: 1,
@@ -93,7 +93,7 @@ export const RECIPES = [
     activity: 'Smelting',
     fuel: 4,
     costs: { oakbranch: 4 },
-    makes: { charcoal: 3 },
+    makes: { coal: 3 },
     xp: 8,
     body: [
       'Limb wood stacked round a stake, turfed over, lit from the middle and starved of air for a day and a night.',
@@ -139,7 +139,7 @@ export const RECIPES = [
     xp: 34,
     body: [
       'A stack tall enough to hold its own heat, charged from the top and tapped at the bottom, and fed for as long as there is anybody to feed it.',
-      'Coal takes it further than charcoal ever did. One man can work it. Two men can work it properly.',
+      'A stack takes it further than an open hearth ever did. One man can work it. Two men can work it properly.',
     ],
   },
 
@@ -208,7 +208,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'links',
     fuel: 6,
-    costs: { bronzebar: 4, charcoal: 2 },
+    costs: { bronzebar: 4, coal: 2 },
     forges: 'bronzechainmail',
     xp: 48,
     body: [
@@ -227,7 +227,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'edges',
     fuel: 5,
-    costs: { bronzebar: 2, charcoal: 1 },
+    costs: { bronzebar: 2, coal: 1 },
     forges: 'bronzesword',
     xp: 40,
     body: [
@@ -248,7 +248,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'raising',
     fuel: 8,
-    costs: { bronzebar: 6, charcoal: 3 },
+    costs: { bronzebar: 6, coal: 3 },
     forges: 'bronzeplatemail',
     xp: 84,
     body: [
@@ -293,7 +293,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'edges',
     fuel: 5,
-    costs: { bronzebar: 2, charcoal: 1 },
+    costs: { bronzebar: 2, coal: 1 },
     forges: 'bronzebracelet',
     xp: 42,
     body: [
@@ -312,7 +312,7 @@ export const RECIPES = [
     activity: 'Forging',
     hard: 'raising',
     fuel: 7,
-    costs: { bronzebar: 3, charcoal: 2 },
+    costs: { bronzebar: 3, coal: 2 },
     forges: 'bronzeamulet',
     xp: 76,
     body: [
@@ -380,11 +380,11 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { oystermushroom: 4, charcoal: 2 },
+    costs: { oystermushroom: 4, coal: 2 },
     makes: { salve: 1 },
     xp: 24,
     body: [
-      'Caps rendered down and charcoal ground through them while it is all still too hot to touch.',
+      'Caps rendered down and coal ground through them while it is all still too hot to touch.',
       'Five measures, and none of them at the pace of the one before.',
     ],
   },
@@ -466,16 +466,16 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { oystermushroom: 2, bitterroot: 2 },
+    costs: { oystermushroom: 2, bittercap: 2 },
     makes: { steadyhand: 1 },
     xp: 34,
     body: [
-      'Caps and root ground together dry and let down with as little water as will carry it, until it is a paste and not a drink.',
+      'Two kinds of cap ground together dry and let down with as little water as will carry it, until it is a paste and not a drink.',
       'Five measures and none of them forgiving. There is a joke in the trade about what it takes to make one of these.',
     ],
   },
   {
-    // Mostly root. Expensive in the scarce half of the pantry, which is the price of a
+    // Mostly bittercap. Expensive in the scarce half of the pantry, which is the price of a
     // check that was going to be lost being held instead.
     id: 'bitterwash',
     name: 'Draw a bitter wash',
@@ -487,16 +487,16 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { bitterroot: 2, oystermushroom: 1 },
+    costs: { bittercap: 2, oystermushroom: 1 },
     makes: { bitterwash: 1 },
     xp: 22,
     body: [
-      'Root cut coarse, drawn cold over a day, and one cap in it for no reason anybody has ever been able to give.',
+      'Bittercaps cut coarse, drawn cold over a day, and one oyster cap in it for no reason anybody has ever been able to give.',
       'Nothing is added to make it drinkable. Adding something is how it stops working.',
     ],
   },
   {
-    // Trumpets and root, the dark pair. Trumpets grow where the light gave up, and this
+    // Trumpets and bittercaps, the dark pair. Trumpets grow where the light gave up, and this
     // is what that is for.
     id: 'nightwash',
     name: 'Steep a nightshade wash',
@@ -508,11 +508,11 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { blacktrumpet: 3, bitterroot: 1 },
+    costs: { blacktrumpet: 3, bittercap: 1 },
     makes: { nightwash: 1 },
     xp: 28,
     body: [
-      'Trumpets steeped until the water will not go any darker, and a finger of root in it to hold it there.',
+      'Trumpets steeped until the water will not go any darker, and a bittercap in it to hold it there.',
       'It is not drunk so much as worn. Whoever made the first one was not trying to make this.',
     ],
   },
@@ -528,11 +528,11 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'wicked',
     fuel: 4,
-    costs: { blacktrumpet: 4, bitterroot: 3 },
+    costs: { blacktrumpet: 4, bittercap: 3 },
     makes: { blackdraught: 1 },
     xp: 40,
     body: [
-      'Trumpets drawn off the still black as tar with the root ground in at the last, and taken off the heat at a moment nobody can describe.',
+      'Trumpets drawn off the still black as tar with bittercaps ground in at the last, and taken off the heat at a moment nobody can describe.',
       'Two ingredients and seven measures. What is difficult about it is not what is in it.',
     ],
   },
@@ -587,8 +587,8 @@ export const RECIPES = [
   },
   {
     // Cooking 3. The top of what a pan does. Three trout is a stream fished properly and
-    // the root is dug rather than picked, so this is the one dish that wants a party who
-    // went out for it.
+    // the caps come off ground nobody walks, so this is the one dish that wants a party
+    // who went out for it.
     id: 'troutsupper',
     name: 'Lay out a trout supper',
     at: 'kitchen',
@@ -599,12 +599,12 @@ export const RECIPES = [
     activity: 'Cooking',
     fire: true,
     fuel: 3,
-    costs: { brooktrout: 3, bitterroot: 1 },
+    costs: { brooktrout: 3, bittercap: 1 },
     makes: { troutsupper: 1 },
     xp: 38,
     body: [
-      'Three fish opened flat and held over the heat together, with the root shaved through them at the end so it does not cook out.',
-      'The root is what stops it being three fish. Whoever first put it in was not cooking, and it worked anyway.',
+      'Three fish opened flat and held over the heat together, with the cap sliced through them at the end so it does not cook out.',
+      'The cap is what stops it being three fish. Whoever first put it in was not cooking, and it worked anyway.',
     ],
   },
   {
