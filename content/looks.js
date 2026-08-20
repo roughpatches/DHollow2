@@ -375,13 +375,15 @@ const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
 // its own colour has nothing to be put through. A stone is a shape any number of stones
 // can be cut to; everything else is only itself.
 const PAINTED_ITEMS = {
-  oakbranch: 'art/items/oakbranch/An_Oak_log/rotations/An_Oak_log.png',
-  oaklog: 'art/items/oaklog/An_Oak_log/rotations/An_Oak_log.png',
-  heartwood: 'art/items/heartwood/An_Oak_log/rotations/An_Oak_log.png',
+  oakbranch: 'art/items/oakbranch/An_oak_log_3/rotations/An_oak_log_3.png',
+  oaklog: 'art/items/oaklog/An_oak_log/rotations/An_oak_log.png',
+  heartwood: 'art/items/heartwood/An_oak_log_2/rotations/An_oak_log_2.png',
   copperore: 'art/items/copperore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   tinore: 'art/items/tinore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   coal: 'art/items/coal/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   bronzebar: 'art/items/bronzebar/A_metal_bar_for_use_in_blacksm/rotations/A_metal_bar_for_use_in_blacksm.png',
+  // Written and unreachable until its ground is, but painted: see content/materials.js.
+  ironbar: 'art/items/ironbar/A_metal_bar_for_use_in_blacksm_2/rotations/A_metal_bar_for_use_in_blacksm_2.png',
   // Each fish and the dish it is the whole of: the trout supper, the bluegill off the
   // embers and the pan-fried perch. The other four dishes have more than one thing in
   // them and keep their drawn shapes.
