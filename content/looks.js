@@ -382,6 +382,8 @@ const PAINTED_ITEMS = {
   tinore: 'art/items/tinore/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   coal: 'art/items/coal/Ore_rough_and_unfinished/rotations/Ore_rough_and_unfinished.png',
   bronzebar: 'art/items/bronzebar/A_metal_bar_for_use_in_blacksm/rotations/A_metal_bar_for_use_in_blacksm.png',
+  // Written and unreachable until its ground is, but painted: see content/materials.js.
+  ironbar: 'art/items/ironbar/A_metal_bar_for_use_in_blacksm_2/rotations/A_metal_bar_for_use_in_blacksm_2.png',
   // Each fish and the dish it is the whole of: the trout supper, the bluegill off the
   // embers and the pan-fried perch. The other four dishes have more than one thing in
   // them and keep their drawn shapes.
