@@ -415,6 +415,12 @@ const PAINTED_ITEMS = {
   bronzechainmail: 'art/items/bronzechainmail/Chainmail_chest_armor/rotations/Chainmail_chest_armor.png',
   bronzeplatemail: 'art/items/bronzeplatemail/Chainmail_chest_armor_2/rotations/Chainmail_chest_armor_2.png',
   bronzeshield: 'art/items/bronzeshield/A_single_metal_shield/rotations/A_single_metal_shield.png',
+  // The three settings, out of one export as `base`, `_2` and `_3`: the open cuff is the
+  // bracelet that closes with a pin, the closed band with a raised face is the ring, and
+  // the one hanging on a cord is the amulet.
+  bronzering: 'art/items/bronzering/A_single_piece_of_simple_bronz_2/rotations/A_single_piece_of_simple_bronz_2.png',
+  bronzebracelet: 'art/items/bronzebracelet/A_single_piece_of_simple_bronz/rotations/A_single_piece_of_simple_bronz.png',
+  bronzeamulet: 'art/items/bronzeamulet/A_single_piece_of_simple_bronz_3/rotations/A_single_piece_of_simple_bronz_3.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
