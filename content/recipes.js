@@ -466,16 +466,16 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { oystermushroom: 2, bitterroot: 2 },
+    costs: { oystermushroom: 2, bittercap: 2 },
     makes: { steadyhand: 1 },
     xp: 34,
     body: [
-      'Caps and root ground together dry and let down with as little water as will carry it, until it is a paste and not a drink.',
+      'Two kinds of cap ground together dry and let down with as little water as will carry it, until it is a paste and not a drink.',
       'Five measures and none of them forgiving. There is a joke in the trade about what it takes to make one of these.',
     ],
   },
   {
-    // Mostly root. Expensive in the scarce half of the pantry, which is the price of a
+    // Mostly bittercap. Expensive in the scarce half of the pantry, which is the price of a
     // check that was going to be lost being held instead.
     id: 'bitterwash',
     name: 'Draw a bitter wash',
@@ -487,16 +487,16 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { bitterroot: 2, oystermushroom: 1 },
+    costs: { bittercap: 2, oystermushroom: 1 },
     makes: { bitterwash: 1 },
     xp: 22,
     body: [
-      'Root cut coarse, drawn cold over a day, and one cap in it for no reason anybody has ever been able to give.',
+      'Bittercaps cut coarse, drawn cold over a day, and one oyster cap in it for no reason anybody has ever been able to give.',
       'Nothing is added to make it drinkable. Adding something is how it stops working.',
     ],
   },
   {
-    // Trumpets and root, the dark pair. Trumpets grow where the light gave up, and this
+    // Trumpets and bittercaps, the dark pair. Trumpets grow where the light gave up, and this
     // is what that is for.
     id: 'nightwash',
     name: 'Steep a nightshade wash',
@@ -508,11 +508,11 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'tricky',
     fuel: 3,
-    costs: { blacktrumpet: 3, bitterroot: 1 },
+    costs: { blacktrumpet: 3, bittercap: 1 },
     makes: { nightwash: 1 },
     xp: 28,
     body: [
-      'Trumpets steeped until the water will not go any darker, and a finger of root in it to hold it there.',
+      'Trumpets steeped until the water will not go any darker, and a bittercap in it to hold it there.',
       'It is not drunk so much as worn. Whoever made the first one was not trying to make this.',
     ],
   },
@@ -528,11 +528,11 @@ export const RECIPES = [
     activity: 'Brewing',
     hard: 'wicked',
     fuel: 4,
-    costs: { blacktrumpet: 4, bitterroot: 3 },
+    costs: { blacktrumpet: 4, bittercap: 3 },
     makes: { blackdraught: 1 },
     xp: 40,
     body: [
-      'Trumpets drawn off the still black as tar with the root ground in at the last, and taken off the heat at a moment nobody can describe.',
+      'Trumpets drawn off the still black as tar with bittercaps ground in at the last, and taken off the heat at a moment nobody can describe.',
       'Two ingredients and seven measures. What is difficult about it is not what is in it.',
     ],
   },
@@ -587,8 +587,8 @@ export const RECIPES = [
   },
   {
     // Cooking 3. The top of what a pan does. Three trout is a stream fished properly and
-    // the root is dug rather than picked, so this is the one dish that wants a party who
-    // went out for it.
+    // the caps come off ground nobody walks, so this is the one dish that wants a party
+    // who went out for it.
     id: 'troutsupper',
     name: 'Lay out a trout supper',
     at: 'kitchen',
@@ -599,12 +599,12 @@ export const RECIPES = [
     activity: 'Cooking',
     fire: true,
     fuel: 3,
-    costs: { brooktrout: 3, bitterroot: 1 },
+    costs: { brooktrout: 3, bittercap: 1 },
     makes: { troutsupper: 1 },
     xp: 38,
     body: [
-      'Three fish opened flat and held over the heat together, with the root shaved through them at the end so it does not cook out.',
-      'The root is what stops it being three fish. Whoever first put it in was not cooking, and it worked anyway.',
+      'Three fish opened flat and held over the heat together, with the cap sliced through them at the end so it does not cook out.',
+      'The cap is what stops it being three fish. Whoever first put it in was not cooking, and it worked anyway.',
     ],
   },
   {

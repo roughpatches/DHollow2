@@ -197,7 +197,7 @@ export const MATERIALS = [
     name: 'Black Draught',
     drink: { rally: 0.5 },
     body: [
-      'Trumpets steeped black with the root ground through them, thick enough to coat the glass.',
+      'Trumpets steeped black with bittercaps ground through them, thick enough to coat the glass.',
       'Somebody who has stopped will get up on this. What it costs them is not paid on the day they drink it.',
     ],
   },
@@ -215,7 +215,7 @@ export const MATERIALS = [
     name: 'Steady Hand',
     drink: { sure: true },
     body: [
-      'Pale caps and white root worked to a paste and taken off the back of a knife.',
+      'Oyster caps and bittercaps worked to a paste and taken off the back of a knife.',
       'It does not make anybody better at anything. It makes the worst thing that can happen stop happening.',
     ],
   },
@@ -224,7 +224,7 @@ export const MATERIALS = [
     name: 'Bitter Wash',
     drink: { steady: 1 },
     body: [
-      'Almost all root, barely cut, and it is drunk in one because it cannot be drunk in two.',
+      'Almost all bittercap, barely cut, and it is drunk in one because it cannot be drunk in two.',
       'Everything gets a little further away and a little clearer, and the hand goes where it is sent.',
     ],
   },
@@ -258,13 +258,13 @@ export const MATERIALS = [
     ],
   },
   {
-    // Cooking 3. Three trout and a root out of wet ground: the top of what a pan can do,
+    // Cooking 3. Three trout and a cap out of wet ground: the top of what a pan can do,
     // and the only thing on the shelf that costs the still something.
     id: 'troutsupper',
     name: 'Trout Supper',
     eat: { con: 11, hp: 8 },
     body: [
-      'Three fish opened flat over the heat with the root shaved through them, and eaten off the board they were cut on.',
+      'Three fish opened flat over the heat with the cap sliced through them, and eaten off the board they were cut on.',
       'Nobody eats this on the way out. It is carried until the night somebody admits how far they still have to go.',
     ],
   },
@@ -373,14 +373,14 @@ export const MATERIALS = [
     ],
   },
   {
-    // The third thing Herblore brings home, and the only one that is not a fungus: it is
-    // dug rather than picked, so it comes off damp ground and ground nothing has walked
-    // on rather than off rot and fallen trunks. Scarcer than either mushroom in every
-    // table it is in, which is what points in the skill are for.
-    id: 'bitterroot',
-    name: 'Bitterroot',
+    // The third thing Herblore brings home, and the only one that comes out of the ground
+    // rather than off rot and fallen trunks: wet ground, and ground nothing has walked on.
+    // Scarcer than either of the others in every table it is in, which is what points in
+    // the skill are for.
+    id: 'bittercap',
+    name: 'Bittercap',
     body: [
-      'A pale forked root out of wet ground, snapping white and wet, and the smell of it comes up the moment it is broken.',
+      'A dark red cap on a ringed white stem, out of wet ground, and the smell of it comes up the moment it is broken.',
       'It is in every second thing an apothecary ever wrote down, and nobody has ever claimed to like it.',
     ],
   },

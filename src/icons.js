@@ -309,7 +309,7 @@ const ICONS = {
   heartwood: ['grain', 'heart'],
   blacktrumpet: ['trumpet', 'soot'],
   oystermushroom: ['cap', 'bone'],
-  bitterroot: ['root', 'herb'],
+  bittercap: ['cap', 'herb'],
   heronfeather: ['feather', 'ash'],
   eggshell: ['shell', 'shell'],
   greyarrow: ['arrows', 'ash'],

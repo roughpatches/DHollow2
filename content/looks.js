@@ -421,6 +421,12 @@ const PAINTED_ITEMS = {
   bronzering: 'art/items/bronzering/A_single_piece_of_simple_bronz_2/rotations/A_single_piece_of_simple_bronz_2.png',
   bronzebracelet: 'art/items/bronzebracelet/A_single_piece_of_simple_bronz/rotations/A_single_piece_of_simple_bronz.png',
   bronzeamulet: 'art/items/bronzeamulet/A_single_piece_of_simple_bronz_3/rotations/A_single_piece_of_simple_bronz_3.png',
+  // The three things Herblore brings home, all of them fungus now: the flat grey trumpet,
+  // the domed oyster on its fat pale stem, and the dark red bittercap with a ring round
+  // the stem. They are one family and read as one, so the ring is what tells the third.
+  blacktrumpet: 'art/items/blacktrumpet/Black_Trumpet/rotations/Black_Trumpet.png',
+  oystermushroom: 'art/items/oystermushroom/Oyster_Mushroom/rotations/Oyster_Mushroom.png',
+  bittercap: 'art/items/bittercap/A_single_mushroom/rotations/A_single_mushroom.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
