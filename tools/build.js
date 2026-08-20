@@ -57,8 +57,16 @@ window.DH_ASSETS = ${JSON.stringify(manifest)};
   Phaser.Loader.FileTypesManager.install(types);
   var image = types.image;
   var missing = [];
+  // Some art paths are built by stepping out of a folder ('art/x/../y.png'). A browser
+  // folds that away before it fetches, so the manifest lookup has to fold it away too.
+  var fold = function (url) {
+    var out = [];
+    url.split('/').forEach(function (part) { if (part === '..') out.pop(); else out.push(part); });
+    return out.join('/');
+  };
   var swap = function (url) {
     if (typeof url !== 'string' || url.slice(0, 5) === 'data:') return url;
+    url = fold(url);
     if (window.DH_ASSETS[url]) return window.DH_ASSETS[url];
     if (missing.indexOf(url) < 0) { missing.push(url); console.warn('not in this build:', url); }
     return url;
