@@ -414,6 +414,7 @@ const PAINTED_ITEMS = {
   bronzesword: 'art/items/bronzesword/Bronze_Sword/rotations/Bronze_Sword.png',
   bronzechainmail: 'art/items/bronzechainmail/Chainmail_chest_armor/rotations/Chainmail_chest_armor.png',
   bronzeplatemail: 'art/items/bronzeplatemail/Chainmail_chest_armor_2/rotations/Chainmail_chest_armor_2.png',
+  bronzeshield: 'art/items/bronzeshield/A_single_metal_shield/rotations/A_single_metal_shield.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
