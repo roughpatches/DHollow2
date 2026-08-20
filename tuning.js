@@ -32,6 +32,24 @@ export const TUNING = {
   streetBreathPx: 1,
   streetBreathMs: 3400,
 
+  // What goes up off a chimney (src/ambient.js). Only a panel that names its chimneys has
+  // any; see `smoke` in content/maps.js.
+  streetSmokePuffs: 28, // how many are climbing off one pot at once: enough that the
+  // column reads as one thing rather than as a row of dots going up
+  streetSmokePx: 7, // how wide one gets at the top of its climb; it leaves the pot at one
+  streetSmokeRise: [11, 20], // how fast it climbs, in pixels a second
+  streetSmokeClimb: [44, 82], // and how far it gets before it is gone, in pixels
+  streetSmokeLean: [0.25, 0.6], // how far it goes sideways per pixel risen: the wind, and
+  // one sign for the whole town, because it is one evening. Negative blows the other way.
+  streetSmokeWobble: [2, 9], // and how far a puff wanders off that line, and over how many
+  // pixels of climb it wanders there and back: what stops the column being a ruled edge
+  streetSmokeAlpha: 0.75, // how solid a puff is when it leaves the pot
+  streetSmokeRead: 14, // how far above the pot the sky it stands against is read
+  streetSmokeContrast: 0.55, // and how far the smoke is pushed away from that sky: nothing
+  // is a plume against a sky the same colour as itself
+  streetSmokeSteps: 3, // and how many greys it thins through on the way up, rather than
+  // every grey between here and gone: a painting blended against continuously is a smear
+
   // Every word in the game is set in this. The face itself is declared in index.html
   // and loaded before the game starts, because a line of text is baked to a texture the
   // moment it is written and one baked against a fallback stays wrong.
@@ -815,6 +833,12 @@ export const COLORS = {
   seaFar: 0x55606b, // steel, out at the horizon
   seaNear: 0x2c3540, // and darker close in
   seaCrest: 0x77828c, // the swell on it
+
+  // What comes off a chimney. Pitched at the middle of what the five panels have behind
+  // their pots — a sky that runs from near-black over the burying ground to bright cloud
+  // over the tavern — so the same smoke is darker than the pale skies and lighter than the
+  // dark ones, and reads against all of them without a colour per panel.
+  streetSmoke: 0x555a63,
 
   // The word a check is answered with, across the road (src/roll.js). Green and red and
   // nothing subtler: it is the one thing on the screen at the moment it is up.

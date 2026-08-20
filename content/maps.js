@@ -74,6 +74,10 @@ export const MAPS = {
   //             Left out, it is streetBodyPx from tuning.js, which is the town's. These
   //             five are painted at the town's own scale — a door in them is a little
   //             over a person tall — so none of them says otherwise.
+  //   smoke   — where the chimneys are in the painting, as [x, y] on the pot itself: what
+  //             goes up off them is the one thing on a street that moves without being
+  //             asked to. Measured off the image, so a chimney that is not smoking is one
+  //             line deleted. A panel that names none has none. See src/ambient.js.
   //   edges   — what lies off each end: { right: 'quay', left: 'harbourroad' }. A street is
   //             a panel, not a stretch of something longer — walk into the end of one and
   //             the next is what is on the screen, standing you at its far end. Painted
@@ -95,6 +99,7 @@ export const MAPS = {
       size: [688, 384],
       ground: 352, // the middle of the cobbles
       sill: 325, // the kerb, where the ground the town stands on begins
+      smoke: [[522, 156]], // the farmhouse standing in the burying ground
       repeats: 1,
       edges: { right: 'fieldroad' },
     },
@@ -112,6 +117,7 @@ export const MAPS = {
       size: [688, 384],
       ground: 352,
       sill: 327,
+      smoke: [[30, 81]], // the house at the west end, the tall stack over its gable
       repeats: 1,
       edges: { left: 'woodend', right: 'harbourroad' },
     },
@@ -129,6 +135,8 @@ export const MAPS = {
       size: [688, 384],
       ground: 354,
       sill: 328,
+      smoke: [[280, 104], [532, 120]], // the Salty Dog's brick stack, and the stone one
+      // on the house across the well from it
       repeats: 1,
       edges: { left: 'fieldroad', right: 'searow' },
     },
@@ -146,6 +154,7 @@ export const MAPS = {
       size: [688, 384],
       ground: 340, // the cobbles run out into rough grass in front; this keeps you on stone
       sill: 318,
+      smoke: [[471, 208]], // the cottage down the row, with the water behind it
       repeats: 1,
       edges: { left: 'harbourroad', right: 'quay' },
     },
