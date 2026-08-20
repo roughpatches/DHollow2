@@ -408,6 +408,12 @@ const PAINTED_ITEMS = {
   tonic: 'art/items/tonic/A_single_potion/rotations/A_single_potion.png',
   salve: 'art/items/salve/A_single_potion/rotations/A_single_potion.png',
   cordial: 'art/items/cordial/A_single_potion/rotations/A_single_potion.png',
+  // What the forge turns the bars into. Both shirts came out of one export as `base` and
+  // `_2`: the ringed one is the chainmail and the plated one is the platemail.
+  bronzedagger: 'art/items/bronzedagger/Bronze_Dagger/rotations/Bronze_Dagger.png',
+  bronzesword: 'art/items/bronzesword/Bronze_Sword/rotations/Bronze_Sword.png',
+  bronzechainmail: 'art/items/bronzechainmail/Chainmail_chest_armor/rotations/Chainmail_chest_armor.png',
+  bronzeplatemail: 'art/items/bronzeplatemail/Chainmail_chest_armor_2/rotations/Chainmail_chest_armor_2.png',
 };
 
 // And the same for the things a pack holds: materials by their id from
