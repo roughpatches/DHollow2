@@ -7,6 +7,7 @@ import Skills from './scenes/Skills.js';
 import Craft from './scenes/Craft.js';
 import Name from './scenes/Name.js';
 import { report } from './placeholders.js';
+import { CANVAS } from './view.js';
 import * as party from './party.js';
 import * as town from './town.js';
 import * as run from './run.js';
@@ -40,20 +41,26 @@ window.game = new Phaser.Game({
   pixelArt: true,
   // The game is drawn at one size and shown at another. Everything inside it lays
   // itself out against TUNING.viewWidth / viewHeight and always will; the canvas is
-  // then blown up to whatever the window is, keeping its shape, with the dark of the
-  // page down the sides. Nothing in the game knows or cares how big the window is.
+  // built at the size the window can actually show it at, and every camera carries the
+  // difference. Nothing in the game knows or cares how big the window is — see
+  // src/view.js, which is where that difference is worked out and handed round.
   //
   // The enlargement is not a whole number at most window sizes, so a pixel of the
-  // painting lands on one and a bit pixels of the screen: the ironwork's thinnest
-  // lines come out uneven and the lettering, which is drawn small and then enlarged,
-  // goes ragged at the strokes. That is the cost of filling the screen at this
-  // drawing size and it is meant to be looked at rather than argued about.
+  // painting lands on one and a bit pixels of the screen and the ironwork's thinnest
+  // lines come out uneven. That is the cost of filling the screen at this drawing size
+  // and it is meant to be looked at rather than argued about. The lettering is not in
+  // that bargain any more: it is baked at the screen's own resolution rather than at
+  // the drawing size and then chunked up.
+  //
+  // FIT rather than NONE so a window resized after boot is fitted rather than cut off.
+  // What it loses by being resized is the crispness — it is blown up by the browser
+  // again, as the whole game used to be — and it is back the next time it is loaded.
   scale: {
     parent: 'game',
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: TUNING.viewWidth,
-    height: TUNING.viewHeight,
+    width: CANVAS.width,
+    height: CANVAS.height,
   },
   physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
   scene: [World, Dialogue, Menu, Quest, Skills, Craft, Name],

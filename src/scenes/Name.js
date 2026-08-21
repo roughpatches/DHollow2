@@ -1,6 +1,7 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { setName, YOU } from '../party.js';
 import { framed, padOf, inkOf } from '../frames.js';
+import { fitCamera, crispType } from '../view.js';
 
 const PANEL = 'parchment'; // asked in the hut, answered on the town's paper
 
@@ -14,11 +15,13 @@ export default class Name extends Phaser.Scene {
   }
 
   create() {
+    fitCamera(this);
+    crispType(this);
     const p = TUNING.questPad;
     this.box = {
       x: p * 3,
-      y: this.scale.height / 2 - 90,
-      w: this.scale.width - p * 6,
+      y: TUNING.viewHeight / 2 - 90,
+      w: TUNING.viewWidth - p * 6,
       h: 180,
     };
     const pad = padOf(PANEL);

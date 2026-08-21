@@ -8,9 +8,10 @@
 
 import { TUNING, COLORS } from '../tuning.js';
 import { BAND, actorFrame, walkAnim, markKey } from './textures.js';
-import { bodyOf, footOf, nodeArtFor, nodeFrame, nodeAnim } from './art.js';
+import { bodyScale, footOf, nodeArtFor, nodeFrame, nodeAnim } from './art.js';
 import { charOf } from './party.js';
 import { createLeaves } from './ambient.js';
+import { shadeUnder } from './player.js';
 
 const LAYERS = ['far', 'mid', 'near'];
 
@@ -83,11 +84,19 @@ export function createWalk(scene, rect, party, when, backdrop) {
   const bodies = party.map((id, i) => {
     const palette = charOf(id).palette;
     const foot = footOf(palette);
-    const sp = scene.add.sprite(rect.x + 90 + i * 34, ground + 4, actorFrame(palette, 'right', 0));
+    const stood = ground + 4;
+    // The pool at their feet, the one the town gives everybody, laid down before the body
+    // so it lies under them. A placeholder has one in its frames already and is given no
+    // second; only drawn art gets one. It does not move, because on the road the party
+    // does not either — the landscape is what goes past them.
+    const shade = shadeUnder(scene, palette, rect.x + 90 + i * 34, stood, TUNING.questBodyPx);
+    if (shade) layer.add(shade);
+    const sp = scene.add.sprite(rect.x + 90 + i * 34, stood, actorFrame(palette, 'right', 0));
     sp.setOrigin(0.5, foot);
     // a placeholder fills its frame and drawn art does not, so everyone is stood up by how
-    // much of their frame is them rather than by the frame itself
-    sp.setScale(TUNING.questBodyPx / (sp.frame.height * bodyOf(palette)));
+    // much of their frame is them rather than by the frame itself, on the whole step the
+    // town stands them up on
+    sp.setScale(bodyScale(sp.frame.height, palette, TUNING.questBodyPx));
     sp.setDepth(party.length - i); // whoever is in front overlaps whoever is behind
     if (night) sp.setTint(COLORS.questNightTint);
     layer.add(sp);
