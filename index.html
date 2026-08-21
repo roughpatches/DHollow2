@@ -15,7 +15,14 @@
     font-display: block;
   }
   html, body { margin: 0; height: 100%; background: #0b0d10; overflow: hidden; }
-  body { display: grid; place-items: center; }
+  /* The box the game is fitted into. It has to be the whole window and be sized by the
+     window rather than by what is inside it: the game measures this to decide how far
+     it can be blown up, and a box that shrinks to fit the canvas would be measuring
+     itself. Centring the canvas within it is the game's own job — see `autoCenter` in
+     src/main.js. */
+  #game { width: 100%; height: 100%; }
+  /* Enlarged in whole blocks rather than smeared. The game is painted pixel by pixel
+     and is shown bigger than it is drawn, so the browser is told to keep the edges. */
   canvas { image-rendering: pixelated; }
 </style>
 </head>
