@@ -14,7 +14,7 @@
 // parchment hexes, its config comes from TUNING.quarry.prospect in tuning.js, and the v1
 // document citations are stripped. The mechanic is untouched.
 
-import { COLOR, FONT } from './ui.js';
+import { COLOR, FONT, JUDGE } from './ui.js';
 import { trackWidget, meterBar, popFeedback } from './meters.js';
 
 function clamp01(v) {
@@ -76,15 +76,15 @@ export class ProspectEngine {
     if (dist <= this.bandHalf * 0.45) {
       judgment = 'perfect';
       word = 'CLEAR READ!';
-      color = 0xffffff;
+      color = JUDGE.perfect;
     } else if (dist <= this.bandHalf) {
       judgment = 'good';
       word = 'sounding';
-      color = 0xffd700;
+      color = JUDGE.good;
     } else {
       judgment = 'miss';
       word = 'FAINT';
-      color = 0x99a0b0;
+      color = JUDGE.glance;
     }
     this.judgments.push(judgment);
     this._popFeedback(word, color);
@@ -125,7 +125,7 @@ export class ProspectEngine {
 
   _succeed(fadedOut = false) {
     this.completed = true;
-    this._popFeedback(fadedOut ? 'ECHO LOST' : 'READ DONE', fadedOut ? 0xd98a8a : 0x8fd694);
+    this._popFeedback(fadedOut ? 'ECHO LOST' : 'READ DONE', fadedOut ? JUDGE.danger : JUDGE.held);
     this.scene.time.delayedCall(400, () => { this._cleanup(); this.onComplete?.(this.judgments); });
   }
 
@@ -137,13 +137,13 @@ export class ProspectEngine {
 
   _layout() {
     const onBand = Math.abs(this.needlePos - this.bandCenter) <= this.bandHalf;
-    this.scopeTrack.setBand(this.bandCenter, this.bandHalf).setBandTint(0x9ad06f)
-      .setMarker(this.needlePos).setMarkerTint(onBand ? 0x9ad06f : null);
+    this.scopeTrack.setBand(this.bandCenter, this.bandHalf).setBandTint(JUDGE.held)
+      .setMarker(this.needlePos).setMarkerTint(onBand ? JUDGE.held : null);
 
     this.headText.setText(`Soundings  ${this.judgments.length} / ${this.config.sampleCount}`);
 
     this.clarityBar.setValue(this.clarity);
-    this.clarityBar.tint(this.clarity <= 0.25 ? 0xd97a6a : this.clarity <= 0.5 ? 0xf2913a : null);
+    this.clarityBar.tint(this.clarity <= 0.25 ? JUDGE.danger : this.clarity <= 0.5 ? JUDGE.near : null);
     this.clarityText.setText('Clarity  (fades — keep taking soundings)');
     this.clarityText.setColor(this.clarity <= 0.25 ? COLOR.warn : COLOR.grass);
   }

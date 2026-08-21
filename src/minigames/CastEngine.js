@@ -16,7 +16,7 @@
 // than StarScape's parchment hexes, its config comes from TUNING.fish in tuning.js, and
 // the reactive water layer it signalled is not here. The mechanic is untouched.
 
-import { COLOR, FONT } from './ui.js';
+import { COLOR, FONT, JUDGE } from './ui.js';
 import { trackWidget, meterBar, clamp01 } from './meters.js';
 
 export class CastEngine {
@@ -139,7 +139,7 @@ export class CastEngine {
     // two judgments, so the cast carries real weight in what the catch is worth
     const j = quality >= 0.75 ? 'perfect' : quality >= 0.4 ? 'good' : 'miss';
     this.judgments.push(j, j);
-    this.water.setMarkerTint(0xedc46b);
+    this.water.setMarkerTint(JUDGE.good);
     this._succeed('Presented in the lie — a fish rises to look.');
   }
 
@@ -157,7 +157,7 @@ export class CastEngine {
     this.completed = true;
     this.failed = true;
     this.judgments = [];
-    this.water.setMarkerTint(0xd0684f);
+    this.water.setMarkerTint(JUDGE.danger);
     this._setStatus(message, COLOR.danger);
     this.scene.time.delayedCall(800, () => {
       this._cleanup();
@@ -174,7 +174,7 @@ export class CastEngine {
     this.water.setBand((laneStart + laneEnd) / 2, this.config.lane.width / 2);
     this.water.setMarker(this.reach);
     this.presBar.setValue(clamp01(this.presentation));
-    this.presBar.tint(this.presentation > 0.35 ? null : 0xf2913a);
+    this.presBar.tint(this.presentation > 0.35 ? null : JUDGE.near);
     this.lineText?.setText(`Line out ${Math.round(this.reach * 100)}%`);
   }
 

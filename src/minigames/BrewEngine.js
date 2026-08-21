@@ -14,7 +14,7 @@
 //  - No hard fail. A botched brew is a weak draught and not a lost pot: nothing here is
 //    balanced yet, and a potion nobody can finish is a potion nobody plays twice.
 
-import { COLOR, FONT, panel } from './ui.js';
+import { COLOR, FONT, panel, inkOn } from './ui.js';
 import { popFeedback } from './meters.js';
 import { COLORS } from '../../tuning.js';
 
@@ -181,8 +181,9 @@ export class BrewEngine {
     this.intoText.setText(s.label ? `Into the pot: ${s.label}` : 'Into the pot');
   }
 
+  // Every line this traces is inside the plate, which is paper, so it is drawn in ink.
   _trace(r, sides, colour, width, alpha) {
-    this.g.lineStyle(width, colour, alpha);
+    this.g.lineStyle(width, inkOn(colour), alpha);
     if (!sides) {
       this.g.strokeCircle(this.cx, this.cy, r);
       return;

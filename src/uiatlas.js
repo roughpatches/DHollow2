@@ -1,12 +1,21 @@
-// The 'ui' atlas the minigame kit draws from, generated at boot the way everything else
-// in src/textures.js is. StarScape shipped this as a painted ui.png plus a generated
-// manifest; neither exists here, so the frames are drawn instead. Same texture key, same
-// frame names, same 9-slice borders — src/minigames/ui.js cannot tell the difference.
+// What the minigame kit draws its widgets from. Two sources, because a widget is one of
+// two things.
 //
-// The frame table is built at module load so ART.ui.frames is ready for anything that
-// reads it at import time. buildUiAtlas(scene) is what actually paints the canvas.
+// The furniture — the square an activity is worked on and the trough a marker runs along
+// — is painted, cut from the same parchment sheet every screen in Dreadhollow is drawn
+// on. StarScape shipped these as part of a painted ui.png that does not exist here, and
+// they used to be drawn in code: a grey box with a thin outline, landing on top of the
+// painted page a bench had already opened. Now the bench and the work on it are the same
+// paper.
+//
+// The instruments are still generated. A gradient that runs cold to scorch, a dial a
+// plumb bob swings across, a bar that fills — these change shape as they are played and
+// are read rather than looked at, so there is nothing to paint. They are drawn into a
+// canvas at boot the way everything in src/textures.js is, under the same 'ui' texture
+// key and the same frame names StarScape used, so an imported engine cannot tell.
 
 import { COLORS, hex } from '../tuning.js';
+import { UI } from '../content/looks.js';
 
 const U = COLORS.ui;
 const ATLAS_W = 256;
@@ -14,6 +23,16 @@ const PAD = 2;
 
 // left/right/top/bottom insets that must not stretch when a frame is 9-sliced
 const B = (l, r = l, t = l, b = t) => ({ left: l, right: r, top: t, bottom: b });
+
+// The painted furniture: where it is cut from the town's parchment sheet, and the edges
+// that must not stretch. Both were sitting unused on that sheet — the trough at the top
+// of it and the square at the bottom right — and both are the shape they are being asked
+// to be, so nothing is being stretched into a proportion it was never painted in.
+const SHEET = UI.sheets.town;
+const PAINTED = {
+  panel: { at: [160, 168, 57, 57], slice: [6, 6, 6, 6] },
+  track: { at: [80, 32, 161, 17], slice: [6, 6, 3, 3] },
+};
 
 function box(ctx, x, y, w, h, fill, edge, inner) {
   ctx.fillStyle = hex(fill);
@@ -29,22 +48,23 @@ function box(ctx, x, y, w, h, fill, edge, inner) {
   }
 }
 
-// a plain colour block, for the fills and markers that are never sliced
+// a plain colour block, for the fills and bands that are never sliced
 const solid = (fill) => (ctx, x, y, w, h) => {
   ctx.fillStyle = hex(fill);
   ctx.fillRect(x, y, w, h);
 };
 
-function hatched(ctx, x, y, w, h, c) {
-  ctx.strokeStyle = hex(c);
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  for (let i = -h; i < w; i += 4) {
-    ctx.moveTo(x + i + 0.5, y + h);
-    ctx.lineTo(x + i + h + 0.5, y);
-  }
-  ctx.stroke();
-}
+// A marker is read against painted parchment now, which is nearly as pale as the marker
+// used to be. So it is a light core inside a dark edge: the core takes whatever an engine
+// tints it, and the edge stays dark whatever that tint is — multiplying a near-black by a
+// colour leaves it near-black — so a marker keeps its outline on the paper whichever
+// thing it is currently saying.
+const pipped = (core, edge) => (ctx, x, y, w, h) => {
+  ctx.fillStyle = hex(edge);
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = hex(core);
+  ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
+};
 
 // A ribbon behind a judgment word. The engines pop these on every scored input, so they
 // are wide enough for PERFECT and flat enough to read at a glance.
@@ -97,37 +117,18 @@ function leanFace(ctx, x, y, w, h) {
 
 // name, size, optional 9-slice border, and how it is painted
 const SPEC = [
-  ['panel', 24, 24, B(8), (c, x, y, w, h) => box(c, x, y, w, h, U.panel, U.edge, U.rule)],
-  ['panel_inset', 24, 24, B(8), (c, x, y, w, h) => box(c, x, y, w, h, U.inset, U.rule)],
-  ['hud_plate', 24, 24, B(8), (c, x, y, w, h) => box(c, x, y, w, h, U.inset, U.edge)],
-  ['dialogue_box', 24, 24, B(8), (c, x, y, w, h) => box(c, x, y, w, h, COLORS.dialogueFill, COLORS.dialogueEdge)],
-
-  // all four button states share one geometry, so the kit can swap frames on hover
-  ['btn', 24, 24, B(8), (c, x, y, w, h) => box(c, x, y, w, h, COLORS.menuSelectFill, U.gold)],
-  ['btn_hover', 24, 24, B(8), (c, x, y, w, h) => box(c, x, y, w, h, U.panel, U.goldBright, U.gold)],
-  ['btn_pressed', 24, 24, B(8), (c, x, y, w, h) => box(c, x, y, w, h, U.inset, U.gold)],
-  ['btn_locked', 24, 24, B(8), (c, x, y, w, h) => {
-    box(c, x, y, w, h, U.inset, U.rule);
-    hatched(c, x + 2, y + 2, w - 4, h - 4, U.rule);
-  }],
-
-  ['track', 24, 14, B(6, 6, 3, 3), (c, x, y, w, h) => box(c, x, y, w, h, U.inset, U.edge)],
   ['sweetspot_band', 16, 12, B(3, 3, 0, 0), (c, x, y, w, h) => {
     c.globalAlpha = 0.45;
     c.fillStyle = hex(U.grass);
     c.fillRect(x, y, w, h);
     c.globalAlpha = 1;
   }],
-  ['marker', 6, 16, null, solid(U.goldBright)],
-
-  ['slot', 24, 24, B(6), (c, x, y, w, h) => box(c, x, y, w, h, U.inset, U.edge)],
-  ['slot_equipped', 24, 24, B(6), (c, x, y, w, h) => box(c, x, y, w, h, U.panel, U.gold)],
-  ['slot_empty', 24, 24, B(6), (c, x, y, w, h) => box(c, x, y, w, h, U.stage, U.rule)],
+  ['marker', 6, 16, null, pipped(U.goldBright, U.ink)],
 
   ['heat_gauge', 64, 16, null, heat],
   ['lean_gauge', 48, 48, null, leanFace],
   ['lean_band', 10, 14, null, solid(U.grass)],
-  ['lean_marker', 6, 26, null, solid(U.goldBright)],
+  ['lean_marker', 6, 26, null, pipped(U.goldBright, U.ink)],
 ];
 
 for (const [name, colour] of Object.entries(COLORS.uiRibbons)) {
@@ -171,4 +172,27 @@ export function buildUiAtlas(scene) {
   for (const f of frames) f.draw(ctx, f.x, f.y, f.w, f.h);
   tex.refresh();
   for (const f of frames) tex.add(f.name, 0, f.x, f.y, f.w, f.h);
+}
+
+// Where a frame is drawn from, and the edges that must not stretch: a texture key, a name
+// on it, and the four insets. Generated and painted frames come back the same shape, so
+// whatever is drawing does not have to know which it asked for.
+//
+// A painted cut is named on the sheet's own texture the first time it is wanted, not at
+// boot — the sheet is still loading while the atlas is generated (src/scenes/Dialogue.js
+// says the same of its own panel), and nothing asks for one of these until an activity
+// starts, which is long after the town is standing. Named with a prefix so the kit can
+// never collide with a frame content/looks.js cuts from the same sheet.
+export function uiSource(scene, name) {
+  const p = PAINTED[name];
+  if (p) {
+    const frame = `ui_${name}`;
+    const tex = scene.textures.get(SHEET);
+    if (!tex.has(frame)) tex.add(frame, 0, ...p.at);
+    return { key: SHEET, frame, slice: p.slice };
+  }
+  const f = ART.ui.frames.find((o) => o.name === name);
+  if (!f) return null;
+  const b = f.border;
+  return { key: 'ui', frame: name, slice: b && [b.left, b.right, b.top, b.bottom] };
 }

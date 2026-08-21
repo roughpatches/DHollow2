@@ -17,7 +17,7 @@
 //  - Scored at the end, face by face, on how near the stone sits to the shape it was
 //    given. No hard fail — a badly cut stone is a badly cut stone.
 
-import { COLOR, FONT, panel } from './ui.js';
+import { COLOR, FONT, panel, inkOn } from './ui.js';
 import { meterBar, popFeedback } from './meters.js';
 import { COLORS } from '../../tuning.js';
 
@@ -242,12 +242,12 @@ export class GemEngine {
 
     // the stone as it stands
     const stone = this._points(this.r);
-    this.g.fillStyle(COLORS.ui.cool, 0.28);
+    this.g.fillStyle(inkOn(COLORS.ui.cool), 0.28);
     this.g.fillPoints(stone, true);
-    this.g.lineStyle(2, COLORS.ui.cool, 1);
+    this.g.lineStyle(2, inkOn(COLORS.ui.cool), 1);
     this.g.strokePoints(stone, true, true);
     // and the shape it is meant to be, over the top of it
-    this.g.lineStyle(2, COLORS.ui.gold, 1);
+    this.g.lineStyle(2, inkOn(COLORS.ui.gold), 1);
     this.g.strokePoints(this._points(this.t), true, true);
 
     // the nodes round the rim, and the plane the wheel would take at the one you are on
@@ -257,7 +257,7 @@ export class GemEngine {
       const px = this.cx + Math.cos(phi) * depth;
       const py = this.cy + Math.sin(phi) * depth;
       const reach = c.radius * 0.9;
-      this.g.lineStyle(1, COLORS.ui.goldBright, 0.65);
+      this.g.lineStyle(1, inkOn(COLORS.ui.goldBright), 0.65);
       this.g.lineBetween(px - Math.sin(phi) * reach, py + Math.cos(phi) * reach,
         px + Math.sin(phi) * reach, py - Math.cos(phi) * reach);
 
@@ -265,7 +265,7 @@ export class GemEngine {
         const a = this._nodeAngle(j);
         const at = c.radius * 1.12;
         const on = j === this.node;
-        this.g.fillStyle(on ? COLORS.ui.goldBright : COLORS.ui.muted, on ? 1 : 0.85);
+        this.g.fillStyle(inkOn(on ? COLORS.ui.goldBright : COLORS.ui.muted), on ? 1 : 0.85);
         this.g.fillCircle(this.cx + Math.cos(a) * at, this.cy + Math.sin(a) * at, on ? 5 : 3);
       }
     }

@@ -36,11 +36,25 @@ await document.fonts.load(`16px ${TUNING.font}`);
 // exposed so the game can be poked from the browser console
 window.game = new Phaser.Game({
   type: Phaser.AUTO,
-  parent: 'game',
-  width: TUNING.viewWidth,
-  height: TUNING.viewHeight,
   backgroundColor: COLORS.bg,
   pixelArt: true,
+  // The game is drawn at one size and shown at another. Everything inside it lays
+  // itself out against TUNING.viewWidth / viewHeight and always will; the canvas is
+  // then blown up to whatever the window is, keeping its shape, with the dark of the
+  // page down the sides. Nothing in the game knows or cares how big the window is.
+  //
+  // The enlargement is not a whole number at most window sizes, so a pixel of the
+  // painting lands on one and a bit pixels of the screen: the ironwork's thinnest
+  // lines come out uneven and the lettering, which is drawn small and then enlarged,
+  // goes ragged at the strokes. That is the cost of filling the screen at this
+  // drawing size and it is meant to be looked at rather than argued about.
+  scale: {
+    parent: 'game',
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: TUNING.viewWidth,
+    height: TUNING.viewHeight,
+  },
   physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
   scene: [World, Dialogue, Menu, Quest, Skills, Craft, Name],
 });

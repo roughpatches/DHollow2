@@ -16,7 +16,7 @@
 // same drift — the integrity pips are one of the kit's bars, and the reactive water layer
 // it signalled is not here. The physics and the sampling are untouched.
 
-import { COLOR, FONT } from './ui.js';
+import { COLOR, FONT, JUDGE } from './ui.js';
 import { trackWidget, meterBar, resolveBarKind } from './meters.js';
 
 function clamp(value, min, max) {
@@ -89,7 +89,7 @@ export class TensionBarEngine {
     if (!this.integrityBar) return;
     const left = this.integrity / this.config.lineIntegrity;
     this.integrityBar.setValue(left);
-    this.integrityBar.tint(this.integrity > 1 ? null : 0xf2913a);
+    this.integrityBar.tint(this.integrity > 1 ? null : JUDGE.near);
   }
 
   _randomZoneCenter() {
@@ -177,7 +177,7 @@ export class TensionBarEngine {
     this.bar.setMarker(this.indicatorPos);
     const half = this.config.zoneWidth / 2;
     const inBand = Math.abs(this.indicatorPos - this.zoneCenter) <= half;
-    this.bar.setMarkerTint(inBand ? null : 0xf2913a);
+    this.bar.setMarkerTint(inBand ? null : JUDGE.near);
     this.tensionText?.setText(inBand ? this.words.holding : this.words.slipping);
     this.tensionText?.setColor(inBand ? COLOR.text : COLOR.warn);
   }

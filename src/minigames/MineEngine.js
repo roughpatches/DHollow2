@@ -17,7 +17,7 @@
 // art StarScape skinned this with is not here — the generic kit draws all three. The
 // mechanic is untouched.
 
-import { COLOR, FONT } from './ui.js';
+import { COLOR, FONT, JUDGE } from './ui.js';
 import { trackWidget, meterBar, popFeedback, resolveBarKind, resolveFrame } from './meters.js';
 
 function clamp01(v) {
@@ -92,7 +92,7 @@ export class MineEngine {
     // Shock: the managed resource, with the red end of it drawn in behind the bar.
     this.shockText = this.scene.add.text(bx, L.top + 56, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.text });
     this.shockBar = meterBar(this.scene, bx, L.top + 86, this.BW, 16, resolveBarKind(this.scene, 'bar_shock', 'bar_quality'));
-    this.shockRed = this.scene.add.rectangle(bx + 2 + inner * c.shockRedAt, L.top + 86, inner * (1 - c.shockRedAt), 16, 0xd97a6a, 0.3).setOrigin(0, 0.5);
+    this.shockRed = this.scene.add.rectangle(bx + 2 + inner * c.shockRedAt, L.top + 86, inner * (1 - c.shockRedAt), 16, JUDGE.danger, 0.3).setOrigin(0, 0.5);
 
     // Stability (soft collapse gate).
     this.stabText = this.scene.add.text(bx, L.top + 112, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.grass });
@@ -140,7 +140,7 @@ export class MineEngine {
 
     if (power > c.overchargeAt) {
       this.lastMiss = 'wild';
-      this._resolve('miss', this.words.wild, 0xff8c42, () => {
+      this._resolve('miss', this.words.wild, JUDGE.wild, () => {
         this.stability = clamp01(this.stability - c.wildChip);
         this.shock = clamp01(this.shock + c.shockPerStrike * c.wildShockMult);
         this.fracture = clamp01(this.fracture + c.fracturePerStrike * c.glanceFractureMult);
@@ -148,13 +148,13 @@ export class MineEngine {
     } else if (inZone) {
       const precision = Math.abs(power - this.zoneCenter) / half;
       const perfect = precision <= 0.5;
-      this._resolve(perfect ? 'perfect' : 'good', perfect ? this.words.perfect : this.words.good, perfect ? 0xffffff : 0xffd700, () => {
+      this._resolve(perfect ? 'perfect' : 'good', perfect ? this.words.perfect : this.words.good, perfect ? JUDGE.perfect : JUDGE.good, () => {
         this.fracture = clamp01(this.fracture + c.fracturePerStrike * fracGear * (perfect ? 1 : 0.82));
         this.shock = clamp01(this.shock + c.shockPerStrike * shockGear);
       });
     } else {
       this.lastMiss = 'glance';
-      this._resolve('miss', this.words.glance, 0x99a0b0, () => {
+      this._resolve('miss', this.words.glance, JUDGE.glance, () => {
         this.fracture = clamp01(this.fracture + c.fracturePerStrike * c.glanceFractureMult);
         this.shock = clamp01(this.shock + c.shockPerStrike * c.glanceShockMult);
       });
@@ -164,7 +164,7 @@ export class MineEngine {
     if (intoRed) {
       this.stability = clamp01(this.stability - c.stabilityCrackOnStrike);
       this.crackCount++;
-      this._popFeedback('CRACK', 0xff5555);
+      this._popFeedback('CRACK', JUDGE.danger);
     }
 
     this.chargeState = 'venting';
@@ -241,22 +241,22 @@ export class MineEngine {
 
     const shockRed = this.shock >= c.shockRedAt;
     this.shockBar.setValue(this.shock);
-    this.shockBar.tint(shockRed ? 0xd97a6a : this.shock >= c.shockRedAt * 0.7 ? 0xf2913a : 0xedc46b);
+    this.shockBar.tint(shockRed ? JUDGE.danger : this.shock >= c.shockRedAt * 0.7 ? JUDGE.near : JUDGE.good);
     this.shockText.setText(this.words.shock);
     this.shockText.setColor(shockRed ? COLOR.warn : COLOR.text);
 
     // Stability's own low-warning tint, plus a coupling cue: red shock pulses the stability bar so
     // the deep-gear → shock → stability → collapse causality reads without being inferred.
     this.stabBar.setValue(this.stability);
-    this.stabBar.tint(this.stability <= 0.3 || shockRed ? 0xd97a6a : this.stability <= 0.6 ? 0xf2913a : null);
+    this.stabBar.tint(this.stability <= 0.3 || shockRed ? JUDGE.danger : this.stability <= 0.6 ? JUDGE.near : null);
     this.stabText.setText(this.words.stability);
     this.stabText.setColor(this.stability <= 0.3 ? COLOR.warn : COLOR.grass);
 
     const p = Math.min(this.power, 1);
     const half = c.powerZone.width / 2;
     const inZone = this.power >= this.zoneCenter - half && this.power <= this.zoneCenter + half;
-    this.powerTrack.setBand(this.zoneCenter, half).setBandTint(inZone ? 0xffffff : 0x9ad06f)
-      .setMarker(p).setMarkerTint(this.power > c.overchargeAt ? 0xd97a6a : null);
+    this.powerTrack.setBand(this.zoneCenter, half).setBandTint(inZone ? null : JUDGE.held)
+      .setMarker(p).setMarkerTint(this.power > c.overchargeAt ? JUDGE.danger : null);
 
     this.gearText.setText(this.gear === 'deep' ? this.words.deep : this.words.shallow);
 

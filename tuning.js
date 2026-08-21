@@ -1003,6 +1003,23 @@ export const COLORS = {
     bar_quality: 0xc9a95f,
     bar_integrity: 0xc08040,
   },
+  // How an activity answers the player, moment to moment: the tint on a marker, a band,
+  // a meter running out, and the word a swing is scored with. The engines came from
+  // StarScape carrying its own brighter palette written into them a colour at a time —
+  // a pure gold, a grass green, a red at full strength — which is a second game's
+  // colours laid over this one's. These are the same eight things said in Dreadhollow's.
+  // Retint here and every activity follows; nothing else reads them.
+  uiJudgment: {
+    perfect: 0xf0d68f, // the best a swing gets, and the brightest thing on the screen
+    good: 0xc9a95f, // a swing that landed, and the resting colour of anything live
+    held: 0x6f8f4a, // in the band, on the beat, holding: the work is going well
+    near: 0xc08040, // a meter far enough along to be worth watching
+    wild: 0xb5652f, // and past it — overcharged, overcooked, swung too hard
+    danger: 0x9c5a46, // the stone cracking, the heat going, and the take worth striking
+    // at — one red, because all three are the moment the player has to do something
+    glance: 0x8b8578, // a swing gone off it: nothing gained and nothing broken
+    edge: 0xd9d3c4, // the line a thing is cut against, which is not a judgment at all
+  },
 
   grass: [0x2f3d2b, 0x263422],
   path: [0x4f4a43, 0x413d37],

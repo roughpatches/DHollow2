@@ -389,6 +389,26 @@ export function walking() {
   return [charOf(YOU), ...roster()];
 }
 
+// What a point on this skill is worth, which is not the same for all of them. A skill
+// with no activities is rolled rather than played — there is no work at a node that is
+// Woodcraft — so it buys the roll, and the ground where it reads ground, and nothing
+// else: the yield and the scarcer things are what an activity pays, and it has none.
+// Read off what the skill has rather than off its group, so a skill given an activity or
+// a terrain says so without a change here.
+function pointLine(t) {
+  const roll = `one to any ${t.name} roll`;
+  if (t.activities.length) {
+    return `A point adds ${TUNING.skillBonusPerPoint} to ${t.activities.join(', ')}, ${roll}, `
+      + `and ${Math.round(TUNING.skillYieldPerPoint * 100)}% to what work of that kind pays the party. `
+      + 'It also turns up the scarcer things more often, where the work has any.';
+  }
+  return `A point adds ${roll}.`
+    + (t.terrain
+      ? ` It is rolled rather than played, and it is worth ${TUNING.conPerTerrainPoint} `
+        + `constitution apiece to a party setting out on ${t.terrain} ground.`
+      : ' It is rolled rather than played: no node\'s work is this skill.');
+}
+
 // Who has the points is the thing worth knowing about a skill, so the tab is rebuilt
 // on every draw and says it out loud rather than describing the skill in the abstract.
 export function skillRows() {
@@ -407,9 +427,7 @@ export function skillRows() {
         (yours ? `You have ${yours}.` : 'You have none.')
           + (bank ? `  ${bank} point${bank === 1 ? '' : 's'} to spend — [Enter] to spend ${bank === 1 ? 'it' : 'them'}.`
             : '  Nothing to spend; a level is what hands the points over.'),
-        `A point adds ${TUNING.skillBonusPerPoint} to ${t.activities.join(', ')}, one to any ${t.name} roll, `
-          + `and ${Math.round(TUNING.skillYieldPerPoint * 100)}% to what work of that kind pays the party. `
-          + 'It also turns up the scarcer things more often, where the work has any.',
+        pointLine(t),
         held.length
           ? held.map((c) => `${nameOf(c.id)} ${rankOf(c.id, t.id)}`).join('\n')
           : 'Nobody in Dreadhollow has spent a point on this.',
