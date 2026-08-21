@@ -320,7 +320,7 @@ export const TUNING = {
     oxidePerSec: 0.055, // what being held above the band costs the pool
     minMoltenToPour: 0.5, // below this the pot will not tip: half a charge is the least bar
     // The surface. A clump left past drossSetMs has set, and a set clump is half the
-    // purity for twice the heat — the whole of why a skim is a thing to be prompt about.
+    // purity for twice the heat, which is why a skim wants to be prompt.
     drossIntervalMs: 2500,
     drossJitterMs: 300, // so the rhythm cannot be counted
     drossSetMs: 2200,
@@ -749,9 +749,9 @@ export const TUNING = {
       },
     },
     // What playing it well is worth. Quality is the engine's own 0..1 — see
-    // activityWorth — and it is the whole of what a blow does: full harm at perfect,
-    // less the worse it went, and never under the floor, because a bad swing is still
-    // a swing. A guard covers by the same fraction, and a turn played well lands more
+    // activityWorth — and it decides what a blow does: full harm at perfect, less the
+    // worse it went, and never under the floor, because a bad swing is still a swing. A
+    // guard covers by the same fraction, and a turn played well lands more
     // often as well as harder.
     harmFloor: 0.4,
     playHit: 4,

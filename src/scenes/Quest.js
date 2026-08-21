@@ -1671,7 +1671,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   // Everything that can be done with a turn: the three moves, and — where somebody else
-  // on the run fights and is still up — changing over to them, which costs the whole of it.
+  // on the run fights and is still up — changing over to them, which costs the turn.
   fightWays() {
     const f = run.fightingAt();
     if (!f) return [];
@@ -1716,7 +1716,7 @@ export default class Quest extends Phaser.Scene {
           ? 'Leave it standing and go, if you can.  '
             + `(the turn, a d20 against ${TUNING.combat.fleeDC}, `
             + `and it answers at +${TUNING.combat.swapOpens} if you do not get clear)`
-        // what they have left is on the bar above; what it costs is the whole of the news
+        // what they have left is on the bar above; what it costs is the news here
           : `They come across, you come out.  (the turn, and it answers at +${TUNING.combat.swapOpens})`;
       out.push([`    ${said}`, TUNING.questHintSize, COLORS.menuText]);
     });
@@ -1821,9 +1821,9 @@ export default class Quest extends Phaser.Scene {
       const shut = !h.score;
       // The way itself, as it was written, and nothing under it. A kind with nothing
       // written for it falls back to naming the work. What the work is worth and who can
-      // do it were a readout stood in the middle of the writing: the way it is written is
-      // the whole of what the choice is made on now, and work nobody walking can do is
-      // greyed out rather than explained.
+      // do it were a readout stood in the middle of the writing; now the way as it is
+      // written is all the choice is made on, and work nobody walking can do is greyed
+      // out rather than explained.
       out.push([`${shut ? '·' : on ? '>' : ' '} ${h.text || `${h.activity} — ${h.skill.name}`}`,
         TUNING.questBodySize, shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
     });
@@ -1866,8 +1866,8 @@ export default class Quest extends Phaser.Scene {
         : 'The constitution ran out with the job unfinished. They came home from where they stood.',
       TUNING.questBodySize, COLORS.menuMapFolk]);
     }
-    // The pack at the gate, which is the whole of what the walk was worth: nothing reached
-    // the town's stock until they did.
+    // The pack at the gate, which is what the walk was worth: nothing reached the town's
+    // stock until they did.
     out.push([`Carried out of it: ${run.listOf(r.pack)}.    ${r.xp} xp each.`, TUNING.questBodySize, COLORS.menuText]);
     if (Object.keys(r.left || {}).length) {
       out.push([`Left on the road: ${run.listOf(r.left)}.`, TUNING.questBodySize, COLORS.menuMapFolk]);
