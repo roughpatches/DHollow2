@@ -62,13 +62,15 @@ export function createLeaves(scene, layer, rect, ground, night) {
 // where across the band it falls, each rolled between the two ends tuning gives it. It
 // starts above the band and is held there unseen, so leaves come back a few at a time
 // rather than all together whenever the last of them lands.
-// Where it is let go is inset by its own swing, so a leaf at the end of a swing is still
-// inside the band rather than out over the ironwork beside it.
+// Where it is let go is inset by its own swing and by half its own width, so a leaf at the
+// end of a swing is still inside the band rather than out over the ironwork beside it. Both
+// halves matter: inset by the swing alone and the far edge of the leaf still hangs over.
 function cast(rect) {
   const sway = between(TUNING.questLeafSway);
+  const edge = sway + TUNING.questLeafPx[0] / 2;
   return {
     sway,
-    x: rect.x + sway + Math.random() * Math.max(1, rect.w - sway * 2),
+    x: rect.x + edge + Math.random() * Math.max(1, rect.w - edge * 2),
     y: rect.y - TUNING.questLeafPx[1] - Math.random() * rect.h * 0.3,
     fall: between(TUNING.questLeafFall),
     swayMs: between(TUNING.questLeafSwayMs),
@@ -154,14 +156,21 @@ export function createSmoke(scene, vents, depth) {
 }
 
 // What colour smoke is over a given chimney: the sky a little above the pot, read off the
-// painting, and pushed away from itself — dark smoke against a pale sky and pale against a
-// dark one. One rule rather than a colour per panel, because what a plume has to stand out
-// against is not the town, it is whatever weather was painted behind that one roof.
+// painting and pushed away from itself. One rule rather than a colour per panel, because
+// what a plume has to stand out against is not the town, it is whatever weather was
+// painted behind that one roof.
 export function skyward(scene, art, x, y) {
   const sky = scene.textures.getPixel(x, Math.max(0, y - TUNING.streetSmokeRead), art);
-  if (!sky) return COLORS.streetSmoke;
-  const lit = (sky.red * 0.3 + sky.green * 0.6 + sky.blue * 0.1) / 255;
-  return blend(sky.color, lit > 0.5 ? 0x000000 : 0xffffff, TUNING.streetSmokeContrast);
+  return sky ? awayFrom(sky.color, TUNING.streetSmokeContrast) : COLORS.streetSmoke;
+}
+
+// A colour that will be seen against another: the one pushed away from the other, dark
+// against a pale ground and pale against a dark one. What the smoke and the scud are both
+// coloured by, because both are laid over a painting that was not painted for them.
+function awayFrom(colour, amount) {
+  const lit = (((colour >> 16) & 255) * 0.3 + ((colour >> 8) & 255) * 0.6
+    + (colour & 255) * 0.1) / 255;
+  return blend(colour, lit > 0.5 ? 0x000000 : 0xffffff, amount);
 }
 
 // Light moving on water. Glints are set down inside a rect of a painted panel, each a dash
@@ -224,7 +233,101 @@ export function createShimmer(scene, art, rects, depth) {
 // The water is taken to be the handful of colours most of the rect is made of: a sea drawn
 // round by eye is four fifths water and one fifth whatever is floating on it, and the two
 // are nowhere near each other in colour.
-function waterIn(scene, art, [x, y, w, h]) {
+function waterIn(scene, art, rect) {
+  const [x, y] = rect;
+  const pix = pixelsOf(scene, art, rect);
+  const tones = tonesIn(pix, TUNING.streetWaterTones);
+  const spots = [];
+  const wet = new Set();
+  for (let row = 0; row < pix.h; row++) {
+    for (let col = 0; col < pix.w; col++) {
+      if (!tones.includes(pix.at(col, row))) continue;
+      spots.push([x + col, y + row]);
+      wet.add(`${x + col},${y + row}`);
+    }
+  }
+  return { spots, wet, colour: tones[0] };
+}
+
+// Scud going across a painted sky. Thin streaks, low and pale, crossing under the weather
+// the panel was painted with rather than moving it: the cloud banks in these skies are
+// part of the picture and cannot be shifted, but something passing under them reads as
+// weather where a painting that never changes reads as a photograph.
+//
+// A streak lives inside the rect it was given and is clipped to it, so it slides in from
+// one edge and out of the other rather than appearing whole, and it never reaches over the
+// roofs below. The rect is the designer's promise that everything in it is sky; unlike the
+// water there is nothing to read here, because on these panels a slate roof and a rain
+// cloud are the same grey and no rule would tell them apart.
+export function createDrift(scene, art, rects, depth) {
+  const streaks = [];
+
+  for (const rect of rects) {
+    const [x, y, w, h] = rect;
+    const colour = awayFrom(tonesIn(pixelsOf(scene, art, rect), 1)[0], TUNING.streetDriftContrast);
+    const many = Math.round(((w * h) / 1000) * TUNING.streetDriftPer);
+    for (let i = 0; i < many; i++) {
+      const sp = scene.add.rectangle(0, 0, 1, 1, colour)
+        .setOrigin(0, 0).setDepth(depth).setVisible(false);
+      const s = { sp, rect, ...adrift(rect) };
+      // already halfway across when the panel comes up, rather than a sky that fills from
+      // one side over the first minute of standing in it
+      s.x = x - s.long + Math.random() * (w + s.long);
+      streaks.push(s);
+    }
+  }
+
+  return {
+    update(delta) {
+      const steps = TUNING.streetDriftSteps;
+      const fade = TUNING.streetDriftFade;
+      for (const s of streaks) {
+        const [x, , w] = s.rect;
+        s.x += (s.pace * delta) / 1000;
+        if (s.x > x + w) Object.assign(s, adrift(s.rect), { x: x - s.long });
+
+        // clipped to the rect, so what is over the roofs is not drawn rather than drawn
+        // and hoped about
+        const from = Math.max(s.x, x);
+        const to = Math.min(s.x + s.long, x + w);
+        const wide = Math.round(to - from);
+        if (wide <= 0) {
+          s.sp.setVisible(false);
+          continue;
+        }
+        s.sp.setVisible(true);
+        if (wide !== s.sp.width) s.sp.setSize(wide, s.tall);
+        s.sp.x = Math.round(from);
+        s.sp.y = s.y;
+        // and thinned as it comes in and goes out, so nothing appears at the edge of a rect
+        // that stops short of the edge of the panel
+        const near = Math.min(to - x, x + w - from) / fade;
+        s.sp.setAlpha((Math.ceil(Math.min(1, near) * steps) / steps) * TUNING.streetDriftAlpha);
+      }
+    },
+
+    destroy() {
+      for (const s of streaks) s.sp.destroy();
+      streaks.length = 0;
+    },
+  };
+}
+
+// One streak: which row of the sky it crosses, how long it is, how thick, and how fast it
+// goes. Rolled again each time one has crossed, so the sky is never the same twice.
+function adrift([, y, , h]) {
+  const tall = Math.round(between(TUNING.streetDriftTall));
+  return {
+    tall,
+    y: Math.round(y + Math.random() * (h - tall)),
+    long: Math.round(between(TUNING.streetDriftLong)),
+    pace: between(TUNING.streetDriftPace),
+  };
+}
+
+// The pixels of a rect of a painting, read once off the image the way a building's pad
+// below is measured in src/art.js.
+function pixelsOf(scene, art, [x, y, w, h]) {
   const img = scene.textures.get(art).getSourceImage();
   const c = document.createElement('canvas');
   c.width = w;
@@ -232,21 +335,21 @@ function waterIn(scene, art, [x, y, w, h]) {
   const ctx = c.getContext('2d');
   ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
   const d = ctx.getImageData(0, 0, w, h).data;
+  const at = (col, row) => {
+    const i = (row * w + col) * 4;
+    return (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
+  };
+  return { at, w, h };
+}
 
+// and the colours that rect is most made of, commonest first
+function tonesIn(pix, many) {
   const seen = new Map();
-  const at = (i) => (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
-  for (let i = 0; i < d.length; i += 4) seen.set(at(i), (seen.get(at(i)) || 0) + 1);
-  const tones = [...seen.entries()].sort((a, b) => b[1] - a[1])
-    .slice(0, TUNING.streetWaterTones).map(([colour]) => colour);
-
-  const spots = [];
-  const wet = new Set();
-  for (let row = 0; row < h; row++) {
-    for (let col = 0; col < w; col++) {
-      if (!tones.includes(at((row * w + col) * 4))) continue;
-      spots.push([x + col, y + row]);
-      wet.add(`${x + col},${y + row}`);
+  for (let row = 0; row < pix.h; row++) {
+    for (let col = 0; col < pix.w; col++) {
+      const v = pix.at(col, row);
+      seen.set(v, (seen.get(v) || 0) + 1);
     }
   }
-  return { spots, wet, colour: tones[0] };
+  return [...seen.entries()].sort((a, b) => b[1] - a[1]).slice(0, many).map(([v]) => v);
 }

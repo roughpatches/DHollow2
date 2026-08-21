@@ -7,7 +7,7 @@
 import { TUNING, COLORS, hex, blend } from '../tuning.js';
 import { MAPS } from '../content/maps.js';
 import { buildings } from './town.js';
-import { createSmoke, createShimmer, skyward } from './ambient.js';
+import { createSmoke, createShimmer, createDrift, skyward } from './ambient.js';
 
 const TS = TUNING.tileSize;
 
@@ -16,8 +16,9 @@ const TS = TUNING.tileSize;
 export const DEPTH = {
   weather: -10,
   town: 0,
-  shimmer: 4, // on the water in the painting, and the smoke over the roofs in it: both are
-  smoke: 5, // over the painting, under everything standing in front of it
+  drift: 3, // the scud crossing the painted sky, the light on the painted water, and the
+  shimmer: 4, // smoke over the roofs: all three lie on the painting, under everything
+  smoke: 5, // standing in front of it, and in that order where they meet
   structure: 10,
   prop: 20,
   npc: 30,
@@ -87,16 +88,17 @@ export function createStreet(scene, def) {
     // on — so a panel with no painting in yet has none of it. See src/ambient.js.
     ambient: scene.textures.exists(def.art) ? [
       def.smoke && createSmoke(scene, vents(scene, def, w), DEPTH.smoke),
-      def.water && createShimmer(scene, def.art, seas(def, w), DEPTH.shimmer),
+      def.water && createShimmer(scene, def.art, spread(def.water, def, w), DEPTH.shimmer),
+      def.sky && createDrift(scene, def.art, spread(def.sky, def, w), DEPTH.drift),
     ].filter(Boolean) : [],
   };
 }
 
-// The rects of water along the whole street rather than in one copy of the painting,
-// flipped the way the chimneys are and for the same reason.
-function seas(def, w) {
+// A panel's rects — of water, of sky — laid along the whole street rather than in one copy
+// of the painting, flipped the way the chimneys are and for the same reason.
+function spread(rects, def, w) {
   const out = [];
-  for (const [x, y, rw, rh] of def.water) {
+  for (const [x, y, rw, rh] of rects) {
     for (let i = 0; i < def.repeats; i++) {
       out.push([i * w + (i % 2 ? w - x - rw : x), y, rw, rh]);
     }

@@ -66,6 +66,20 @@ export const TUNING = {
   streetGlintAlpha: 0.85, // how solid it is at its brightest
   streetGlintContrast: 0.35, // and how far above the water's own colour that brightest is
 
+  // Scud crossing a painted sky (src/ambient.js). Only a panel that draws a rect round its
+  // clear sky has any; see `sky` in content/maps.js.
+  streetDriftPer: 0.28, // how many streaks to a thousand pixels of sky, so a panel that is
+  // mostly weather and one with a strip of it above the roofs are crossed at the same rate
+  streetDriftLong: [16, 54], // how long one is, and
+  streetDriftTall: [1, 3], // how thick: low cloud is drawn out, not piled up
+  streetDriftPace: [5, 13], // how fast it crosses, in pixels a second
+  streetDriftFade: 40, // and over how much of each end of its crossing it comes and goes,
+  // so nothing appears at the edge of a rect that stops short of the edge of the panel
+  streetDriftAlpha: 0.3, // how solid it is in the middle of the crossing: scud is thin,
+  // and a sky already painted full of cloud does not want more laid over it opaque
+  streetDriftSteps: 3, // in whole steps, for the same reason the smoke has them
+  streetDriftContrast: 0.5, // and how far it is pushed off the sky's own colour
+
   // Every word in the game is set in this. The face itself is declared in index.html
   // and loaded before the game starts, because a line of text is baked to a texture the
   // moment it is written and one baked against a fallback stays wrong.
