@@ -1726,22 +1726,15 @@ export default class Quest extends Phaser.Scene {
           TUNING.questBodySize, COLORS.menuText]);
       }
     }
+    // The way as it was written and nothing under it, the same as the ways at a node: who
+    // would take it and what they would be throwing against was a readout stood in the
+    // middle of the writing. A way nobody walking can take is greyed out rather than
+    // explained; what the die was for is said by the die, when it is thrown.
     (b.choose || []).forEach((o, i) => {
       const on = i === this.row;
       const shut = run.shutTo(o);
       out.push([`${shut ? '·' : on ? '>' : ' '} ${fill(o.text)}`, TUNING.questBodySize,
         shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
-      if (!o.skill) return;
-      // who would take it and how hard it is, before it is taken rather than after — or,
-      // where nobody could take it, that nobody could
-      if (shut) {
-        out.push([`    ${skillOf(o.skill).name} — nobody walking this has any.`,
-          TUNING.questHintSize, COLORS.menuRule]);
-        return;
-      }
-      const who = run.actorFor(o.skill);
-      out.push([`    ${skillOf(o.skill).name} DC ${o.dc} — ${nameOf(who)} would try it`,
-        TUNING.questHintSize, on ? COLORS.menuText : COLORS.menuRule]);
     });
     return [...out, ...this.packLines()];
   }
