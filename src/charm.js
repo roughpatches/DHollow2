@@ -126,8 +126,8 @@ export function sideLine(gem, grade, slot) {
   return statsFor(gem, slot).map((s) => `+${stepOf(grade, s)} ${nameOfStat(s)}`).join(', ');
 }
 
-// And both sides at once, for a stone nobody has decided about yet: this is the whole of
-// the question a cut stone puts to the player.
+// And both sides at once, for a stone nobody has decided about yet: the whole question a
+// cut stone puts to the player.
 export function worthLine(gem, grade) {
   return `in metal ${sideLine(gem, grade, 'weapon')}; against the skin ${sideLine(gem, grade, 'jewellery')}`;
 }

@@ -2,8 +2,8 @@
 //
 // An encounter names an `activity` in content/encounters.js. If there is an engine for
 // that name here, the node stops and hands the player the controls; if there is not, the
-// node says the name and pays out as it always did. That is the whole of the contract,
-// so importing the next StarScape engine is a line in the table below.
+// node says the name and pays out as it always did. That is the whole contract, so
+// importing the next StarScape engine is a line in the table below.
 
 import { TUNING } from '../tuning.js';
 import { FellEngine } from './minigames/FellEngine.js';
@@ -53,11 +53,11 @@ class Held {
   }
 }
 
-// Some work is harder than other work of the same kind, and where it is, the difficulty is
-// written on the work rather than on the engine: a recipe names one of the tiers in
-// tuning.js and that is the whole of what makes one potion or one stone harder than the
-// next. An engine with `tiers` below reads it; anything arriving without one — a node on
-// the road, a recipe that leaves it out — gets the first tier written.
+// Some work is harder than other work of the same kind, and where it is, the difficulty
+// is written on the work rather than on the engine: a recipe names one of the tiers in
+// tuning.js, and that is the only thing making one potion or one stone harder than the
+// next. An engine with `tiers` below reads it; anything arriving without one — a node
+// on the road, a recipe that leaves it out — gets the first tier written.
 function tierOf(name, hard) {
   const tiers = ENGINES[name] && ENGINES[name].tiers;
   return tiers ? (tiers[hard] || Object.values(tiers)[0]) : {};
@@ -131,7 +131,7 @@ const ENGINES = {
   // The same engines, in the numbers a single blow needs: an axe swing that fells its
   // tree in one, a pick blow that breaks the face in one, and a hold short enough to be
   // one turn of covering up. A move in content/foes.js names one of these, and how well
-  // it is played is the whole of what the blow does — see src/combat.js.
+  // it is played decides what the blow does — see src/combat.js.
   Swing: {
     make: (scene, layout) => new FellEngine(scene, { ...TUNING.fell, ...TUNING.combat.swing, layout }),
     hint: '[Hold Space] Swing    [Left/Right] Come in high or low',
@@ -166,8 +166,8 @@ export function firedWork(name) {
 // road: an engine reached from the crawl is the same engine at the same difficulty.
 export function engineFor(name, scene, layout, opts = {}) {
   const e = ENGINES[name];
-  // Fired work runs under a fuel bar, and the bar is the whole of what having a fire means:
-  // finish inside `burnSeconds` or the work is lost. Everything else is handed over bare.
+  // Fired work runs under a fuel bar, and the bar is what having a fire means: finish
+  // inside `burnSeconds` or the work is lost. Everything else is handed over bare.
   if (e.fired && opts.burnSeconds) {
     return new Fired(scene, layout, opts.burnSeconds,
       (inner, fire) => e.make(scene, inner, { ...opts, fire }));

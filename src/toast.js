@@ -26,9 +26,9 @@ export function clearToast() {
 }
 
 // What a node handed over, and nothing else about it: what went on their backs, the
-// experience, and anybody that took to a new level. Loot and what it taught them is the
-// whole of what this panel is for — what it cost, what would not fit and what was left
-// standing are the road's business, not the tally's.
+// experience, and anybody that took to a new level. Loot and what it taught them is all
+// this panel is for — what it cost, what would not fit and what was left standing are
+// the road's business, not the tally's.
 //
 // What went in the pack rather than what the node gave up: they are the same thing until
 // the pack is full, and what will not go in is asked about where it happens.

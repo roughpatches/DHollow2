@@ -66,7 +66,7 @@ export function createWalk(scene, rect, party, when, backdrop) {
   }
 
   // Each band is tiled across the width and scrolled at its own fraction of the near
-  // ground's speed, which is the whole of the parallax. A painted zone brings its own.
+  // ground's speed, which is all the parallax there is. A painted zone brings its own.
   if (!painted) {
     LAYERS.forEach((name, i) => {
       const [, h] = BAND[name];
@@ -95,7 +95,7 @@ export function createWalk(scene, rect, party, when, backdrop) {
   });
 
   // The node ahead: it walks in from off the right and stops short of the leading body,
-  // which is the whole of "the party arrives at it".
+  // which is what 'the party arrives at it' looks like.
   const markFrom = rect.x + rect.w + 40;
   const markTo = rect.x + rect.w - TUNING.questMarkInset;
   // a sprite rather than an image: an encounter with art of its own has that art moving

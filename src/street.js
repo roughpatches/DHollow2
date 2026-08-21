@@ -37,8 +37,8 @@ export function atTile(tx) {
 // Weather behind the town, and then the painting laid over the top of it at 1:1. The
 // paintings carry no sky of their own, so what is behind is drawn: a dusk going to the
 // last of the light at the water, banks of cloud lying across it, and a steely sea under
-// them, which is what you are looking at wherever a panel has a hole in it. A panel with
-// no horizon is somewhere indoors and gets the two flat bands instead.
+// them. That is what shows wherever a panel has a hole in it. A panel with no horizon
+// is somewhere indoors and gets the two flat bands instead.
 // Every copy after the first is flipped, so the join is a mirror — the two halves of a
 // seam are the same edge, and the row of houses reads as a longer town rather than as the
 // same town twice.
@@ -61,8 +61,8 @@ export function createStreet(scene, def) {
   } else {
     // A panel with no horizon is a room, or a town painted with a sky of its own. Either
     // way what goes behind it is a wall down to where the wall meets the floor and boards
-    // below that — which a painting covers completely, and which is the whole of a room
-    // that has not been painted yet.
+    // below that. A painting covers all of it, and it is all a room that has not been
+    // painted yet needs.
     const sill = def.sill ?? def.ground;
     const g = scene.add.graphics().setDepth(DEPTH.weather);
     g.fillStyle(COLORS.wall[0], 1);

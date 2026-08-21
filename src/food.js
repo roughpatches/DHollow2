@@ -1,6 +1,6 @@
 // What a meal does, and where it is eaten.
 //
-// Food is a material in content/materials.js carrying `eat`, and `eat` is the whole of it:
+// Food is a material in content/materials.js carrying `eat`, and `eat` is all of it:
 //   con — constitution straight back into the pool, and never past what the run set out
 //         with. A meal puts back what the road took; it does not make a party fitter than
 //         they were at the gate.
@@ -37,8 +37,8 @@ export function foods() {
   return Object.values(FOOD);
 }
 
-// What is in the given store that could be eaten. There is no second question to ask —
-// having it is the whole of being able to eat it.
+// What is in the given store that could be eaten. There is no second question to ask:
+// having it is what makes it edible.
 export function carried(store) {
   return Object.keys(FOOD).filter((mid) => store.heldOf(mid) > 0);
 }
