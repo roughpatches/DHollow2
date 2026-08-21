@@ -4,7 +4,7 @@
 // game and nothing here asks the game anything, which is why a leaf landing in the wrong
 // place costs nothing to be wrong about. Everything is tuned from tuning.js.
 
-import { TUNING, COLORS, blend } from '../tuning.js';
+import { TUNING, COLORS, blend, hex } from '../tuning.js';
 
 // Leaves coming down through a wood. A fixed handful of them, each falling at its own
 // rate and fluttering as it goes, put back above the band whenever one reaches the
@@ -363,6 +363,36 @@ export function createFlicker(lamps) {
       lit.length = 0;
     },
   };
+}
+
+// A room lit behind a window somebody painted dark. Everything else here moves what the
+// painting already has; this puts something in it that was never there, so it is done as
+// carefully as that deserves: the light is laid only on the pixels the painting drew as
+// empty glass, and never on the sash bars across them. What comes out is light behind a
+// broken window rather than a lit rectangle stuck on a wall, and the window is still the
+// window that was painted.
+// The images are handed back rather than driven here, because what a lit window does is
+// exactly what a lamp does — see createFlicker.
+export function glowIn(scene, art, rects, depth) {
+  return rects.map((rect) => {
+    const [x, y, w, h] = rect;
+    const key = `glow_${art}_${x}_${y}_${w}_${h}`;
+    if (!scene.textures.exists(key)) {
+      const pix = pixelsOf(scene, art, rect);
+      const tex = scene.textures.createCanvas(key, w, h);
+      const ctx = tex.getContext();
+      ctx.fillStyle = hex(COLORS.streetGlow);
+      for (let row = 0; row < h; row++) {
+        for (let col = 0; col < w; col++) {
+          const c = pix.at(col, row);
+          const lit = ((c >> 16) & 255) * 0.3 + ((c >> 8) & 255) * 0.6 + (c & 255) * 0.1;
+          if (lit < TUNING.streetGlowDark) ctx.fillRect(col, row, 1, 1);
+        }
+      }
+      tex.refresh();
+    }
+    return scene.add.image(x, y, key).setOrigin(0, 0).setDepth(depth);
+  });
 }
 
 // The pixels of a rect of a painting, read once off the image the way a building's pad

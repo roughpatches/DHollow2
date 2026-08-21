@@ -82,6 +82,10 @@ export const MAPS = {
   //             goes on it. Drawn generously by eye — a boat, a jetty or the end of a roof
   //             inside the rect is left alone, because what counts as water is read off the
   //             painting rather than off the rect. See src/ambient.js.
+  //   windows — which windows have somebody behind them, as [x, y, w, h] rects round the
+  //             opening: a room is lit inside them and gutters. The light is laid only on
+  //             the pixels the painting drew as empty glass, so the sash across a window
+  //             stays dark in front of it. See src/ambient.js.
   //   sky     — where the clear sky is, as [x, y, w, h] rects: scud crosses under the
   //             weather the panel was painted with. Unlike `water` this is taken on trust
   //             and nothing in it is left alone, because on these panels a slate roof and a
@@ -150,6 +154,10 @@ export const MAPS = {
       smoke: [[280, 104], [532, 120]], // the Salty Dog's brick stack, and the stone one
       // on the house across the well from it
       water: [[300, 144, 100, 34]], // the wedge of sea in the gap between the two roofs
+      // The three upper windows of the Salty Dog, which is the Sea Hag: the only rooms in
+      // Dreadhollow with anybody in them, over the only door in it that opens. The ground
+      // floor is boarded and stays dark.
+      windows: [[201, 191, 17, 27], [245, 191, 18, 27], [284, 191, 18, 27]],
       sky: [[0, 0, 688, 102]], // clear across, down to the Salty Dog's chimney
       repeats: 1,
       edges: { left: 'fieldroad', right: 'searow' },

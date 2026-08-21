@@ -7,7 +7,7 @@
 import { TUNING, COLORS, hex, blend } from '../tuning.js';
 import { MAPS } from '../content/maps.js';
 import { buildings } from './town.js';
-import { createSmoke, createShimmer, createDrift, skyward } from './ambient.js';
+import { createSmoke, createShimmer, createDrift, createFlicker, glowIn, skyward } from './ambient.js';
 
 const TS = TUNING.tileSize;
 
@@ -16,6 +16,7 @@ const TS = TUNING.tileSize;
 export const DEPTH = {
   weather: -10,
   town: 0,
+  glow: 2, // the light behind a window in the painting, which is inside it rather than on it
   drift: 3, // the scud crossing the painted sky, the light on the painted water, and the
   shimmer: 4, // smoke over the roofs: all three lie on the painting, under everything
   smoke: 5, // standing in front of it, and in that order where they meet
@@ -90,6 +91,8 @@ export function createStreet(scene, def) {
       def.smoke && createSmoke(scene, vents(scene, def, w), DEPTH.smoke),
       def.water && createShimmer(scene, def.art, spread(def.water, def, w), DEPTH.shimmer),
       def.sky && createDrift(scene, def.art, spread(def.sky, def, w), DEPTH.drift),
+      // a lit window gutters the same way a lamp does, so it is the same clock
+      def.windows && createFlicker(glowIn(scene, def.art, spread(def.windows, def, w), DEPTH.glow)),
     ].filter(Boolean) : [],
   };
 }

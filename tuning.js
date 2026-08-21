@@ -86,6 +86,9 @@ export const TUNING = {
   // into each other, so the lamp never comes back round to where it was
   streetFlickerRange: [0.55, 1], // how far down the flame goes and how far up: never to
   // nothing, because a lamp somebody keeps lit is down rather than out
+  streetGlowDark: 40, // how dark a pixel inside a lit window's rect has to be to count as
+  // the glass rather than the sash across it: the glass on these windows reads about 15
+  // and the bars about 100, so there is a wide gap to sit in
   streetFlickerSteps: 6, // in whole steps, for the same reason the smoke has them, but
   // more of them than the smoke gets: a flame this coarse has two lamps sitting on the
   // same step half the evening, and a row of lamps in step is a row wired together
@@ -879,6 +882,12 @@ export const COLORS = {
   // over the tavern — so the same smoke is darker than the pale skies and lighter than the
   // dark ones, and reads against all of them without a colour per panel.
   streetSmoke: 0x555a63,
+
+  // What is burning behind the Sea Hag's windows. Taken off the flame in art/props/
+  // lamp_lit.png, so the tavern and the lamps outside it are lit by the same fire — off the
+  // body of that flame rather than its dim edge, which is grey enough that a window filled
+  // with it looks painted beige rather than lit.
+  streetGlow: 0xf6d0a9,
 
   // The word a check is answered with, across the road (src/roll.js). Green and red and
   // nothing subtler: it is the one thing on the screen at the moment it is up.
