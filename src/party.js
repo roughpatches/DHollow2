@@ -3,8 +3,8 @@
 // where they have got to. Every number it works from is in tuning.js.
 //
 // Constitution is not tracked here. A run pools everyone's into one number and spends it
-// down (src/run.js); between runs there is nothing to remember, because a party that got
-// home is a party that got home.
+// down (src/run.js); between runs there is nothing to remember, because a party that
+// got home is a party that got home.
 
 import { TUNING } from '../tuning.js';
 import { PARTY } from '../content/party.js';
@@ -16,16 +16,16 @@ import { bonus as gearBonus } from './gear.js';
 const SKILL = Object.fromEntries(SKILLS.map((t) => [t.id, t]));
 
 // Skills live here rather than in content/party.js because the player's are chosen in
-// the hut and everyone's could move later; content says what they start as.
-// The name is here for the same reason: everyone else is named in content, and the
-// player is named in the hut, by the player.
+// the hut and everyone's could move later; content says what they start as. The name
+// is here for the same reason: everyone else is named in content, and the player is
+// named in the hut, by the player.
 const state = new Map(PARTY.map((c) => [c.id, {
   level: 1, xp: 0, bond: c.bond || 0, skills: { ...c.skills }, name: c.name, points: 0,
 }]));
 
 // a misspent or misspelt skill list is a content mistake, and content mistakes are
-// said out loud at boot rather than found later in a wrong bonus. The player's three
-// are not written down anywhere to be wrong yet.
+// reported at boot rather than found later in a wrong bonus. The player's three are
+// not written down anywhere to be wrong yet.
 for (const c of PARTY.filter((x) => !x.you)) {
   const spent = Object.entries(c.skills);
   const bad = spent.filter(([t]) => !SKILL[t]).map(([t]) => t);
@@ -60,7 +60,7 @@ export function fighters(ids) {
 }
 
 // What a fighter is worth in a fight, at the level they have reached. Their own block
-// says whatever it wants to say and tuning.js says the rest, so a character written as
+// says whatever it wants to and tuning.js says the rest, so a character written as
 // `combat: {}` is a fighter of exactly the default size. Nobody else has any of this:
 // a character who cannot fight has no hit points, which is why a night job needs one.
 export function combatOf(id) {
@@ -173,8 +173,8 @@ export function capNow() {
   return Math.min(TUNING.maxLevel, levelCap());
 }
 
-// leaving a level costs more than leaving the one before it, and costs everything at the
-// cap, which is what a cap is
+// leaving a level costs more than leaving the one before it, and everything at the cap,
+// which is what a cap is
 export function xpToNext(level) {
   return level >= capNow() ? Infinity : TUNING.xpBase * level;
 }
@@ -184,15 +184,15 @@ export function atCap(id) {
   return stateOf(id).level >= capNow();
 }
 
-// Experience goes to the level and to nothing else: no skill is ever practised into
-// existence. A level hands back skillPointsPerLevel points, and what those are spent on
-// is a decision somebody makes — the player at the sheet, everybody else on the spot.
-// Returns how many levels were gained, so a caller can say so.
+// Experience goes to the level and nowhere else: no skill is ever practised into
+// existence. A level hands back skillPointsPerLevel points, and what those are spent
+// on is a decision somebody makes — the player at the sheet, everybody else on the
+// spot. Returns how many levels were gained, so a caller can say so.
 export function award(id, xp) {
   const s = stateOf(id);
   // XP earned at the cap has nowhere to go and is not kept for later: work done at the
-  // ceiling is work done for what it paid out at the time. Raising the cap is what makes
-  // the next day's work worth something, not what makes yesterday's worth more.
+  // ceiling paid what it paid at the time. Raising the cap makes the next day's work
+  // worth something; it does not make yesterday's worth more.
   if (s.level >= capNow()) return 0;
   s.xp += xp;
   let gained = 0;
@@ -212,9 +212,9 @@ export function award(id, xp) {
 }
 
 // There is one character sheet the player fills in, and it is theirs. Everyone else
-// spends as they earn, and broadens rather than deepens: the point goes on whichever of
-// the things they already know they are worst at, so a companion stays the shape they
-// were recruited as instead of turning into a specialist nobody asked for.
+// spends as they earn, and broadens instead of deepening: the point goes on whichever
+// of the things they already know they are worst at, so a companion keeps the shape
+// they were recruited in rather than turning into a specialist nobody asked for.
 function autoSpend(id) {
   const s = stateOf(id);
   const known = Object.keys(s.skills).filter((t) => SKILL[t]);
@@ -389,12 +389,12 @@ export function walking() {
   return [charOf(YOU), ...roster()];
 }
 
-// What a point on this skill is worth, which is not the same for all of them. A skill
+// What a point on this skill is worth, which differs from one skill to the next. A skill
 // with no activities is rolled rather than played — there is no work at a node that is
 // Woodcraft — so it buys the roll, and the ground where it reads ground, and nothing
 // else: the yield and the scarcer things are what an activity pays, and it has none.
-// Read off what the skill has rather than off its group, so a skill given an activity or
-// a terrain says so without a change here.
+// Read off what the skill has rather than off its group, so a skill given an activity
+// or a terrain says so without a change here.
 function pointLine(t) {
   const roll = `one to any ${t.name} roll`;
   if (t.activities.length) {
@@ -409,8 +409,8 @@ function pointLine(t) {
       : ' It is rolled rather than played: no node\'s work is this skill.');
 }
 
-// Who has the points is the thing worth knowing about a skill, so the tab is rebuilt
-// on every draw and says it out loud rather than describing the skill in the abstract.
+// Who has the points is the thing worth knowing about a skill, so the tab is rebuilt on
+// every draw and names them rather than describing the skill in the abstract.
 export function skillRows() {
   return SKILLS.map((t) => {
     const held = walking()
