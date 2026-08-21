@@ -54,7 +54,7 @@ export const PARTY = [
     you: true,
     name: 'You',
     palette: 'player',
-    con: 11, // the Vitality on the Character tab, and the same number for the same reason
+    con: 11, // Vitality, and the same number for the same reason
     carry: 4, // you are the one the pack is on
     // Filled in by the scene in Aldis's hut, which is on hold — so these three stand in
     // for the sheet until it is asked for again, and are overwritten the moment it is.

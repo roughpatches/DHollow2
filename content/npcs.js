@@ -6,8 +6,8 @@
 // with drawn art instead of a generated placeholder. x/y are tile coordinates on the map.
 // The palette also picks the portrait shown while they speak; add `portrait: 'name'` to
 // give someone a face from a different palette than the one they walk around in.
-// Anywhere a line isn't written yet, put [Placeholder Text] — the Script tab in the
-// menu lists every one of them, and an NPC with no `lines` at all gets one for free.
+// Anywhere a line isn't written yet, put [Placeholder Text] — src/placeholders.js counts
+// every one of them at startup, and an NPC with no `lines` at all gets one for free.
 // `until` / `after` name a scene from content/scenes.js: someone with `until` is gone
 // once it has played, someone with `after` is not there until it has. The same id can
 // appear on more than one map — it is the same person, standing somewhere else.
@@ -96,8 +96,8 @@ export const NPCS = [
     x: 33,
     facing: 'right',
     palette: 'melovia', // real art; see content/looks.js
-    // No lines yet. src/placeholders.js gives her one for free and the Script tab in the
-    // menu lists it, which is where it wants writing.
+    // No lines yet. src/placeholders.js gives her one for free and counts it at startup,
+    // which is how it is remembered that it wants writing.
   },
   {
     // Aethelwynn at the forge: two tiles east of the shed, so the hearth at 31 is still

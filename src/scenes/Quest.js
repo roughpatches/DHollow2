@@ -1098,11 +1098,14 @@ export default class Quest extends Phaser.Scene {
       });
     }
 
-    // What the node gave up, raised the moment it is settled and gone again on its own.
-    // Once per node: the card under it is redrawn on every keypress, and a tally that
-    // came back with the page turn would be a tally nobody could read past.
-    if (r.state === 'running' && r.phase === 'node' && !this.approaching && !this.holding
-      && this.toasted !== r.at) {
+    // What the node gave up, raised the moment it is settled and taken down again when the
+    // party walks on from it — the card under it says nothing about what it paid, so the
+    // tally has to stand as long as the card does. Raised once per node: the card is
+    // redrawn on every keypress, and a tally that came back with the page turn would be a
+    // tally nobody could read past.
+    const settled = r.state === 'running' && r.phase === 'node';
+    if (!settled || this.toasted !== r.at) clearToast();
+    if (settled && !this.approaching && !this.holding && this.toasted !== r.at) {
       this.toasted = r.at;
       rewardToast(this, band.walk, r.nodes[r.at], r.when === 'night');
     }
@@ -1129,7 +1132,13 @@ export default class Quest extends Phaser.Scene {
       this.card(band.walk, this.beatLines(r), this.nodeHead(r), !r.nodes[r.at].beat.choose);
     }
     else if (r.state === 'running' && !this.approaching && !this.holding) {
-      this.card(band.walk, this.nodeLines(r), this.nodeHead(r), true);
+      // A node that was played out in its beats has said everything written for it by the
+      // time it settles, and the card carries nothing else now. Rather than stand an empty
+      // panel on the road, it is not hung at all: the tally is up, the hint says press on,
+      // and the landscape is left to be looked at.
+      const lines = this.nodeLines(r);
+      if (lines.length) this.card(band.walk, lines, this.nodeHead(r), true);
+      else this.pages = 1;
     }
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r), true);
 
@@ -1589,8 +1598,6 @@ export default class Quest extends Phaser.Scene {
     if (passed) {
       for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
       out.push([passed, TUNING.questBodySize, COLORS.menuMapFolk]);
-      const con = run.conLines(n);
-      if (con) out.push([con, TUNING.questBodySize, COLORS.menuMapFolk]);
       return out;
     }
     // How the work went, in the words written for it. A node whose account was read on the
@@ -1611,21 +1618,9 @@ export default class Quest extends Phaser.Scene {
     }
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
-    // What went in the pack rather than what the node gave up: they are the same thing
-    // until the pack is full, and the day they are not is the day the difference matters.
-    out.push([`Taken: ${run.listOf(n.packed || n.spoils)}.    ${n.xp} xp each.`,
-      TUNING.questBodySize, COLORS.menuAccent]);
-    const left = run.leftLine(n);
-    if (left) out.push([left, TUNING.questBodySize, COLORS.menuMapFolk]);
-    out.push([run.packLine(), TUNING.questHintSize, COLORS.menuDim]);
-    const stone = run.stoneLine(n);
-    if (stone) out.push([stone, TUNING.questBodySize, COLORS.menuMapMark]);
-    // what the work they chose was worth, and what is still standing here after it
-    const worth = run.harvestLine(n);
-    if (worth) out.push([worth, TUNING.questHintSize, COLORS.menuDim]);
-    for (const line of run.leftLines(n)) out.push([line, TUNING.questHintSize, COLORS.menuMapFolk]);
-    const con = run.conLines(n);
-    if (con) out.push([con, TUNING.questBodySize, n.con >= 0 ? COLORS.menuMapMark : COLORS.menuMapFolk]);
+    // What the node paid is on the tally raised over the road and nowhere else, down to the
+    // stone that came up with the ore. This card is what was said about the work, and
+    // nothing that was counted off it.
     // Last, and in the small type, because it is a note to the workshop rather than to the
     // party: what was written for this node is what the player came here to read, and a
     // line about an engine that has not landed does not go in front of it.
@@ -1805,22 +1800,13 @@ export default class Quest extends Phaser.Scene {
     hs.forEach((h, i) => {
       const on = i === this.row;
       const shut = !h.score;
-      // The way itself, as it was written. A kind with nothing written for it falls back
-      // to naming the work, which is what every one of them read like before there was
-      // anything else to say.
+      // The way itself, as it was written, and nothing under it. A kind with nothing
+      // written for it falls back to naming the work. What the work is worth and who can
+      // do it were a readout stood in the middle of the writing: the way it is written is
+      // the whole of what the choice is made on now, and work nobody walking can do is
+      // greyed out rather than explained.
       out.push([`${shut ? '·' : on ? '>' : ' '} ${h.text || `${h.activity} — ${h.skill.name}`}`,
         TUNING.questBodySize, shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
-      if (h.offer) {
-        out.push([`    ${h.offer}`, TUNING.questHintSize,
-          shut ? COLORS.menuRule : on ? COLORS.menuText : COLORS.menuRule]);
-      }
-      // The work and the skill it is done with, unless they are the same word — Mining is
-      // mined and there is no sense in saying so twice.
-      const named = h.activity === h.skill.name ? '' : `${h.activity} — `;
-      out.push([shut
-        ? `    ${named}nobody walking this has a point of ${h.skill.name}.`
-        : `    ${named}${h.skill.name} ${h.score} between you, ${Math.round(h.more * 100)}% more off it.`,
-      TUNING.questHintSize, shut ? COLORS.menuRule : COLORS.menuDim]);
     });
     return [...out, ...this.packLines()];
   }
