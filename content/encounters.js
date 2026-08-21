@@ -94,7 +94,10 @@ export const ENCOUNTERS = [
     draw: { count: [1, 1], odds: { bluegill: 50, perch: 30, brooktrout: 20 } },
     xp: [12, 18],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: [
+      'The bank is soft mud, cut about with deer tracks down to the water.',
+      'Fish hold in the slack under the far side, out of the current.',
+    ],
 
     // The description, and then the two answers to it. A way with no `then` is the end of
     // the beats, which at a node with an activity is the controls; a way to a beat marked
@@ -120,7 +123,7 @@ export const ENCOUNTERS = [
       {
         id: 'onward',
         pass: true, // offered and not taken: nothing is rolled, played or paid here
-        text: ['You leave the water where it is. The path picks up again inside the treeline.'],
+        text: ['You leave the rod in the pack and follow the bank down to where the path starts again.'],
       },
     ],
   },
@@ -133,13 +136,16 @@ export const ENCOUNTERS = [
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
-    read: { skill: 'woodcraft', line: '[Placeholder Text]' },
+    read: {
+      skill: 'woodcraft',
+      line: "There's a heron's nest in those dead alders, and the trunks are white underneath it. The bird will be about somewhere.",
+    },
     harvest: 'woodcraft',
     check: null, // the beats carry their own rolls, one per way in
     spoils: {}, // and their own spoils: nothing is taken off this by walking past it
     xp: [10, 16],
     con: [0, 0],
-    body: ['[Placeholder Text]'],
+    body: ['The trunks are streaked white with droppings, and the mud at their feet is full of fish bones.'],
 
     // A beat is a card. `text` is what is on it — a string is narration, { cry } is a
     // noise the bird makes. `then` is the next beat, `toss` is two of them and a coin,
@@ -179,7 +185,7 @@ export const ENCOUNTERS = [
         id: 'skree',
         text: [
           { cry: 'SKREEEE!!!' },
-          '[Placeholder Text]', // companion bark — the size of the bird, or a warning
+          { who: 'aldis', line: 'Grey heron, full grown. That beak goes through a fish end to end. Keep your face back.' },
         ],
         then: 'ways',
       },
@@ -273,7 +279,7 @@ export const ENCOUNTERS = [
         id: 'realising',
         text: [
           { cry: 'Skreeeeeeee—' },
-          '[Placeholder Text]', // companion bark — the realisation
+          { who: 'aldis', line: "The eggs are gone and it's still standing guard over an empty nest. Nothing round here climbs an alder." },
         ],
         then: 'northward',
       },
@@ -334,13 +340,16 @@ export const ENCOUNTERS = [
     activity: null,
     only: true,
     weight: { day: 0, night: 0 },
-    read: { skill: 'herblore', line: '[Placeholder Text]' },
+    read: {
+      skill: 'herblore',
+      line: 'Oysters on that trunk, and bittercap in among them. They look the same until you cut one.',
+    },
     harvest: 'herblore',
     check: null, // the beats carry their own rolls, one per way in
     spoils: {}, // and their own spoils: the hollow gives up nothing to walking past it
     xp: [10, 16],
     con: [0, 0],
-    body: ['[Placeholder Text]'],
+    body: ['Oysters and black trumpets grow on the trunk. So does the bittercap, and from a stride away it looks like the rest.'],
 
     beats: [
       {
@@ -355,7 +364,7 @@ export const ENCOUNTERS = [
         id: 'crowded',
         text: [
           "Hundreds. Pale caps the size of a fist, crowded so close along the trunk that there's no bark left showing.",
-          '[Placeholder Text]', // companion bark — recognition, or appetite
+          { who: 'aldis', line: "That's a week of suppers there, if you know which is which. I don't." },
         ],
         then: 'ways',
       },
@@ -423,7 +432,7 @@ export const ENCOUNTERS = [
           'Twenty feet in, a snare line strung between two saplings at knee height. It has been there long enough to rust.',
           "There's a cold fire under the bank, and beside it a bundle of feathers, trimmed at the quill and tied off.",
           'Grey, most of them.',
-          '[Placeholder Text]', // companion bark — the realisation
+          { who: 'aldis', line: "That snare's been out a month. And they trimmed the quills and left them. That's not a man feeding himself." },
         ],
         flag: 'poacher-clue', // the same clue the heron's second bird raises
       },
@@ -464,7 +473,7 @@ export const ENCOUNTERS = [
     draw: { count: [3, 5], odds: { oakbranch: 50, oaklog: 30, heartwood: 20 } },
     xp: [12, 18],
     con: [-1, 0],
-    body: ['[Placeholder Text]'],
+    body: ['Storm-torn oak, one limb down and the rest of it sound. There is enough in the limb alone to fill a cart.'],
 
     // The same shape as the stream: what is standing there, and then the two answers.
     beats: [
@@ -487,7 +496,7 @@ export const ENCOUNTERS = [
       {
         id: 'onward',
         pass: true,
-        text: ['You leave the oak standing. The limb will still be down the next time anybody comes this way.'],
+        text: ['You leave the oak standing. The limb has been down a year already; another week will not hurt it.'],
       },
     ],
   },
@@ -507,7 +516,7 @@ export const ENCOUNTERS = [
     spoils: {},
     xp: [20, 20],
     con: [0, 0],
-    body: ['[Placeholder Text]'],
+    body: ['Birch in a fold of the ground, close-grown, the light coming down between them in bars. The air is warm and still. You smell it from sixty yards out.'],
 
     beats: [
       {
@@ -549,7 +558,7 @@ export const ENCOUNTERS = [
           'Something moves in the eye socket.',
           'Then the mouth. Then the whole open length of the flank, all at once.',
           'Beetles. Black, thumbnail-sized, coming out of the animal in a steady unbroken pour, over the antlers and down into the moss.',
-          { who: 'aldis', line: '[Placeholder Text]' }, // his line here was left blank
+          { who: 'aldis', line: "Back up. Don't let them on your boots." },
         ],
         then: 'everyway',
       },

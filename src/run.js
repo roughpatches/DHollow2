@@ -1577,7 +1577,7 @@ export function passedLine(node) {
   // Offered it and said no, which is not the same as not being able to. A scene has
   // written its own words for it and does not want a second set on top of them; a work
   // card has none of its own, so they are here.
-  if (node.walkedOn) return node.beat ? null : 'You leave it where it is and pick the path back up.';
+  if (node.walkedOn) return node.beat ? null : 'Nobody unpacks anything. You walk on.';
   const named = (node.harvests || []).map((h) => h.skill.name);
   const skill = named.length ? named.join(' or ') : 'this work';
   return `Nobody walking this knows ${skill}. The party looks at it a while and goes on.`;
