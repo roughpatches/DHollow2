@@ -50,6 +50,22 @@ export const TUNING = {
   streetSmokeSteps: 3, // and how many greys it thins through on the way up, rather than
   // every grey between here and gone: a painting blended against continuously is a smear
 
+  // Light moving on painted water (src/ambient.js). Only a panel that draws a rect round
+  // its sea has any; see `water` in content/maps.js.
+  streetWaterTones: 2, // how many of a rect's commonest colours count as the water itself:
+  // what is left is the boat and the jetty, and nothing is set down on those
+  streetGlintPer: 6, // how many glints to a thousand pixels of water, so a wide harbour
+  // and a gap between two roofs are lit at the same rate rather than in the same number
+  streetGlintPx: 5, // how wide a dash gets at its brightest; it comes up at one. Long
+  // enough to lie along the swell rather than sit on it like a star
+  streetGlintMs: [900, 2600], // how long one takes to come up and go again
+  streetGlintCut: 0.45, // how far into its turn it stays dark: a glint lit half the time is
+  // a light rather than a glint
+  streetGlintSteps: 3, // and how many levels it comes up through, for the same reason smoke
+  // has them
+  streetGlintAlpha: 0.85, // how solid it is at its brightest
+  streetGlintContrast: 0.35, // and how far above the water's own colour that brightest is
+
   // Every word in the game is set in this. The face itself is declared in index.html
   // and loaded before the game starts, because a line of text is baked to a texture the
   // moment it is written and one baked against a fallback stays wrong.

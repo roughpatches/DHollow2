@@ -163,3 +163,90 @@ export function skyward(scene, art, x, y) {
   const lit = (sky.red * 0.3 + sky.green * 0.6 + sky.blue * 0.1) / 255;
   return blend(sky.color, lit > 0.5 ? 0x000000 : 0xffffff, TUNING.streetSmokeContrast);
 }
+
+// Light moving on water. Glints are set down inside a rect of a painted panel, each a dash
+// of a pixel or three that comes up and goes again on its own clock. Nothing here scrolls:
+// water sliding sideways is a river, and what a sea does under a low sky is catch the light
+// in one place and lose it in another.
+// A rect of sea has a boat and a jetty and the end of a roof in it, so a glint is not put
+// down anywhere in the rect — only on one of the few colours the rect is mostly made of,
+// which is the water. That is also what lets the rect be drawn generously by eye rather
+// than traced round the things standing in it.
+export function createShimmer(scene, art, rects, depth) {
+  const glints = [];
+
+  for (const rect of rects) {
+    const sea = waterIn(scene, art, rect);
+    if (!sea.spots.length) continue;
+    // a crest is the water with the light on it, so it is the water's own colour brought up
+    const colour = blend(sea.colour, 0xffffff, TUNING.streetGlintContrast);
+    const many = Math.round((sea.spots.length / 1000) * TUNING.streetGlintPer);
+    for (let i = 0; i < many; i++) {
+      const [x, y] = sea.spots[Math.floor(Math.random() * sea.spots.length)];
+      // as wide as the water it sits on allows, so a dash never runs off onto a hull
+      let wide = 1;
+      while (wide < TUNING.streetGlintPx && sea.wet.has(`${x + wide},${y}`)) wide++;
+      const sp = scene.add.rectangle(x, y, 1, 1, colour)
+        .setOrigin(0, 0).setDepth(depth).setVisible(false);
+      glints.push({ sp, wide, at: Math.random() * Math.PI * 2, period: between(TUNING.streetGlintMs) });
+    }
+  }
+
+  return {
+    update(delta) {
+      const steps = TUNING.streetGlintSteps;
+      const cut = TUNING.streetGlintCut;
+      for (const g of glints) {
+        g.at += (Math.PI * 2 * delta) / g.period;
+        // Dark for most of its turn and lit for a little of it. A glint that is on half the
+        // time is a light rather than a glint, and a sea of them is a lit shop window.
+        const lit = (Math.sin(g.at) - cut) / (1 - cut);
+        if (lit <= 0) {
+          g.sp.setVisible(false);
+          continue;
+        }
+        g.sp.setVisible(true);
+        const wide = 1 + Math.round((g.wide - 1) * lit);
+        if (wide !== g.sp.width) g.sp.setSize(wide, 1);
+        g.sp.setAlpha((Math.ceil(lit * steps) / steps) * TUNING.streetGlintAlpha);
+      }
+    },
+
+    destroy() {
+      for (const g of glints) g.sp.destroy();
+      glints.length = 0;
+    },
+  };
+}
+
+// Which pixels of a rect of a painting are water, and what colour that water is. Read once,
+// off the image, the way a building's pad below is measured in src/art.js.
+// The water is taken to be the handful of colours most of the rect is made of: a sea drawn
+// round by eye is four fifths water and one fifth whatever is floating on it, and the two
+// are nowhere near each other in colour.
+function waterIn(scene, art, [x, y, w, h]) {
+  const img = scene.textures.get(art).getSourceImage();
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, x, y, w, h, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data;
+
+  const seen = new Map();
+  const at = (i) => (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
+  for (let i = 0; i < d.length; i += 4) seen.set(at(i), (seen.get(at(i)) || 0) + 1);
+  const tones = [...seen.entries()].sort((a, b) => b[1] - a[1])
+    .slice(0, TUNING.streetWaterTones).map(([colour]) => colour);
+
+  const spots = [];
+  const wet = new Set();
+  for (let row = 0; row < h; row++) {
+    for (let col = 0; col < w; col++) {
+      if (!tones.includes(at((row * w + col) * 4))) continue;
+      spots.push([x + col, y + row]);
+      wet.add(`${x + col},${y + row}`);
+    }
+  }
+  return { spots, wet, colour: tones[0] };
+}

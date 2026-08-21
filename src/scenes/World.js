@@ -149,7 +149,7 @@ export default class World extends Phaser.Scene {
     if (scene) play(this, scene, scene.id);
 
     this.events.once('shutdown', () => {
-      this.smoke?.destroy();
+      for (const a of this.ambient) a.destroy();
       this.game.events.off('dialogue:end', afterDialogue);
       this.game.events.off('menu:open', freeze);
       this.game.events.off('menu:close', unfreeze);
@@ -173,7 +173,7 @@ export default class World extends Phaser.Scene {
     this.reachScale = street.body / TUNING.streetBodyPx; // and so how far an arm reaches
     this.worldW = street.width;
     this.worldH = street.height;
-    this.smoke = street.smoke;
+    this.ambient = street.ambient;
     this.physics.world.setBounds(0, 0, street.width, street.height);
 
     this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body,
@@ -200,10 +200,10 @@ export default class World extends Phaser.Scene {
       updateStreetPlayer(this.player, this.keys);
       this.checkEdges();
     }
-    // the chimneys go on smoking whether or not the player is doing anything, and whether
-    // or not the game is frozen behind a panel: it is weather rather than a thing anybody
-    // is waiting on
-    this.smoke?.update(delta);
+    // the chimneys go on smoking and the water goes on catching the light whether or not
+    // the player is doing anything, and whether or not the game is frozen behind a panel:
+    // it is weather rather than a thing anybody is waiting on
+    for (const a of this.ambient) a.update(delta);
     this.showHint();
     this.idles();
     this.takeUp();

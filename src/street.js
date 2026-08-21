@@ -7,7 +7,7 @@
 import { TUNING, COLORS, hex, blend } from '../tuning.js';
 import { MAPS } from '../content/maps.js';
 import { buildings } from './town.js';
-import { createSmoke, skyward } from './ambient.js';
+import { createSmoke, createShimmer, skyward } from './ambient.js';
 
 const TS = TUNING.tileSize;
 
@@ -16,7 +16,8 @@ const TS = TUNING.tileSize;
 export const DEPTH = {
   weather: -10,
   town: 0,
-  smoke: 5, // over the painting the chimney is in, under everything standing in front of it
+  shimmer: 4, // on the water in the painting, and the smoke over the roofs in it: both are
+  smoke: 5, // over the painting, under everything standing in front of it
   structure: 10,
   prop: 20,
   npc: 30,
@@ -81,13 +82,26 @@ export function createStreet(scene, def) {
     ground: def.ground,
     sill: def.sill ?? def.ground,
     body: def.body ?? TUNING.streetBodyPx,
-    // and what is going up off its chimneys, which is the one thing on a street that moves
-    // without being asked to. Null on a panel that names none, and on one whose painting
-    // is not in yet — the sky a plume is coloured against is read off that painting. See
-    // src/ambient.js.
-    smoke: def.smoke && scene.textures.exists(def.art)
-      ? createSmoke(scene, vents(scene, def, w), DEPTH.smoke) : null,
+    // and whatever moves on the panel without being asked to. All of it is read off the
+    // painting — the sky a plume is coloured against, the water a glint is allowed to sit
+    // on — so a panel with no painting in yet has none of it. See src/ambient.js.
+    ambient: scene.textures.exists(def.art) ? [
+      def.smoke && createSmoke(scene, vents(scene, def, w), DEPTH.smoke),
+      def.water && createShimmer(scene, def.art, seas(def, w), DEPTH.shimmer),
+    ].filter(Boolean) : [],
   };
+}
+
+// The rects of water along the whole street rather than in one copy of the painting,
+// flipped the way the chimneys are and for the same reason.
+function seas(def, w) {
+  const out = [];
+  for (const [x, y, rw, rh] of def.water) {
+    for (let i = 0; i < def.repeats; i++) {
+      out.push([i * w + (i % 2 ? w - x - rw : x), y, rw, rh]);
+    }
+  }
+  return out;
 }
 
 // Where the chimneys are along the whole street rather than in one copy of the painting,

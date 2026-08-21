@@ -78,6 +78,10 @@ export const MAPS = {
   //             goes up off them is the one thing on a street that moves without being
   //             asked to. Measured off the image, so a chimney that is not smoking is one
   //             line deleted. A panel that names none has none. See src/ambient.js.
+  //   water   — where the sea is in the painting, as [x, y, w, h] rects: light comes up and
+  //             goes on it. Drawn generously by eye — a boat, a jetty or the end of a roof
+  //             inside the rect is left alone, because what counts as water is read off the
+  //             painting rather than off the rect. See src/ambient.js.
   //   edges   — what lies off each end: { right: 'quay', left: 'harbourroad' }. A street is
   //             a panel, not a stretch of something longer — walk into the end of one and
   //             the next is what is on the screen, standing you at its far end. Painted
@@ -137,6 +141,7 @@ export const MAPS = {
       sill: 328,
       smoke: [[280, 104], [532, 120]], // the Salty Dog's brick stack, and the stone one
       // on the house across the well from it
+      water: [[300, 144, 100, 34]], // the wedge of sea in the gap between the two roofs
       repeats: 1,
       edges: { left: 'fieldroad', right: 'searow' },
     },
@@ -174,6 +179,8 @@ export const MAPS = {
       size: [688, 384],
       ground: 345, // the paving is drawn in perspective; this is the line across it
       sill: 300, // and the far side of it, where the quay wall stands
+      water: [[330, 146, 358, 62]], // the harbour, with the moored boat and the far end of
+      // the jetty standing in it; both are left alone
       repeats: 1,
       edges: { left: 'searow' },
     },
