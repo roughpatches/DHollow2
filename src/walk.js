@@ -157,9 +157,11 @@ export function createWalk(scene, rect, party, when, backdrop) {
 
     // How far along the walk up to the next node they are, nothing to all of it. The
     // trail down the bottom of the screen reads it to slide the party along the road
-    // between one node and the next, so both readouts are the same walk.
+    // between one node and the next, so both readouts are the same walk — eased, because
+    // the road stops rather than being switched off: a tree that slides in at one speed
+    // and halts on the frame it arrives reads as machinery moving it.
     coming() {
-      return arriving ? 1 - Math.max(0, arriving.until) / arriving.total : 1;
+      return arriving ? Phaser.Math.Easing.Sine.Out(1 - Math.max(0, arriving.until) / arriving.total) : 1;
     },
 
     // The work is done and what was standing there is not standing any more: played
@@ -184,8 +186,7 @@ export function createWalk(scene, rect, party, when, backdrop) {
       }
       if (!arriving) return;
       arriving.until -= delta;
-      const done = 1 - Math.max(0, arriving.until) / arriving.total;
-      mark.x = markFrom + (markTo - markFrom) * done;
+      mark.x = markFrom + (markTo - markFrom) * api.coming();
       if (arriving.until <= 0) {
         const { onArrive } = arriving;
         arriving = null;

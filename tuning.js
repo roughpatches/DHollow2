@@ -26,6 +26,14 @@ export const TUNING = {
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
+  // and how it comes and goes: a name that blinks on the frame you step into reach is a
+  // flicker, and a walk down a row of doors is half a dozen of them. It fades instead,
+  // and settles the last few pixels of the rise as it does.
+  streetHintFadeMs: 130,
+  streetHintLift: 3,
+  // A door and the end of a street are the same crossing: black, and then somewhere else.
+  // Short enough that walking the town is not walking through curtains.
+  streetFadeMs: 180,
   // The breath under anybody standing still between one thing and the next: how far they
   // rise, and how long a breath takes. A pixel is a breath at this size; two is a man who
   // has just run up the road.
