@@ -1132,7 +1132,13 @@ export default class Quest extends Phaser.Scene {
       this.card(band.walk, this.beatLines(r), this.nodeHead(r), !r.nodes[r.at].beat.choose);
     }
     else if (r.state === 'running' && !this.approaching && !this.holding) {
-      this.card(band.walk, this.nodeLines(r), this.nodeHead(r), true);
+      // A node that was played out in its beats has said everything written for it by the
+      // time it settles, and the card carries nothing else now. Rather than stand an empty
+      // panel on the road, it is not hung at all: the tally is up, the hint says press on,
+      // and the landscape is left to be looked at.
+      const lines = this.nodeLines(r);
+      if (lines.length) this.card(band.walk, lines, this.nodeHead(r), true);
+      else this.pages = 1;
     }
     else if (r.state !== 'running') this.card(band.walk, this.endingLines(r), this.endHead(r), true);
 
@@ -1612,14 +1618,9 @@ export default class Quest extends Phaser.Scene {
     }
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
-    // The one thing out of the spoil worth saying in words rather than counting: a stone
-    // is not what the face owed and it is not turned up often, so it is said here, where
-    // it happened, and counted with the rest of it on the tally.
-    const stone = run.stoneLine(n);
-    if (stone) out.push([stone, TUNING.questBodySize, COLORS.menuMapMark]);
-    // What the node paid — what was taken, what would not fit, what it cost the pool and
-    // how full they are — is on the tally raised over the road and nowhere else. This card
-    // is the account of how the work went, and a column of numbers is not that.
+    // What the node paid is on the tally raised over the road and nowhere else, down to the
+    // stone that came up with the ore. This card is what was said about the work, and
+    // nothing that was counted off it.
     // Last, and in the small type, because it is a note to the workshop rather than to the
     // party: what was written for this node is what the player came here to read, and a
     // line about an engine that has not landed does not go in front of it.

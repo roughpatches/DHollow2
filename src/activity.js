@@ -209,10 +209,3 @@ export function qualityLine(node) {
     : node.quality >= TUNING.activityConGood ? 'Well done.'
       : node.quality >= 0.5 ? 'It came down.' : 'Hard going.';
 }
-
-// and the figure behind that verdict, which goes on the tally with the rest of the
-// numbers. Nothing for work that was botched or held: neither of those has a share.
-export function qualityPct(node) {
-  if (node.quality === undefined || node.failed || node.saved) return null;
-  return `${Math.round(node.quality * 100)}% of what the work was worth.`;
-}

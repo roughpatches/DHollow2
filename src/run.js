@@ -1551,33 +1551,6 @@ export function offerLine() {
   return `No room for ${listOf(o)}.`;
 }
 
-// The one thing out of the spoil worth saying by name. A stone is not part of what the
-// face owed and it is not turned up often, so it is said where it happened rather than
-// left to be picked out of a list of ore.
-export function stoneLine(node) {
-  return node.stone ? `And something in the spoil that is not ore: ${nameOf(node.stone)}.` : null;
-}
-
-// What the work they chose was worth to them, in the one line that says why they chose it
-export function harvestLine(node) {
-  const h = node.took;
-  if (!h || !h.score) return null;
-  return `${h.skill.name} ${h.score} between you — ${Math.round(h.more * 100)}% more off it.`;
-}
-
-// And what is still standing here: what they turned down, and what nobody walking could
-// have taken anyway. Two different sentences because they are two different regrets.
-export function leftLines(node) {
-  if (node.passed) return [];
-  const named = (list) => list.map((h) => h.skill.name).join(' and ');
-  const spare = (node.worked || []).filter((h) => h !== node.took);
-  const shut = (node.harvests || []).filter((h) => !h.score);
-  const out = [];
-  if (spare.length) out.push(`${named(spare)} left where it stood. There was light for one of them.`);
-  if (shut.length) out.push(`Nobody walking this knows ${named(shut)}. That much is left standing too.`);
-  return out;
-}
-
 // Why a node gave up nothing: not a failure, an absence. Said in place of the roll and
 // the take, because there was neither.
 export function passedLine(node) {
@@ -1624,19 +1597,6 @@ export function faintLines(node) {
 // crew screen and along the bottom of the crawl
 export function partyLine(who = walkers()) {
   return who.map((c) => `${whoIs(c.id)} ${conOf(c.id)}`).join('    ');
-}
-
-// what a node did to it, in the order it happened, for the card under the encounter
-export function conLines(node) {
-  const out = [];
-  const say = (n, why) => { if (n) out.push(`${n > 0 ? '+' : ''}${n} ${why}`); };
-  say(node.conRoad, 'walking it');
-  say(node.conKind, node.conKind > 0 ? 'put back here' : 'taken here');
-  say(node.conBeat, node.conBeat > 0 ? 'put back in it' : 'taken in it');
-  say(node.conCheck, node.conCheck > 0 ? 'for holding' : 'for losing it');
-  say(node.conWork, node.conWork > 0 ? 'for good work' : 'for botching it');
-  say(node.conGuard, 'held off by what you drank');
-  return out.length ? `${out.join('    ')}    →  ${node.conAfter}` : '';
 }
 
 // the Quest Log, with whatever the run state has to say about each job on top of it
