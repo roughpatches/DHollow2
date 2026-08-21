@@ -1,5 +1,5 @@
 import { TUNING, COLORS } from '../tuning.js';
-import { bodyOf, drawnBody, faceFrame, fitBody, footOf, stand, walking } from './art.js';
+import { bodyScale, drawnBody, faceFrame, fitBody, footOf, stand, walking } from './art.js';
 import { atTile, DEPTH } from './street.js';
 
 const TS = TUNING.tileSize;
@@ -10,19 +10,23 @@ const TS = TUNING.tileSize;
 // How tall that is belongs to the panel and not to the person: a painted town seen down
 // the length of a road and a room seen from across it are not painted at the same scale,
 // so a panel that says so says it in `body` (see content/maps.js).
-export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left', bodyPx = TUNING.streetBodyPx) {
+export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left',
+  bodyPx = TUNING.streetBodyPx, light = COLORS.streetLight) {
   const s = scene.physics.add.sprite(atTile(tx), groundY, faceFrame(palette, facing)[0]);
   s.setOrigin(0.5, footOf(palette));
-  s.setScale(bodyPx / (s.frame.height * bodyOf(palette)));
+  s.setScale(bodyScale(s.frame.height, palette, bodyPx));
   fitBody(s, 10, 8);
   s.palette = palette;
   s.facing = facing;
   stand(s, palette, facing);
   // An export is painted at full strength and the panel it walks into is an evening. Lit
   // by the panel's own light it is in the picture rather than laid on top of it, which is
-  // the whole difference between a character and a sticker.
-  s.setTint(COLORS.streetLight);
-  s.shade = shadeUnder(scene, s, bodyPx);
+  // the whole difference between a character and a sticker. The panel says which light,
+  // because the burying ground at dusk, the harbour and the room behind the bar are not
+  // the same hour and were never painted as if they were; a panel that says nothing takes
+  // the town's, which is what every one of them used to take.
+  s.setTint(light);
+  s.shade = shadeUnder(scene, palette, s.x, s.y, bodyPx)?.setDepth(DEPTH.shadow) ?? null;
   return s;
 }
 
@@ -30,15 +34,18 @@ export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left', b
 // else in the game says a body is standing on the ground rather than in front of it. It is
 // centred on the line they stand on, so half of it lies in front of their boots.
 // A generated body has one drawn into its frames already and is not given a second.
-function shadeUnder(scene, sprite, bodyPx) {
-  if (!drawnBody(sprite.palette)) return null;
+// The road draws its party inside a container of its own, so where the pool goes is the
+// caller's to say: on the street it is a depth on the panel, on the road it is a place in
+// the walking band. Everything else about it is the same pool.
+export function shadeUnder(scene, palette, x, y, bodyPx) {
+  if (!drawnBody(palette)) return null;
   const wide = bodyPx * TUNING.streetShadowWide;
-  return scene.add.ellipse(sprite.x, sprite.y, wide, wide * TUNING.streetShadowDeep,
-    COLORS.streetShadow, TUNING.streetShadowAlpha).setDepth(DEPTH.shadow);
+  return scene.add.ellipse(x, y, wide, wide * TUNING.streetShadowDeep,
+    COLORS.streetShadow, TUNING.streetShadowAlpha);
 }
 
-export function createStreetPlayer(scene, tx, groundY, bodyPx, palette = 'player') {
-  const s = spawnStreetActor(scene, palette, tx, groundY, 'right', bodyPx);
+export function createStreetPlayer(scene, tx, groundY, bodyPx, palette = 'player', light) {
+  const s = spawnStreetActor(scene, palette, tx, groundY, 'right', bodyPx, light);
   s.setCollideWorldBounds(true);
   return s;
 }

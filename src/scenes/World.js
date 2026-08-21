@@ -74,7 +74,7 @@ export default class World extends Phaser.Scene {
       // the aisle, and what shows of them is cut at the line they are standing behind
       const palette = lookIn(def.palette, map.indoors);
       const npc = spawnStreetActor(this, palette, def.x,
-        def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx);
+        def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx, this.light);
       // and their feet are behind it too, so the pool that would be under them is not
       // theirs to cast on this side of the bar
       if (def.behind) {
@@ -181,6 +181,7 @@ export default class World extends Phaser.Scene {
     this.groundY = street.ground; // where a person walks
     this.sillY = street.sill; // and where a building stands, which is further back
     this.bodyPx = street.body; // and how tall a person is drawn, which is the panel's own
+    this.light = street.light; // and the light they are lit by, which is the panel's too
     this.reachScale = street.body / TUNING.streetBodyPx; // and so how far an arm reaches
     this.worldW = street.width;
     this.worldH = street.height;
@@ -188,7 +189,7 @@ export default class World extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, street.width, street.height);
 
     this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body,
-      lookIn('player', map.indoors));
+      lookIn('player', map.indoors), street.light);
     this.player.setDepth(DEPTH.player);
     this.playerY = street.ground; // the line they stand on, to breathe against
 

@@ -380,6 +380,21 @@ export function footOf(palette) {
   return look ? look.foot / look.size : 1;
 }
 
+// How much a body is scaled to stand `bodyPx` tall, snapped to a whole step. What the
+// ratio works out to is whatever the export's height and the panel's happen to make it —
+// the player came out at 0.512 and the landlord behind his bar at 1.564 — and nearest
+// neighbour at a ratio like that drops and doubles rows in an uneven pattern, which is
+// most of why drawn art reads soft beside a painting laid down at 1:1. On a half step it
+// is regular: 0.5 takes every other row, 1.5 takes two and doubles one. The body lands a
+// pixel or two off the height that was asked for, which is not a thing anybody can see,
+// and every export that was already sized for this comes out exactly where it did —
+// Aldis on the street at 1, Melovia indoors at 1.5.
+export function bodyScale(frameHeight, palette, bodyPx) {
+  const step = TUNING.bodyScaleStep;
+  const raw = bodyPx / (frameHeight * bodyOf(palette));
+  return Math.max(step, Math.round(raw / step) * step);
+}
+
 // And how much of the frame is the person: head to feet, as a fraction of it, which is
 // what stands two exports the same height as each other. Where a look measures its own
 // `head` that is exact; where it does not, the air over the head is taken to be the

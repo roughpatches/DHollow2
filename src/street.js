@@ -86,6 +86,8 @@ export function createStreet(scene, def) {
     ground: def.ground,
     sill: def.sill ?? def.ground,
     body: def.body ?? TUNING.streetBodyPx,
+    // and the light anybody standing on it is lit by; see `light` in content/maps.js
+    light: def.light ?? COLORS.streetLight,
     // and whatever moves on the panel without being asked to. All of it is read off the
     // painting — the sky a plume is coloured against, the water a glint is allowed to sit
     // on — so a panel with no painting in yet has none of it. See src/ambient.js.
@@ -163,6 +165,41 @@ export function coverPatch(scene, art, take) {
     .setOrigin(0, 0).setDepth(DEPTH.town + 1).setVisible(false);
 }
 
+// The dither the drawn sky and sea are laid down with. A ramp of a counted number of
+// colours reads as bands; the same ramp with each pixel nudged to the step above or below
+// it on a fixed 4x4 pattern reads as one colour going into another, and every pixel on it
+// is one of the few colours the picture is made of. Ordered rather than random, because
+// what is drawn once and looked at for an hour must not be noise.
+const DITHER = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5],
+];
+
+// Which colour of a ramp a pixel takes: the step the fraction falls on, and the one above
+// it wherever this pixel's place in the pattern says to reach for it.
+// The reaching is squeezed into the join between one step and the next rather than run
+// across the whole of it, because a ramp dithered end to end is half one colour and half
+// the other nearly everywhere, and what that reads as at this size is not a sky going
+// from one colour to another — it is hatching laid over the lot of it. Squeezed, each
+// colour has a run it holds on its own and they are mixed where they meet, which is how
+// anybody drawing this by hand would have laid it down.
+function stepAt(t, x, y) {
+  const at = t * (TUNING.streetSkySteps - 1);
+  const low = Math.floor(at);
+  const mix = TUNING.streetSkyMix;
+  const near = mix > 0 ? Math.min(1, Math.max(0, (at - low - 0.5) / mix + 0.5)) : 0;
+  const up = near > (DITHER[y & 3][x & 3] + 0.5) / 16 ? 1 : 0;
+  return Math.min(TUNING.streetSkySteps - 1, low + up);
+}
+
+// and the colours themselves, mixed once rather than per pixel
+function ramp(from, to) {
+  const n = TUNING.streetSkySteps;
+  return Array.from({ length: n }, (_, i) => blend(from, to, i / (n - 1)));
+}
+
 // One sky and one sea, baked once per size and horizon and kept, since two panels the same
 // shape are the same evening. Everything about it is drawn rather than painted, so it
 // costs no files and retints out of tuning.js.
@@ -172,16 +209,30 @@ function weatherFor(scene, w, h, horizon) {
 
   const tex = scene.textures.createCanvas(key, w, h);
   const ctx = tex.getContext();
-  const band = (y, colour) => {
-    ctx.fillStyle = hex(colour);
-    ctx.fillRect(0, y, w, 1);
-  };
 
-  // Dusk overhead going to the last of the light at the water. Squared off, so the light
-  // is a band low down rather than half the sky.
-  for (let y = 0; y < horizon; y++) band(y, blend(COLORS.skyHigh, COLORS.skyLow, (y / horizon) ** 2.2));
-  // and steel at the horizon, darker as it comes in
-  for (let y = horizon; y < h; y++) band(y, blend(COLORS.seaFar, COLORS.seaNear, (y - horizon) / Math.max(1, h - horizon)));
+  // Dusk overhead going to the last of the light at the water, and steel at the horizon
+  // going darker as it comes in. Both are laid down in a counted number of colours with
+  // the dither below carrying the rest, rather than a fresh colour on every row: a ramp
+  // over three hundred rows of a picture drawn in whole pixels is the one thing on the
+  // screen that is not pixel art, and it bands in stripes anyway.
+  const sky = ramp(COLORS.skyHigh, COLORS.skyLow);
+  const sea = ramp(COLORS.seaFar, COLORS.seaNear);
+  const img = ctx.createImageData(w, h);
+  for (let y = 0; y < h; y++) {
+    // Squared off above the horizon, so the light is a band low down rather than half
+    // the sky; straight down below it.
+    const up = y < horizon;
+    const t = up ? (y / horizon) ** 2.2 : (y - horizon) / Math.max(1, h - horizon);
+    for (let x = 0; x < w; x++) {
+      const colour = (up ? sky : sea)[stepAt(t, x, y)];
+      const i = (y * w + x) * 4;
+      img.data[i] = (colour >> 16) & 255;
+      img.data[i + 1] = (colour >> 8) & 255;
+      img.data[i + 2] = colour & 255;
+      img.data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
 
   // Cloud lying in banks rather than piled up: this is weather that has been here a while.
   // Each bank is drawn a column at a time, thinning away at both ends and with its edge

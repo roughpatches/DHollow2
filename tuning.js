@@ -23,6 +23,13 @@ export const TUNING = {
   // from boot to crown — so their pixels land on the panel's pixels rather than being
   // resampled, which is most of why they used to read small.
   streetBodyPx: 62,
+  // What that height is rounded to. An export scaled by whatever the two heights happen to
+  // make — 0.512 for the player, 1.564 for the landlord behind his bar — has rows of its
+  // pixels dropped and doubled in an uneven pattern, and comes out soft beside a painting
+  // laid down at 1:1. On a half it is regular, and the body lands a pixel or two off the
+  // height above, which nobody can see. At 1 nothing is ever drawn at anything but its own
+  // size or a whole multiple of it, which is stricter than these exports can stand.
+  bodyScaleStep: 0.5,
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
@@ -45,6 +52,18 @@ export const TUNING = {
   // has just run up the road.
   streetBreathPx: 1,
   streetBreathMs: 3400,
+
+  // The sky and the sea a panel with no painting draws for itself (see weatherFor in
+  // src/street.js): how many colours each of the two ramps is made of. The rest of the
+  // way from one end to the other is carried by a 4x4 ordered dither, so every pixel of
+  // the weather is one of a handful of colours rather than one of three hundred — a ramp
+  // mixed fresh on every row is the one thing on the screen that is not pixel art, and it
+  // bands in stripes anyway. Fewer is coarser and more openly drawn; many more and the
+  // dither has nothing left to do.
+  streetSkySteps: 14,
+  streetSkyMix: 0.45, // and how much of each step the two colours are mixed across, the
+  // rest of it being the one colour flat. At 1 the whole ramp is mixed, which is hatching
+  // laid over the sky rather than a sky; at 0 it is hard bands and no dither at all.
 
   // What goes up off a chimney (src/ambient.js). Only a panel that names its chimneys has
   // any; see `smoke` in content/maps.js.
