@@ -22,8 +22,8 @@ export const MATERIALS = [
   //     nothing, the way a node zoned to a place that is not open is content waiting on
   //     the place. Give them a zone in content/places.js and a node in content/nodes.js
   //     that draws them, and they are in the game the same hour.
-  // Nothing in code reads a tier: what makes an ore second-tier is that only second-tier
-  // ground pays it out. Add the recipes when the ground lands.
+  // Nothing in code reads a tier. An ore is second-tier because only second-tier ground
+  // pays it out. Add the recipes when the ground lands.
 
   // tier one — the Greywood
   {
@@ -228,8 +228,8 @@ export const MATERIALS = [
   // — so the question the kitchen asks is how much of a day's fishing a party is willing
   // to carry back out instead of selling.
   {
-    // Cooking 1. The whole of what a lit range and a borrowed pan will do, and it is done
-    // to the fish nobody was saving for anything.
+    // Cooking 1. All a lit range and a borrowed pan will do, and it is done to the fish
+    // nobody was saving for anything.
     id: 'coalfish',
     name: 'Coal-Baked Bluegill',
     eat: { con: 3, hp: 2 },
@@ -366,9 +366,9 @@ export const MATERIALS = [
   },
   {
     // The third thing Herblore brings home, and the only one that comes out of the ground
-    // rather than off rot and fallen trunks: wet ground, and ground nothing has walked on.
-    // Scarcer than either of the others in every table it is in, which is what points in
-    // the skill are for.
+    // rather than off rot and fallen trunks: wet ground, and ground nothing has walked
+    // on. Scarcer than either of the others in every table it is in, which is what
+    // points in the skill are for.
     id: 'bittercap',
     name: 'Bittercap',
     body: [
