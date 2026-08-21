@@ -147,15 +147,15 @@ export const RECIPES = [
   // Five pieces and three slots, so the smithy is a set of questions rather than a
   // ladder: the dagger against the sword, the mail against the plate, and the shield
   // against the free hand Grast keeps recommending. Every one of them is bronze and
-  // bronze carries one buff, which is what keeps the question a question.
+  // bronze carries one buff, which keeps each of them a question.
   // These name `forges` rather than `makes`: one piece comes off the anvil however good
-  // the smith is, and what the work decides is which grade of it — the same bargain a cut
-  // stone makes at the wheel. See content/gear.js and `gear` in tuning.js.
+  // the smith is, and the work decides which grade it is — the same bargain a cut stone
+  // makes at the wheel. See content/gear.js and `gear` in tuning.js.
   // Forging is played at the anvil now — see src/minigames/ForgeEngine.js — so all five
   // are over a fire and all five want a fuel. `hard` names one of the three signature
-  // jobs in `forge.jobs` in tuning.js rather than a difficulty: the links of a mail, the
-  // two edges of a blade, the work-hardening of raised plate. A piece naming none is
-  // plain work, which is what the first thing anybody makes should be.
+  // jobs in `forge.jobs` in tuning.js rather than a difficulty: the links of a mail,
+  // the two edges of a blade, the work-hardening of raised plate. A piece naming none
+  // is plain work, which is what the first thing anybody makes should be.
   {
     id: 'bronzedagger',
     name: 'Draw a bronze dagger',
@@ -259,11 +259,11 @@ export const RECIPES = [
 
   // --- and what a stone goes in ------------------------------------------------
   // One slot, three things that fit it, and none of them worth anything empty. A ring is
-  // a setting on a band and an amulet is three settings on a disc, and that is the whole
-  // difference: what the smithy sells here is somewhere to put what the wheel cut.
+  // a setting on a band and an amulet is three settings on a disc. That is the whole of
+  // the difference: what the smithy sells here is somewhere to put what the wheel cut.
   // These are the cheap end of the anvil on purpose. A masterwork sword also takes a
-  // stone, but it has to be a masterwork sword first — a ring only has to be a ring, and
-  // that is what makes it the first thing a stone can go into.
+  // stone, but it has to be a masterwork sword first. A ring only has to be a ring,
+  // which is why it is the first thing a stone can go into.
   {
     id: 'bronzering',
     name: 'Draw a bronze ring',
@@ -348,8 +348,8 @@ export const RECIPES = [
 
   // --- the still room --------------------------------------------------------
   // Three potions and three tiers, which is what the pot is for: the same hands at three
-  // difficulties, so what a tier costs the player is a thing that can be felt rather than
-  // read off a table.
+  // difficulties, so what a tier costs the player is something felt rather than read
+  // off a table.
   {
     id: 'tonic',
     name: 'Steep a tonic',
@@ -475,8 +475,8 @@ export const RECIPES = [
     ],
   },
   {
-    // Mostly bittercap. Expensive in the scarce half of the pantry, which is the price of a
-    // check that was going to be lost being held instead.
+    // Mostly bittercap. Expensive in the scarce half of the pantry, which is what it costs
+    // to hold a check that was going to be lost.
     id: 'bitterwash',
     name: 'Draw a bitter wash',
     at: 'stillroom',

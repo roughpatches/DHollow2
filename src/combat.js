@@ -177,8 +177,8 @@ function pullsBack(fight) {
 }
 
 // A bare d20 against the flee DC. Nothing adds to it: getting away from something in the
-// dark is not a skill anybody in Dreadhollow has, and a side that tries has already spent
-// the turn either way.
+// dark is not a skill anybody in Dreadhollow has, and a side that tries has already
+// spent the turn either way.
 function getsAway() {
   return 1 + Math.floor(Math.random() * TUNING.checkDie) >= TUNING.combat.fleeDC;
 }
@@ -252,8 +252,8 @@ export function take(fight, moveId, played = null) {
   fight.log = [];
   const me = combatOf(fight.who);
   const well = playedAt(move, played);
-  // playing it well lands it as well as hurting with it, so a clean swing is a clean
-  // swing all the way through rather than a good roll with a number bolted on
+  // playing it well lands it as well as hurting with it, so a clean swing is clean all
+  // the way through rather than a good roll with a number bolted on
   const worked = move.play ? Math.round(well * TUNING.combat.playHit) : 0;
 
   if (move.harm > 0) {
@@ -275,8 +275,8 @@ export function take(fight, moveId, played = null) {
 
   // Their turn: change over behind a fresher one, break off altogether, or answer. The
   // first two cost them the blow, which is what makes either of them a decision. What a
-  // guard turns aside is what the guard was worth: covered perfectly it is the move's own
-  // number, covered badly it is most of the blow anyway.
+  // guard turns aside is what the guard was worth: covered perfectly it is the move's
+  // own number, covered badly it is most of the blow anyway.
   const kept = 1 - (1 - move.keep) * well;
   if (!pullsBack(fight) && !foeFlees(fight)) answer(fight, move.opens, kept);
   // A move that steadies sets what it is worth and a move that does not leaves it alone.

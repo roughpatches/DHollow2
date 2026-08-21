@@ -193,9 +193,9 @@ function framesIn(spec) {
   return spec.still ? 1 : spec.frames;
 }
 
-// Where a frame is on disk. `folder` is a loop of numbered frames, which is what a thing
-// that moves comes back as; `still` is the single export out of a rotations folder, which
-// is what a thing that only stands there comes back as, and is the whole of that state.
+// Where a frame is on disk. `folder` is a loop of numbered frames, which is how a thing
+// that moves comes back; `still` is the single export out of a rotations folder, which
+// is how a thing that only stands there comes back, and is all there is to that state.
 function framePath(art, spec, i) {
   if (spec.still) return `${art.path}/${spec.still}`;
   return `${art.path}/${spec.folder}/frame_${String(i).padStart(3, '0')}.png`;
@@ -267,9 +267,9 @@ function trimmed(img, w, h, [tl, tr, tt, tb]) {
 }
 
 // Art painted under a light the place does not have, multiplied toward the light it does
-// rather than repainted — the same treatment the pale seawater sheet gets in bakeTiles.
-// A multiply only ever takes away, so cold art warms by losing its blue and nothing on
-// the sheet can come out brighter than it was painted.
+// have rather than repainted — the same treatment the pale seawater sheet gets in
+// bakeTiles. A multiply only takes away, so cold art warms by losing its blue, and
+// nothing on the sheet comes out brighter than it was painted.
 function shaded(img, shade) {
   const r = (shade >> 16) & 0xff;
   const g = (shade >> 8) & 0xff;
@@ -281,14 +281,14 @@ function shaded(img, shade) {
   }
 }
 
-// The alpha ramp, measured from where the art is rather than from where its frame is:
-// an export carries whatever air the exporter felt like and the feather has to bite into
-// the painting, not into the empty margin around it.
+// The alpha ramp, measured from where the art is rather than from where its frame is.
+// An export carries whatever air the exporter felt like, and the feather has to bite
+// into the painting, not into the empty margin around it.
 function feather(img, w, h, [fl, fr, ft, fb]) {
   const { x0, x1, y0, y1 } = boundsOf(img, w, h);
   if (x1 < 0) return;
   // A bank is not a ruled line. How far each row's fade reaches wanders slowly along the
-  // edge, so where the art runs out is ragged the way ground is; it is a function of the
+  // edge, so where the art runs out is ragged the way ground is. It is a function of the
   // pixel and not of chance, so all nine frames of a loop run out in the same place.
   const wander = (n) => (Math.sin(n * 0.19) + Math.sin(n * 0.071)) / 5;
   const ramp = (n, over, at) => (over ? Math.min(1, Math.max(0, n / over + wander(at))) : 1);

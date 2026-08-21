@@ -58,14 +58,14 @@
 //            that does not swing at all.
 //   opens  — what the foe adds to its answering d20 for having been given the opening.
 //   keep   — what is left of the foe's answering blow after this move takes the weight
-//            of it. One is the whole of it.
+//            of it. One leaves the blow whole.
 //   steady — added to the next swing, for a turn spent not taking one.
 // Three moves is the whole list on purpose: a fight is a question asked eight times, and
-// a question with three answers is one a player can hold in their head. Add a fourth when
-// a foe is written that makes one of these three the wrong answer.
-// A fourth row turns up under them on its own where the run has another fighter still on
-// their feet: changing over to them. It is not written here because it is not a move — it
-// is the turn spent on somebody else taking the front. See swapOpens in tuning.js.
+// a question with three answers is one a player can hold in their head. Add a fourth
+// when a foe is written that makes one of these three the wrong answer.
+// A fourth row turns up under them on its own where the run has another fighter still
+// on their feet: changing over to them. It is not written here because it is not a
+// move — it is the turn spent on somebody else taking the front. See swapOpens.
 
 export const FOES = [
   {

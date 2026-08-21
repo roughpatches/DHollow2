@@ -9,8 +9,8 @@
 //    boil, which is the only clock there is.
 //  - The outline is rolled fresh for every shape, and so is how fast that shape breathes:
 //    a quick one, then a slow one, and the hand that knows the quick one is not the hand
-//    that knows the slow one. That is the whole of what makes a hard potion hard — more
-//    shapes, quicker, less evenly, in a tighter outline. See `brew` in tuning.js.
+//    that knows the slow one. That is all that makes a hard potion hard — more shapes,
+//    quicker, less evenly, in a tighter outline. See `brew` in tuning.js.
 //  - No hard fail. A botched brew is a weak draught and not a lost pot: nothing here is
 //    balanced yet, and a potion nobody can finish is a potion nobody plays twice.
 

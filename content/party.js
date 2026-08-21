@@ -9,7 +9,7 @@
 //              of a drawn look from content/looks.js if they have real art.
 //   con      — their own constitution at level one. Levels add conPerLevel on top of it.
 //              A run starts with everyone's added together and drains it as the party
-//              walks; at zero they turn for home. It is the whole of what a run costs.
+//              walks; at zero they turn for home. It is all a run costs.
 //   skills   — exactly skillsAtLevelOne ids from content/skills.js, against the points
 //              spent on each. The points must add up to skillPointsAtLevelOne;
 //              src/party.js complains to the console if either count is wrong. The
@@ -88,9 +88,9 @@ export const PARTY = [
     name: 'Ivo Marchant',
     palette: 'warden',
     con: 11,
-    // Three skills, six points, like everybody else. Nothing here is what makes them a
-    // fighter — the line below is — but they are the second pair of eyes on the road at
-    // night, which is what a night job's own roll usually asks for.
+    // Three skills, six points, like everybody else. None of it makes them a fighter —
+    // the line below does — but they are the second pair of eyes on the road at night,
+    // which is what a night job's own roll usually asks for.
     carry: 2, // the one who fights walks with their hands free, and that costs the pack
     skills: { intimidation: 3, fording: 2, investigation: 1 },
     // A fighter at the size tuning.js says a fighter is. Written this way and not as the
@@ -118,9 +118,9 @@ export const PARTY = [
     body: ['[Placeholder Text]'],
   },
   {
-    // The blacksmith, and the whole of the iron in one person: neither smithing nor
-    // mining is anywhere else in the cast. Persuasion rather than a fourth terrain point
-    // because no zone is mountain yet and a point that buys nothing is not a point.
+    // The blacksmith, and all the iron in one person: neither smithing nor mining is
+    // anywhere else in the cast. Persuasion rather than a fourth terrain point, because
+    // no zone is mountain yet and a point that buys nothing is not a point.
     id: 'aethelwynn',
     name: 'Aethelwynn',
     palette: 'aethelwynn',

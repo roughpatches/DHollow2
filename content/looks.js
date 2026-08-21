@@ -67,10 +67,10 @@ export const LOOKS = [
     indoors: 'aldis-indoors',
   },
   {
-    // And indoors, at the size a room is painted at: the hood down, arms crossed and the
-    // bow on his back, which is a hunter in somebody's house rather than one in the wood.
-    // The export's other state — hood up, bow in hand — is in the same folder if a scene
-    // ever wants him ready indoors.
+    // And indoors, at the size a room is painted at: hood down, arms crossed, bow on his
+    // back — a hunter in somebody's house rather than one in the wood. The export's other
+    // state, hood up and bow in hand, is in the same folder if a scene ever wants him
+    // ready indoors.
     id: 'aldis-indoors',
     path: 'art/aldis-indoors',
     size: 128,
@@ -108,10 +108,10 @@ export const LOOKS = [
   {
     // Aethelwynn, the blacksmith with the hammer on her shoulder, out on the road. Her
     // walk was exported on a bigger canvas than her rotations — 88 and 92 pixels against
-    // 64 — and one frame size per look is what stands a character still while she walks,
-    // so every frame of this export was re-canvassed to 66 about its own centre. Nothing
-    // was painted over or cut: 66 is simply the smallest square the widest swing of the
-    // hammer fits in. Like Melovia she talks with the room-sized export's face.
+    // 64 — and a look needs one frame size throughout, or the character shifts as she
+    // walks. So every frame was re-canvassed to 66 about its own centre. Nothing was
+    // painted over or cut: 66 is the smallest square the widest swing of the hammer fits
+    // in. Like Melovia, she talks with the room-sized export's face.
     id: 'aethelwynn',
     path: 'art/aethelwynn',
     size: 66,
@@ -160,7 +160,7 @@ export const LOOKS = [
       frames: 9,
       yoyo: true, // he ends holding the glass and starts with folded arms; run it back
       every: [8000, 12000], // and he does it now and then, not for ever: a man polishing
-      // one glass without stopping is a man with something wrong with him
+      // a man polishing one glass without a pause looks wrong
     },
   },
 ];
@@ -182,9 +182,9 @@ export const LOOKS = [
 //              roof  — whether the last stage is capped with one. A jetty is not.
 //              built — how much of it is standing at each stage, lowest first, 0 to 1.
 //                     How many numbers are on this line is how many stages it has.
-//            It is drawn see-through and hatched on purpose: it stands over a painted
-//            town, and it should read as somewhere art is going rather than as art.
-//            Swap it for `path` and `stages` when the export arrives; nothing else changes.
+            // Drawn see-through and hatched on purpose. It stands over a painted town, and
+            // it should read as a space waiting for art rather than as art. Swap it for
+            // `path` and `stages` when the export arrives; nothing else changes.
 export const STRUCTURES = [
   // The Sea Hag has no entry: it is painted into the harbour road, sign and all, and a
   // building that is already in the picture does not want a second one standing on it.
@@ -243,9 +243,9 @@ export const PROPS = [
   // and a lamp on either of those stands in the middle of it.
   // They are drawn at three times the size they were painted. The picture is 36 pixels of
   // lamp and a person on these panels is 62, so at its own size it stands waist-high and
-  // reads as a bollard; at three it is a head and a half over a man, which is what a lamp
-  // post is. Three rather than two because two is still chest-high, and a whole multiple
-  // because a fraction would stop it being pixel art. Repainted at 108 it would want none
+  // reads as a bollard. At three it stands a head and a half over a man, which is the
+  // height of a lamp post. Not two, because two is still chest-high, and a whole multiple
+  // because a fraction would stop it being pixel art. Repainted at 108 it would need none
   // of this and the line would lose its `scale`.
   { art: 'lamp_dark', lit: 'lamp_lit', map: 'quay', at: [20], scale: 3 },
   { art: 'lamp_dark', lit: 'lamp_lit', map: 'quay', at: [37], scale: 3 },
@@ -285,28 +285,28 @@ export const PROPS = [
 //           it, so whatever does that lining up adds this back.
 //   sheet — which sheet below it is cut from.
 export const UI = {
-  // Two schemes, and where the party is standing decides which. The autumn ironwork is
-  // the road and the wood: leaves, because that is what is around them out there. The
-  // parchment is Dreadhollow — plain paper and plain iron, because a town is not a season.
+  // Two schemes, chosen by where the party is standing. The autumn ironwork is for the
+  // road and the wood, with leaves on it because that is what is around them out there.
+  // The parchment is Dreadhollow: plain paper and plain iron, because a town is not a
+  // season.
   sheets: {
     autumn: 'art/Autumn-leafy-vines-twined-around-wrought-iron-framing.png',
     town: 'art/Neutral-faded-aged-parchment.png',
   },
   frames: {
-    // A whole screen of the autumn ironwork. Cut to the ironwork rather than to the
-    // leaves, because a leaf hanging off the side is a leaf drawn down the whole side once
-    // the panel is stretched to a screen. Nothing asks for it since the board, the hour
-    // and the crew went onto the town's parchment; it is kept for the day something
-    // full-screen belongs to the road rather than to Dreadhollow.
+    // A whole screen of the autumn ironwork. Cut to the ironwork and not to the leaves: a
+    // leaf hanging off the side gets drawn down the whole side once the panel is stretched
+    // to a screen. Nothing asks for it since the board, the hour and the crew moved onto
+    // the town's parchment. Kept for the day something full-screen belongs to the road.
     page: {
       sheet: 'autumn',
       at: [107, 97, 480, 172], slice: [158, 320, 113, 57],
       flat: [24, 31, 39, 35], pad: [42, 46, 50, 62], shade: 0.8,
     },
     // A band across the crawl: over the road, under it, and stood on its end beside it.
-    // Washed like the plaque, for the same reason in a different key — the board inside
-    // it is painted with stains and highlights, and a nine-slice pulls a two-pixel slice
-    // of those the width of a screen, which is where the pale shapes came from.
+    // Washed like the plaque, and for the same reason: the board inside it is painted with
+    // stains and highlights, and a nine-slice pulls a two-pixel slice of those the width
+    // of a screen, which is where the pale shapes came from.
     band: {
       sheet: 'autumn',
       at: [196, 11, 295, 81], slice: [183, 110, 43, 36],
@@ -332,10 +332,10 @@ export const UI = {
       flat: [8, 8, 8, 8], pad: [24, 24, 20, 20],
       paper: [56, 120, 40, 40], wash: 2, ink: true,
     },
-    // The square off the same sheet: what a face or an icon is set in. The one frame
-    // used on both sides of the game — a speaker's portrait in the town, a walked node
-    // down on the trail — so it takes the cold after dark the way the road's own
-    // ironwork does rather than staying a warm square on a cold band.
+    // The square off the same sheet: what a face or an icon is set in. One frame for both
+    // sides of the game — a speaker's portrait in the town, a walked node down on the
+    // trail — so it takes the cold after dark the way the road's ironwork does instead of
+    // staying a warm square on a cold band.
     plate: {
       sheet: 'town',
       at: [160, 168, 57, 57], slice: [6, 6, 6, 6],
@@ -354,11 +354,10 @@ export const UI = {
 export const SKILL_ART = {
   sheet: 'art/pixellab-Skill-Icons-for-the-following--1786668947352.png',
   cell: 32,
-  // The sheet was painted for the eight skills there used to be. Six of them kept their
-  // names and two were renamed onto the cell that was already the right picture — the eye
-  // is Investigation now and the speech bubble is Persuasion. The other eight skills have
-  // no cell on it and keep the shape src/icons.js draws, which is what a skill with no
-  // entry here always did.
+  // The sheet was painted for the eight skills there used to be. Six kept their names and
+  // two were renamed onto the cell that was already the right picture: the eye is
+  // Investigation now, the speech bubble is Persuasion. The other eight skills have no
+  // cell on it and keep the shape src/icons.js draws, the same as any skill with no entry.
   at: {
     woodcraft: [1, 1],
     woodcutting: [1, 2],
@@ -372,10 +371,10 @@ export const SKILL_ART = {
 };
 
 // A stone is painted twice — the lump it comes out of the ground as, and the same stone
-// off the wheel — and both come out of one export, under the two names below. Colour is
-// not what an export decides: the painting is put through that stone's own pair from
-// COLORS.icon on the way to the screen, which is exactly how the drawn placeholders
-// already worked. So an export is a shape, and every stone cut to that shape shares it.
+// off the wheel — and both come out of one export, under the two names below. The export
+// does not decide colour: the painting is put through that stone's own pair from
+// COLORS.icon on the way to the screen, the way the drawn placeholders already worked. An
+// export is a shape, then, and every stone cut to that shape shares it.
 //   folder under art/gems → the stones painted in it
 // A stone left off keeps the shape src/icons.js draws for it and nothing else changes.
 // Tier one is here because tier one is what is dug so far.
@@ -391,10 +390,10 @@ const ROUGH_STONE = 'An_uncut_gem_recently_mined/rotations/An_uncut_gem_recently
 const CUT_STONE = 'Cut_and_polished_int/rotations/Cut_and_polished_int.png';
 
 // And the things a pack holds that are not stones: icon name → the export, each under its
-// own folder in art/items because two exports asked for at different times come back under
-// the same name often enough. No ink named, so these go up as painted — a thing painted in
-// its own colour has nothing to be put through. A stone is a shape any number of stones
-// can be cut to; everything else is only itself.
+// own folder in art/items, because two exports asked for at different times come back
+// under the same name often enough. No ink is named, so these go up as painted — a thing
+// painted in its own colour has nothing to be put through. A stone is a shape any number
+// of stones can be cut to; everything else is only itself.
 const PAINTED_ITEMS = {
   oakbranch: 'art/items/oakbranch/An_oak_log_3/rotations/An_oak_log_3.png',
   oaklog: 'art/items/oaklog/An_oak_log/rotations/An_oak_log.png',
@@ -405,9 +404,9 @@ const PAINTED_ITEMS = {
   bronzebar: 'art/items/bronzebar/A_metal_bar_for_use_in_blacksm/rotations/A_metal_bar_for_use_in_blacksm.png',
   // Written and unreachable until its ground is, but painted: see content/materials.js.
   ironbar: 'art/items/ironbar/A_metal_bar_for_use_in_blacksm_2/rotations/A_metal_bar_for_use_in_blacksm_2.png',
-  // Each fish and the dish it is the whole of: the trout supper, the bluegill off the
-  // embers and the pan-fried perch. The other four dishes have more than one thing in
-  // them and keep their drawn shapes.
+  // Each fish and the dish made of nothing else: the trout supper, the bluegill off the
+  // embers, the pan-fried perch. The other four dishes have more than one thing in them
+  // and keep their drawn shapes.
   brooktrout: 'art/items/brooktrout/Brook_Trout/rotations/Brook_Trout.png',
   troutsupper: 'art/items/troutsupper/Cooked_and_served_a/rotations/Cooked_and_served_a.png',
   bluegill: 'art/items/bluegill/A_single_Fish_freshly_caught/rotations/A_single_Fish_freshly_caught.png',
@@ -416,8 +415,8 @@ const PAINTED_ITEMS = {
   friedfish: 'art/items/friedfish/Fried_for_dinner/rotations/Fried_for_dinner.png',
   // The six the wood pays for, each in the glass it is kept in: the round amber flask, the
   // green cone, the tall dark bottle, the purple round, the tall clear one and the squat
-  // blue. Six vessels rather than six inks on one flask, which is what a shelf of them
-  // has to be to be read at a glance.
+  // blue. Six vessels rather than one flask in six inks, so a shelf of them can be read
+  // at a glance.
   copsebroth: 'art/items/copsebroth/Copse_Draught/rotations/Copse_Draught.png',
   woodsdraught: 'art/items/woodsdraught/Woodsdraught/rotations/Woodsdraught.png',
   blackdraught: 'art/items/blackdraught/Blackdraught/rotations/Blackdraught.png',
@@ -455,9 +454,9 @@ const PAINTED_ITEMS = {
 // And the same for the things a pack holds: materials by their id from
 // content/materials.js, cut stones by their gem id from content/gems.js. Same shape as
 // SKILL_ART and read by the same code, so a sheet dropped under art/ and a column of
-// [column, row] here is the whole of putting painted icons in the game. Until then every
+// [column, row] here is all it takes to put painted icons in the game. Until then every
 // square keeps the shape src/icons.js draws for it, and nothing else changes either way.
-// `at` is empty because the sheet is not painted yet: that is the hole, and it closes by
+// `at` is empty because the sheet is not painted yet. That is the hole, and it closes by
 // filling this in rather than by touching any code.
 export const ITEM_ART = {
   sheet: null, // 'art/…-item-icons.png' once it exists
@@ -493,8 +492,8 @@ export const ITEM_ART = {
 //            whole: pixel art scaled by a fraction stops being pixel art.
 //   turn   — quarter turns clockwise to give the art before it is used, for a thing
 //            painted lying one way and wanted the other. A brook painted as a channel
-//            running across the frame is a brook running down the screen once it has been
-//            stood on its end, which is what a brook crossing a road looks like.
+//            running across the frame runs down the screen once it is stood on its end,
+//            which is how a brook crossing a road reads.
 //   shade  — a colour to multiply the art by, for art painted under a light the place
 //            does not have. A multiply only takes away, so this warms cold art by losing
 //            its blue rather than by adding anything; nothing comes out brighter.
@@ -507,8 +506,8 @@ export const ITEM_ART = {
 //            painted hard to the edge of the paint — sits on the landscape with a seam
 //            round it otherwise. Measured from the paint, not from the frame around it,
 //            and applied after the turn, so the sides are the sides it ends up with.
-// `ground` is per state because a state is drawn where it is drawn: the oak's roots run
-// to the bottom of its frame and the felled trunk sits well up inside its own, and both
+// `ground` is per state because each state sits differently in its frame: the oak's roots
+// run to the bottom of its frame, the felled trunk sits well up inside its own, and both
 // have to meet the same road. Measure it off the art once — it is the empty pixels under
 // the paint — and nothing has to be recut.
 const OAK = {
@@ -532,10 +531,9 @@ const OAK = {
   },
 };
 
-// Painted as a channel running across its frame, and turned a quarter so it runs down
-// the screen instead: out of the trees at the top, over the road in the middle, and off
-// the bottom of it. Its floor line is the middle of the water, because the middle of the
-// water is what the road runs into.
+// Painted as a channel running across its frame, and turned a quarter so it runs down the
+// screen instead: out of the trees at the top, over the road in the middle, and off the
+// bottom. Its floor line is the middle of the water, which is where the road meets it.
 const BROOK = {
   path: 'art/brook',
   stands: {
@@ -546,9 +544,9 @@ const BROOK = {
     // Painted cold — grey rock and cyan water — under a wood that is all warm brown and
     // amber, so it is pulled toward the Greywood's light rather than repainted.
     shade: 0xe4a387,
-    // It is painted long enough to reach halfway up the trunks, which is further into the
-    // wood than a brook crossing a road wants to be seen coming from. The far end is cut
-    // back so it comes out of the trees just above the path; the near end is left, because
+    // It is painted long enough to reach halfway up the trunks, which is further back into
+    // the wood than a brook crossing a road should be seen coming from. The far end is cut
+    // back so it comes out of the trees just above the path. The near end is left, because
     // that is the one running off under the card.
     trim: [0, 0, 44, 0],
     // Its banks are painted hard to the edge of the paint, so they are eaten back into
@@ -591,9 +589,9 @@ const BRACKEN = {
 };
 
 // The cart that went over and stayed over. Two generations and an overgrown dressing of
-// the first; the overgrown one is what the node wants, because twenty years is what it
-// says and twenty years is what has grown through this. The other two ship with it — the
-// same cart clean, and a second generation that went into a cut ditch instead.
+// the first. The overgrown one is what the node wants: the node says twenty years, and
+// twenty years is what has grown through this. The other two ship with it — the same
+// cart clean, and a second generation that went into a cut ditch instead.
 const CART = {
   path: 'art/cart',
   stands: {
@@ -682,8 +680,8 @@ const hollow = (name) => ({
     still: `${name}/rotations/${name}.png`,
     // A hole in the ground is a hole the road runs to the lip of, so its floor line goes
     // to the middle of the paint rather than the bottom of it: the far rim stays back
-    // among the trunks and the near rim comes on past the party, which is what makes it
-    // read as something you are looking down into rather than a patch beyond the path.
+    // among the trunks and the near rim comes on past the party, so it reads as
+    // something you are looking down into rather than a patch beyond the path.
     ground: 84,
     // The moss. The wood has no green in it at all — not one pixel of the backdrop's floor
     // band is green-dominant, where a sixth of this export is — so there is nothing to

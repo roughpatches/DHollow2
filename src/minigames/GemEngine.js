@@ -4,14 +4,14 @@
 //
 //  - The rough stone is drawn fresh every time: a lumpy blob, no two alike, and always
 //    big enough to hold the shape it is meant to become. That shape is laid over it in
-//    gold, and the whole of the work is bringing one down onto the other.
+//    gold, and the work is bringing one down onto the other.
 //  - LEFT/RIGHT walks the nodes round the rim. SPACE cuts at the node you are on: a flat
 //    facet, taken down to where the shape's own edge lies in that direction.
 //  - A cut takes a run of nodes, not the one you picked, and how many is rolled — so is
 //    where the run sits around your node. The facet is the plane across whatever the wheel
-//    actually took, which is why a wide cut that straddles a corner of the shape takes the
-//    corner with it. UP/DOWN is the bite: shallow takes less and slips less, deep clears a
-//    face in one and may cost you the next one. That is the whole of the risk.
+//    actually took, which is why a wide cut that straddles a corner of the shape takes
+//    the corner with it. UP/DOWN is the bite: shallow takes less and slips less, deep
+//    clears a face in one and may cost you the next one. That is the risk, all of it.
 //  - Cuts are counted and there are never enough to be careful with all of them. Nothing
 //    grows back: material cut away below the shape is gone, and the score says so.
 //  - Scored at the end, face by face, on how near the stone sits to the shape it was
@@ -86,10 +86,9 @@ export class GemEngine {
   }
 
   // The rough stone: a circle with a few slow waves taken out of it, so it is lumpy in a
-  // way that is different every time and never so lumpy that the shape will not fit inside
-  // it. The shape is then grown until it touches the tightest point, which is what makes
-  // every stone a stone that can be cut properly and none of them one that can be cut
-  // easily.
+  // way that is different every time and never so lumpy that the shape will not fit
+  // inside it. The shape is then grown until it touches the tightest point, so every
+  // stone can be cut properly and none of them can be cut easily.
   _rough() {
     const c = this.config;
     const waves = [2, 3, 5].map((k, i) => ({

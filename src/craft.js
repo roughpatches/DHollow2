@@ -223,12 +223,12 @@ export function make(r, played, opts = {}) {
   const take = (1 + moreOf(r)) * worth;
 
   // A cut is one stone whatever anybody's points are: what the work decides is the grade,
-  // and the grade is the wheel's own reading of it and nothing else's.
+  // and the grade is the wheel's reading of the work and nothing else.
   const stone = r.cuts ? cut(r.cuts, quality ?? 0) : null;
   // And a forge is one piece, on the same bargain — except that the anvil is the one
   // bench with a hard fail in it. A piece cracked under the hammer is no piece: the metal
-  // is in two halves on the floor and the bars that went into it are gone, which is what
-  // makes the soundness bar worth watching. Everything short of that is a piece, and how
+  // is in two halves on the floor and the bars that went into it are gone, which is why
+  // the soundness bar is worth watching. Everything short of that is a piece, and how
   // well the work went decides which grade of it.
   const cracked = !!(played && played.failed);
   const piece = r.forges && !cracked ? forge(r.forges, quality ?? 0) : null;
@@ -268,13 +268,13 @@ export function recipeLines(r) {
     `Takes: ${list(Object.entries(r.costs))}.`,
     gem
       // Points do not make a bigger stone, so the line says what the stone is worth at
-      // each grade instead: the whole of what a cut is for is which of the three it is.
+      // each grade instead: which of the three it is is all a cut decides.
       ? `Makes: one ${gem.name}, ${TUNING.gem.grades.map((g) => `${g.name} ${worthLine(gem, g)}`).join(' / ')}.`
       : kit
         // The same for a piece off the anvil, and for the same reason: one comes off it
         // however good the smith is, and how good the smith is decides which one. Except
-        // where it does not: jewellery is settings and nothing else, and a setting is a
-        // setting at any standard, so its line is said once rather than three times over.
+        // for jewellery, which is settings and nothing else, and a setting is a setting
+        // at any standard — so its line is said once rather than three times over.
         ? (kit.sockets
           ? `Makes: one ${kit.name} — ${kit.sockets} setting${kit.sockets === 1 ? '' : 's'}, `
             + 'whatever it comes off the anvil like.'

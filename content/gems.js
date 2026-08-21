@@ -12,10 +12,10 @@
 //   id     — how content/recipes.js and src/gear.js refer to it.
 //   name   — the cut stone's name. What it is called worn is the grade and this: a Fine
 //            Sapphire, a Flawless Ruby.
-//   tier   — 1, 2 or 3, and the whole of what a tier means is the length of each list: a
-//            tier one stone moves one number either way, a tier three stone moves three.
-//            It also says how hard the stone is to cut, where it is dug, and what metal
-//            will hold it — bronze takes tier one; see content/gear.js.
+//   tier   — 1, 2 or 3. What a tier means is the length of each list: a tier one stone
+//            moves one number either way, a tier three stone moves three. It also says
+//            how hard the stone is to cut, where it is dug, and what metal will hold
+//            it — bronze takes tier one; see content/gear.js.
 //   rough  — the material id it is cut from, out of content/materials.js. That is what
 //            drops; this list is what it becomes.
 //   combat — what it moves in a weapon, a shield or a piece of armour, `tier` of them,

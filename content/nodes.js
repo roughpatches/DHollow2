@@ -11,18 +11,18 @@
 //   d20 check, and the party takes one of them. A run only ever has one of each: the
 //   same thing happening twice on one walk out reads as the road running short.
 //
-// The two kinds ask for two different halves of content/skills.js, and that is the whole
-// difference between them:
+// The two kinds ask for different halves of content/skills.js, and that is what separates
+// them:
 //   A harvest names a GATHERING skill and nothing else — Woodcutting, Fishing, Mining,
 //   Herblore — and its activity is the StarScape engine that work is. src/run.js says so
 //   at boot if a harvest names anything outside that group. Herblore's engine is still
 //   being built, so a Foraging node names it, pays out and moves on until it lands.
 //   The resource table is kept full: every gathering skill has a node that is only that
-//   skill, and a node shared with each of the others. Four skills is four solo nodes and
-//   six pairings, which is the ten below. A point spent on any of them buys work nobody
-//   else's points can reach, and a second specialist in the party is always a question
-//   at some node rather than dead weight. src/run.js counts the table at boot and says
-//   which solo or which pairing is missing, so a fifth gathering skill names its own gap.
+//   skill, and a node shared with each of the others. Four skills makes four solo nodes
+//   and six pairings, which is the ten below. A point in any of them buys work nobody
+//   else's points can reach, and a second specialist is always worth bringing to some
+//   node. src/run.js counts the table at boot and names whichever solo or pairing is
+//   missing, so a fifth gathering skill announces its own gaps.
 //   A way through an encounter names ANY skill, gathering included. It is a roll against
 //   a DC and not a piece of work, so nothing has to have an engine behind it.
 //
@@ -55,14 +55,14 @@
 //             read against each other and need not add up to a hundred. Points in the
 //             skill take more off it and bend the table toward its scarce end; see
 //             tuning.js.
-//             `stones` is the third and is not part of the yield at all: one roll at the
-//             end of work that went well, against a table read like any other. How well
-//             the work was played decides whether anything is found — nothing under
-//             stoneFloor in tuning.js, and work no engine was played for finds none —
-//             and the party's points decide which of them it is. It is what a gem drops
-//             off; see content/gems.js. Write two of them and the node becomes a question the party is
-//             asked where they stand, so write two the same crew would want differently
-//             — not two spellings of one job.
+//             `stones` is the third and is not part of the yield: one roll at the end of
+//             work that went well, against a table read like any other. How well the work
+//             was played decides whether anything is found — nothing under stoneFloor in
+//             tuning.js, and work no engine was played for finds none — and the party's
+//             points decide which stone it is. This is where gems come from; see
+//             content/gems.js. Write two harvests and the node becomes a question asked
+//             where the party stands, so write two the same crew would answer
+//             differently rather than two spellings of one job.
 //             Each harvest carries its own three lines as well:
 //               text  — the way as it is offered, on the card the party reads on
 //                       arriving. Imperative and short. A harvest with none falls back to
@@ -76,21 +76,21 @@
 //                       whatever the number. A node whose engine has not been imported
 //                       yet is never played and always reads as `well`; write the other
 //                       two anyway, for the day it lands.
-//             A resource node's `body` is read on arriving at it, on the same card as the
-//             ways in — it is a description of a place, so it comes before the work and
-//             not after it. The tally afterwards says how the work went, not where it was.
+//             A resource node's `body` is read on arriving, on its own card in front of
+//             the one that offers the ways: it describes a place, so it comes before the
+//             work rather than after it. The tally afterwards says how the work went, not
+//             where it was.
 //
 // An encounter node also has:
 //   ways    — two or three of them. Each is `text` (the way as it is offered), the
 //             `skill` and `dc` it is rolled at, `tried` (the attempt, said before the
 //             roll is read back), and `held` / `lost`. `spoils` and `con` are what
 //             holding it is worth; `lostCon` is what losing it costs, written positive.
-//             Give every way a different skill — a way naming a skill nobody on the run
-//             has is shown and will not answer, and a node where all of them are shut is
-//             a node the party walks past. Three ways is a node that asks three different
-//             parties three different questions and is a third likelier to have something
-//             for the one standing in front of it; the card holds three and no more.
-//
+//             Give every way a different skill. A way naming a skill nobody on the run has
+//             is shown and will not answer, and a node where all of them are shut is one
+//             the party walks past. Three ways asks three different parties three
+//             different questions and is a third likelier to have something for whoever
+//             is standing there; the card holds three and no more.
 // And a COMBAT node — an encounter node carrying a foe — also has:
 //   foe     — an id from content/foes.js. Whatever the ways come to, this is what is
 //             standing there, and a node carrying one is only ever drawn after dark.
@@ -163,9 +163,9 @@ export const RESOURCE_NODES = [
     ],
   },
   {
-    // Woodcutting's own node. It came down last week: nothing has had time to grow on it
-    // and nothing else is standing here, so the whole of it is one job and the party
-    // either brought somebody who can do that job or turns round.
+    // Woodcutting's own node. It came down last week, so nothing has had time to grow on
+    // it and nothing else is standing here. It is one job: the party either brought
+    // somebody who can do it or turns round.
     id: 'deadfall',
     name: 'An oak gone over in the wind',
     zones: ['greywood'],
@@ -236,8 +236,8 @@ export const RESOURCE_NODES = [
     ],
   },
   {
-    // Fishing's own node. Deep, slow and overhung — there is nothing on the bank worth
-    // stopping for and no bottom worth turning over, so the water is the whole of it.
+    // Fishing's own node. Deep, slow and overhung: nothing on the bank worth stopping for
+    // and no bottom worth turning over, so the water is all there is here.
     id: 'pool',
     name: 'A deep pool under the bank',
     zones: ['greywood'],
@@ -248,8 +248,8 @@ export const RESOURCE_NODES = [
       {
         skill: 'fishing',
         activity: 'Casting',
-        // the big ones are down here and the small ones are not, which is the whole
-        // difference between this and the shallows
+        // the big ones are down here and the small ones are not, which is what separates
+        // this from the shallows
         text: 'Fish the undercut.',
         offer: 'Nothing shows on the top of it. What is worth taking is against the bank and under it.',
         done: {
@@ -386,8 +386,8 @@ export const RESOURCE_NODES = [
     ],
   },
   {
-    // The one node the crew you can actually put together at the start is asked a real
-    // question by: both halves of it are work somebody in Dreadhollow already knows.
+    // The one node that asks the starting crew a real question: both halves of it are work
+    // somebody in Dreadhollow already knows.
     id: 'logjam',
     name: 'A jam in the narrows',
     zones: ['greywood'],

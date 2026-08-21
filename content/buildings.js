@@ -47,7 +47,7 @@ export const BUILDINGS = [
     // Three stages, three pictures. The door is shut until the roof is back on: there is
     // nothing inside a burnt chapel but weather.
     // It is also what holds the party's level down. Nothing else in town carries a `cap`,
-    // so the chapel is the whole of it: three at a ruin, six shored up, nine roofed.
+    // so the chapel sets it alone: three at a ruin, six shored up, nine roofed.
     id: 'chapel',
     name: 'The chapel',
     map: 'woodend',
@@ -208,8 +208,8 @@ export const BUILDINGS = [
   },
   {
     // The east end of town, where the paving runs out over the mud. Nothing is made here
-    // yet: three stages of repair and no `craft` on any of them, so standing at it is
-    // repairing it and nothing else until there is work written for it.
+    // yet: three stages of repair and no `craft` on any of them, so standing at it only
+    // repairs it, until there is work written for it.
     id: 'docks',
     name: 'The docks',
     map: 'quay',

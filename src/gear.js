@@ -12,8 +12,8 @@
 // between jobs is not a decision anybody makes.
 //
 // And a piece is a thing rather than a kind of thing. Two masterwork daggers are two
-// daggers with two different stones in them, so every piece forged gets its own number and
-// is tracked one at a time. That is the whole reason this file does not count.
+// daggers with two different stones in them, so every piece forged gets its own number
+// and is tracked one at a time. That is why this file does not count.
 //
 // A socket is what a masterwork piece is for. Everything short of the top grade holds
 // nothing, and the exception is jewellery, which is nothing but sockets and holds them at
@@ -189,8 +189,8 @@ export function setIn(stoneKey) {
 }
 
 // Whether this piece could hold this stone at all: it has to have a socket free, and the
-// stone has to be no finer than the metal will carry. Bronze holds tier one, which is what
-// the Greywood pays out; a tier two stone in a bronze setting is a stone waiting for iron.
+// stone has to be no finer than the metal will carry. Bronze holds tier one, which is
+// what the Greywood pays out; a tier two stone in a bronze setting waits for iron.
 // This asks nothing about whether such a stone is to hand — moving one that is already set
 // is the same question, and it is already out of the drawer.
 export function couldHold(uid, stoneKey) {
@@ -219,8 +219,8 @@ export function setStone(uid, stoneKey) {
   return at;
 }
 
-// And back out onto the shelf. A setting is not a weld: a stone goes in and comes out, and
-// the piece is unchanged by having held one.
+// And back out onto the shelf. A setting is not a weld: a stone goes in and comes out,
+// and the piece is unchanged by having held one.
 export function pullStone(uid, at) {
   const m = rawOf(uid);
   if (!m || !m.sockets[at]) return null;
@@ -229,9 +229,9 @@ export function pullStone(uid, at) {
   return key;
 }
 
-// Every setting this stone could go into, jewellery first: jewellery is what a setting is
-// for, so it is the one offered before the rest. A socket already holding this stone is in
-// the list too, which is what lets one key walk it along them.
+// Every setting this stone could go into, jewellery first, because jewellery is what a
+// setting is for. A socket already holding this stone is in the list too, which is what
+// lets one key walk it along them.
 function couldTake(stoneKey) {
   const order = [...wornAll()].sort(
     (a, b) => (b.piece.slot === 'jewellery') - (a.piece.slot === 'jewellery'),

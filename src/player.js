@@ -58,8 +58,8 @@ export function cutBelow(sprite, line) {
   sprite.setCrop(0, 0, sprite.frame.width, Math.max(0, (line - top) / sprite.scaleY));
 }
 
-// Left and right, and nothing else: a street has one line on it and the whole of walking
-// a street is which way along it you are going.
+// Left and right, and nothing else: a street has one line on it, so walking a street is
+// only a question of which way along it you are going.
 export function updateStreetPlayer(player, keys) {
   let vx = 0;
   if (keys.left.isDown || keys.a.isDown) vx -= 1;
