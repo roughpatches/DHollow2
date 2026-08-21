@@ -1800,22 +1800,13 @@ export default class Quest extends Phaser.Scene {
     hs.forEach((h, i) => {
       const on = i === this.row;
       const shut = !h.score;
-      // The way itself, as it was written. A kind with nothing written for it falls back
-      // to naming the work, which is what every one of them read like before there was
-      // anything else to say.
+      // The way itself, as it was written, and nothing under it. A kind with nothing
+      // written for it falls back to naming the work. What the work is worth and who can
+      // do it were a readout stood in the middle of the writing: the way it is written is
+      // the whole of what the choice is made on now, and work nobody walking can do is
+      // greyed out rather than explained.
       out.push([`${shut ? '·' : on ? '>' : ' '} ${h.text || `${h.activity} — ${h.skill.name}`}`,
         TUNING.questBodySize, shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
-      if (h.offer) {
-        out.push([`    ${h.offer}`, TUNING.questHintSize,
-          shut ? COLORS.menuRule : on ? COLORS.menuText : COLORS.menuRule]);
-      }
-      // The work and the skill it is done with, unless they are the same word — Mining is
-      // mined and there is no sense in saying so twice.
-      const named = h.activity === h.skill.name ? '' : `${h.activity} — `;
-      out.push([shut
-        ? `    ${named}nobody walking this has a point of ${h.skill.name}.`
-        : `    ${named}${h.skill.name} ${h.score} between you, ${Math.round(h.more * 100)}% more off it.`,
-      TUNING.questHintSize, shut ? COLORS.menuRule : COLORS.menuDim]);
     });
     return [...out, ...this.packLines()];
   }
