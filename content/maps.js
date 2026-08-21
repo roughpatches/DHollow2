@@ -5,6 +5,13 @@
 // `indoors: true` on a map says it is a room rather than the open air: anybody with a
 // second look painted for indoors is drawn from that one on it. See content/looks.js.
 //
+// `light` on a street is the colour anybody standing on it is lit by — the tint laid over
+// a body so it is in the picture rather than on top of it. Exports are painted at full
+// strength and no two of these panels were painted at the same hour, so a panel that is
+// darker or warmer than the town says so here: lower is dimmer, and a warm one loses its
+// blue. White is no light at all. A panel that says nothing takes COLORS.streetLight,
+// which is the town's own evening and what every panel used to be lit by.
+//
 export const MAPS = {
   // Where the player wakes up the morning after. Aldis carried them here.
   // A room walked along rather than around, like the Sea Hag: the same panel, the same

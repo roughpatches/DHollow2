@@ -23,6 +23,13 @@ export const TUNING = {
   // from boot to crown — so their pixels land on the panel's pixels rather than being
   // resampled, which is most of why they used to read small.
   streetBodyPx: 62,
+  // What that height is rounded to. An export scaled by whatever the two heights happen to
+  // make — 0.512 for the player, 1.564 for the landlord behind his bar — has rows of its
+  // pixels dropped and doubled in an uneven pattern, and comes out soft beside a painting
+  // laid down at 1:1. On a half it is regular, and the body lands a pixel or two off the
+  // height above, which nobody can see. At 1 nothing is ever drawn at anything but its own
+  // size or a whole multiple of it, which is stricter than these exports can stand.
+  bodyScaleStep: 0.5,
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
@@ -45,6 +52,18 @@ export const TUNING = {
   // has just run up the road.
   streetBreathPx: 1,
   streetBreathMs: 3400,
+
+  // The sky and the sea a panel with no painting draws for itself (see weatherFor in
+  // src/street.js): how many colours each of the two ramps is made of. The rest of the
+  // way from one end to the other is carried by a 4x4 ordered dither, so every pixel of
+  // the weather is one of a handful of colours rather than one of three hundred — a ramp
+  // mixed fresh on every row is the one thing on the screen that is not pixel art, and it
+  // bands in stripes anyway. Fewer is coarser and more openly drawn; many more and the
+  // dither has nothing left to do.
+  streetSkySteps: 14,
+  streetSkyMix: 0.45, // and how much of each step the two colours are mixed across, the
+  // rest of it being the one colour flat. At 1 the whole ramp is mixed, which is hatching
+  // laid over the sky rather than a sky; at 0 it is hard bands and no dither at all.
 
   // What goes up off a chimney (src/ambient.js). Only a panel that names its chimneys has
   // any; see `smoke` in content/maps.js.
@@ -100,6 +119,30 @@ export const TUNING = {
   // into each other, so the lamp never comes back round to where it was
   streetFlickerRange: [0.55, 1], // how far down the flame goes and how far up: never to
   // nothing, because a lamp somebody keeps lit is down rather than out
+  // And what that lamp throws (src/ambient.js). The picture gutters and until now nothing
+  // around it did: no pool on the cobbles, nobody warming as they walked past, and the
+  // same shadow at somebody's feet ten pixels from the post as fifty. All of it is read
+  // off the flame's own alpha rather than kept on a clock of its own, so the light on the
+  // ground and the light on a face gutter with the flame and cannot drift out of step
+  // with it. Only a prop with a lit picture throws any; see PROPS in content/looks.js.
+  streetLampReach: 96, // how far down the road the light carries, in pixels
+  streetLampFall: 1.8, // and how sharply it gives out over that distance. 1 is a straight
+  // ramp out to nothing; higher keeps the light close about the post, which is what a
+  // flame in a glass does and a floodlight does not
+  streetLampPool: 52, // how far the pool on the cobbles reaches from the foot of the post
+  streetLampPoolAlpha: 0.34, // and how strong it is there at full flame. It is added to
+  // the painting rather than laid over it: light falling on a street is light, and a pale
+  // shape laid over cobbles is a puddle
+  streetLampPoolSteps: 4, // and how many steps it gives out over, the way the smoke thins
+  // in steps: one ring is a line drawn round the light rather than light falling on a street
+  streetLampWarm: 0.5, // how far a body under it is carried off the panel's own light
+  // toward the flame's colour. At 0 nobody warms, which is the game as it was
+  streetLampCast: 30, // and the longest their own shadow is thrown by it, which is about
+  // halfway out of the reach: under the post the light is overhead and the shadow is under
+  // their boots, and past the reach there is no light to cast one. It keeps the end under
+  // their boots and stretches at the other, because a shadow that slides out from under
+  // somebody is a shadow with nobody standing in it
+
   streetGlowDark: 40, // how dark a pixel inside a lit window's rect has to be to count as
   // the glass rather than the sash across it: the glass on these windows reads about 15
   // and the bars about 100, so there is a wide gap to sit in

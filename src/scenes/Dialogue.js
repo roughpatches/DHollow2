@@ -3,6 +3,7 @@ import { setting } from '../settings.js';
 import { buildTextures, portraitKey } from '../textures.js';
 import { fill } from '../party.js';
 import { framed, padOf } from '../frames.js';
+import { fitCamera, crispType } from '../view.js';
 
 const BOX = 'parchment'; // talking happens in the town, so it happens on the town's paper
 const FACE = 'plate';
@@ -16,12 +17,14 @@ export default class Dialogue extends Phaser.Scene {
   }
 
   create() {
+    fitCamera(this);
+    crispType(this);
     buildTextures(this);
 
     const m = TUNING.dialogueBoxMargin;
     const ps = TUNING.dialoguePortraitSize;
     const h = TUNING.dialogueBoxHeight;
-    const top = this.scale.height - h - m;
+    const top = TUNING.viewHeight - h - m;
     this.metrics = { m, ps, h, top };
 
     // the panel is hung on the first line the box is opened with, not here: the sheet it
@@ -74,7 +77,7 @@ export default class Dialogue extends Phaser.Scene {
   layout(withPortrait) {
     const { m, ps, h, top } = this.metrics;
     const bx = withPortrait ? m + ps + TUNING.dialoguePortraitGap : m;
-    const w = this.scale.width - bx - m;
+    const w = TUNING.viewWidth - bx - m;
 
     const pad = this.pad;
     this.box.removeAll(true);

@@ -4,6 +4,7 @@ import {
   setSkills, spendPoints, pointsOf, rankOf, worthOf, YOU,
 } from '../party.js';
 import { framed, padOf, inkOf } from '../frames.js';
+import { fitCamera, crispType } from '../view.js';
 
 const PANEL = 'parchment'; // the sheet is filled in at Aldis's table, which is in the town
 
@@ -17,8 +18,10 @@ export default class Skills extends Phaser.Scene {
   }
 
   create() {
+    fitCamera(this);
+    crispType(this);
     const p = TUNING.questPad;
-    this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
+    this.box = { x: p, y: p, w: TUNING.viewWidth - p * 2, h: TUNING.viewHeight - p * 2 };
     const pad = padOf(PANEL);
     this.left = this.box.x + pad.l;
     this.wide = this.box.w - pad.l - pad.r;

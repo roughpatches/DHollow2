@@ -22,6 +22,7 @@ import { rewardToast, clearToast } from '../toast.js';
 import { rollCard, clearRoll } from '../roll.js';
 import { markKey } from '../textures.js';
 import { hasEngine, engineFor, hintFor, qualityLine } from '../activity.js';
+import { fitCamera, crispType } from '../view.js';
 
 // What a pan on a camp fire came to, in the few words the card has room for. Nothing is
 // said about a pan that is still on it — the engine is drawing that.
@@ -55,6 +56,8 @@ export default class Quest extends Phaser.Scene {
   }
 
   create() {
+    fitCamera(this);
+    crispType(this);
     this.sizeTo(null);
 
     this.layer = this.add.container().setDepth(29000).setVisible(false);
@@ -75,7 +78,7 @@ export default class Quest extends Phaser.Scene {
   // is no longer behind them, so it takes the whole screen.
   sizeTo(mode) {
     const p = mode === 'run' ? 0 : TUNING.questPad;
-    this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
+    this.box = { x: p, y: p, w: TUNING.viewWidth - p * 2, h: TUNING.viewHeight - p * 2 };
     // The frame is the margin. A screen is written inside the flat of whichever panel it
     // is drawn in, so nothing runs under the ironwork at either edge.
     const pad = padOf(this.frame(mode));

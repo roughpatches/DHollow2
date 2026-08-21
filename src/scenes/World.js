@@ -10,7 +10,7 @@ import {
   raiseProps, restate, occasionalIdle, lookIn, faceFor,
 } from '../art.js';
 import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
-import { createFlicker } from '../ambient.js';
+import { createFlicker, createLamplight } from '../ambient.js';
 import { preloadFrames, buildFrames } from '../frames.js';
 import { preloadIcons, buildIcons } from '../icons.js';
 import { findTarget, faceToward } from '../interact.js';
@@ -20,6 +20,7 @@ import {
 } from '../town.js';
 import { worksAt } from '../craft.js';
 import { applyToWorld } from '../settings.js';
+import { crispType } from '../view.js';
 import { SCENES, START } from '../../content/scenes.js';
 import { play, hasPlayed, holdBack } from '../script.js';
 import * as story from '../story.js';
@@ -59,6 +60,10 @@ export default class World extends Phaser.Scene {
     buildIcons(this);
     const map = MAPS[this.mapKey];
     this.street = map.street;
+    // before anything writes a line: the town's camera is zoomed, so the name written over
+    // the player's head is baked at that zoom as well. Said here rather than after the fact
+    // because buildStreet writes that line. See src/view.js.
+    crispType(this, map.street ? TUNING.streetZoom : TUNING.zoom);
     this.buildStreet(map);
 
     this.npcs = [];
@@ -74,7 +79,7 @@ export default class World extends Phaser.Scene {
       // the aisle, and what shows of them is cut at the line they are standing behind
       const palette = lookIn(def.palette, map.indoors);
       const npc = spawnStreetActor(this, palette, def.x,
-        def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx);
+        def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx, this.light);
       // and their feet are behind it too, so the pool that would be under them is not
       // theirs to cast on this side of the bar
       if (def.behind) {
@@ -100,6 +105,9 @@ export default class World extends Phaser.Scene {
       // get past you, so people are walked through rather than walked around.
       npc.setDepth(DEPTH.npc);
     }
+
+    // everybody standing on the panel, for whatever lights them; see this.lamplight
+    this.actors = [this.player, ...this.npcs];
 
     const cam = this.cameras.main;
     cam.setBounds(0, 0, this.worldW, this.worldH);
@@ -161,6 +169,7 @@ export default class World extends Phaser.Scene {
 
     this.events.once('shutdown', () => {
       for (const a of this.ambient) a.destroy();
+      this.lamplight?.destroy();
       this.game.events.off('dialogue:end', afterDialogue);
       this.game.events.off('menu:open', freeze);
       this.game.events.off('menu:close', unfreeze);
@@ -181,6 +190,7 @@ export default class World extends Phaser.Scene {
     this.groundY = street.ground; // where a person walks
     this.sillY = street.sill; // and where a building stands, which is further back
     this.bodyPx = street.body; // and how tall a person is drawn, which is the panel's own
+    this.light = street.light; // and the light they are lit by, which is the panel's too
     this.reachScale = street.body / TUNING.streetBodyPx; // and so how far an arm reaches
     this.worldW = street.width;
     this.worldH = street.height;
@@ -188,7 +198,7 @@ export default class World extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, street.width, street.height);
 
     this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body,
-      lookIn('player', map.indoors));
+      lookIn('player', map.indoors), street.light);
     this.player.setDepth(DEPTH.player);
     this.playerY = street.ground; // the line they stand on, to breathe against
 
@@ -196,6 +206,10 @@ export default class World extends Phaser.Scene {
     // whatever is standing about the town, and the flame in any of it that carries one
     const lit = raiseProps(this, this.mapKey);
     if (lit.length) this.ambient.push(createFlicker(lit));
+    // and what those flames throw on the street and on whoever is standing in it. It is
+    // not weather and is not in `ambient` with the rest: it has the last word on where a
+    // shadow lies, so it runs at the end of the frame rather than the start of it.
+    this.lamplight = lit.length ? createLamplight(this, lit, DEPTH.lamplight) : null;
 
     this.hint = this.add.text(0, 0, '', {
       fontFamily: TUNING.font,
@@ -223,6 +237,8 @@ export default class World extends Phaser.Scene {
     this.showHint();
     this.idles();
     this.takeUp();
+    // last, because it moves the shadows idles() has just put under everybody's feet
+    this.lamplight?.update(this.actors, this.light);
   }
 
   // A street is a panel, not a stretch of something longer: walk into the end of one and

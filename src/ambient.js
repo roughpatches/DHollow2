@@ -366,6 +366,97 @@ export function createFlicker(lamps) {
   };
 }
 
+// What a lamp throws. createFlicker above gutters the picture and nothing else: the flame
+// came up and died down and the street it stood in never changed. This is the rest of it —
+// a pool of light on the cobbles, anybody near it carried off the panel's own light toward
+// the flame's colour, and their shadow thrown away from the post rather than sitting under
+// their boots wherever they stand.
+//
+// Nothing here keeps a clock. The lamp is already guttering on two slow sines that never
+// come round together, and its alpha is read off the picture every frame: a pool given a
+// waver of its own would be a second flame in the same glass, and the two would drift.
+// The flicker is stepped, so the light on the ground and on a face is stepped with it.
+//
+// It owns where a body's shadow lies, which is why it is updated after the scene has put
+// that shadow under their feet — see World.update. A panel with no lit prop on it has none
+// of this and the shadow stays where the scene put it.
+export function createLamplight(scene, lamps, depth) {
+  // The pool is a few rings inside one another rather than one shape, each adding its own
+  // share of the light: brightest under the post where all of them lie over each other, and
+  // giving out in steps toward the edge. One ellipse is a hard line drawn round the light,
+  // which reads as a shape painted on the cobbles rather than as anything falling on them —
+  // and stepping it is what the smoke and the glints already do, for the same reason.
+  // Each is filled solid and carried on its object alpha, which is where the flame is read
+  // in: a shape's fill alpha and its object alpha multiply, so a ring built with its fill
+  // at nothing stays at nothing however bright the lamp gets.
+  const steps = TUNING.streetLampPoolSteps;
+  const pools = [];
+  for (const lamp of lamps) {
+    for (let i = steps; i > 0; i--) {
+      const reach = (TUNING.streetLampPool * i) / steps;
+      pools.push({
+        lamp,
+        ring: scene.add.ellipse(lamp.x, lamp.y,
+          reach * 2, reach * 2 * TUNING.streetShadowDeep, COLORS.streetGlow)
+          .setDepth(depth).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0),
+      });
+    }
+  }
+
+  // How much of the nearest lamp is on somebody standing at x, and how far it throws their
+  // shadow. The light is nothing outside the reach, all of it at the foot of the post, and
+  // the flame's own strength scales both.
+  // The throw is not which side of the post they are on: it is nothing directly under it,
+  // longest about halfway out, and nothing again at the edge of the reach — which is what
+  // a light overhead does, and is also the only shape that does not jump. On the sign
+  // alone a shadow the length of itself swaps ends the moment somebody walks past a lamp.
+  // In whole pixels, because everything else on this panel is.
+  function nearest(x) {
+    let most = 0;
+    let cast = 0;
+    for (const sp of lamps) {
+      const out = (x - sp.x) / TUNING.streetLampReach;
+      if (Math.abs(out) >= 1) continue;
+      const near = (1 - Math.abs(out)) ** TUNING.streetLampFall * sp.alpha;
+      if (near <= most) continue;
+      most = near;
+      cast = Math.round(4 * out * (1 - Math.abs(out)) * TUNING.streetLampCast * sp.alpha);
+    }
+    return [most, cast];
+  }
+
+  return {
+    // `light` is the panel's own, which is what anybody out of reach of every lamp keeps
+    update(bodies, light) {
+      // every ring its own share, so where all of them lie together the light is whole
+      for (const p of pools) {
+        p.ring.setAlpha((p.lamp.alpha * TUNING.streetLampPoolAlpha) / steps);
+      }
+
+      for (const b of bodies) {
+        // measured off the physics body rather than the sprite, the way the scene measures
+        // where to put the shadow, and for the same reason: the sprite catches up a frame late
+        const [near, cast] = nearest(b.body ? b.body.center.x : b.x);
+        b.setTint(near > 0 ? blend(light, COLORS.streetGlow, near * TUNING.streetLampWarm) : light);
+        const shade = b.shade;
+        if (!shade) continue;
+        if (shade.base === undefined) shade.base = shade.width;
+        // Half the stretch on the centre and the whole of it on the width, so the end
+        // under their boots stays where it is and only the far end reaches.
+        if (shade.width !== shade.base + Math.abs(cast)) {
+          shade.setSize(shade.base + Math.abs(cast), shade.height);
+        }
+        shade.x += cast / 2;
+      }
+    },
+
+    destroy() {
+      for (const p of pools) p.ring.destroy();
+      pools.length = 0;
+    },
+  };
+}
+
 // A room lit behind a window somebody painted dark. Everything else here moves what the
 // painting already has; this puts something in it that was never there, so it is done as
 // carefully as that deserves: the light is laid only on the pixels the painting drew as
