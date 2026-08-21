@@ -46,9 +46,9 @@ const PIP = 'plate'; // and the small square a walked node is hung in, down on t
 
 // The crawl. Runs over World, which freezes behind it. Three bands: the party's
 // constitution across the top, the party walking the landscape in the middle, and the
-// trail they are on along the bottom — what they have walked, what they are standing in,
-// and how many blanks are still in front of them. A node is not a node until it has
-// walked into view, so the card over the landscape only opens when they reach it.
+// trail along the bottom — what they have walked, what they are standing in, and how many
+// blanks are still ahead. A node is not a node until it has walked into view, so the card
+// over the landscape only opens when they reach it.
 export default class Quest extends Phaser.Scene {
   constructor() {
     super('Quest');
@@ -71,8 +71,8 @@ export default class Quest extends Phaser.Scene {
   }
 
   // The board, the hour and the crew are panels over wherever you are standing, because
-  // you are still standing there. The crawl is not: once the party has set out, the town
-  // is not behind them any more, so it takes the whole screen.
+  // you are still standing there. The crawl is not — once the party has set out the town
+  // is no longer behind them, so it takes the whole screen.
   sizeTo(mode) {
     const p = mode === 'run' ? 0 : TUNING.questPad;
     this.box = { x: p, y: p, w: this.scale.width - p * 2, h: this.scale.height - p * 2 };
@@ -85,9 +85,9 @@ export default class Quest extends Phaser.Scene {
     this.foot = this.box.y + this.box.h - pad.b;
   }
 
-  // The board, the hour and the crew are opened standing in Dreadhollow, so they are the
-  // town's parchment. The crawl is bands of the road's own ironwork: once they have set
-  // out they are not in the town any more, and the screen says so before a word is read.
+  // The board, the hour and the crew are opened standing in Dreadhollow, so they use the
+  // town's parchment. The crawl uses the road's own ironwork, so the screen says they have
+  // left town before a word of it is read.
   frame(mode = this.mode) {
     return mode === 'run' ? 'band' : 'parchment';
   }
@@ -121,9 +121,9 @@ export default class Quest extends Phaser.Scene {
     this.game.events.emit('quest:open');
   }
 
-  // Taking a job is answering however many questions it leaves open. Standing work off
-  // the board asks all three — how long, when, and where — and a written job asks only
-  // the hour, and only if it was written to leave that free.
+  // Taking a job means answering whatever it leaves open. Standing work off the board asks
+  // all three — how long, when, where. A written job asks only the hour, and only if it
+  // was written to leave that free.
   take(job) {
     this.job = job;
     this.times = job.procedural ? run.allTimes(job) : run.timesFor(job);
@@ -270,15 +270,14 @@ export default class Quest extends Phaser.Scene {
     }
 
     const r = run.active();
-    // A throw still in the air takes the next key and nothing else does: the die comes
-    // down where it stands and the card comes up behind it, so nobody presses past the
-    // one thing they were waiting on.
+    // A throw still in the air takes the next key and nothing else does. The die comes down
+    // where it stands and the card comes up behind it, so nobody presses past the one thing
+    // they were waiting on.
     if (this.holding) { this.landRoll(); return; }
     if (this.activity) {
-      // The engine has the controls: space winds up and releases, and every arrow is
-      // handed over by the name of its direction. What an engine has no use for it
-      // ignores — the axe takes two of them, the pot takes all four. Nothing else is
-      // listening.
+      // The engine has the controls: space winds up and releases, and every arrow is passed
+      // through by the name of its direction. An engine ignores what it has no use for —
+      // the axe takes two arrows, the pot takes all four. Nothing else is listening.
       if (k === ' ') this.activity.chargeStart();
       else if (k === 'arrowleft' || k === 'a') this.activity.setSide('left');
       else if (k === 'arrowright' || k === 'd') this.activity.setSide('right');
@@ -457,27 +456,27 @@ export default class Quest extends Phaser.Scene {
     else if (recruit.asked(id, this.job, this.when_).willing) this.taking.push(id);
   }
 
-  // The crew is settled, so what they can carry is settled. Packing is the last thing
-  // asked before the gate, and it is asked here rather than in the town's menu because it
-  // is a decision about this job: what is worth a square on this road, at this hour, with
-  // these four.
+  // The crew is settled, so what they can carry is settled. Packing is the last thing asked
+  // before the gate, and it is asked here rather than in the town's menu because it is a
+  // decision about this job: what is worth a square on this road, at this hour, with these
+  // four.
   //
-  // Two grids. The town's shelves on the left, which is where the cursor is, and the pack
-  // on the right, which is a readout of what the left one has done. The pack is drawn at
-  // exactly the number of squares the crew is worth, empties and all, because how much
-  // room is left is the whole question.
+  // Two grids. The town's shelves on the left, where the cursor is, and the pack on the
+  // right, which reads back what the left one has done. The pack is drawn at exactly the
+  // number of squares the crew is worth, empties included, because the question is how
+  // much room is left.
   toPacking() {
     this.bring = {};
     this.mode = 'pack';
     this.row = 0;
   }
 
-  // What is still on the shelves, a square at a time: the gear, then the stones, then what
-  // the town has in stock. What has been packed has left the shelf and is drawn in the
-  // other grid, so the two together always add up to what the town owns — except for a
-  // thing taken down to none, which keeps one empty square so there is somewhere to put it
-  // back to. A stone set in something keeps its square for the same reason: it is chosen
-  // from this grid, so it has to stay pointable at.
+  // What is still on the shelves, a square at a time: gear, then stones, then the town's
+  // stock. Anything packed has left the shelf and is drawn in the other grid, so the two
+  // together add up to what the town owns. A thing taken down to none keeps one empty
+  // square so there is somewhere to put it back to, and a stone set in something keeps its
+  // square for the same reason: settings are chosen from this grid, so it has to stay
+  // something the cursor can reach.
   packRows() {
     const out = [];
     // Gear first and stones second, because neither of them costs a square and the two
@@ -548,13 +547,12 @@ export default class Quest extends Phaser.Scene {
     }
   }
 
-  // One key does both halves of getting kitted out, because they are the same decision
-  // made twice. On a piece it puts it on, and a second press takes it off; putting on a
-  // second thing for the same slot sends the first back to the shelf rather than losing
-  // it. On a stone it walks the stone along every setting that will have it and then off
-  // the end of them — jewellery first, since a ring is what a setting is for. That matters
-  // more than it used to: a stone in a ring is a skill and the same stone in a sword is a
-  // fight, so which setting it lands in is the whole decision and not a formality.
+  // One key does both halves of getting kitted out. On a piece it puts it on, and a second
+  // press takes it off; putting on a second thing for the same slot sends the first back
+  // to the shelf rather than losing it. On a stone it walks the stone along every setting
+  // that will have it and then off the end — jewellery first, since a ring is what a
+  // setting is for. Which setting it lands in matters: a stone in a ring is a skill, and
+  // the same stone in a sword is a fight.
   equip(row) {
     if (!row) return;
     if (row.gear) { wearGear(row.w.uid); return; }
@@ -636,9 +634,9 @@ export default class Quest extends Phaser.Scene {
     while (packed.length < room) packed.push(null);
     const packBottom = draw({ x: packX, y, w: packWide }, packed, -1);
 
-    // What is on, under the pack and not in it. A line for every slot whatever is in it,
-    // because an empty slot is the thing worth seeing, and its settings under it where it
-    // has any: what is in a piece is as much a decision as which piece it is.
+    // What is worn, under the pack rather than in it. A line for every slot whether it is
+    // filled or not, because an empty slot is the thing worth seeing, with its settings
+    // under it: what is in a piece is as much a decision as which piece it is.
     let sy = packBottom + 10;
     sy += this.text(packX, sy, 'On the body', TUNING.menuRowSize, COLORS.menuDim).height + 4;
     for (const slot of SLOTS) {
@@ -672,9 +670,9 @@ export default class Quest extends Phaser.Scene {
     } else if (r && r.stone) {
       const set = setIn(r.key);
       ty += this.text(this.left, ty, fullName(r.gem, r.grade), TUNING.menuRowSize, COLORS.menuAccent).height + 2;
-      // A stone that is going somewhere is told what it will be worth there and nothing
-      // else — the other half of it is not the question any more. A stone with nowhere to
-      // go is told both halves, because that is what it is choosing between.
+      // A stone with a setting in view is told what it will be worth there and nothing else,
+      // because the other half is no longer the question. A stone with nowhere to go is told
+      // both halves, since that is what it is choosing between.
       const into = set || (r.n > 0 ? firstTaking(r.key) : null);
       const worth = into
         ? `${sideLine(r.gem, r.grade, into.piece.slot)} in your ${gearName(into.piece, into.grade).toLowerCase()}`
@@ -706,9 +704,9 @@ export default class Quest extends Phaser.Scene {
   begin(when) {
     const r = run.start(this.job.id, when, this.taking,
       { size: this.size_, where: this.where_ }, this.bring || {});
-    // The board and the crew are panels over the town because the party is still standing
+    // The board and the crew are panels over the town, because the party is still standing
     // in it. Once they have set out they are not, so the crawl paints its own ground and
-    // the town behind it is gone rather than showing through the ironwork.
+    // the town does not show through the ironwork.
     this.cameras.main.setBackgroundColor(COLORS.bg);
     this.mode = 'run';
     this.sizeTo(this.mode);
@@ -731,9 +729,9 @@ export default class Quest extends Phaser.Scene {
   bands() {
     const b = this.box;
     const pad = padOf('band');
-    // The band over the road holds the constitution and, where anybody on the run fights,
-    // a slim bar apiece under it: hit points are nobody's but their own, so they are not
-    // in the pool and they are not on the pool's bar.
+    // The band over the road holds the constitution and, where anybody on the run fights, a
+    // slim bar apiece under it. Hit points belong to each fighter, so they are not in the
+    // pool and not on the pool's bar.
     const hp = this.fightersOn();
     const barY = hp.length
       ? b.y + pad.t + 2
@@ -880,8 +878,8 @@ export default class Quest extends Phaser.Scene {
   }
 
   // Set out when? What each hour costs is shown rather than described, so the choice is
-  // made on what the run will actually be. An hour with nothing written to walk in it
-  // stays on the screen and will not answer: it is coming, and saying so is the point.
+  // made on what the run will be. An hour with nothing written to walk in it stays on the
+  // screen and will not answer — it is coming, and the point is to say so.
   when() {
     let y = this.top;
     y += this.text(this.left, y, this.job.label, TUNING.questTitleSize, COLORS.menuAccent).height + 6;
@@ -915,8 +913,8 @@ export default class Quest extends Phaser.Scene {
     this.hint('[Up/Down] Choose    [Enter] Set out    [Esc] Back');
   }
 
-  // And where. A place is its ground, what is in it, and what the hour will be made of
-  // once you are standing there — which is the whole of what separates one from another.
+  // And where. A place is its ground, what is in it, and what the hour will be made of once
+  // you are standing there. Those three are what separate one place from another.
   where() {
     const places = run.zones();
     let y = this.top;
@@ -955,7 +953,7 @@ export default class Quest extends Phaser.Scene {
   }
 
   // Who will come, who will not, and the arithmetic behind both. A refusal the player
-  // cannot account for reads as unfairness, so the whole sum is on the page.
+  // cannot account for reads as unfair, so the sum is on the page.
   party() {
     const all = roster();
     const short = this.job.party - (1 + this.taking.length); // you are already on it
@@ -1081,10 +1079,10 @@ export default class Quest extends Phaser.Scene {
     const r = run.active();
     const band = this.bands();
     this.pages = 1;
-    // what the card is showing, in one string: when it changes, it is read from the top
+    // what the card is showing, in one string: when it changes the card is read from the top
     const sig = `${r.state}:${r.at}:${r.phase}:${r.nodes[r.at]?.beat?.id || ''}`;
-    // and a throw still in the air belonged to the card that was showing when it was
-    // made, so moving on takes it down with that card
+    // a throw still in the air belonged to the card showing when it was made, so moving on
+    // takes it down with that card
     if (sig !== this.cardSig) { this.cardSig = sig; this.page = 0; clearRoll(); this.holding = false; }
 
     // A node the party has not walked up to yet is not a node they know anything about,
@@ -1106,9 +1104,9 @@ export default class Quest extends Phaser.Scene {
     // the node, or off the last beat of the walk up to it
     if (r.state === 'running' && r.phase === 'activity' && !this.approaching) this.startActivity();
 
-    // The die, thrown the first time the card showing it is drawn. Kept by the check
-    // itself rather than by which node it was: every roll is its own object, so a beat
-    // that rolls a second time at the same node is a second throw and a redraw is not.
+    // The die, thrown the first time the card showing it is drawn. Keyed on the check
+    // itself rather than the node, because every roll is its own object: a beat that rolls
+    // a second time at the same node is a second throw, and a redraw is not.
     const throwing = !this.approaching ? this.rollShown(r) : null;
     if (throwing && this.thrown !== throwing) {
       this.thrown = throwing;
@@ -1119,11 +1117,10 @@ export default class Quest extends Phaser.Scene {
       });
     }
 
-    // What the node gave up, raised the moment it is settled and taken down again when the
-    // party walks on from it — the card under it says nothing about what it paid, so the
-    // tally has to stand as long as the card does. Raised once per node: the card is
-    // redrawn on every keypress, and a tally that came back with the page turn would be a
-    // tally nobody could read past.
+    // What the node gave up, raised the moment it settles and taken down when the party
+    // walks on. The card under it says nothing about what was paid, so the tally has to
+    // stand as long as the card does. Raised once per node: the card is redrawn on every
+    // keypress, and a tally that came back with each page turn could not be read past.
     const settled = r.state === 'running' && r.phase === 'node';
     if (!settled || this.toasted !== r.at) clearToast();
     if (settled && !this.approaching && !this.holding && this.toasted !== r.at) {
@@ -1148,18 +1145,18 @@ export default class Quest extends Phaser.Scene {
     }
     else if (r.state === 'running' && r.phase === 'activity') this.activityHead(r, band.walk);
     else if (r.state === 'running' && r.phase === 'beat' && !this.approaching && !this.holding) {
-      // A beat can be the moment the thing on the road stops being there — the heron
-      // taking flight rather than a tree coming down, but the same change of state.
-      // Said on every draw of the beat and not once when it is reached: the loop it
-      // starts is played with ignoreIfPlaying, so saying it twice changes nothing.
+      // A beat can be the moment the thing on the road stops being there — the heron taking
+      // flight rather than a tree coming down, but the same change of state. Called on
+      // every draw of the beat rather than once on reaching it: the loop it starts is
+      // played with ignoreIfPlaying, so calling it twice changes nothing.
       if (r.nodes[r.at].beat.leaves) this.walk.felled();
       this.card(band.walk, this.beatLines(r), this.nodeHead(r), !r.nodes[r.at].beat.choose);
     }
     else if (r.state === 'running' && !this.approaching && !this.holding) {
-      // A node that was played out in its beats has said everything written for it by the
-      // time it settles, and the card carries nothing else now. Rather than stand an empty
-      // panel on the road, it is not hung at all: the tally is up, the hint says press on,
-      // and the landscape is left to be looked at.
+      // A node played out in its beats has said everything written for it by the time it
+      // settles, so the card would be empty. Rather than stand an empty panel on the road
+      // it is not hung at all: the tally is up, the hint says press on, and the landscape
+      // is left to look at.
       const lines = this.nodeLines(r);
       if (lines.length) this.card(band.walk, lines, this.nodeHead(r), true);
       else this.pages = 1;
@@ -1201,14 +1198,14 @@ export default class Quest extends Phaser.Scene {
     return run.atHand().length ? '    [1-9] Cook, eat or drink' : '';
   }
 
-  // The constitution, and nothing else on the band with it. It is the one readout that
-  // has to be taken at a glance — at nothing the run is over wherever it stands — and a
-  // length that is going down says that faster than a sentence about it does. What each
-  // node took is said on the card at that node, which is where it happened.
+  // The constitution, and nothing else on the band with it. It is the one readout that has
+  // to be taken at a glance — at nothing the run is over where it stands — and a shortening
+  // bar says that faster than a sentence would. What each node took is said on the card at
+  // that node, where it happened.
   //
-  // Iron, like everything else on the screen: a sunk trough, a rim lit along its top,
-  // and a rivet driven in at each end. What is left in them is the gold the leaves are,
-  // and it goes the red they go as it runs out.
+  // Iron, like everything else on the screen: a sunk trough, a rim lit along the top, and
+  // a rivet at each end. What is left in them is the gold of the leaves, and it turns the
+  // same red as it runs out.
   // A sunk trough with something left in it. The one shape every readout on the crawl is
   // made of: the constitution across the top, and the slim bars under it.
   trough(g, rect, frac, low, full) {
@@ -1256,8 +1253,8 @@ export default class Quest extends Phaser.Scene {
     }
   }
 
-  // Everybody on the run who fights, in the order they were taken. Empty on a day run and
-  // on a night one crewed before anybody could — and then there is no second row at all.
+  // Everybody on the run who fights, in the order they were taken. Empty on a day run, or
+  // on a night one crewed before anybody could fight — and then there is no second row.
   fightersOn() {
     const r = run.active();
     return r && this.mode === 'run' ? r.party.filter((id) => isCombat(id)) : [];
@@ -1309,9 +1306,9 @@ export default class Quest extends Phaser.Scene {
     return true;
   }
 
-  // What the party is worth at each thing it has any points in at all, best first — the
-  // same sum the crew screen ends on. A skill nobody has is not a readout, it is a blank
-  // line, so it is not one of these.
+  // What the party is worth at every skill it has any points in, best first — the same sum
+  // the crew screen ends on. A skill nobody has would be a blank line rather than a
+  // readout, so it is left out.
   scored() {
     const r = run.active();
     if (!r) return [];
@@ -1396,9 +1393,9 @@ export default class Quest extends Phaser.Scene {
         g.fillRect(rx - 2, cy - 2, 3, 3);
       }
 
-      // A node they have walked is the thing that was standing in it. One still in front
-      // of them is a stud in the road and nothing else, because it is not anything yet:
-      // what a node turns out to be is rolled when the party gets there.
+      // A node they have walked is drawn as the thing that was standing in it. One still
+      // ahead is a stud in the road and nothing more, because it is not anything yet: what
+      // a node turns out to be is rolled when the party gets there.
       if (boxed) {
         // A node whose work belongs to a skill is drawn with that skill's own icon — the
         // axe where they cut, the rod where they fished — and one that is nobody's work
@@ -1410,8 +1407,8 @@ export default class Quest extends Phaser.Scene {
         // hung along the road rather than shapes floating over it
         this.hang(PIP, { x: cx - side / 2, y: cy - side / 2, w: side, h: side }, night);
         const mark = this.add.image(cx, cy, skill ? iconKeyFor(skill.id) : markKey(e.nature));
-        // fitted, not stretched: a silhouette squashed to a box stops being a silhouette.
-        // Inside the square's own edge, not across it, or the frame is a thing drawn over.
+        // Fitted, not stretched: a silhouette squashed to a box stops being a silhouette.
+        // Drawn inside the square's edge rather than across it, so the frame stays on top.
         const inner = side - TUNING.questPipInset * 2;
         mark.setScale(Math.min(inner / mark.width, inner / mark.height));
         // in its own colours, and dimmer the further back down the road it is: these are
@@ -1440,7 +1437,7 @@ export default class Quest extends Phaser.Scene {
 
     // and the party themselves, somewhere on the road between the last node and the one
     // walking into view. Only while they are walking: standing at a node, the ring round
-    // that node is where they are, and two marks saying it is one too many.
+    // that node is where they are, and a second mark would say it twice.
     if (this.approaching) {
       const m = this.add.graphics();
       m.fillStyle(blend(COLORS.conRim, 0x000000, 0.5), 1);
@@ -1466,9 +1463,9 @@ export default class Quest extends Phaser.Scene {
     return back + (to - back) * (this.walk ? this.walk.coming() : 1);
   }
 
-  // Everything that happens at a node is said on one card over the landscape, so the
-  // party and the ground they are standing on stay on the screen while it is read. The
-  // card is the plaque: a page held up over the road, written in ink.
+  // Everything that happens at a node is said on one card over the landscape, so the party
+  // and the ground they are standing on stay on screen while it is read. The card is a
+  // plaque: a page held up over the road.
   card(rect, lines, head, paged) {
     const pad = padOf(CARD);
     const w = Math.max(Math.min(TUNING.questCardWidth, rect.w - 16), minOf(CARD).w);
