@@ -34,9 +34,9 @@ function mealResult(meal) {
     : ' — and nothing came off it worth eating';
 }
 
-// The last row on a work card, and when it is written. Where the party can do exactly one
-// thing here, leaving it is the other answer and the card has to say so; where there are
-// two, the card is a question already and a third row saying nothing happens is noise.
+// The last row on a work card. It is written where the party can do exactly one thing
+// here, because then leaving is the only other answer. A card with two things to do is
+// already a question and does not need it.
 const WALK_ON = 'Continue on.';
 const walkRow = (node) => node.worked.length === 1;
 
@@ -368,8 +368,7 @@ export default class Quest extends Phaser.Scene {
       this.draw();
       return;
     }
-    // The description, before anybody is asked anything. One key, the same as the one
-    // that turns any other page of writing over.
+    // The description card. One key, the same one that turns any other page of writing.
     if (r.phase === 'read') {
       if (this.approaching) return; // they have not got to it yet
       if (k === 'e' || k === ' ' || k === 'enter') { if (this.turnPage()) return; run.readOn(); }
@@ -383,7 +382,7 @@ export default class Quest extends Phaser.Scene {
       if (this.approaching) return; // they have not got to it yet
       const n = r.nodes[r.at];
       const hs = n.harvests;
-      // the walking-on row is last and is always open: it asks nothing of anybody
+      // the walking-on row is last and always open: it needs no skill
       const rows = hs.length + (walkRow(n) ? 1 : 0);
       const step = (d) => {
         for (let i = 1; i <= rows; i++) {
@@ -1178,9 +1177,8 @@ export default class Quest extends Phaser.Scene {
       this.hint(`${this.page < this.pages - 1 ? '[E] Read on' : '[E] Press on'}${pack}    [Esc] Turn back`);
     }
     else if (r.phase === 'choose' && !this.approaching) {
-      // Every work card is a question now: where there is one thing to do, the other
-      // answer is to leave it, and a card with nothing on it that anybody can do never
-      // gets this far.
+      // Every work card is a question now, because leaving is always one of the answers.
+      // A card with nothing on it anybody can do never gets this far.
       const pack = this.campKeys();
       this.hint(`[Up/Down] Choose    [Enter] Do it${pack}    [Esc] Turn back`);
     }
@@ -1650,10 +1648,9 @@ export default class Quest extends Phaser.Scene {
     // What the node paid is on the tally raised over the road and nowhere else, down to the
     // stone that came up with the ore. This card is what was said about the work, and
     // nothing that was counted off it.
-    // Nothing about an engine that has not landed either. The card carries the writing and
-    // only the writing; which activities have no engine behind them yet is a question for
-    // the workshop, and hasEngine in src/activity.js answers it without spending a line
-    // of the party's card on it.
+    // And nothing about a missing engine. The card carries the writing and nothing else;
+    // hasEngine in src/activity.js says which activities still have none, without spending
+    // a line of the party's card on it.
     return [...out, ...this.packLines()];
   }
 
@@ -1804,9 +1801,8 @@ export default class Quest extends Phaser.Scene {
     return out;
   }
 
-  // What they have walked up to, and nothing else on the card. The node's own account is
-  // here and not on the tally afterwards, because a description of a place is read on
-  // arriving at it and not on leaving. The ways are the card after this one.
+  // The node's description and nothing else. It is here rather than on the tally because
+  // a place is described on arriving at it, not on leaving. The ways are the next card.
   readLines(r) {
     const n = r.nodes[r.at];
     const out = run.kindOf(n.kind).body.map((para) => [para, TUNING.questBodySize, COLORS.menuDim]);
@@ -1817,8 +1813,8 @@ export default class Quest extends Phaser.Scene {
     const n = r.nodes[r.at];
     const hs = n.harvests;
     // The cursor never rests on work nobody can do, including on the first draw. The
-    // walking-on row sits past the end of the harvests and is not work, so it is left
-    // alone: it is the one row that is always open.
+    // walking-on row sits past the end of the harvests and is not work, so it is skipped
+    // here — it is always open.
     if (!(walkRow(n) && this.row === hs.length) && (!hs[this.row] || !hs[this.row].score)) {
       this.row = Math.max(0, hs.findIndex((h) => h.score));
     }
@@ -1834,8 +1830,8 @@ export default class Quest extends Phaser.Scene {
       out.push([`${shut ? '·' : on ? '>' : ' '} ${h.text || `${h.activity} — ${h.skill.name}`}`,
         TUNING.questBodySize, shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
     });
-    // One thing to do here is still a question, because the other answer is to leave it.
-    // A card with two is a choice already and does not need a third way written into it.
+    // One thing to do is still a question: the other answer is to leave it. A card with
+    // two is already a choice and does not need the row.
     if (walkRow(n)) {
       const on = this.row === hs.length;
       out.push([`${on ? '>' : ' '} ${WALK_ON}`,

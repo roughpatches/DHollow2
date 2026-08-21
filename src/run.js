@@ -984,8 +984,7 @@ export function skillAt(node) {
 
 // Two things standing here and time for one of them. Answered by index into the whole
 // list, shut ones included, so the card and the answer count the same rows.
-// E on the card that is only the place: they have read what they walked up to, and now
-// they are asked what to do with it.
+// E on the description card. They have read what is there; now they are asked what to do.
 export function readOn() {
   if (!run || run.phase !== 'read') return run;
   run.phase = 'choose';
@@ -1002,9 +1001,9 @@ export function pickWork(i) {
   return run;
 }
 
-// The other row on a work card: the party looks at what is here and goes on. Same end as
-// a node nobody could have worked — nothing rolled, nothing taken, nothing paid — and the
-// only difference is that this one was a choice.
+// The other row on a work card: the party leaves the work and walks on. It ends the node
+// the same way a node nobody could work ends — nothing rolled, taken or paid — except that
+// here it was chosen.
 export function walkOn() {
   if (!run || run.phase !== 'choose') return run;
   const node = run.nodes[run.at];
@@ -1073,10 +1072,8 @@ function resolve(node) {
     return;
   }
 
-  // The party stops in front of it and reads it before anything is cut, cast for or dug —
-  // and before they are asked what to do about it. Set up, then the ways, then what came
-  // of it, the same three cards a scene deals: a description with the menu printed under
-  // it is something you read past rather than something you read.
+  // Three cards, the same as a scene: what is there, the ways, and what came of it. The
+  // description gets its own card so it is read, rather than skimmed on the way to a menu.
   if (node.worked.length) {
     node.shown = true; // its account was read on the way in, so the tally does not repeat it
     run.phase = 'read';
@@ -1108,9 +1105,9 @@ function toBeat(node, id) {
   if (b.con) node.conBeat += b.con;
   if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
   if (b.draw) node.beatDraw = b.draw; // the beat walked into decides which table, if any
-  // The way on the card that is not the work: the party was offered it and said no, so
-  // the beats end here and nothing is rolled, played or paid. Its own words are the
-  // account of it, which is why passedLine below stays quiet for a scene.
+  // The party was offered the work and said no. The beats end here and nothing is rolled,
+  // played or paid. This beat's own text says so, which is why passedLine stays quiet for
+  // a scene.
   if (b.pass) { node.passed = true; node.walkedOn = true; }
 
   // Every way on closed to this party and no plain way past: there is nothing here they
@@ -1574,9 +1571,8 @@ export function offerLine() {
 // the take, because there was neither.
 export function passedLine(node) {
   if (!node.passed) return null;
-  // Offered it and said no, which is not the same as not being able to. A scene has
-  // written its own words for it and does not want a second set on top of them; a work
-  // card has none of its own, so they are here.
+  // Saying no is not the same as being unable. A scene has written its own line for it;
+  // a work card has not, so the line is here.
   if (node.walkedOn) return node.beat ? null : 'Nobody unpacks anything. You walk on.';
   const named = (node.harvests || []).map((h) => h.skill.name);
   const skill = named.length ? named.join(' or ') : 'this work';

@@ -99,10 +99,9 @@ export const ENCOUNTERS = [
       'Fish hold in the slack under the far side, out of the current.',
     ],
 
-    // The description, and then the two answers to it. A way with no `then` is the end of
-    // the beats, which at a node with an activity is the controls; a way to a beat marked
-    // `pass` is the party leaving it where it is. Nothing else on the card asks a question,
-    // so the description does not ask one either.
+    // Description first, then the two answers. A way with no `then` ends the beats, which
+    // starts the minigame at a node with an activity. A way to a beat marked `pass` skips
+    // the work: the party walks on and nothing is rolled or paid.
     beats: [
       {
         id: 'water',
@@ -116,13 +115,13 @@ export const ENCOUNTERS = [
       {
         id: 'ways',
         choose: [
-          { text: '[Cast a line.]' }, // no way on: the beats run out and the rod takes over
+          { text: '[Cast a line.]' }, // no way on: the beats end and the rod takes over
           { text: '[Continue on.]', then: 'onward' },
         ],
       },
       {
         id: 'onward',
-        pass: true, // offered and not taken: nothing is rolled, played or paid here
+        pass: true, // they said no: nothing is rolled, played or paid
         text: ['You leave the rod in the pack and follow the bank down to where the path starts again.'],
       },
     ],
@@ -475,7 +474,7 @@ export const ENCOUNTERS = [
     con: [-1, 0],
     body: ['Storm-torn oak, one limb down and the rest of it sound. There is enough in the limb alone to fill a cart.'],
 
-    // The same shape as the stream: what is standing there, and then the two answers.
+    // Same shape as the stream: the tree, then the two answers.
     beats: [
       {
         id: 'oak',
@@ -489,7 +488,7 @@ export const ENCOUNTERS = [
       {
         id: 'ways',
         choose: [
-          { text: '[Fell the oak.]' }, // no way on: the beats run out and the axe takes over
+          { text: '[Fell the oak.]' }, // no way on: the beats end and the axe takes over
           { text: '[Continue on.]', then: 'onward' },
         ],
       },
