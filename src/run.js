@@ -1,10 +1,10 @@
 // One quest, being walked. The nodes between the Sea Hag and the goal are drawn fresh
-// every time a quest is accepted, so accepting the same job twice is not the same run.
+// each time a quest is accepted, so the same job is never the same run twice.
 //
-// A run is a line, and some of its nodes are reached by a fork instead of walked into.
-// A fork offers two or three ways on and each way is a node: whoever can read that
-// ground says what is down there, and taking it is taking that. Which nodes can be
-// drawn at all is the zone, the hour and nothing else — see content/nodes.js.
+// A run is a line. Some nodes are reached by a fork rather than walked into: a fork
+// offers two or three ways on, each way is a node, and whoever can read that ground says
+// what is down there. Taking the way is taking the node. What can be drawn at all depends
+// on the zone and the hour and nothing else — see content/nodes.js.
 
 import { TUNING } from '../tuning.js';
 import { QUESTS } from '../content/quests.js';
@@ -33,9 +33,8 @@ import {
   MOVES,
 } from './combat.js';
 
-// Everything a node can turn out to be: the ones a quest names by hand, and the ones the
-// road draws. They are one shape and one lookup, so nothing downstream has to know which
-// table a node came out of.
+// Every node there is: the ones a quest names by hand and the ones the road draws. One
+// shape and one lookup, so nothing downstream needs to know which table it came from.
 const KINDS = [...ENCOUNTERS, ...DRAWN_KINDS];
 const KIND = Object.fromEntries(KINDS.map((e) => [e.id, e]));
 // The zones a job can be walked in. Only a place a job sets out from needs an id.
@@ -52,12 +51,11 @@ function skillsIn(e) {
   ].filter(Boolean);
 }
 
-// A node belongs somewhere twice over: it has to list the zone, and everything it asks of
-// the party has to be on what that zone is made of. A place's `skills` list is how a
-// Greywood full of timber and talk is told apart from a coast full of tide and rigging —
-// the nodes are all written, and the place picks which of them are its. A zone with no
-// list draws everything, and so does a run with no zone at all: a job handed over a bar
-// rather than set out for has no ground to tell it otherwise.
+// A node belongs to a zone twice over: it has to list the zone, and every skill it asks
+// for has to be on that zone's `skills` list. That list is what separates a Greywood of
+// timber and talk from a coast of tide and rigging — the nodes are all written, and the
+// place picks which are its. A zone with no list draws everything, and so does a run with
+// no zone: a job handed out over a bar has no ground to say otherwise.
 function inZone(e, where) {
   if (!where) return true;
   if (e.zones && !e.zones.includes(where)) return false;
@@ -65,21 +63,18 @@ function inZone(e, where) {
   return !allowed || skillsIn(e).every((id) => allowed.includes(id));
 }
 
-// Nothing is fought by daylight. What comes out of the ground and what follows a party
-// home only does either after dark, so a day run draws from the table with the combat
-// kinds taken out of it and a night run draws from the whole of it.
-// An authored kind is only ever reached by a quest naming it, so it is out of the table
-// the road draws from whatever the hour is.
+// Nothing is fought by daylight, so a day run draws from the table with the combat kinds
+// removed and a night run draws from all of it. Authored kinds are only ever reached by a
+// quest naming them, so they are out of the draw at either hour.
 function poolAt(when, where) {
   return KINDS.filter((e) => !e.only && (when === 'night' || e.nature !== 'combat') && inZone(e, where));
 }
 
-// What the road may still put up. Two rules, and both of them are about not repeating
-// yourself: never the kind they have just finished with, so the same stand of timber is
-// not standing there again a hundred yards on, and never a kind marked `once` that this
-// run has already had, so a party meets bad ground once a job and not four times.
-// If the two of them between them leave nothing, the rules are dropped for that draw
-// rather than the run stopping in the middle of the wood.
+// What the road may still put up. Two rules against repeating: never the kind just
+// finished, so the same stand of timber is not standing there again a hundred yards on;
+// and never a `once` kind this run has already had, so bad ground turns up once a job
+// rather than four times. If the two together leave nothing, both are dropped for that
+// draw rather than stopping the run in the middle of the wood.
 function drawableAt(when, where) {
   const pool = poolAt(when, where);
   const last = run && run.at > 0 ? run.nodes[run.at - 1].kind : null;
@@ -91,13 +86,13 @@ function readableAt(when, where) {
   return drawableAt(when, where).filter((e) => e.read);
 }
 
-// A table naming a skill the list does not have, usually one left behind by a rewrite of
-// content/skills.js. It rolls the die on its own until it is pointed at something real,
-// so the run still walks; this is where the mistake is said out loud.
+// A table naming a skill that no longer exists, usually left behind by a rewrite of
+// content/skills.js. The die still rolls on its own so the run walks; the mistake is
+// reported here rather than crashing.
 const SKILL_IDS = new Set(SKILLS.map((s) => s.id));
-// The work a resource node is made of comes off the gathering half of content/skills.js
-// and nowhere else: that is what separates a resource node from an encounter node, whose
-// ways may name anything. Said here because it is a content mistake, not a crash.
+// A resource node's work must be a gathering skill from content/skills.js. That is what
+// separates it from an encounter node, whose ways may name any skill. Reported here
+// because it is a content mistake, not a crash.
 const GATHERING = new Set(SKILLS.filter((s) => s.group === 'gathering').map((s) => s.id));
 for (const e of KINDS) {
   for (const h of e.harvests || []) {
@@ -115,8 +110,8 @@ for (const z of PLACES.filter((p) => p.skills)) {
     if (!SKILL_IDS.has(id)) console.warn(`${z.label}: no such skill — ${id}`);
   }
 }
-// A zone's shares and a zone's skills have to be the same list of gathering work, or one
-// of them is a share of nothing and the other is work that never comes up.
+// A zone's shares and its skills must name the same gathering work, or there is a share
+// of work that never comes up, or work with no share.
 for (const z of PLACES.filter((p) => p.gather)) {
   const wanted = (z.skills || [...GATHERING]).filter((id) => GATHERING.has(id));
   for (const id of Object.keys(z.gather)) {
@@ -126,10 +121,10 @@ for (const z of PLACES.filter((p) => p.gather)) {
     if (!z.gather[id]) console.warn(`${z.label}: ${id} is gathered here and has no share.`);
   }
 }
-// The resource table is meant to be full: a node for each gathering skill on its own, and
-// a node for each pairing of two. That is what makes a point in any of them buy work
-// nobody else can reach and a second specialist a question rather than dead weight. Add a
-// gathering skill and this is what names the nodes it still wants; see content/nodes.js.
+// The resource table is meant to be full: one node for each gathering skill alone, and
+// one for each pair. That way a point in any skill buys work nobody else can reach, and a
+// second specialist is worth bringing. Add a gathering skill and this names the nodes it
+// still needs; see content/nodes.js.
 const pairings = new Set();
 for (const e of KINDS) {
   if (e.harvests) pairings.add([...new Set(e.harvests.map((h) => h.skill))].sort().join('+'));
@@ -142,9 +137,8 @@ for (const [i, a] of gathering.entries()) {
   }
 }
 
-// A combat node with nothing to fight is a node that reads as a fight and then is not
-// one, and a foe nobody wrote is a fight that cannot start. Both are content mistakes and
-// both are cheap to say here.
+// A combat node with nothing to fight reads as a fight and then is not one, and a foe
+// nobody wrote cannot be fought. Both are content mistakes, and cheap to catch here.
 for (const e of KINDS) {
   const band = e.foes || (e.foe ? [e.foe] : []);
   for (const entry of band) {
@@ -154,14 +148,13 @@ for (const e of KINDS) {
   if (e.nature === 'combat' && !band.length) console.warn(`${e.name}: a combat node with nothing to fight.`);
 }
 
-// Four a side. A job that asks for more than that is a job that cannot be crewed, and
-// this is where that is cheap to say rather than found on the screen where they are picked.
+// Four walk out at most. A job asking for more cannot be crewed, and it is cheaper to say
+// so here than to find out on the screen where the crew is picked.
 for (const q of QUESTS) {
   if (q.party > TUNING.partyMax) console.warn(`${q.label}: asks for ${q.party}; ${TUNING.partyMax} is the most that walk out.`);
 }
 
-// Somewhere to set out for has to have something to walk. A zone open for work with
-// nothing drawable in it by day is an empty run, and this is where that is cheap to say.
+// A zone open for work needs something drawable in it. Nothing by day is an empty run.
 for (const z of PLACES.filter((p) => p.work)) {
   if (!poolAt('day', z.id).length) console.warn(`${z.label}: nothing in content/nodes.js is zoned here.`);
 }
@@ -169,17 +162,17 @@ for (const q of QUESTS) {
   if (q.check && !SKILL_IDS.has(q.check.skill)) console.warn(`${q.label}: no such skill — ${q.check.skill}`);
 }
 
-// The first job — the only one the story offers with nothing raised yet — is day work
+// The first job — the only one offered before any flag is raised — has to be day work
 // with Aldis on it. He does not fight, and a night run needs somebody who does, so the
-// game cannot open on one. Said at boot rather than found later in an unwalkable board.
+// game cannot open on one. Checked at boot, not found later on an unwalkable board.
 for (const q of QUESTS.filter((x) => !x.needs)) {
   if (q.when !== 'day') console.warn(`${q.label}: the first job must be day work.`);
   if (!(q.must || []).includes('aldis')) console.warn(`${q.label}: the first job must have Aldis on it.`);
 }
 
-// how many times each job has been walked to the end. Gregorious keeps a standing
-// board rather than a story: the same job can be taken again, which is what lets a
-// bond grow far enough to crew the ones nobody will touch yet.
+// How many times each job has been walked to the end. Gregorious keeps a standing board
+// rather than a story, so the same job can be taken again — which is how a bond grows far
+// enough to crew the jobs nobody will touch yet.
 const walked = new Map();
 let run = null;
 
@@ -192,25 +185,23 @@ function pick(list) {
 }
 
 // How far the party's points bend a table toward its rare end. Zero leaves the odds as
-// they were written; one would make every row equally likely, and the cap keeps it well
-// short of that. See skillOddsPerPoint in tuning.js.
+// written; one would make every row equally likely, and the cap stays well short of that.
+// See skillOddsPerPoint in tuning.js.
 function tiltOf(score) {
   return Math.min(TUNING.skillOddsMost, score * TUNING.skillOddsPerPoint);
 }
 
-// A node that draws its yield rather than paying a fixed list of it: `count` things come
-// off it, and each one of them is drawn against the odds. Knowing the work does two
-// things here — it takes more off the node, through `take`, and it bends the table, by
-// raising every weight to a lower power. A weight of 50 against one of 20 falls faster
-// than the 20 does, so the scarce row rises without ever passing the common one, and a
-// table already even stays even. See `draw` in content/encounters.js.
+// A node that draws its yield instead of paying a fixed list: `count` things come off it,
+// each drawn against the odds. Knowing the work does two things — `take` pulls more off
+// the node, and the table bends, because every weight is raised to a lower power. A weight
+// of 50 falls faster than one of 20, so the scarce row rises without ever passing the
+// common one, and an even table stays even. See `draw` in content/encounters.js.
 function offTable(table, take, tilt) {
   const odds = Object.entries(table.odds).map(([m, w]) => [m, w ** (1 - tilt)]);
   const total = odds.reduce((n, [, w]) => n + w, 0);
-  // How many things come off it, with the part of the count that falls between two
-  // things left as a chance at one more rather than rounded away. A party one point
-  // better than another is a party who sometimes comes back with an extra fish, which
-  // is what a point ought to feel like at the low end where whole fish are scarce.
+  // How many things come off it. The fractional part is a chance at one more rather than
+  // being rounded away, so a party one point better sometimes comes home with an extra
+  // fish — which is what a point should feel like where whole fish are scarce.
   const wanted = roll(table.count) * take;
   let count = Math.floor(wanted);
   if (Math.random() < wanted - count) count++;
@@ -228,12 +219,11 @@ function offTable(table, take, tilt) {
   return out;
 }
 
-// A stone at the end of a shift. Not part of the yield and not multiplied by anything:
-// one roll, and either there is a stone in the spoil or there is not. How well the work
-// went is the whole of whether — nothing under stoneFloor, climbing to stoneBest at
-// perfect — and the table it is drawn from is read on the same tilt as any other, so who
-// was brought decides which stone it is. Work no engine was played for finds none: a
-// stone is what a good shift turns up, and nobody had a good shift they did not have.
+// A stone at the end of a shift. Not part of the yield and not multiplied by anything —
+// one roll, and there either is a stone in the spoil or there is not. Only how well the
+// work went decides: nothing below stoneFloor, climbing to stoneBest at perfect. The table
+// bends on the same tilt as any other, so who was brought decides which stone it is. Work
+// with no engine played finds none, because there was no shift to go well.
 function stoneFrom(table, quality, tilt) {
   if (!(quality > TUNING.stoneFloor)) return null;
   const chance = TUNING.stoneBest * (quality - TUNING.stoneFloor) / (1 - TUNING.stoneFloor);
@@ -253,8 +243,8 @@ export function timesWalked(id) {
   return walked.get(id) || 0;
 }
 
-// Everything known about and not set out for from somewhere else. Work does not run
-// out, but it does have to be offered first.
+// Every job that is known about and not set out for from somewhere else. Work does not
+// run out, but it has to be offered first.
 export function offered() {
   return QUESTS.filter((q) => story.ok(q) && !q.at);
 }
@@ -264,8 +254,8 @@ export function known() {
   return QUESTS.filter((q) => story.ok(q));
 }
 
-// Whether a job can be walked right now, and what is in the way if not. The reasons
-// are the readout on the Map tab, so they say what to go and do about it.
+// Whether a job can be walked right now, and what is in the way if not. These reasons are
+// what the Map tab shows, so each one says what to go and do about it.
 export function blockers(id, when) {
   const q = questOf(id);
   const out = [];
@@ -306,8 +296,8 @@ export function active() {
   return run;
 }
 
-// How many nodes a job is, in [least, most]. A job the player sets the length of has no
-// length of its own until they have set it, so before that it is the whole span.
+// How many nodes a job is, in [least, most]. A job whose length the player sets has none
+// of its own until they set it, so before that it is the whole span.
 export function sizeOf(q, size = q && q.size) {
   return TUNING.questNodes[size]
     || [TUNING.questNodes.short[0], TUNING.questNodes.long[1]];
@@ -320,9 +310,9 @@ export function allTimes(q) {
   return q.when === 'any' ? ['day', 'night'] : [q.when];
 }
 
-// A job whose length and place the player picks is work off the board rather than a
-// written job, and there is nothing written to walk after dark yet. A job that names
-// night itself is not affected: it was written with its own nights in it.
+// A job whose length and place the player picks is work off the board, and there is
+// nothing written for it after dark yet. A job that names night itself is unaffected —
+// it was written with its own nights in it.
 export function timeOpen(q, when) {
   return when !== 'night' || !q.procedural || TUNING.questNightOpen;
 }
@@ -341,17 +331,17 @@ export function zoneOf(id) {
   return ZONE[id] || null;
 }
 
-// how much of a run here is something in the way rather than work, or null where the zone
-// has not said and it falls out of the nodes' own weights
+// how much of a run here is trouble rather than work, or null where the zone has not said
+// and it falls out of the nodes' own weights
 export function troubleAt(where, when) {
   const share = (ZONE[where] || {}).trouble;
   return share && share[when] !== undefined ? share[when] : null;
 }
 
-// What a run at this hour and in this place is mostly made of, so the choice is made on
-// something more than the word for it. Where the zone names its share, the two sides are
-// counted against that rather than against each other's weights — otherwise the readout
-// would say one thing and the road would do another.
+// What a run at this hour and place is mostly made of, so the player is choosing on more
+// than a place name. Where the zone names its share, the two sides are counted against
+// that rather than against each other's weights, or the readout would say one thing and
+// the road do another.
 export function mixAt(when, where) {
   const pool = poolAt(when, where);
   const share = troubleAt(where, when);
@@ -376,10 +366,10 @@ export function mixAt(when, where) {
 }
 
 // --- ground ----------------------------------------------------------------
-// A job is walked somewhere, and somewhere is made of something. A party carrying the
-// skill that reads that ground sets out with more in them than one that does not — which
-// is the whole of why you take the woodsman into the wood. A job handed out over a bar
-// rather than set out for from a place has no ground yet and this is worth nothing to it.
+// A job is walked somewhere, and every somewhere is made of something. A party carrying
+// the skill that reads that ground sets out with more constitution than one that does
+// not, which is why you take the woodsman into the wood. A job handed out over a bar has
+// no ground yet, so this is worth nothing to it.
 
 // Where a job is walked: the place it is set out from, or the one the player chose for
 // work they picked the place of.
@@ -419,21 +409,21 @@ export function start(id, when, party, choice = {}, bring = {}) {
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
   const size = quest.size || choice.size || 'short';
   const where = quest.at || choice.where || null;
-  // The player and the recruited walk it: they take the wounds, earn the experience,
-  // and are the only ones who can read anything at a fork. The player is on it whoever
-  // else is, so their three skills are the three the party always has.
+  // The player and whoever was recruited walk it: they take the wounds, earn the
+  // experience, and are the only ones who can read a fork. The player is always on it, so
+  // their three skills are the three the party always has.
   const who = [YOU, ...(party && party.length ? party : roster().map((c) => c.id))]
     .filter((id, i, all) => all.indexOf(id) === i)
     .slice(0, TUNING.partyMax); // four walk out and no more, however they were picked
   const nodes = quest.line ? authored(quest.line) : drawn(size);
-  // everyone's own constitution, what knowing this ground adds to it, and whatever was
-  // drunk in town waiting on this job — see src/potions.js. A potion drunk at the bar
-  // is in the pool at the gate and nowhere else: it is the next job out it was for.
+  // everyone's own constitution, what knowing this ground adds, and whatever was drunk in
+  // town waiting on this job — see src/potions.js. A potion drunk at the bar counts at the
+  // gate and nowhere else: it was for the next job out.
   const dosed = potions.takeUp();
   const con = conTotal(who) + groundCon(who, terrainOf(quest, where)) + dosed;
-  // What the crew can shift between them, and what of the town's stock is going out on
-  // their backs. Counted in squares — see carryOf in src/party.js — with stackMax of one
-  // thing to a square. Nothing worn takes one: a stone set in a ring is on a finger.
+  // What the crew can carry between them, and what of the town's stock goes out on their
+  // backs. Counted in squares — see carryOf in src/party.js — with stackMax of one thing
+  // to a square. Nothing worn takes a square: a stone set in a ring is on a finger.
   const room = carryTotal(who);
   const pack = {};
   const squares = () => Object.values(pack).reduce((a, v) => a + Math.ceil(v / TUNING.stackMax), 0);
@@ -450,14 +440,14 @@ export function start(id, when, party, choice = {}, bring = {}) {
   run = {
     quest, size, where, when: at, party: who, nodes, at: -1, state: 'running',
     used: new Set(), // the kinds this run has had that it is only allowed one of
-    // The pack is the whole of what comes home: nothing reaches the town's stock until
-    // the party does. `brought` is what of it was carried out rather than found, so the
-    // tally can tell one from the other.
+    // The pack is all that comes home: nothing reaches the town's stock until the party
+    // does. `brought` is what was carried out rather than found, so the tally can tell one
+    // from the other.
     pack, brought: { ...pack }, room, left: {}, offer: null, delivered: false,
     spoils: {}, xp: 0, con, conMax: con, dosed,
-    // Hit points are the fighters' own and are not pooled: the party shares a
-    // constitution and nobody shares a rib. Full at the gate, spent down by whatever
-    // they trade blows with, and forgotten when the run ends — the same as the pool.
+    // Hit points belong to each fighter and are not pooled — the party shares a
+    // constitution, not ribs. Full at the gate, spent down by whatever they trade blows
+    // with, and forgotten when the run ends, the same as the pool.
     hp: Object.fromEntries(fighters(who).map((id) => [id, combatOf(id).hp])),
     fight: null, // the one going on right now, and null the rest of the time
     cooking: null, // and the pan on the camp fire, the same
@@ -492,16 +482,15 @@ function drawn(size) {
   }));
 }
 
-// A potion drunk at a camp comes out of the pack, not off the town's shelves: what was
-// left at home is no use out here. src/potions.js takes this and does not otherwise care
-// which of the two stores it is spending.
+// A potion drunk at a camp comes out of the pack, not the town's shelves — what was left
+// at home is no use out here. src/potions.js takes this and does not otherwise care which
+// store it is spending.
 const fromPack = {
   heldOf: (m) => (run ? run.pack[m] || 0 : 0),
   take: (m, n) => fromPack.give(m, -n),
   // Paid into as well as spent, because a fire on the road cooks into the same pack it
-  // cooked out of. Nothing here argues with the room: what comes out of a pan is smaller
-  // than what went into it, and a party who cannot fit their own dinner is a joke rather
-  // than a rule.
+  // cooked out of. Room is not checked: what comes out of a pan is smaller than what went
+  // in, and a party who cannot fit their own dinner would be a joke, not a rule.
   give: (m, n) => {
     if (!run) return;
     run.pack[m] = (run.pack[m] || 0) + n;
@@ -510,17 +499,15 @@ const fromPack = {
 };
 
 // --- the pack ---------------------------------------------------------------
-// Counted in things and not in kinds: seven iron ore is seven of it. A run pays the town
-// nothing until it is over, so what is in here at the gate is the whole of what the walk
-// was worth.
+// Counted in things, not kinds: seven iron ore is seven. A run pays the town nothing until
+// it is over, so what is in here at the gate is what the walk was worth.
 
 export function packOf() {
   return run ? run.pack : {};
 }
 
-// How many squares a count of one thing takes up. Everything is stacked the same way, so
-// this is the whole of the arithmetic: stackMax to a square and the remainder takes one
-// more of its own.
+// How many squares a count of one thing takes up. Everything stacks the same way, so this
+// is all the arithmetic there is: stackMax to a square, and the remainder takes one more.
 export function slotsFor(n) {
   return Math.ceil(Math.max(0, n) / TUNING.stackMax);
 }
@@ -536,10 +523,9 @@ export function packRoom() {
   return run ? Math.max(0, run.room - packUsed()) : 0;
 }
 
-// How many more of one particular thing will go in: whatever is left in its own part-filled
-// square, plus a whole square for every empty one. Asked per thing rather than in general
-// because a pack with one square left has room for twenty ore and no room at all for one
-// of anything else it is not already carrying.
+// How many more of one thing will go in: whatever is left in its own part-filled square,
+// plus a whole square for every empty one. Asked per thing because a pack with one square
+// left has room for twenty ore and no room for one of anything it is not already carrying.
 export function roomFor(m) {
   if (!run) return 0;
   const have = run.pack[m] || 0;
@@ -560,9 +546,9 @@ function putIn(m, n) {
   return fits;
 }
 
-// The pack as the grid draws it: one entry per square, and then the empty squares that
-// are left over. A stack past stackMax is more than one square and is drawn as more than
-// one, so what is on the screen is what the arithmetic says and not a summary of it.
+// The pack as the grid draws it: one entry per square, then the empty squares left over.
+// A stack past stackMax takes more than one square and is drawn as more than one, so the
+// screen shows the arithmetic rather than a summary of it.
 export function packCells() {
   if (!run) return [];
   const cells = [];
@@ -575,9 +561,9 @@ export function packCells() {
   return cells;
 }
 
-// A square emptied onto the ground, and whatever was waiting for the room goes straight
-// into it. The whole square goes rather than one thing off it: the point of the prompt is
-// that a square is what is short, so freeing one is what answering it means.
+// A square emptied onto the ground, with whatever was waiting for the room going straight
+// into it. The whole square goes, not one thing off it: what was short was a square, so
+// freeing one is what answering the prompt means.
 export function dropSquare(i) {
   if (!run) return null;
   const cell = packCells()[i];
@@ -632,19 +618,18 @@ export function abandon() {
   return run;
 }
 
-// Constitution is a within-run resource and nothing carries out of the run: the question
-// a run asks is whether the party has enough left to finish this one, not whether they
-// have been worn down since the first. Move this the day beds and food cost something.
+// Constitution lasts one run and nothing carries out of it. The question a run asks is
+// whether the party can finish this one, not whether they have been worn down since the
+// first. Move this the day beds and food cost something.
 export function clear() {
   potions.clear(); // nothing drunk survives the run it was drunk into
   run = null;
 }
 
 // --- the pack, on the road -------------------------------------------------
-// A camp is the one node a party can open a pack at: they have stopped, there is a fire,
+// A camp is the one node a party can open the pack at: they have stopped, there is a fire,
 // and nobody drinks anything standing in front of a boar. Which nodes are camps is
-// content — `camp: true` in content/nodes.js — so the day a second one is written this
-// works there too.
+// content — `camp: true` in content/nodes.js — so a second one works here too.
 
 export function atCamp() {
   if (!run || run.state !== 'running' || run.at < 0) return false;
@@ -674,27 +659,26 @@ export function drink(mid) {
   return took;
 }
 
-// One meal to a fire. A camp is a party sitting down once, not a party eating their way
-// down the pack until the pool is full: they get a dinner here, and the next one waits for
-// the next fire. It is written on the node rather than on the run because that is what
-// makes it a rule about the fire — a longer road is more fires and more dinners, which is
-// the whole reason a party takes the longer road.
+// One meal to a fire. A camp is a party sitting down once, not eating down the pack until
+// the pool is full: dinner here, and the next one waits for the next fire. It is recorded
+// on the node rather than the run so it stays a rule about the fire — a longer road means
+// more fires and more dinners, which is why a party would take one.
 export function mealAt() {
   const node = run && run.at >= 0 ? run.nodes[run.at] : null;
   return (node && node.meal) || null;
 }
 
-// And what can be eaten here, by the same rule and out of the same pack. A meal is not a
-// potion — see src/food.js — so nothing is held off because something like it is already
-// working; what holds a second one off is that the first one was eaten at this fire.
+// What can be eaten here, by the same rule and out of the same pack. A meal is not a
+// potion — see src/food.js — so nothing is held off because something similar is already
+// working. What holds a second one off is that the first was eaten at this fire.
 export function edible() {
   return atCamp() && !mealAt() ? food.carried(fromPack) : [];
 }
 
-// Eaten at the fire. The constitution goes back into the pool, capped at what the run set
-// out with, and the hit points go back to everybody still on their feet, each capped at
-// their own. Nobody is got up off the ground by a meal: that is a black draught's job, and
-// somebody being carried is not somebody eating.
+// Eaten at the fire. Constitution goes back into the pool, capped at what the run set out
+// with, and hit points go back to everybody still on their feet, each capped at their own.
+// A meal does not get anybody up off the ground — that is a black draught's job, and
+// somebody being carried is not eating.
 export function eat(mid) {
   if (!atCamp() || mealAt() || !food.canEat(mid, fromPack)) return null;
   const ate = food.eat(mid, fromPack);
@@ -712,14 +696,14 @@ export function eat(mid) {
 }
 
 // --- cooking at the fire ----------------------------------------------------
-// A camp is a fire, and a fire is a pan. What can be cooked at one is content — `fire` on
-// a recipe in content/recipes.js — because a recipe is the only thing that knows whether
-// it wants an oven. Nothing is burnt out of the pack and there is no clock on the work:
-// the fire is already alight, which is what makes it a camp.
+// A camp is a fire, and a fire takes a pan. What can be cooked at one is content — `fire`
+// on a recipe in content/recipes.js — because only the recipe knows whether it wants an
+// oven. No fuel is burnt out of the pack and there is no clock on the work: the fire is
+// already alight, which is what makes it a camp.
 //
 // Cooking and eating share the fire's one meal. A party can put a pan on or open something
-// they carried, and either way they have had their hour here: turning three trout into a
-// supper and then eating it is two sittings, and there is one to a fire.
+// they carried; either way they have had their hour. Turning three trout into a supper
+// and then eating it would be two sittings, and a fire is worth one.
 
 // What could be cooked here, out of what is in the pack.
 export function cookable() {
@@ -756,14 +740,13 @@ export function cookPlayed(played) {
 }
 
 // The pack at a fire, as one numbered list: what could go on the fire, then what is
-// already cooked, then the bottles. One shape for all three, so the card numbers them
-// without knowing what any of them is — and the row is handed back on the way in, because
-// a recipe and a dish may well share an id.
+// already cooked, then the bottles. One shape for all three, so the card can number them
+// without knowing what any of them is. The row is handed back on the way in, because a
+// recipe and a dish may share an id.
 //   kind — 'cook', 'eat' or 'drink'
 //   id   — the recipe to put on, or the material to eat or drink
-// The meal comes before the bottles because the meal is the perishable choice: there is
-// one of it to a fire, and a bottle left in the pack can still be drunk at the next one or
-// over the bar at home.
+// Meals come before bottles because a meal is the perishable choice: one to a fire, while
+// a bottle left in the pack can still be drunk at the next fire or over the bar at home.
 function handRows() {
   return [
     ...cookable().map((r) => ({
@@ -778,10 +761,9 @@ function handRows() {
   ];
 }
 
-// Nine of them, because nine is how many number keys there are. A row past that would be
-// drawn with a number nobody can press, which is worse than not drawing it: what does not
-// fit is counted instead — see handOver — and the next of it comes up as soon as something
-// above it is taken.
+// Nine rows, because there are nine number keys. A tenth would be drawn with a number
+// nobody can press, which is worse than not drawing it. What does not fit is counted
+// instead — see handOver — and comes up as soon as something above it is taken.
 const HAND = 9;
 
 export function atHand() {
@@ -830,11 +812,11 @@ export function step() {
 // three-way one has a road straight on between them.
 const SIDES = { 1: ['Ahead'], 2: ['Left', 'Right'], 3: ['Left', 'Ahead', 'Right'] };
 
-// Two or three ways on, and each way is the node at the end of it: whoever can read that
-// ground says what is down there, and taking it is taking that. Only kinds that can be
-// read are offered, because a fork nobody can see down is a coin toss with a card in
-// front of it. The ways are drawn against the hour and the place, so a night fork in the
-// wood offers the wood's nights.
+// Two or three ways on, each way being the node at the end of it. Whoever can read that
+// ground says what is down there, and taking the way takes the node. Only readable kinds
+// are offered, because a fork nobody can see down is a coin toss with a card in front of
+// it. Ways are drawn against the hour and the place, so a night fork in the wood offers
+// the wood's nights.
 function branches(pick) {
   let drew;
   if (pick) {
@@ -860,8 +842,8 @@ export function walkers() {
   return run ? run.party.map((id) => charOf(id)) : walking();
 }
 
-// who on the run can see this coming, and what they say about it. The one with the most
-// points in the skill speaks: a party carrying two who could tell you hears the better.
+// Who on the run can see this coming, and what they say. The one with the most points in
+// the skill speaks, so a party carrying two who could tell you hears the better of them.
 function readOf(kind) {
   const seen = walkers().filter((c) => rankOf(c.id, kind.read.skill) > 0);
   if (!seen.length) return null;
@@ -873,8 +855,8 @@ export function choose(i) {
   if (!run || run.phase !== 'fork') return run;
   const node = run.nodes[run.at];
   node.taken = node.branches[i];
-  // A way was named before it was taken, so it is that and not a lean toward it. The
-  // party walked to the thing they were told was down there.
+  // The way was named before it was taken, so the party gets what they were told was down
+  // there rather than a fresh draw.
   node.only = node.taken.kind;
   resolve(node);
   return run;
@@ -890,8 +872,8 @@ function weighted(from) {
   return from[from.length - 1];
 }
 
-// Which work the party finds, out of the shares the zone was written with, counting only
-// work something still drawable actually offers — a share spent on a node this run has
+// Which work the party finds, out of the shares the zone was written with. Only work that
+// something still drawable offers is counted: a share spent on a node this run has
 // already had would be a share spent on nothing.
 function whichWork(table, from) {
   const live = Object.entries(table)
@@ -914,18 +896,17 @@ function workNode(gather, digging) {
 
 // What the road puts up next, in two questions.
 //
-// First, work or something in the way. A zone that names its `trouble` share says that in
-// one number an hour and it stays put however many nodes are written; a zone that does not
-// falls back to the nodes' own weights, where every encounter added moved the shape of
-// every run a little and a table could not be grown without retuning it.
+// First: work, or trouble. A zone naming its `trouble` share settles that in one number
+// an hour, and it holds however many nodes get written. A zone without one falls back to
+// the nodes' own weights, where every encounter added shifted the shape of every run and
+// the table could not be grown without retuning it.
 //
-// Then which. For work that is the zone's `gather` shares — the work first, then which of
-// the nodes offering it. Those are shares of the work and not of the nodes, because a node
-// with two harvests is two kinds of work standing in one place: it is reached by either of
-// its rolls, so a wood that is two parts timber to one part fish puts up more mixed stands
-// than a straight reading of the table would. That is the mixed stand doing its job. For
-// trouble it is the nodes' own weights, which is all that is wanted there: they are
-// already only competing with each other.
+// Then: which. Work comes off the zone's `gather` shares — the work first, then which
+// node offering it. Those are shares of work, not of nodes, because a node with two
+// harvests is two kinds of work in one place and is reached by either roll. So a wood two
+// parts timber to one part fish puts up more mixed stands than reading the table straight
+// would, which is the mixed stand doing its job. Trouble uses the nodes' own weights,
+// which is all that is wanted there: they only compete with each other.
 function drawNode(from) {
   const gather = (ZONE[run.where] || {}).gather;
   const digging = gather ? from.filter((e) => e.harvests) : [];
@@ -943,11 +924,10 @@ function drawNode(from) {
   return workNode(gather, digging);
 }
 
-// The work a node has in it, and what the party's points are worth at each piece of it:
-// everyone's points in that skill added up, each one adding skillYieldPerPoint to what
-// comes out of it. Who you take on a job is the loudest thing you say about what you
-// want off it — and at a node with two resources in it, taking one specialist and not
-// the other is coming home with half of what was standing there.
+// The work a node has in it, and what the party's points are worth at each piece: every
+// point in that skill adds skillYieldPerPoint to what comes out. Who you take on a job is
+// the loudest thing you say about what you want off it — at a node with two resources,
+// bringing one specialist and not the other means half of what was standing there.
 // A kind written the older way, with one `harvest` and one list of spoils, reads as a
 // node with a single piece of work whose yield is the kind's own.
 function harvestsOf(e) {
@@ -960,9 +940,9 @@ function harvestsOf(e) {
   });
 }
 
-// The work at this node the party can actually do, best-known first. There is a day's
-// light and one of it, so where there are two the party says which — see pickWork. The
-// order is what the cursor opens on: what they are best at is the likelier answer.
+// The work at this node the party can actually do, best-known first. There is light for
+// one of them, so where there are two the party says which — see pickWork. The order sets
+// where the cursor opens, on the likelier answer.
 function workedOf(node) {
   return node.harvests.filter((h) => h.score > 0).sort((a, b) => b.score - a.score);
 }
@@ -972,10 +952,10 @@ export function activityOf(node) {
   return node.took ? node.took.activity : KIND[node.kind].activity;
 }
 
-// The skill whose picture stands for a node on the trail: the work they chose to do
-// there, or — at an encounter, where there is no work — the skill of the way they took
-// through it. Either way the mark says what they did, not what was standing there. A
-// node that asked nothing of anybody keeps the silhouette of its nature.
+// The skill whose picture stands for a node on the trail: the work they chose, or at an
+// encounter the skill of the way they took. Either way the mark says what they did, not
+// what was standing there. A node that asked nothing of anybody keeps the silhouette of
+// its nature.
 export function skillAt(node) {
   if (node.took) return node.took.skill;
   if (node.check && node.check.skill) return node.check.skill;
@@ -1049,9 +1029,9 @@ function resolve(node) {
   node.took = node.worked[0] || null; // until the party says otherwise, which they only
   // get to do where there is more than one thing here they could do
 
-  // Nobody on the run has a single point in any of the work this node is. They do not
-  // get to try it and fail at it — they stand and look at it and go on. Nothing is
-  // rolled, nothing is taken, nothing is learned, and the walking is all it costs.
+  // Nobody on the run has a point in any of this node's work. They do not get to try and
+  // fail at it — they look at it and go on. Nothing is rolled, taken or learned, and the
+  // walking is all it costs.
   if (node.harvests.length && !node.worked.length && !isScene(e)) {
     node.passed = true;
     node.check = null;
@@ -1086,10 +1066,10 @@ function resolve(node) {
 }
 
 // --- beats -----------------------------------------------------------------
-// An authored encounter: paragraphs, a choice or two, and a way through to the end of
-// it. Nothing here is drawn or weighted — the whole shape is in the content. A beat
-// carrying `spoils`, `con` or `flag` does that on the way through, and the node settles
-// on the first beat with no way on.
+// An authored encounter: paragraphs, a choice or two, and a way through to the end. None
+// of it is drawn or weighted — the shape is all in the content. A beat carrying `spoils`,
+// `con` or `flag` applies it on the way through, and the node settles on the first beat
+// with no way on.
 
 function toBeat(node, id) {
   const b = KIND[node.kind].beats.find((x) => x.id === id);
@@ -1110,9 +1090,8 @@ function toBeat(node, id) {
   // a scene.
   if (b.pass) { node.passed = true; node.walkedOn = true; }
 
-  // Every way on closed to this party and no plain way past: there is nothing here they
-  // can do, so the scene ends where it stands. Content that always writes one way through
-  // needing nothing never reaches this.
+  // Every way closed to this party and no plain way past, so the scene ends where it
+  // stands. Content that always writes one way needing no skill never reaches this.
   if (b.choose && b.choose.every(shutTo)) {
     node.passed = true;
     outOfBeats(node);
@@ -1134,10 +1113,10 @@ export function advance() {
   return run;
 }
 
-// The end of the beats is the end of the node — unless the way the party took walked
-// them into a fight, or the encounter also names an activity, in which case the beats
-// were the walk up to it and the player takes the controls now. That is how a node gets
-// words in front of its minigame, and words in front of whatever is standing in the road.
+// The end of the beats is the end of the node, unless the way the party took walked them
+// into a fight, or the encounter also names an activity — in which case the beats were
+// the walk up to it and the player takes the controls now. That is how a node gets words
+// in front of its minigame, and in front of whatever is standing in the road.
 function outOfBeats(node) {
   if (!node.passed && node.fight) {
     toFight(node);
@@ -1151,10 +1130,10 @@ function outOfBeats(node) {
 }
 
 // --- fighting ---------------------------------------------------------------
-// A fight is 1v1: one combat character is up and the rest of the party stands off it.
-// The rules are in src/combat.js and what is fought is in content/foes.js; this is only
-// what a run does with the result. Hit points are the fighter's own — the pool hears
-// about a fight when somebody goes down, and not before.
+// A fight is one against one: a single combat character is up and the rest stand off it.
+// The rules are in src/combat.js and what is fought is in content/foes.js; this file only
+// handles the result. Hit points are the fighter's own, and the pool hears about a fight
+// when somebody goes down and not before.
 
 // who on the run can fight and is still on their feet
 export function standing() {
@@ -1175,8 +1154,8 @@ export function fightingAt() {
 }
 
 // The party has walked up to something that has to be fought. Where more than one of them
-// fights, which one steps up is the player's call — it is the only choice they get about
-// a fight before it starts, and it is the whole of what a second fighter is for.
+// fights, which steps up is the player's call — the only choice they get before a fight
+// starts, and the reason to bring a second fighter.
 function toFight(node) {
   // What is standing there is rolled once, here, and the same band is what the whole
   // fight is against however many of the party have to be fed into it.
@@ -1188,9 +1167,9 @@ function toFight(node) {
   else run.phase = 'fighter';
 }
 
-// Sending somebody to the front: the first one, or the one who steps over them when they
-// go down. There is one fight and it is the same fight all the way through, so a fighter
-// carried out of it leaves the thing standing there as wounded as they left it.
+// Sending somebody to the front: the first one, or whoever steps over them when they go
+// down. It is one fight all the way through, so a fighter carried out of it leaves what
+// is standing there as wounded as they left it.
 export function stepUp(id) {
   if (!run || !standing().includes(id)) return run;
   const node = run.nodes[run.at];
@@ -1214,8 +1193,8 @@ export function swapIn(id) {
 }
 
 // A move is played rather than declared: the engine it names opens where the party is
-// standing, and what the player makes of it is what the blow is worth. A move with no
-// engine behind it resolves on the spot, the way every node did before its engine landed.
+// standing, and what the player makes of it decides what the blow is worth. A move with
+// no engine resolves on the spot, the way every node did before its engine landed.
 export function fightMove(moveId) {
   if (!run || run.phase !== 'fight' || !run.fight || run.fight.over) return run;
   const move = MOVES.find((m) => m.id === moveId);
@@ -1247,8 +1226,8 @@ export function playing() {
   return run && run.at >= 0 ? activityOf(run.nodes[run.at]) : null;
 }
 
-// Breaking off the whole thing, which is only on the card once whoever is up is badly
-// hurt. It costs the turn and it is not promised; see flee in src/combat.js.
+// Breaking off, which is only on the card once whoever is up is badly hurt. It costs the
+// turn and it is not guaranteed; see flee in src/combat.js.
 export function canBreakOff() {
   return canFlee(run && run.fight);
 }
@@ -1278,23 +1257,23 @@ function afterTurn(node) {
   };
   node.beatSpoils = { ...(node.beatSpoils || {}), ...spoilsOf(f) };
   // The party ran. They keep what they had already taken off it and pay for the running:
-  // a party that came back down the road at a dead sprint is a party that is spent.
+  // coming back down the road at a sprint leaves a party spent.
   if (f.over === 'fled') node.conBeat -= TUNING.combat.fleeCon;
   run.fight = null;
   settle(null);
   return run;
 }
 
-// A fighter at nothing is carried, and a body being carried is not a body walking: their
-// constitution comes off the pool with them. Somebody else who fights steps up; nobody
-// left who fights and the party is finished out here whatever the pool still says.
+// A fighter at nothing is carried, and a body being carried is not walking: their
+// constitution comes off the pool with them. Somebody else who fights steps up. If
+// nobody is left who fights, the party is finished out here whatever the pool says.
 function faint(id) {
   const node = run.nodes[run.at];
   run.fight.who = null; // nothing standing in front of it, and the fight still going on
   // A black draught in force: the first one carried this run is got back on their feet
   // instead, on what the bottle has in it. The pool pays nothing, the thing in front of
-  // them is still there, and the party is asked again who is going to stand in front of
-  // it — which may well be the one who just got up.
+  // them is still there, and the party is asked again who stands in front of it — which
+  // may well be the one who just got up.
   const rally = potions.spendRally();
   if (rally) {
     run.hp[id] = Math.max(1, Math.round(hpMaxOf(id) * rally));
@@ -1319,9 +1298,9 @@ function rout() {
   spend();
 }
 
-// A way through a scene that names work nobody on the run knows is a way the party
-// cannot take. The words stay on the card — you are told what you are not equipped for —
-// and the option simply will not answer. A way that names no skill is open to anybody.
+// A way through a scene naming work nobody on the run knows is a way the party cannot
+// take. The words stay on the card, so you are told what you are not equipped for, and
+// the option will not answer. A way naming no skill is open to anybody.
 export function shutTo(option) {
   return !!(option && option.skill) && !scoreOf(run.party, option.skill);
 }
@@ -1370,10 +1349,10 @@ export function settle(played) {
   const took = node.took || null;
   const take = takeAt(took ? took.more : 0);
 
-  // Three things pay out here, and they are kept apart because they are three different
-  // shapes: what the kind itself hands over, what the beats picked up on the way through,
-  // and the one piece of work at the node the party decided to do. The other thing that
-  // was standing here is left standing — there was only ever time for one of them.
+  // Three things pay out here, kept apart because they are three different shapes: what
+  // the kind itself hands over, what the beats picked up on the way through, and the one
+  // piece of work at the node the party chose to do. The other thing standing here is
+  // left standing — there was only ever light for one of them.
   const paid = {};
   const put = (m, n) => { paid[m] = (paid[m] || 0) + n; };
   if (!node.passed) {
@@ -1393,8 +1372,8 @@ export function settle(played) {
       }
     }
     // And the one thing the face does not owe anybody. A check lost on the way in does
-    // not cost it — the stone is in the rock or it is not — but botched work finds
-    // nothing, the same as work that went badly enough not to clear the floor.
+    // not cost it — the stone is in the rock or it is not — but botched work finds none,
+    // the same as work that went badly enough to miss the floor.
     if (took && took.stones && !node.failed) {
       const stone = stoneFrom(took.stones, node.quality, tiltOf(took.score));
       if (stone) {
@@ -1404,8 +1383,8 @@ export function settle(played) {
     }
   }
 
-  // What the node gave up, and then how much of it there was room for. Nothing goes to
-  // the town here: it goes on their backs, and what will not fit is held in front of them
+  // What the node gave up, and then how much of it there was room for. Nothing goes to the
+  // town here: it goes on their backs, and what will not fit is held in front of them
   // until the player says which of it they would rather have. See `offer` above.
   node.spoils = {};
   node.packed = {};
@@ -1434,8 +1413,8 @@ export function settle(played) {
   }
 
   // What the node did to the party, in one number: the road's standing cost, what the
-  // encounter itself takes or puts back, how the party bore up in front of it, and how
-  // well they did the work. They are kept apart so the readout can say which was which.
+  // encounter itself takes or puts back, how the party bore up, and how well they did the
+  // work. They are kept apart so the readout can say which was which.
   const taken = node.passed ? 0 : roll(e.con); // a node walked past takes nothing but the road
   node.conRoad = -TUNING.questConDecay;
   node.conKind = taken < 0 && night && !potions.daylight()
@@ -1446,8 +1425,8 @@ export function settle(played) {
       : node.quality >= TUNING.activityConGood ? TUNING.activityConBest : 0;
   node.conBeat = node.conBeat || 0; // what an authored beat did on the way through
   node.con = node.conRoad + node.conKind + node.conCheck + node.conWork + node.conBeat;
-  // And what a potion in force held off the whole of it. It never turns a node that took
-  // something into a node that gave something back: the most it does is nothing happened.
+  // And what a potion in force held off. It never turns a node that took something into a
+  // node that gave something back: the most it does is nothing happening.
   node.conGuard = node.con < 0 ? Math.min(potions.guard(), -node.con) : 0;
   node.con += node.conGuard;
 
@@ -1456,19 +1435,19 @@ export function settle(played) {
   // Nothing left in them: they turn for home from wherever they are standing, and what
   // they were still deciding about is left where it stands.
   if (run.con <= 0) { leaveOffer(); spend(); return run; }
-  // A pack with something standing in front of it that will not fit is answered before
-  // the tally is read: the decision is about the thing in your hands, not about a list.
+  // A pack with something standing in front of it that will not fit is answered before the
+  // tally is read: the decision is about the thing in your hands, not about a list.
   if (run.offer) run.phase = 'pack';
   return run;
 }
 
-// A run that ran out of constitution is over where it stands. Half of everything the
-// party was carrying goes back — they came home light, and it is not a finished job.
-// Nothing left in them. What they were carrying comes home short: a party helped back
-// down that road did not carry all of it, and the pack is where that is felt now.
+// A run that ran out of constitution is over where it stands, and half of everything the
+// party was carrying goes back. They came home light, and it is not a finished job: a
+// party helped back down that road did not carry all of it, and the pack is where that
+// is felt.
 function spend() {
   run.state = 'spent';
-  // Only the pack is spilled. Gear and the stones set in it are on a person and not on
+  // Only the pack is spilled. Gear and the stones set in it are on a person rather than on
   // their back, so they come home whole however light the rest of it is.
   run.lost = {};
   for (const [m, n] of Object.entries(run.pack)) {
@@ -1490,8 +1469,8 @@ function finish() {
   walked.set(run.quest.id, timesWalked(run.quest.id) + 1);
   story.set(run.quest.sets);
 
-  // Paid over the counter rather than carried, so it is not against the pack: this is
-  // what the job was worth on top of what came out of the ground.
+  // Paid over the counter rather than carried, so it is not against the pack: this is what
+  // the job was worth on top of what came out of the ground.
   run.bonus = { spoils: {}, xp: TUNING.questBonusXp[run.size] };
   for (const [m, n] of Object.entries(run.pack)) {
     const extra = n * TUNING.questBonusFactor;
@@ -1541,9 +1520,9 @@ export function groundLine(q, ids, where) {
 }
 
 // How the work went, in the words written for it. An engine hands back a quality and the
-// band in tuning.js says which of the three lines that is; a node whose engine has not
-// landed yet was never played, so it reads as the work going well — which is what the
-// spoils it has just paid already said.
+// band in tuning.js says which of the three lines that is. A node whose engine has not
+// landed was never played, so it reads as the work going well — which is what the spoils
+// it has just paid already said.
 export function doneLine(node) {
   const said = node.took && node.took.done;
   if (!said || node.passed) return null;
@@ -1560,7 +1539,7 @@ export function packLine() {
 }
 
 // The thing standing in front of a full pack, and the sentence that says what the choice
-// is. Nobody is asked to read a table to work out that they are out of room.
+// is. Nobody should have to read a table to work out that they are out of room.
 export function offerLine() {
   const o = offering();
   if (!o) return null;
@@ -1585,8 +1564,8 @@ export function wonLine(node) {
   const w = node.won;
   if (!w) return null;
   const rounds = `${w.rounds} ${w.rounds === 1 ? 'round' : 'rounds'}`;
-  // How it ended: the party ran, the last of them ran, or everything that was standing
-  // there is down. What got away is named as got away, because it is still out there.
+  // How it ended: the party ran, the last of them ran, or everything standing there is
+  // down. What got away is named as got away, because it is still out there.
   const felled = w.felled === 1 ? 'one of them down'
     : `${saidCount(w.felled)} of them down`;
   const down = w.fled
