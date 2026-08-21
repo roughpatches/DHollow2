@@ -10,6 +10,7 @@ import {
   raiseProps, restate, occasionalIdle, lookIn, faceFor,
 } from '../art.js';
 import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
+import { createFlicker } from '../ambient.js';
 import { preloadFrames, buildFrames } from '../frames.js';
 import { preloadIcons, buildIcons } from '../icons.js';
 import { findTarget, faceToward } from '../interact.js';
@@ -149,6 +150,7 @@ export default class World extends Phaser.Scene {
     if (scene) play(this, scene, scene.id);
 
     this.events.once('shutdown', () => {
+      for (const a of this.ambient) a.destroy();
       this.game.events.off('dialogue:end', afterDialogue);
       this.game.events.off('menu:open', freeze);
       this.game.events.off('menu:close', unfreeze);
@@ -172,6 +174,7 @@ export default class World extends Phaser.Scene {
     this.reachScale = street.body / TUNING.streetBodyPx; // and so how far an arm reaches
     this.worldW = street.width;
     this.worldH = street.height;
+    this.ambient = street.ambient;
     this.physics.world.setBounds(0, 0, street.width, street.height);
 
     this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body,
@@ -179,7 +182,9 @@ export default class World extends Phaser.Scene {
     this.player.setDepth(DEPTH.player);
 
     this.built = raiseStructures(this, this.mapKey);
-    raiseProps(this, this.mapKey);
+    // whatever is standing about the town, and the flame in any of it that carries one
+    const lit = raiseProps(this, this.mapKey);
+    if (lit.length) this.ambient.push(createFlicker(lit));
 
     this.hint = this.add.text(0, 0, '', {
       fontFamily: TUNING.font,
@@ -192,12 +197,16 @@ export default class World extends Phaser.Scene {
 
   // A panel sorts by layer, not by feet: nobody on it is ever further up the road than
   // anybody else, so the depths set when they were placed are the last word.
-  update() {
+  update(time, delta) {
     if (this.frozen) this.player.body.setVelocity(0, 0);
     else {
       updateStreetPlayer(this.player, this.keys);
       this.checkEdges();
     }
+    // the chimneys go on smoking and the water goes on catching the light whether or not
+    // the player is doing anything, and whether or not the game is frozen behind a panel:
+    // it is weather rather than a thing anybody is waiting on
+    for (const a of this.ambient) a.update(delta);
     this.showHint();
     this.idles();
     this.takeUp();
