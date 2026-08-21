@@ -46,6 +46,67 @@ export const TUNING = {
   streetBreathPx: 1,
   streetBreathMs: 3400,
 
+  // What goes up off a chimney (src/ambient.js). Only a panel that names its chimneys has
+  // any; see `smoke` in content/maps.js.
+  streetSmokePuffs: 28, // how many are climbing off one pot at once: enough that the
+  // column reads as one thing rather than as a row of dots going up
+  streetSmokePx: 7, // how wide one gets at the top of its climb; it leaves the pot at one
+  streetSmokeRise: [11, 20], // how fast it climbs, in pixels a second
+  streetSmokeClimb: [44, 82], // and how far it gets before it is gone, in pixels
+  streetSmokeLean: [0.25, 0.6], // how far it goes sideways per pixel risen: the wind, and
+  // one sign for the whole town, because it is one evening. Negative blows the other way.
+  streetSmokeWobble: [2, 9], // and how far a puff wanders off that line, and over how many
+  // pixels of climb it wanders there and back: what stops the column being a ruled edge
+  streetSmokeAlpha: 0.75, // how solid a puff is when it leaves the pot
+  streetSmokeRead: 14, // how far above the pot the sky it stands against is read
+  streetSmokeContrast: 0.55, // and how far the smoke is pushed away from that sky: nothing
+  // is a plume against a sky the same colour as itself
+  streetSmokeSteps: 3, // and how many greys it thins through on the way up, rather than
+  // every grey between here and gone: a painting blended against continuously is a smear
+
+  // Light moving on painted water (src/ambient.js). Only a panel that draws a rect round
+  // its sea has any; see `water` in content/maps.js.
+  streetWaterTones: 2, // how many of a rect's commonest colours count as the water itself:
+  // what is left is the boat and the jetty, and nothing is set down on those
+  streetGlintPer: 6, // how many glints to a thousand pixels of water, so a wide harbour
+  // and a gap between two roofs are lit at the same rate rather than in the same number
+  streetGlintPx: 5, // how wide a dash gets at its brightest; it comes up at one. Long
+  // enough to lie along the swell rather than sit on it like a star
+  streetGlintMs: [900, 2600], // how long one takes to come up and go again
+  streetGlintCut: 0.45, // how far into its turn it stays dark: a glint lit half the time is
+  // a light rather than a glint
+  streetGlintSteps: 3, // and how many levels it comes up through, for the same reason smoke
+  // has them
+  streetGlintAlpha: 0.85, // how solid it is at its brightest
+  streetGlintContrast: 0.35, // and how far above the water's own colour that brightest is
+
+  // Scud crossing a painted sky (src/ambient.js). Only a panel that draws a rect round its
+  // clear sky has any; see `sky` in content/maps.js.
+  streetDriftPer: 0.28, // how many streaks to a thousand pixels of sky, so a panel that is
+  // mostly weather and one with a strip of it above the roofs are crossed at the same rate
+  streetDriftLong: [16, 54], // how long one is, and
+  streetDriftTall: [1, 3], // how thick: low cloud is drawn out, not piled up
+  streetDriftPace: [5, 13], // how fast it crosses, in pixels a second
+  streetDriftFade: 40, // and over how much of each end of its crossing it comes and goes,
+  // so nothing appears at the edge of a rect that stops short of the edge of the panel
+  streetDriftAlpha: 0.3, // how solid it is in the middle of the crossing: scud is thin,
+  // and a sky already painted full of cloud does not want more laid over it opaque
+  streetDriftSteps: 3, // in whole steps, for the same reason the smoke has them
+  streetDriftContrast: 0.5, // and how far it is pushed off the sky's own colour
+
+  // A lamp guttering (src/ambient.js). Only a prop that names a second, lit picture has
+  // any; see PROPS in content/looks.js.
+  streetFlickerMs: [2300, 870], // the two lengths the waver is made of. They do not divide
+  // into each other, so the lamp never comes back round to where it was
+  streetFlickerRange: [0.55, 1], // how far down the flame goes and how far up: never to
+  // nothing, because a lamp somebody keeps lit is down rather than out
+  streetGlowDark: 40, // how dark a pixel inside a lit window's rect has to be to count as
+  // the glass rather than the sash across it: the glass on these windows reads about 15
+  // and the bars about 100, so there is a wide gap to sit in
+  streetFlickerSteps: 6, // in whole steps, for the same reason the smoke has them, but
+  // more of them than the smoke gets: a flame this coarse has two lamps sitting on the
+  // same step half the evening, and a row of lamps in step is a row wired together
+
   // Every word in the game is set in this. The face itself is declared in index.html
   // and loaded before the game starts, because a line of text is baked to a texture the
   // moment it is written and one baked against a fallback stays wrong.
@@ -104,6 +165,17 @@ export const TUNING = {
   // a longer account is read a page at a time
   questScrollPxPerSec: 46, // the near ground's speed; the layers behind it run slower
   questParallax: [0.15, 0.4, 1], // far, mid, near, as a fraction of that speed
+  questIdleDrift: 0.3, // and what is left of that when the party has stopped: standing at
+  // a node the landscape keeps creeping, so a wood at rest is not a photograph. The ground
+  // under their feet is not in this — it holds still with them. See src/walk.js.
+
+  // Leaves coming down through a painted wood (src/ambient.js). Only a backdrop that says
+  // `leaves` gets them; see content/places.js.
+  questLeaves: 34, // how many are in the air at once
+  questLeafPx: [3, 2], // how big one is, across and down, at its flattest
+  questLeafFall: [10, 26], // how fast one comes down, in pixels a second, slowest to fastest
+  questLeafSway: [14, 34], // how far it swings either side of where it was let go
+  questLeafSwayMs: [1800, 3600], // and how long a swing takes
   questApproachMs: 1400, // how long a node takes to walk into view
   questConTweenMs: 500, // and how long the bar takes to catch up with it
 
@@ -818,6 +890,18 @@ export const COLORS = {
   seaNear: 0x2c3540, // and darker close in
   seaCrest: 0x77828c, // the swell on it
 
+  // What comes off a chimney. Pitched at the middle of what the five panels have behind
+  // their pots — a sky that runs from near-black over the burying ground to bright cloud
+  // over the tavern — so the same smoke is darker than the pale skies and lighter than the
+  // dark ones, and reads against all of them without a colour per panel.
+  streetSmoke: 0x555a63,
+
+  // What is burning behind the Sea Hag's windows. Taken off the flame in art/props/
+  // lamp_lit.png, so the tavern and the lamps outside it are lit by the same fire — off the
+  // body of that flame rather than its dim edge, which is grey enough that a window filled
+  // with it looks painted beige rather than lit.
+  streetGlow: 0xf6d0a9,
+
   // The light a panel stands in, laid over anybody standing in it. An export is painted at
   // full strength and the town it walks into is a dusk, so a body at full strength reads as
   // a sticker laid on the picture rather than somebody standing in it. White is no light at
@@ -835,6 +919,11 @@ export const COLORS = {
   questSkyDay: 0x2c333c, // what the party is walking under in the middle band
   questSkyNight: 0x11141d,
   questNightTint: 0x6a7590, // laid over the landscape after dark
+  // What is coming down through the Greywood. Read off the painting, but off the brightest
+  // of it: a leaf in the air has the sky behind it and the canopy it falls past is nearly
+  // black, so a leaf the colour of the canopy is a leaf nobody sees. Taken in turn rather
+  // than at random, so a handful is never all one colour by chance.
+  questLeaf: [0xa96423, 0xc24e68, 0x88422d, 0x9f435e],
 
   // What a placeholder item icon is made of (src/icons.js): the body of the thing, and
   // the mark on it. Retint here and every wooden thing changes at once.

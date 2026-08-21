@@ -222,14 +222,35 @@ export const STRUCTURES = [
 // the harbour lamps. A prop is only a picture — the tile it stands on is what stops you,
 // so a crate goes on a crate tile and a lamp on a post tile (see content/maps.js).
 //   art — the file under art/props/, without the extension.
+//   lit — a second picture laid over the first at a strength that wavers, for a prop that
+//         carries a flame. The lamp is painted in both states; see createFlicker in
+//         src/ambient.js. Left out, the prop just stands there.
+//   scale — a whole multiple of the size it was painted, and only ever a whole one: a
+//         picture blown up by a fraction stops being pixel art. Left out, it is drawn at
+//         the size it was painted, which is what a picture painted for these panels wants.
 //   map — the map it stands on.
 //   at  — the tile it stands on. The picture is centred on that tile and stands on the
 //         bottom of it, so it sorts against actors like anything else in the world.
 // Add a prop by adding a line. Placing several of the same picture is fine and cheap.
 export const PROPS = [
-  // Nothing is dressed on the town map yet: the export is terrain, and where the crates,
-  // the casks and the harbour lamps go is the designer's to say. art/props/ holds nineteen
-  // pictures ready for it — one line each, and the tile under it is what stops you.
+  // Nothing else is dressed on the town map yet: the export is terrain, and where the
+  // crates and the casks go is the designer's to say. art/props/ holds nineteen pictures
+  // ready for it — one line each, and the tile under it is what stops you.
+  // The lamps below are a first placing and nothing more: move them, add to them or take
+  // them out a line at a time. They stand where the painting has something to stand them
+  // on — the quay's paving and the harbour road's cobbles — and off the tiles a building
+  // or a door already claims: `docks` has tile 34 of the quay and the track north has 39,
+  // and a lamp on either of those stands in the middle of it.
+  // They are drawn at three times the size they were painted. The picture is 36 pixels of
+  // lamp and a person on these panels is 62, so at its own size it stands waist-high and
+  // reads as a bollard; at three it is a head and a half over a man, which is what a lamp
+  // post is. Three rather than two because two is still chest-high, and a whole multiple
+  // because a fraction would stop it being pixel art. Repainted at 108 it would want none
+  // of this and the line would lose its `scale`.
+  { art: 'lamp_dark', lit: 'lamp_lit', map: 'quay', at: [20], scale: 3 },
+  { art: 'lamp_dark', lit: 'lamp_lit', map: 'quay', at: [37], scale: 3 },
+  { art: 'lamp_dark', lit: 'lamp_lit', map: 'harbourroad', at: [9], scale: 3 },
+  { art: 'lamp_dark', lit: 'lamp_lit', map: 'harbourroad', at: [34], scale: 3 },
 ];
 
 // The painted panels the quest screens are drawn in: one sheet with the frames laid out

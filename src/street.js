@@ -7,6 +7,7 @@
 import { TUNING, COLORS, hex, blend } from '../tuning.js';
 import { MAPS } from '../content/maps.js';
 import { buildings } from './town.js';
+import { createSmoke, createShimmer, createDrift, createFlicker, glowIn, skyward } from './ambient.js';
 
 const TS = TUNING.tileSize;
 
@@ -15,6 +16,10 @@ const TS = TUNING.tileSize;
 export const DEPTH = {
   weather: -10,
   town: 0,
+  glow: 2, // the light behind a window in the painting, which is inside it rather than on it
+  drift: 3, // the scud crossing the painted sky, the light on the painted water, and the
+  shimmer: 4, // smoke over the roofs: all three lie on the painting, under everything
+  smoke: 5, // standing in front of it, and in that order where they meet
   structure: 10,
   prop: 20,
   shadow: 25, // the pools at people's feet: over the painting, under everyone standing on it
@@ -80,7 +85,45 @@ export function createStreet(scene, def) {
     ground: def.ground,
     sill: def.sill ?? def.ground,
     body: def.body ?? TUNING.streetBodyPx,
+    // and whatever moves on the panel without being asked to. All of it is read off the
+    // painting — the sky a plume is coloured against, the water a glint is allowed to sit
+    // on — so a panel with no painting in yet has none of it. See src/ambient.js.
+    ambient: scene.textures.exists(def.art) ? [
+      def.smoke && createSmoke(scene, vents(scene, def, w), DEPTH.smoke),
+      def.water && createShimmer(scene, def.art, spread(def.water, def, w), DEPTH.shimmer),
+      def.sky && createDrift(scene, def.art, spread(def.sky, def, w), DEPTH.drift),
+      // a lit window gutters the same way a lamp does, so it is the same clock
+      def.windows && createFlicker(glowIn(scene, def.art, spread(def.windows, def, w), DEPTH.glow)),
+    ].filter(Boolean) : [],
   };
+}
+
+// A panel's rects — of water, of sky — laid along the whole street rather than in one copy
+// of the painting, flipped the way the chimneys are and for the same reason.
+function spread(rects, def, w) {
+  const out = [];
+  for (const [x, y, rw, rh] of rects) {
+    for (let i = 0; i < def.repeats; i++) {
+      out.push([i * w + (i % 2 ? w - x - rw : x), y, rw, rh]);
+    }
+  }
+  return out;
+}
+
+// Where the chimneys are along the whole street rather than in one copy of the painting,
+// and what colour each of them smokes. Every copy after the first is flipped, so a chimney
+// in one of those is the same distance from the other end of the panel as it is from this
+// one — but it is the same chimney against the same sky, so the colour is read once, off
+// the painting, where the designer measured it.
+function vents(scene, def, w) {
+  const out = [];
+  for (const [x, y] of def.smoke) {
+    const colour = skyward(scene, def.art, x, y);
+    for (let i = 0; i < def.repeats; i++) {
+      out.push({ x: i * w + (i % 2 ? w - x : x), y, colour });
+    }
+  }
+  return out;
 }
 
 // A mug painted into the room, taken off it. The painting cannot be moved and nothing can
