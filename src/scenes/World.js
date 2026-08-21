@@ -10,7 +10,7 @@ import {
   raiseProps, restate, occasionalIdle, lookIn, faceFor,
 } from '../art.js';
 import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
-import { createFlicker } from '../ambient.js';
+import { createFlicker, createLamplight } from '../ambient.js';
 import { preloadFrames, buildFrames } from '../frames.js';
 import { preloadIcons, buildIcons } from '../icons.js';
 import { findTarget, faceToward } from '../interact.js';
@@ -101,6 +101,9 @@ export default class World extends Phaser.Scene {
       npc.setDepth(DEPTH.npc);
     }
 
+    // everybody standing on the panel, for whatever lights them; see this.lamplight
+    this.actors = [this.player, ...this.npcs];
+
     const cam = this.cameras.main;
     cam.setBounds(0, 0, this.worldW, this.worldH);
     cam.setRoundPixels(true);
@@ -161,6 +164,7 @@ export default class World extends Phaser.Scene {
 
     this.events.once('shutdown', () => {
       for (const a of this.ambient) a.destroy();
+      this.lamplight?.destroy();
       this.game.events.off('dialogue:end', afterDialogue);
       this.game.events.off('menu:open', freeze);
       this.game.events.off('menu:close', unfreeze);
@@ -197,6 +201,10 @@ export default class World extends Phaser.Scene {
     // whatever is standing about the town, and the flame in any of it that carries one
     const lit = raiseProps(this, this.mapKey);
     if (lit.length) this.ambient.push(createFlicker(lit));
+    // and what those flames throw on the street and on whoever is standing in it. It is
+    // not weather and is not in `ambient` with the rest: it has the last word on where a
+    // shadow lies, so it runs at the end of the frame rather than the start of it.
+    this.lamplight = lit.length ? createLamplight(this, lit, DEPTH.lamplight) : null;
 
     this.hint = this.add.text(0, 0, '', {
       fontFamily: TUNING.font,
@@ -224,6 +232,8 @@ export default class World extends Phaser.Scene {
     this.showHint();
     this.idles();
     this.takeUp();
+    // last, because it moves the shadows idles() has just put under everybody's feet
+    this.lamplight?.update(this.actors, this.light);
   }
 
   // A street is a panel, not a stretch of something longer: walk into the end of one and

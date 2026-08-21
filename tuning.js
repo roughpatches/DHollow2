@@ -119,6 +119,30 @@ export const TUNING = {
   // into each other, so the lamp never comes back round to where it was
   streetFlickerRange: [0.55, 1], // how far down the flame goes and how far up: never to
   // nothing, because a lamp somebody keeps lit is down rather than out
+  // And what that lamp throws (src/ambient.js). The picture gutters and until now nothing
+  // around it did: no pool on the cobbles, nobody warming as they walked past, and the
+  // same shadow at somebody's feet ten pixels from the post as fifty. All of it is read
+  // off the flame's own alpha rather than kept on a clock of its own, so the light on the
+  // ground and the light on a face gutter with the flame and cannot drift out of step
+  // with it. Only a prop with a lit picture throws any; see PROPS in content/looks.js.
+  streetLampReach: 96, // how far down the road the light carries, in pixels
+  streetLampFall: 1.8, // and how sharply it gives out over that distance. 1 is a straight
+  // ramp out to nothing; higher keeps the light close about the post, which is what a
+  // flame in a glass does and a floodlight does not
+  streetLampPool: 52, // how far the pool on the cobbles reaches from the foot of the post
+  streetLampPoolAlpha: 0.34, // and how strong it is there at full flame. It is added to
+  // the painting rather than laid over it: light falling on a street is light, and a pale
+  // shape laid over cobbles is a puddle
+  streetLampPoolSteps: 4, // and how many steps it gives out over, the way the smoke thins
+  // in steps: one ring is a line drawn round the light rather than light falling on a street
+  streetLampWarm: 0.5, // how far a body under it is carried off the panel's own light
+  // toward the flame's colour. At 0 nobody warms, which is the game as it was
+  streetLampCast: 30, // and the longest their own shadow is thrown by it, which is about
+  // halfway out of the reach: under the post the light is overhead and the shadow is under
+  // their boots, and past the reach there is no light to cast one. It keeps the end under
+  // their boots and stretches at the other, because a shadow that slides out from under
+  // somebody is a shadow with nobody standing in it
+
   streetGlowDark: 40, // how dark a pixel inside a lit window's rect has to be to count as
   // the glass rather than the sash across it: the glass on these windows reads about 15
   // and the bars about 100, so there is a wide gap to sit in

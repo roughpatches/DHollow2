@@ -22,7 +22,9 @@ export const DEPTH = {
   smoke: 5, // standing in front of it, and in that order where they meet
   structure: 10,
   prop: 20,
-  shadow: 25, // the pools at people's feet: over the painting, under everyone standing on it
+  lamplight: 22, // what a lamp throws on the cobbles: over the post it comes off, and under
+  shadow: 25, // the pools at people's feet, which are cast on the lit ground rather than
+  // under it — over the painting, and under everyone standing on it
   npc: 30,
   player: 40,
   hint: 50,
