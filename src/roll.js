@@ -58,9 +58,9 @@ function otherFace(showing) {
   return face;
 }
 
-// The word across the road, once the sum is in: the whole of what the throw came to,
-// where nothing else on the screen is. `onDone` is called as it starts to go, which is
-// when whatever is waiting on the answer — the card, the tally — is free to come up.
+// The word across the road, once the sum is in: what the throw came to, where nothing
+// else on the screen is. `onDone` is called as it starts to go, which is when whatever
+// is waiting on the answer — the card, the tally — is free to come up.
 function flash(scene, rect, check, onDone) {
   const t = scene.add.text(rect.x + rect.w / 2, rect.y + rect.h / 2,
     check.pass ? 'Success' : 'Failure', {

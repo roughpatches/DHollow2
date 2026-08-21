@@ -217,7 +217,7 @@ const SHAPES = {
     fill(g, b, 5, 8, 2, 2);
     fill(g, b, 9, 8, 2, 2);
   },
-  // A round with a boss in the middle of it, which is the whole of what a shield is.
+  // A round with a boss in the middle of it, which is all a shield needs to be.
   shield: (g, [a, b]) => {
     fill(g, a, 6, 1, 4, 1); // the round, stepped in from the top and out to the waist
     fill(g, a, 4, 2, 8, 2);

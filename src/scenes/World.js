@@ -359,9 +359,9 @@ export default class World extends Phaser.Scene {
     if (focus) this.reach(focus);
   }
 
-  // What [E] does at a landmark on a street. A building still wanting materials takes what
-  // you are carrying; one that is finished and has an inside opens; a plain door just
-  // opens. Which of those a place is, is its repair state and nothing else.
+  // What [E] does at a landmark on a street. A building still wanting materials takes
+  // what you are carrying; one that is finished and has an inside opens; a plain door
+  // just opens. Its repair state is what decides which.
   reach(focus) {
     if (focus.kind === 'door') {
       this.enter(focus.door.to, focus.door.spawn);
@@ -405,7 +405,7 @@ export default class World extends Phaser.Scene {
       return;
     }
     const result = contribute(b.id);
-    // a panel has no tiles for a stage to lay down; the picture is the whole of it
+    // a panel has no tiles for a stage to lay down; the picture is the whole building
     if (result.levelled) restate(this.built, b.id);
     this.say(b.name, contributeLines(b.id, result), null);
   }
