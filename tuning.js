@@ -888,7 +888,8 @@ export const COLORS = {
   skyCloudLit: 0x8a7a74, // and their undersides, catching what is left
   seaFar: 0x55606b, // steel, out at the horizon
   seaNear: 0x2c3540, // and darker close in
-  seaCrest: 0x77828c, // the swell on it
+  // and no crest colour: the light on this water is its own colour brought up, the same
+  // way it is on the painted harbour — see streetGlintContrast above
 
   // What comes off a chimney. Pitched at the middle of what the five panels have behind
   // their pots — a sky that runs from near-black over the burying ground to bright cloud
