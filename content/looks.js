@@ -237,7 +237,10 @@ export const PROPS = [
   // crates and the casks go is the designer's to say. art/props/ holds nineteen pictures
   // ready for it — one line each, and the tile under it is what stops you.
   // The lamps below are a first placing and nothing more: move them, add to them or take
-  // them out a line at a time.
+  // them out a line at a time. They stand where the painting has something to stand them
+  // on — the quay's paving and the harbour road's cobbles — and off the tiles a building
+  // or a door already claims: `docks` has tile 34 of the quay and the track north has 39,
+  // and a lamp on either of those stands in the middle of it.
   // They are drawn at three times the size they were painted. The picture is 36 pixels of
   // lamp and a person on these panels is 62, so at its own size it stands waist-high and
   // reads as a bollard; at three it is a head and a half over a man, which is what a lamp
@@ -245,7 +248,7 @@ export const PROPS = [
   // because a fraction would stop it being pixel art. Repainted at 108 it would want none
   // of this and the line would lose its `scale`.
   { art: 'lamp_dark', lit: 'lamp_lit', map: 'quay', at: [20], scale: 3 },
-  { art: 'lamp_dark', lit: 'lamp_lit', map: 'quay', at: [34], scale: 3 },
+  { art: 'lamp_dark', lit: 'lamp_lit', map: 'quay', at: [37], scale: 3 },
   { art: 'lamp_dark', lit: 'lamp_lit', map: 'harbourroad', at: [9], scale: 3 },
   { art: 'lamp_dark', lit: 'lamp_lit', map: 'harbourroad', at: [34], scale: 3 },
 ];
