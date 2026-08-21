@@ -20,6 +20,7 @@ import {
 } from '../town.js';
 import { worksAt } from '../craft.js';
 import { applyToWorld } from '../settings.js';
+import { crispType } from '../view.js';
 import { SCENES, START } from '../../content/scenes.js';
 import { play, hasPlayed, holdBack } from '../script.js';
 import * as story from '../story.js';
@@ -59,6 +60,10 @@ export default class World extends Phaser.Scene {
     buildIcons(this);
     const map = MAPS[this.mapKey];
     this.street = map.street;
+    // before anything writes a line: the town's camera is zoomed, so the name written over
+    // the player's head is baked at that zoom as well. Said here rather than after the fact
+    // because buildStreet writes that line. See src/view.js.
+    crispType(this, map.street ? TUNING.streetZoom : TUNING.zoom);
     this.buildStreet(map);
 
     this.npcs = [];

@@ -16,6 +16,7 @@ import * as potions from '../potions.js';
 import * as food from '../food.js';
 import { questRows, placeLines, canStart, blockers } from '../run.js';
 import { framed, padOf, inkOf } from '../frames.js';
+import { fitCamera, crispType } from '../view.js';
 
 const PANEL = 'parchment'; // the menu is opened standing in the town, so it is the town's paper
 const PLATE = 'plate'; // and a picture on it is set in the square off the same sheet
@@ -126,9 +127,11 @@ export default class Menu extends Phaser.Scene {
   }
 
   create() {
+    fitCamera(this);
+    crispType(this);
     const m = TUNING.menuMargin;
     const p = TUNING.menuPad;
-    this.box = { x: m, y: m, w: this.scale.width - m * 2, h: this.scale.height - m * 2 };
+    this.box = { x: m, y: m, w: TUNING.viewWidth - m * 2, h: TUNING.viewHeight - m * 2 };
     this.listX = this.box.x + p;
     this.detailX = this.listX + TUNING.menuListWidth + p;
     this.detailW = this.box.x + this.box.w - p - this.detailX;
