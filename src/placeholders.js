@@ -51,10 +51,11 @@ function encounterSlots(e) {
   const slots = proseSlots(e);
   if (e.read) slots.push(['fork line', e.read.line]);
   // A harvest with nothing written for it reads as the placeholder, because a line that
-  // is missing wants writing exactly as much as one that says so.
+  // is missing wants writing exactly as much as one that says so. Its `offer` is not
+  // counted: the work card shows the way and nothing under it, so that line goes nowhere
+  // and text nobody can read is not text anybody has to write.
   for (const h of e.harvests || []) {
-    slots.push([`${h.activity} way`, h.text || PLACEHOLDER],
-      [`${h.activity} offer`, h.offer || PLACEHOLDER]);
+    slots.push([`${h.activity} way`, h.text || PLACEHOLDER]);
     for (const how of ['well', 'middling', 'botched']) {
       slots.push([`${h.activity} ${how}`, (h.done && h.done[how]) || PLACEHOLDER]);
     }
