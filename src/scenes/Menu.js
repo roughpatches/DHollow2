@@ -1,12 +1,11 @@
 import { TUNING, COLORS, hex } from '../../tuning.js';
 import { MAPS } from '../../content/maps.js';
 import { NPCS } from '../../content/npcs.js';
-import { CHARACTER, INVENTORY, COMPANIONS } from '../../content/character.js';
-import { BESTIARY, QUESTS } from '../../content/codex.js';
+import { INVENTORY, COMPANIONS } from '../../content/character.js';
+import { QUESTS } from '../../content/codex.js';
 import { PLACES } from '../../content/places.js';
 import { SETTINGS } from '../../content/settings.js';
 import { option, setting, cycleSetting, applyToWorld } from '../settings.js';
-import { SCRIPT } from '../placeholders.js';
 import { skillRows, fill, pointsOf, YOU } from '../party.js';
 import { statusLines, carriedRows, buildings } from '../town.js';
 import { iconKeyFor } from '../icons.js';
@@ -97,23 +96,19 @@ const locations = () => PLACES.filter((p) => p.id);
 // over the same {label, note, body} shape, so adding a tab is one line here and one
 // array in content/. An entry carrying a `map` also gets that grid drawn above its
 // text — the one thing a list of paragraphs cannot say — and one carrying `options`
-// becomes a setting the player cycles with Enter. Script is the one derived tab: it is
-// scanned out of the others rather than written, and lists every line still unwritten.
+// becomes a setting the player cycles with Enter.
 // A tab's rows are an array, or a function returning one when the rows change while
 // the game runs — Party's level and HP move, so it is rebuilt on every draw.
 // A tab marked 'grid' draws its rows as squares of icons instead of a column of names;
 // everything else about it — cursor, scrolling, detail pane — is the same.
 const TABS = [
-  ['Character', CHARACTER],
   ['Skills', skillRows],
   ['Companions', COMPANIONS],
   ['Inventory', inventory, 'grid'],
-  ['Bestiary', BESTIARY],
   // one word each: the strip gives up its spacing before it gives up a name, and
   // 'Quest Log' read as two tabs
   ['Quests', questLog],
   ['Map', locations],
-  ['Script', SCRIPT],
   ['Settings', SETTINGS],
 ];
 

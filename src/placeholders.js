@@ -1,10 +1,10 @@
 // Where the writing isn't done yet. Drop the marker below into any string in content/
-// and it shows up here, in the game, on the Script tab — so unwritten text is visible
-// from inside the thing rather than tracked in a document that goes stale.
+// and scan() finds it, so unwritten text is counted off the content itself rather than
+// tracked in a document that goes stale. report() prints the count at startup.
 
 import { NPCS } from '../content/npcs.js';
-import { CHARACTER, INVENTORY, COMPANIONS } from '../content/character.js';
-import { BESTIARY, QUESTS } from '../content/codex.js';
+import { INVENTORY, COMPANIONS } from '../content/character.js';
+import { QUESTS } from '../content/codex.js';
 import { PLACES } from '../content/places.js';
 import { SETTINGS } from '../content/settings.js';
 import { PARTY } from '../content/party.js';
@@ -88,10 +88,8 @@ const SOURCES = [
   // own, and an encounter node's is spent on the cards its two ways are asked from
   ['Nodes', DRAWN_KINDS, (e) => e.name, encounterSlots],
   ['Fears', FEARS, (f) => f.name, proseSlots],
-  ['Character', CHARACTER, (e) => e.label, entrySlots],
   ['Companions', COMPANIONS, (e) => e.label, entrySlots],
   ['Inventory', INVENTORY, (e) => e.label, entrySlots],
-  ['Bestiary', BESTIARY, (e) => e.label, entrySlots],
   ['Quest Log', QUESTS, (e) => e.label, entrySlots],
   ['Map', PLACES, (e) => e.label, entrySlots],
   ['Settings', SETTINGS, (e) => e.label, entrySlots],
@@ -116,22 +114,6 @@ export function scan() {
 const found = scan();
 
 export const PLACEHOLDER_COUNT = found.reduce((n, f) => n + f.unwritten.length, 0);
-
-// The Script tab, in the same label/note/body shape every other tab uses.
-export const SCRIPT = found.length
-  ? found.map((f) => ({
-    label: f.label,
-    note: `${f.unwritten.length}/${f.total}`,
-    body: [
-      `${f.source}. ${f.unwritten.length} of ${f.total} pieces of text here are still ${PLACEHOLDER}.`,
-      `Unwritten: ${f.unwritten.join(', ')}.`,
-    ],
-  }))
-  : [{
-    label: 'Nothing unwritten',
-    note: '—',
-    body: [`No ${PLACEHOLDER} anywhere in content/. Every line in the game is authored.`],
-  }];
 
 // so the count is visible without opening the game
 export function report() {
