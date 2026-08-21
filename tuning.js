@@ -31,6 +31,12 @@ export const TUNING = {
   // and settles the last few pixels of the rise as it does.
   streetHintFadeMs: 130,
   streetHintLift: 3,
+  // The pool at anybody's feet: how wide it is against how tall they are drawn, how deep
+  // it is against its own width, and how much of the ground it takes. At zero nobody has
+  // one, which is the game as it was.
+  streetShadowWide: 0.5,
+  streetShadowDeep: 0.3,
+  streetShadowAlpha: 0.5,
   // A door and the end of a street are the same crossing: black, and then somewhere else.
   // Short enough that walking the town is not walking through curtains.
   streetFadeMs: 180,
@@ -811,6 +817,13 @@ export const COLORS = {
   seaFar: 0x55606b, // steel, out at the horizon
   seaNear: 0x2c3540, // and darker close in
   seaCrest: 0x77828c, // the swell on it
+
+  // The light a panel stands in, laid over anybody standing in it. An export is painted at
+  // full strength and the town it walks into is a dusk, so a body at full strength reads as
+  // a sticker laid on the picture rather than somebody standing in it. White is no light at
+  // all, and every step below it is the evening reaching one more thing.
+  streetLight: 0xc6bfb8,
+  streetShadow: 0x120e0c, // and the pool at their feet, which is what puts them on the ground
 
   // The word a check is answered with, across the road (src/roll.js). Green and red and
   // nothing subtler: it is the one thing on the screen at the moment it is up.

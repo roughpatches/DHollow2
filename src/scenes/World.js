@@ -74,7 +74,13 @@ export default class World extends Phaser.Scene {
       const palette = lookIn(def.palette, map.indoors);
       const npc = spawnStreetActor(this, palette, def.x,
         def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx);
-      if (def.behind) cutBelow(npc, def.behind);
+      // and their feet are behind it too, so the pool that would be under them is not
+      // theirs to cast on this side of the bar
+      if (def.behind) {
+        cutBelow(npc, def.behind);
+        npc.shade?.destroy();
+        npc.shade = null;
+      }
       // reaches further past the feet than the player's box, so you stop beside someone
       // rather than inside them
       fitBody(npc, 12, 20, 6);
@@ -296,6 +302,11 @@ export default class World extends Phaser.Scene {
     // people who are all breathing and being the one still thing on the panel is the
     // reading nobody wants; it is the same pixel, and it is theirs too.
     this.player.y = this.playerY - (this.player.anims.isPlaying ? 0 : up);
+    // The pool they cast walks with them and does not breathe: the ground is where it was.
+    // It is placed off the body rather than off the sprite, because a body moves in the
+    // physics step and the sprite only catches up with it afterwards: read off the sprite
+    // here, the pool would trail their boots at every stride.
+    if (this.player.shade) this.player.shade.x = this.player.body.center.x;
     for (const w of this.waiting) {
       const idle = occasionalIdle(w.npc.palette, w.npc.facing);
       if (w.npc.anims.isPlaying) w.next = 0; // still at it; the clock starts when it stops

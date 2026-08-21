@@ -17,6 +17,7 @@ export const DEPTH = {
   town: 0,
   structure: 10,
   prop: 20,
+  shadow: 25, // the pools at people's feet: over the painting, under everyone standing on it
   npc: 30,
   player: 40,
   hint: 50,

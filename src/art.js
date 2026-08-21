@@ -65,6 +65,14 @@ export function lookOf(id) {
   return LOOK[id];
 }
 
+// Whether a body is painted rather than generated. The same question src/textures.js asks
+// before it draws one, and the one that decides who is given a shadow: a generated body
+// has its own drawn into its frames, and an export has none.
+export function drawnBody(palette) {
+  const look = LOOK[palette];
+  return !!(look && (look.walk || look.idle || look.still));
+}
+
 // frame 0 of a set is the still one, so a standing character is not a walking pose
 function key(look, set, dir, i) {
   return set === 'idle' ? actorFrame(look.id, dir, i) : `${look.id}_walking_${dir}_${i}`;

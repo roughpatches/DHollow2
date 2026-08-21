@@ -1,6 +1,6 @@
-import { TUNING } from '../tuning.js';
-import { bodyOf, faceFrame, fitBody, footOf, stand, walking } from './art.js';
-import { atTile } from './street.js';
+import { TUNING, COLORS } from '../tuning.js';
+import { bodyOf, drawnBody, faceFrame, fitBody, footOf, stand, walking } from './art.js';
+import { atTile, DEPTH } from './street.js';
 
 const TS = TUNING.tileSize;
 
@@ -18,7 +18,23 @@ export function spawnStreetActor(scene, palette, tx, groundY, facing = 'left', b
   s.palette = palette;
   s.facing = facing;
   stand(s, palette, facing);
+  // An export is painted at full strength and the panel it walks into is an evening. Lit
+  // by the panel's own light it is in the picture rather than laid on top of it, which is
+  // the whole difference between a character and a sticker.
+  s.setTint(COLORS.streetLight);
+  s.shade = shadeUnder(scene, s, bodyPx);
   return s;
+}
+
+// The pool at somebody's feet. A painted panel has no floor to catch a shadow and nothing
+// else in the game says a body is standing on the ground rather than in front of it. It is
+// centred on the line they stand on, so half of it lies in front of their boots.
+// A generated body has one drawn into its frames already and is not given a second.
+function shadeUnder(scene, sprite, bodyPx) {
+  if (!drawnBody(sprite.palette)) return null;
+  const wide = bodyPx * TUNING.streetShadowWide;
+  return scene.add.ellipse(sprite.x, sprite.y, wide, wide * TUNING.streetShadowDeep,
+    COLORS.streetShadow, TUNING.streetShadowAlpha).setDepth(DEPTH.shadow);
 }
 
 export function createStreetPlayer(scene, tx, groundY, bodyPx, palette = 'player') {
