@@ -24,8 +24,11 @@ function fromResource(n) {
 
 // An encounter node is two skill checks and a choice between them, which is what a beat
 // carrying `choose` already is. The cards are laid out here so the content file does not
-// have to spell out seven of them to ask one question: the way in, the attempt, and the
-// two ends of each way. The body is spent on the first card, so the node keeps none.
+// have to spell out eight of them to ask one question: what is standing there, the ways
+// out of it, the attempt, and the two ends of each way. Every encounter is set up, asked,
+// and answered in that order, and the writing and the question are never on the same card:
+// a body with the ways printed under it is a description you read past to get to the menu.
+// The body is spent on the first card, so the node keeps none.
 // A node carrying a foe fights it at the end of whichever way was taken, unless that
 // way was one that avoids it. A beat carrying `fight` is where the fight starts, and how
 // it starts is what the way was worth: held and the foe may come on weakened, lost and it
@@ -36,14 +39,16 @@ function fromEncounter(n) {
   // walks into it; see muster in src/combat.js.
   const band = n.foes || (n.foe ? [n.foe] : null);
   const fight = (extra) => (band ? { band, ...extra } : null);
-  const beats = [{
-    id: 'in',
-    text: n.body,
-    // a way naming no skill is not rolled: it walks straight into whatever is standing there
-    choose: n.ways.map((w, i) => ({
-      text: w.text, skill: w.skill, dc: w.dc, then: w.skill ? `try${i}` : `met${i}`,
-    })),
-  }];
+  const beats = [
+    { id: 'in', text: n.body, then: 'ways' },
+    {
+      id: 'ways',
+      // a way naming no skill is not rolled: it walks straight into whatever is standing there
+      choose: n.ways.map((w, i) => ({
+        text: w.text, skill: w.skill, dc: w.dc, then: w.skill ? `try${i}` : `met${i}`,
+      })),
+    },
+  ];
   n.ways.forEach((w, i) => {
     if (!w.skill) {
       beats.push({

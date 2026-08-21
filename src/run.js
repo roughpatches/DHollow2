@@ -651,7 +651,8 @@ export function atCamp() {
   const node = run.nodes[run.at];
   if (!node || !KIND[node.kind] || !KIND[node.kind].camp) return false;
   // standing at it, rather than walking up to it or fighting something on it
-  return run.phase === 'beat' || run.phase === 'node' || run.phase === 'choose';
+  return run.phase === 'beat' || run.phase === 'node'
+    || run.phase === 'read' || run.phase === 'choose';
 }
 
 // What can be drunk here and now, in the order the pack lists it.
@@ -983,6 +984,14 @@ export function skillAt(node) {
 
 // Two things standing here and time for one of them. Answered by index into the whole
 // list, shut ones included, so the card and the answer count the same rows.
+// E on the card that is only the place: they have read what they walked up to, and now
+// they are asked what to do with it.
+export function readOn() {
+  if (!run || run.phase !== 'read') return run;
+  run.phase = 'choose';
+  return run;
+}
+
 export function pickWork(i) {
   if (!run || run.phase !== 'choose') return run;
   const node = run.nodes[run.at];
@@ -1064,14 +1073,13 @@ function resolve(node) {
     return;
   }
 
-  // The party stops in front of it and reads it before anything is cut, cast for or dug.
-  // Where two things here can be worked and there is light for one, that card is the
-  // question; where there is only one, it is the account of what they have walked up to
-  // and a key to get on with it. Either way the node is described before it is worked,
-  // which is the only order the writing makes sense in.
+  // The party stops in front of it and reads it before anything is cut, cast for or dug —
+  // and before they are asked what to do about it. Set up, then the ways, then what came
+  // of it, the same three cards a scene deals: a description with the menu printed under
+  // it is something you read past rather than something you read.
   if (node.worked.length) {
     node.shown = true; // its account was read on the way in, so the tally does not repeat it
-    run.phase = 'choose';
+    run.phase = 'read';
     return;
   }
 

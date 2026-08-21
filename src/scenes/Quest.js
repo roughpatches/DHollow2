@@ -368,6 +368,15 @@ export default class Quest extends Phaser.Scene {
       this.draw();
       return;
     }
+    // The description, before anybody is asked anything. One key, the same as the one
+    // that turns any other page of writing over.
+    if (r.phase === 'read') {
+      if (this.approaching) return; // they have not got to it yet
+      if (k === 'e' || k === ' ' || k === 'enter') { if (this.turnPage()) return; run.readOn(); }
+      else if (k === 'escape') run.abandon();
+      this.draw();
+      return;
+    }
     // Two things standing here and light for one. Same shape as a scene's choice: the
     // cursor steps over work nobody walking can do rather than landing on it.
     if (r.phase === 'choose') {
@@ -1132,6 +1141,9 @@ export default class Quest extends Phaser.Scene {
     else if (r.state === 'running' && r.phase === 'fighter') this.card(band.walk, this.fighterLines(r), this.nodeHead(r));
     else if (r.state === 'running' && r.phase === 'fight') this.card(band.walk, this.fightLines(r), this.fightHead());
     else if (r.state === 'running' && r.phase === 'fork') this.card(band.walk, this.forkLines(r), 'The way splits.');
+    else if (r.state === 'running' && r.phase === 'read' && !this.approaching) {
+      this.card(band.walk, this.readLines(r), this.nodeHead(r), true);
+    }
     else if (r.state === 'running' && r.phase === 'choose' && !this.approaching) {
       this.card(band.walk, this.workLines(r), this.nodeHead(r));
     }
@@ -1161,6 +1173,10 @@ export default class Quest extends Phaser.Scene {
     else if (r.phase === 'fighter') this.hint('[Up/Down] Who steps up    [Enter] Send them    [Esc] Turn back');
     else if (r.phase === 'fight') this.hint('[Up/Down] Choose    [Enter] Do it    [Esc] Break off');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
+    else if (r.phase === 'read' && !this.approaching) {
+      const pack = this.campKeys();
+      this.hint(`${this.page < this.pages - 1 ? '[E] Read on' : '[E] Press on'}${pack}    [Esc] Turn back`);
+    }
     else if (r.phase === 'choose' && !this.approaching) {
       // Every work card is a question now: where there is one thing to do, the other
       // answer is to leave it, and a card with nothing on it that anybody can do never
@@ -1634,14 +1650,10 @@ export default class Quest extends Phaser.Scene {
     // What the node paid is on the tally raised over the road and nowhere else, down to the
     // stone that came up with the ore. This card is what was said about the work, and
     // nothing that was counted off it.
-    // Last, and in the small type, because it is a note to the workshop rather than to the
-    // party: what was written for this node is what the player came here to read, and a
-    // line about an engine that has not landed does not go in front of it.
-    const doing = run.activityOf(n);
-    if (doing && !hasEngine(doing)) {
-      out.push([`${doing} — waiting on that engine. For now the party works it out and moves on.`,
-        TUNING.questHintSize, COLORS.menuDim]);
-    }
+    // Nothing about an engine that has not landed either. The card carries the writing and
+    // only the writing; which activities have no engine behind them yet is a question for
+    // the workshop, and hasEngine in src/activity.js answers it without spending a line
+    // of the party's card on it.
     return [...out, ...this.packLines()];
   }
 
@@ -1792,9 +1804,15 @@ export default class Quest extends Phaser.Scene {
     return out;
   }
 
-  // What they have walked up to, and what can be done about it. The node's own account is
-  // on this card and not on the tally afterwards, because a description of a place is
-  // read on arriving at it and not on leaving.
+  // What they have walked up to, and nothing else on the card. The node's own account is
+  // here and not on the tally afterwards, because a description of a place is read on
+  // arriving at it and not on leaving. The ways are the card after this one.
+  readLines(r) {
+    const n = r.nodes[r.at];
+    const out = run.kindOf(n.kind).body.map((para) => [para, TUNING.questBodySize, COLORS.menuDim]);
+    return [...out, ...this.packLines()];
+  }
+
   workLines(r) {
     const n = r.nodes[r.at];
     const hs = n.harvests;
@@ -1804,7 +1822,7 @@ export default class Quest extends Phaser.Scene {
     if (!(walkRow(n) && this.row === hs.length) && (!hs[this.row] || !hs[this.row].score)) {
       this.row = Math.max(0, hs.findIndex((h) => h.score));
     }
-    const out = run.kindOf(n.kind).body.map((para) => [para, TUNING.questBodySize, COLORS.menuDim]);
+    const out = []; // the writing was the card before this one
     hs.forEach((h, i) => {
       const on = i === this.row;
       const shut = !h.score;
