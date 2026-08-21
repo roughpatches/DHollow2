@@ -40,6 +40,9 @@ export default class World extends Phaser.Scene {
     const from = data.map ? data : START;
     this.mapKey = from.map;
     this.spawnTile = from.spawn || MAPS[this.mapKey].spawn;
+    // Only a crossing this scene faded out of fades back in. A boot comes up on the
+    // picture, and a scripted scene owns the camera and does its own fading.
+    this.arriving = !!data.fade;
   }
 
   // the only files the game loads; everyone without art is drawn at boot instead
@@ -72,7 +75,13 @@ export default class World extends Phaser.Scene {
       const palette = lookIn(def.palette, map.indoors);
       const npc = spawnStreetActor(this, palette, def.x,
         def.behind ? this.sillY : this.groundY, def.facing || 'left', this.bodyPx);
-      if (def.behind) cutBelow(npc, def.behind);
+      // and their feet are behind it too, so the pool that would be under them is not
+      // theirs to cast on this side of the bar
+      if (def.behind) {
+        cutBelow(npc, def.behind);
+        npc.shade?.destroy();
+        npc.shade = null;
+      }
       // reaches further past the feet than the player's box, so you stop beside someone
       // rather than inside them
       fitBody(npc, 12, 20, 6);
@@ -96,6 +105,7 @@ export default class World extends Phaser.Scene {
     cam.setBounds(0, 0, this.worldW, this.worldH);
     cam.setRoundPixels(true);
     applyToWorld(this);
+    if (this.arriving) cam.fadeIn(TUNING.streetFadeMs, 0, 0, 0);
 
     this.keys = this.input.keyboard.addKeys('up,down,left,right,w,a,s,d');
     // event-driven, not polled: a quick tap between two frames must not be lost
@@ -180,6 +190,7 @@ export default class World extends Phaser.Scene {
     this.player = createStreetPlayer(this, this.spawnTile[0], street.ground, street.body,
       lookIn('player', map.indoors));
     this.player.setDepth(DEPTH.player);
+    this.playerY = street.ground; // the line they stand on, to breathe against
 
     this.built = raiseStructures(this, this.mapKey);
     // whatever is standing about the town, and the flame in any of it that carries one
@@ -192,7 +203,9 @@ export default class World extends Phaser.Scene {
       color: hex(COLORS.menuAccent),
       stroke: hex(COLORS.bg),
       strokeThickness: 3,
-    }).setOrigin(0.5, 1).setDepth(DEPTH.hint).setVisible(false);
+    }).setOrigin(0.5, 1).setDepth(DEPTH.hint).setAlpha(0);
+    this.hinted = null; // whose name is on it, so it is only tweened when that changes
+    this.lift = { v: 0 }; // and the last of the rise it settles as it fades in
   }
 
   // A panel sorts by layer, not by feet: nobody on it is ever further up the road than
@@ -227,27 +240,59 @@ export default class World extends Phaser.Scene {
   toPanel(to, side) {
     const s = MAPS[to].street;
     const last = (s.size[0] * s.repeats) / TS - 1;
-    this.scene.restart({ map: to, spawn: [side === 'left' ? 1 : last - 1] });
+    this.cross(to, [side === 'left' ? 1 : last - 1]);
+  }
+
+  // Out of one panel and into the next, through black. The player is frozen for the
+  // length of it, which is also what keeps the edge of the street from asking twice while
+  // the screen is going down.
+  cross(to, spawn) {
+    haltPlayer(this.player);
+    this.frozen = true;
+    const cam = this.cameras.main;
+    cam.once('camerafadeoutcomplete', () => {
+      this.scene.restart({ map: to, spawn, fade: true });
+    });
+    cam.fadeOut(TUNING.streetFadeMs, 0, 0, 0);
   }
 
   // The name of whatever is within reach, written over the player's head. A painted street
   // has its doors painted into it, and without this the only way to find one would be to
   // walk the length of the town pressing [E].
+  // It fades in and out rather than appearing: reach is a line on the ground and walking
+  // along a row of doors crosses one every few steps, which as a blink is a flicker. The
+  // tween is started only when the name itself changes, so a walk of a hundred frames
+  // inside one doorway's reach is one fade and not a hundred.
   showHint() {
-    if (this.frozen) {
-      this.hint.setVisible(false);
-      return;
+    const npc = this.frozen ? null : findTarget(this.player, this.npcs, this.reachScale);
+    const focus = (this.frozen || npc) ? null
+      : focusNear(this.mapKey, this.player.x, this.reachScale);
+    const name = npc ? npc.def.name : (focus && focus.name) || null;
+
+    if (name !== this.hinted) {
+      this.hinted = name;
+      this.tweens.killTweensOf(this.hint);
+      this.tweens.killTweensOf(this.lift);
+      if (name) {
+        this.hint.setText(`${name}   [E]`);
+        this.lift.v = TUNING.streetHintLift;
+        this.tweens.add({ targets: this.lift, v: 0, duration: TUNING.streetHintFadeMs, ease: 'Sine.out' });
+      }
+      this.tweens.add({
+        targets: this.hint,
+        alpha: name ? 1 : 0,
+        duration: TUNING.streetHintFadeMs,
+        ease: 'Sine.out',
+      });
     }
-    const npc = findTarget(this.player, this.npcs, this.reachScale);
-    const focus = npc ? null : focusNear(this.mapKey, this.player.x, this.reachScale);
-    const name = npc ? npc.def.name : (focus && focus.name);
-    this.hint.setVisible(!!name);
-    if (!name) return;
-    this.hint.setText(`${name}   [E]`);
+
+    // it goes on following the player while it fades out, because a name left standing
+    // where you were is a name about somewhere else
+    if (!this.hint.alpha && !this.hinted) return;
     this.hint.setPosition(
       Math.round(this.player.x),
       Math.round(this.player.y - this.player.displayHeight * this.player.originY
-        - TUNING.streetHintRise),
+        - TUNING.streetHintRise + this.lift.v),
     );
   }
 
@@ -262,6 +307,15 @@ export default class World extends Phaser.Scene {
   idles() {
     const rise = Math.sin((this.time.now / TUNING.streetBreathMs) * Math.PI * 2) * 0.5 + 0.5;
     const up = Math.round(rise * TUNING.streetBreathPx);
+    // The player breathes on the same clock as everybody else. Standing in a room of
+    // people who are all breathing and being the one still thing on the panel is the
+    // reading nobody wants; it is the same pixel, and it is theirs too.
+    this.player.y = this.playerY - (this.player.anims.isPlaying ? 0 : up);
+    // The pool they cast walks with them and does not breathe: the ground is where it was.
+    // It is placed off the body rather than off the sprite, because a body moves in the
+    // physics step and the sprite only catches up with it afterwards: read off the sprite
+    // here, the pool would trail their boots at every stride.
+    if (this.player.shade) this.player.shade.x = this.player.body.center.x;
     for (const w of this.waiting) {
       const idle = occasionalIdle(w.npc.palette, w.npc.facing);
       if (w.npc.anims.isPlaying) w.next = 0; // still at it; the clock starts when it stops
@@ -336,7 +390,7 @@ export default class World extends Phaser.Scene {
   }
 
   enter(to, spawn) {
-    this.scene.restart({ map: to, spawn: spawn || MAPS[to].spawn });
+    this.cross(to, spawn || MAPS[to].spawn);
   }
 
   say(name, lines, portrait) {

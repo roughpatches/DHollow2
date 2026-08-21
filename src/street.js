@@ -22,6 +22,7 @@ export const DEPTH = {
   smoke: 5, // standing in front of it, and in that order where they meet
   structure: 10,
   prop: 20,
+  shadow: 25, // the pools at people's feet: over the painting, under everyone standing on it
   npc: 30,
   player: 40,
   hint: 50,
@@ -44,10 +45,11 @@ export function atTile(tx) {
 export function createStreet(scene, def) {
   const [w, h] = def.size;
   const width = w * def.repeats;
+  let drawn = null; // the weather a panel draws for itself, where it has no painting
 
   if (def.horizon) {
-    scene.add.image(0, 0, weatherFor(scene, width, h, def.horizon))
-      .setOrigin(0, 0).setDepth(DEPTH.weather);
+    drawn = weatherFor(scene, width, h, def.horizon);
+    scene.add.image(0, 0, drawn).setOrigin(0, 0).setDepth(DEPTH.weather);
     // The weather is sky and water and nothing else, so the ground the panel is walked on
     // is laid over the bottom of it, from the line where the water gives out. A painting
     // covers both; without one this is a shore rather than a man standing on the sea.
@@ -93,8 +95,29 @@ export function createStreet(scene, def) {
       def.sky && createDrift(scene, def.art, spread(def.sky, def, w), DEPTH.drift),
       // a lit window gutters the same way a lamp does, so it is the same clock
       def.windows && createFlicker(glowIn(scene, def.art, spread(def.windows, def, w), DEPTH.glow)),
-    ].filter(Boolean) : [],
+    ].filter(Boolean) : weatherMoving(scene, drawn, width, def),
   };
+}
+
+// What the game drew for itself, moved the way a painting is. A panel with a picture has
+// its sky and its water read off that picture; a panel without one is looking straight at
+// weatherFor's own dusk, and it gets the same two things over it — scud crossing the sky,
+// and the light coming up and going on the water. Nothing here is new: it is the town's
+// weather, pointed at the town's own canvas, so retuning one retunes both.
+// The sea is handed over a row at a time because it is a gradient rather than a painted
+// sea: a row is one colour all the way across, and the light on it is that colour brought
+// up, where the whole band at once would be read as two colours and glint on two lines.
+function weatherMoving(scene, key, width, def) {
+  if (!key) return [];
+  const sea = def.sill ?? def.size[1]; // where the water gives out and the strand starts
+  // and on every third line of it, which is where the swell sat when it was baked into the
+  // picture: a dash on every line is not a rougher sea, it is a lit one
+  const rows = [];
+  for (let y = def.horizon + 2; y < sea; y += 3) rows.push([0, y, width, 1]);
+  return [
+    createDrift(scene, key, [[0, 0, width, def.horizon]], DEPTH.drift),
+    createShimmer(scene, key, rows, DEPTH.shimmer),
+  ];
 }
 
 // A panel's rects — of water, of sky — laid along the whole street rather than in one copy
@@ -181,12 +204,10 @@ function weatherFor(scene, w, h, horizon) {
       Math.round(w * (0.25 + 0.3 * ((i * 0.53) % 1))));
   }
 
-  // and the swell, which is a dash of light on a line of water and nothing more
-  ctx.fillStyle = hex(COLORS.seaCrest);
-  for (let y = horizon + 2; y < h; y += 3) {
-    const gap = 9 + ((y * 5) % 17);
-    for (let x = (y * 7) % gap; x < w; x += gap) ctx.fillRect(x, y, 2 + ((x + y) % 3), 1);
-  }
+  // The swell is not drawn here. It was a fixed pattern of dashes baked into the picture,
+  // which is a sea that has been photographed rather than one that is moving; it is the
+  // shimmer instead, which is the same dashes coming up and going out on their own clocks.
+  // See weatherMoving above.
 
   tex.refresh();
   return key;

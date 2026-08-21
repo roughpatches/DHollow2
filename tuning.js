@@ -26,6 +26,20 @@ export const TUNING = {
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
+  // and how it comes and goes: a name that blinks on the frame you step into reach is a
+  // flicker, and a walk down a row of doors is half a dozen of them. It fades instead,
+  // and settles the last few pixels of the rise as it does.
+  streetHintFadeMs: 130,
+  streetHintLift: 3,
+  // The pool at anybody's feet: how wide it is against how tall they are drawn, how deep
+  // it is against its own width, and how much of the ground it takes. At zero nobody has
+  // one, which is the game as it was.
+  streetShadowWide: 0.5,
+  streetShadowDeep: 0.3,
+  streetShadowAlpha: 0.5,
+  // A door and the end of a street are the same crossing: black, and then somewhere else.
+  // Short enough that walking the town is not walking through curtains.
+  streetFadeMs: 180,
   // The breath under anybody standing still between one thing and the next: how far they
   // rise, and how long a breath takes. A pixel is a breath at this size; two is a man who
   // has just run up the road.
@@ -874,7 +888,8 @@ export const COLORS = {
   skyCloudLit: 0x8a7a74, // and their undersides, catching what is left
   seaFar: 0x55606b, // steel, out at the horizon
   seaNear: 0x2c3540, // and darker close in
-  seaCrest: 0x77828c, // the swell on it
+  // and no crest colour: the light on this water is its own colour brought up, the same
+  // way it is on the painted harbour — see streetGlintContrast above
 
   // What comes off a chimney. Pitched at the middle of what the five panels have behind
   // their pots — a sky that runs from near-black over the burying ground to bright cloud
@@ -887,6 +902,13 @@ export const COLORS = {
   // body of that flame rather than its dim edge, which is grey enough that a window filled
   // with it looks painted beige rather than lit.
   streetGlow: 0xf6d0a9,
+
+  // The light a panel stands in, laid over anybody standing in it. An export is painted at
+  // full strength and the town it walks into is a dusk, so a body at full strength reads as
+  // a sticker laid on the picture rather than somebody standing in it. White is no light at
+  // all, and every step below it is the evening reaching one more thing.
+  streetLight: 0xc6bfb8,
+  streetShadow: 0x120e0c, // and the pool at their feet, which is what puts them on the ground
 
   // The word a check is answered with, across the road (src/roll.js). Green and red and
   // nothing subtler: it is the one thing on the screen at the moment it is up.
