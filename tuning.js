@@ -172,7 +172,6 @@ export const TUNING = {
   questToastInset: 14, // how far in from the corner of the road it hangs
   questToastFadeMs: 220,
   questToastStepMs: 90, // how long between one line landing and the next
-  questToastHoldMs: 2800, // how long the whole tally stays up once it has landed
 
   // The die thrown at a check, watched as it lands (src/roll.js). It is raised at the
   // near corner of the road while the tally goes up at the far one.

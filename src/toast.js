@@ -1,7 +1,8 @@
-// The tally that goes up when a node is done with: what came off it, one line an icon,
-// over the landscape and gone again a few seconds later. The card under the road says
-// the same thing in a sentence — this is that account at a glance, and it is the only
-// place a level shows itself at the moment it is gained.
+// The tally that goes up when a node is done with: what came off it and what it taught
+// them, one line an icon, over the landscape. It is the only place either is said — the
+// card under the road is what was said about the work and nothing counted off it — so it
+// hangs for as long as that card does rather than fading on a timer somebody might be
+// reading past.
 //
 // Paper and ink, like the card, and hung off the same nine-slice: a tally is written out,
 // not stamped in iron.
@@ -24,11 +25,15 @@ export function clearToast() {
   live = null;
 }
 
-// What a node handed over, in the order it is worth reading: the things first, then the
-// experience, then anybody it took to a new level. A node that paid nothing gets no
-// toast at all — an empty tally is a sentence for the card, not a thing to raise.
+// What a node handed over, and nothing else about it: what went on their backs, the
+// experience, and anybody that took to a new level. Loot and what it taught them is the
+// whole of what this panel is for — what it cost, what would not fit and what was left
+// standing are the road's business, not the tally's.
+//
+// What went in the pack rather than what the node gave up: they are the same thing until
+// the pack is full, and what will not go in is asked about where it happens.
 function rowsOf(node) {
-  const out = Object.entries(node.spoils || {})
+  const out = Object.entries(node.packed || node.spoils || {})
     .map(([m, n]) => ({ icon: iconKeyFor(m), label: nameOf(m), tail: `×${n}` }));
   if (node.xp) out.push({ label: 'Experience', tail: `+${node.xp} each`, colour: COLORS.menuAccent });
   for (const up of node.levelled || []) {
@@ -38,7 +43,8 @@ function rowsOf(node) {
 }
 
 // Raised at the top corner of the road, clear of the column of skills down one side and
-// the card standing on the foot of it.
+// the card standing on the foot of it. A node that paid nothing raises no tally: there is
+// nothing to keep an account of, and the card says how it went either way.
 export function rewardToast(scene, rect, node, night) {
   clearToast();
   const rows = rowsOf(node);
@@ -86,16 +92,10 @@ export function rewardToast(scene, rect, node, night) {
     ty += TUNING.questToastRow;
   });
 
-  // up from under the rail it is hung on, held long enough to be read, and away again
+  // up from under the rail it is hung on, and left there: the card below says nothing
+  // about what the node paid, so this stays up until the party walks on from it.
   box.setAlpha(0).setY(10);
   scene.tweens.add({ targets: box, alpha: 1, y: 0, duration: TUNING.questToastFadeMs, ease: 'Sine.out' });
-  scene.time.delayedCall(TUNING.questToastHoldMs + rows.length * TUNING.questToastStepMs, () => {
-    if (live !== box) return;
-    scene.tweens.add({
-      targets: box, alpha: 0, duration: TUNING.questToastFadeMs,
-      onComplete: () => { if (live === box) live = null; box.destroy(); },
-    });
-  });
 
   live = box;
   return box;
