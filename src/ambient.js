@@ -325,6 +325,46 @@ function adrift([, y, , h]) {
   };
 }
 
+// A lamp guttering. The picture is drawn twice — the dark one always, the lit one over it
+// at a wavering strength — so the flame comes up and dies down without the lamp ever going
+// out, and neither picture is touched. Both were painted for this: the lit one differs from
+// the dark one down the whole post, not only at the glass, so what wavers is the light on
+// the ironwork as well as the flame in it.
+//
+// The waver is two slow sines at lengths that do not divide into each other, which never
+// come round together and so never repeat. A flame on a clean sine is a pulse, and a row
+// of lamps on the same pulse is a row of lamps wired together.
+export function createFlicker(lamps) {
+  const lit = lamps.map((sp, i) => ({
+    sp,
+    // each lamp started at its own point in both sines, so no two are ever the same lamp
+    at: Math.random() * Math.PI * 2,
+    also: Math.random() * Math.PI * 2,
+  }));
+
+  return {
+    update(delta) {
+      const [slow, quick] = TUNING.streetFlickerMs;
+      const [low, high] = TUNING.streetFlickerRange;
+      const steps = TUNING.streetFlickerSteps;
+      for (const l of lit) {
+        l.at += (Math.PI * 2 * delta) / slow;
+        l.also += (Math.PI * 2 * delta) / quick;
+        // Stepped along the waver rather than along the alpha, so the steps land inside
+        // the range instead of rounding through it: quantising the alpha itself puts the
+        // bottom step below `low`, and a lamp somebody keeps lit is down rather than out.
+        const up = 0.5 + 0.3 * Math.sin(l.at) + 0.2 * Math.sin(l.also);
+        l.sp.setAlpha(low + (high - low) * (Math.round(up * steps) / steps));
+      }
+    },
+
+    destroy() {
+      for (const l of lit) l.sp.destroy();
+      lit.length = 0;
+    },
+  };
+}
+
 // The pixels of a rect of a painting, read once off the image the way a building's pad
 // below is measured in src/art.js.
 function pixelsOf(scene, art, [x, y, w, h]) {

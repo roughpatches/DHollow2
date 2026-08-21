@@ -100,8 +100,11 @@ export function preloadArt(scene) {
     });
   }
   for (const p of PROPS) {
-    if (!scene.textures.exists(propKey(p.art))) {
-      scene.load.image(propKey(p.art), `art/props/${p.art}.png`);
+    // a prop that gutters is two pictures, the lit one laid over the dark one
+    for (const art of [p.art, p.lit].filter(Boolean)) {
+      if (!scene.textures.exists(propKey(art))) {
+        scene.load.image(propKey(art), `art/props/${art}.png`);
+      }
     }
   }
   // what stands at a node, for the encounters that have art for it
@@ -445,10 +448,15 @@ function propKey(art) {
 
 export function raiseProps(scene, mapKey) {
   // a panel has one line to stand on, so a prop only says how far along it is
+  const lit = [];
   for (const p of PROPS.filter((q) => q.map === mapKey)) {
-    scene.add.image(atTile(p.at[0]), scene.groundY, propKey(p.art))
-      .setOrigin(0.5, 1).setDepth(DEPTH.prop);
+    const stand = (art, over) => scene.add.image(atTile(p.at[0]), scene.groundY, propKey(art))
+      .setOrigin(0.5, 1).setDepth(DEPTH.prop + (over ? 1 : 0)).setScale(p.scale || 1);
+    stand(p.art, false);
+    // and the lit one over it, which is what gutters; see createFlicker in src/ambient.js
+    if (p.lit) lit.push(stand(p.lit, true));
   }
+  return lit;
 }
 
 // the picture for whatever stage the building has got to; repairing it changes what is

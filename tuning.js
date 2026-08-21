@@ -80,6 +80,16 @@ export const TUNING = {
   streetDriftSteps: 3, // in whole steps, for the same reason the smoke has them
   streetDriftContrast: 0.5, // and how far it is pushed off the sky's own colour
 
+  // A lamp guttering (src/ambient.js). Only a prop that names a second, lit picture has
+  // any; see PROPS in content/looks.js.
+  streetFlickerMs: [2300, 870], // the two lengths the waver is made of. They do not divide
+  // into each other, so the lamp never comes back round to where it was
+  streetFlickerRange: [0.55, 1], // how far down the flame goes and how far up: never to
+  // nothing, because a lamp somebody keeps lit is down rather than out
+  streetFlickerSteps: 6, // in whole steps, for the same reason the smoke has them, but
+  // more of them than the smoke gets: a flame this coarse has two lamps sitting on the
+  // same step half the evening, and a row of lamps in step is a row wired together
+
   // Every word in the game is set in this. The face itself is declared in index.html
   // and loaded before the game starts, because a line of text is baked to a texture the
   // moment it is written and one baked against a fallback stays wrong.

@@ -10,6 +10,7 @@ import {
   raiseProps, restate, occasionalIdle, lookIn, faceFor,
 } from '../art.js';
 import { createStreet, coverPatch, focusNear, DEPTH } from '../street.js';
+import { createFlicker } from '../ambient.js';
 import { preloadFrames, buildFrames } from '../frames.js';
 import { preloadIcons, buildIcons } from '../icons.js';
 import { findTarget, faceToward } from '../interact.js';
@@ -181,7 +182,9 @@ export default class World extends Phaser.Scene {
     this.player.setDepth(DEPTH.player);
 
     this.built = raiseStructures(this, this.mapKey);
-    raiseProps(this, this.mapKey);
+    // whatever is standing about the town, and the flame in any of it that carries one
+    const lit = raiseProps(this, this.mapKey);
+    if (lit.length) this.ambient.push(createFlicker(lit));
 
     this.hint = this.add.text(0, 0, '', {
       fontFamily: TUNING.font,
