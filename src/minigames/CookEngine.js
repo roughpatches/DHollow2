@@ -20,7 +20,7 @@
 // this with are not here — the generic track, bar and a line of text stand in for all
 // three, which is the fallback the engine already carried. The mechanic is untouched.
 
-import { COLOR, FONT } from './ui.js';
+import { COLOR, FONT, JUDGE } from './ui.js';
 import { trackWidget, meterBar, popFeedback } from './meters.js';
 
 function clamp01(v) {
@@ -306,9 +306,9 @@ export class CookEngine {
     this.doneBar.setValue(this.doneness);
     this.windowTrack
       .setBand(center, this.windowWidth / 2)
-      .setBandTint(inWindow ? 0x9ad06f : 0xe0b64a)
+      .setBandTint(inWindow ? JUDGE.held : JUDGE.good)
       .setMarker(this.doneness)
-      .setMarkerTint(past ? 0xd97a6a : inWindow ? 0x9ad06f : null);
+      .setMarkerTint(past ? JUDGE.danger : inWindow ? JUDGE.held : null);
   }
 
   _cleanup() {

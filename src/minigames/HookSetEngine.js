@@ -13,7 +13,7 @@
 // it — the colours are the kit's tokens, and the reactive water layer it signalled is
 // not here. The waiting, the feints and both windows are untouched.
 
-import { COLOR, FONT } from './ui.js';
+import { COLOR, FONT, JUDGE } from './ui.js';
 import { trackWidget, popFeedback } from './meters.js';
 
 export class HookSetEngine {
@@ -86,13 +86,13 @@ export class HookSetEngine {
         this.remainingFeints -= 1;
         this.state = 'feint';
         this.feintEndAt = now + this.config.feintMs;
-        this._dip(5, 0xedc46b); // a nibble: a small, brief pull, and tempting
+        this._dip(5, JUDGE.good); // a nibble: a small, brief pull, and tempting
         this._say('…a nibble. Hold — is it committed?', COLOR.gold);
       } else {
         this.state = 'take';
         this.takeStartAt = now;
         this.takeWindowEnd = now + this.config.window.good;
-        this._dip(14, 0xd0684f); // the float goes under and stays under
+        this._dip(14, JUDGE.danger); // the float goes under and stays under
         this._say('TAKE! Set the hook — SPACE', COLOR.goldBright);
       }
     } else if (this.state === 'feint' && now >= this.feintEndAt) {
@@ -130,7 +130,7 @@ export class HookSetEngine {
   _succeed(message) {
     this.completed = true;
     this.failed = false;
-    this._dip(10, 0xedc46b);
+    this._dip(10, JUDGE.good);
     this._setStatus(message, COLOR.grass);
     this.scene.time.delayedCall(450, () => {
       this._cleanup();

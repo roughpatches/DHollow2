@@ -5,7 +5,7 @@
 //
 // Changed on import: the atlas comes from src/uiatlas.js rather than a painted sheet, and
 // StarScape's unused import of the art manifest is gone. Nothing else moved.
-import { bar as uiBar, feedback as uiFeedback } from './ui.js';
+import { bar as uiBar, feedback as uiFeedback, panel } from './ui.js';
 
 function clamp01(v) {
   return Math.max(0, Math.min(1, v));
@@ -36,7 +36,7 @@ export function resolveBarKind(scene, preferred, fallback) {
 // width (so an 8px axe_marker isn't squashed to the generic 6px `marker`), unless
 // `markerW` overrides it.
 export function trackWidget(scene, x, y, w, { height = 14, band = true, markerKey = 'marker', bandKey = 'sweetspot_band', markerW } = {}) {
-  const track = scene.add.nineslice(x + w / 2, y, 'ui', 'track', w, height, 6, 6, 3, 3);
+  const track = panel(scene, x + w / 2, y, w, height, 'track');
   const bandObj = band ? scene.add.nineslice(x, y, 'ui', bandKey, 20, height - 2, 3, 3, 0, 0) : null;
   const mW = markerW ?? scene.textures.getFrame('ui', markerKey)?.width ?? 6;
   const marker = scene.add.image(x, y, 'ui', markerKey).setDisplaySize(mW, height + 8);

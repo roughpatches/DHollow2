@@ -14,7 +14,7 @@
 // set in a taller face and the line above it was running into the board's own top rail.
 // The mechanic is untouched.
 
-import { COLOR, FONT } from './ui.js';
+import { COLOR, FONT, JUDGE, panel } from './ui.js';
 import { popFeedback } from './meters.js';
 
 export class PrepEngine {
@@ -54,11 +54,11 @@ export class PrepEngine {
     this.headText = this.scene.add.text(bx, L.top, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.text });
 
     this.boardText = this.scene.add.text(bx, L.top + 30, 'Tap SPACE as the blade crosses the line — stay on the beat', { fontSize: '15px', fontFamily: FONT, color: COLOR.muted });
-    this.boardBack = this.scene.add.nineslice(bx + this.BW / 2, L.top + 78, 'ui', 'track', this.BW, 48, 6, 6, 3, 3);
+    this.boardBack = panel(this.scene, bx + this.BW / 2, L.top + 78, this.BW, 48, 'track');
     // The cut line at centre, with the on-beat tolerance band around it.
-    this.goodBand = this.scene.add.rectangle(bx + 2 + inner * 0.5, L.top + 78, inner * c.goodTol * 2, 40, 0x9ad06f, 0.25).setOrigin(0.5);
-    this.cutLine = this.scene.add.rectangle(bx + 2 + inner * 0.5, L.top + 78, 3, 44, 0xf2ead2, 0.8).setOrigin(0.5);
-    this.blade = this.scene.add.rectangle(bx + 2, L.top + 78, 5, 52, 0xedc46b).setOrigin(0.5);
+    this.goodBand = this.scene.add.rectangle(bx + 2 + inner * 0.5, L.top + 78, inner * c.goodTol * 2, 40, JUDGE.held, 0.25).setOrigin(0.5);
+    this.cutLine = this.scene.add.rectangle(bx + 2 + inner * 0.5, L.top + 78, 3, 44, JUDGE.edge, 0.8).setOrigin(0.5);
+    this.blade = this.scene.add.rectangle(bx + 2, L.top + 78, 5, 52, JUDGE.good).setOrigin(0.5);
     this.fbPos = { x: bx + this.BW / 2, y: L.top + 118 };
 
     this.flowText = this.scene.add.text(bx, L.top + 148, '', { fontSize: '18px', fontFamily: FONT, color: COLOR.grass });
@@ -103,17 +103,17 @@ export class PrepEngine {
     if (off <= c.perfTol) {
       judgment = 'perfect';
       word = 'CLEAN!';
-      color = 0xffffff;
+      color = JUDGE.perfect;
       this.flow++;
     } else if (off <= c.goodTol) {
       judgment = 'good';
       word = 'cut';
-      color = 0xffd700;
+      color = JUDGE.good;
       this.flow++;
     } else {
       judgment = 'miss';
       word = off === Infinity ? 'MISSED' : 'RAGGED';
-      color = 0xff8c42;
+      color = JUDGE.wild;
       this.flow = 0;
       this.misses++;
     }
@@ -141,7 +141,7 @@ export class PrepEngine {
   _flashLine(color) {
     if (!this.cutLine) return;
     this.cutLine.setFillStyle(color, 1);
-    this.scene.tweens.add({ targets: this.cutLine, alpha: 0.8, duration: 180, onComplete: () => this.cutLine?.setFillStyle(0xf2ead2, 0.8) });
+    this.scene.tweens.add({ targets: this.cutLine, alpha: 0.8, duration: 180, onComplete: () => this.cutLine?.setFillStyle(JUDGE.edge, 0.8) });
   }
 
   _layout() {
@@ -151,7 +151,7 @@ export class PrepEngine {
 
     this.blade.x = bx + 2 + inner * this.pos;
     const onBeat = Math.abs(this.pos - 0.5) <= this.config.goodTol;
-    this.blade.setFillStyle(onBeat ? 0x9ad06f : 0xedc46b);
+    this.blade.setFillStyle(onBeat ? JUDGE.held : JUDGE.good);
     this.blade.scaleY += (1 - this.blade.scaleY) * 0.2; // settle the tap pop
 
     this.headText.setText(`Cuts  ${Math.min(this.beat, this.config.cutCount)} / ${this.config.cutCount}`);
