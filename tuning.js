@@ -26,14 +26,14 @@ export const TUNING = {
   streetReach: 30, // how near a door or a building you stand for [E] to reach it, in pixels
   streetHintSize: 14, // the name of whatever is within reach, written over the player's head
   streetHintRise: 22, // and how far over it
-  // and how it comes and goes: a name that blinks on the frame you step into reach is a
-  // flicker, and a walk down a row of doors is half a dozen of them. It fades instead,
-  // and settles the last few pixels of the rise as it does.
+  // and how it comes and goes. A name that blinks on the frame you step into reach reads
+  // as a flicker, and a walk down a row of doors would be half a dozen of them, so it
+  // fades in instead and settles the last few pixels of the rise as it does.
   streetHintFadeMs: 130,
   streetHintLift: 3,
-  // The pool at anybody's feet: how wide it is against how tall they are drawn, how deep
-  // it is against its own width, and how much of the ground it takes. At zero nobody has
-  // one, which is the game as it was.
+  // The pool at anybody's feet: how wide against how tall they are drawn, how deep against
+  // its own width, and how much of the ground it covers. At zero nobody has one, which is
+  // how the game looked before.
   streetShadowWide: 0.5,
   streetShadowDeep: 0.3,
   streetShadowAlpha: 0.5,
@@ -120,9 +120,9 @@ export const TUNING = {
   interactReach: 12,
   interactRange: 20,
 
-  // Four a side and no more. The most that walk out of Dreadhollow on one job, and the
-  // most that can be standing on the other side of a fight — one number because it is
-  // one rule, and because a card that holds four rows holds four rows either way.
+  // Four a side and no more: the most that walk out of Dreadhollow on one job, and the
+  // most that can stand on the other side of a fight. One number, because it is one rule
+  // and because a card that holds four rows holds them either way.
   partyMax: 4,
 
   // A run is a line of nodes with a fork before some of them. Node counts are
@@ -498,8 +498,8 @@ export const TUNING = {
   },
 
   // What comes off the smithy's anvil, and how much of it. Gear is graded rather than
-  // counted — one piece a job, and how well the work went decides what the piece is worth
-  // — so this is the whole of the difference between a poor dagger and a good one. See
+  // counted: one piece a job, and how well the work went decides what the piece is worth.
+  // That grade is the difference between a poor dagger and a good one. See
   // content/gear.js for the five pieces and src/gear.js for what wears them.
   gear: {
     // Read against the quality the forge scored, best first: a piece is the highest grade
@@ -510,10 +510,10 @@ export const TUNING = {
       { id: 'sound', name: 'Sound', at: 0.55, worth: 2 },
       { id: 'rough', name: 'Rough', at: 0, worth: 1 },
     ],
-    // How many stones a weapon, a shield or a piece of armour will hold, and it only holds
-    // them at the top grade above: a socket is what a masterwork piece is for, and it is
-    // the reason to forge one rather than settle for the piece you already have.
-    // Jewellery ignores this and says its own count — see content/gear.js.
+    // How many stones a weapon, shield or piece of armour will hold, and only at the top
+    // grade above. Sockets are the reason to forge a masterwork piece instead of settling
+    // for the one you already have. Jewellery ignores this and names its own count — see
+    // content/gear.js.
     socketsAtMasterwork: 1,
     // A point of guard and a point of hit are worth the same on a d20; a point of hit
     // points is not, against a fighter who starts with twenty-four of them. This is what
@@ -599,12 +599,12 @@ export const TUNING = {
   // The fire under a bench. Smelting, Cooking and Brewing are all somebody standing over
   // heat, so all three are on one clock: the work has to be finished before what was put
   // on the fire burns through. Gem cutting is a wheel and is not on it.
-  //   worth        — what one of a thing is worth on the fire. Wood goes up with its tier
+  //   worth        — what one of a thing is worth on the fire. Wood goes up with its tier,
   //                  because a branch is kindling and heartwood is not, and coal is worth
-  //                  a whole armful of branches, which is what makes it worth carrying
-  //                  home off a face. Anything not written here does not burn.
-  //   secondsPerUnit — how long one unit of that burns for. This and a recipe's `fuel` in
-  //                  content/recipes.js are the whole of how long a job is allowed to take.
+  //                  an armful of branches, which is why it is worth carrying home off a
+  //                  face. Anything not written here does not burn.
+  //   secondsPerUnit — how long one unit burns for. This and a recipe's `fuel` in
+  //                  content/recipes.js decide how long a job is allowed to take.
   //   spare        — fuel loaded over what the recipe asked for, as a fraction: a fire is
   //                  laid with a little more than the job needs, because a job that ends
   //                  the same second the fuel does is a job nobody ever finishes.
@@ -668,10 +668,9 @@ export const TUNING = {
 
   // A stone is not part of what a face pays. It is a chance at the end of a shift that
   // went well, rolled once against the `stones` table a harvest carries — see
-  // content/nodes.js. Work below stoneFloor finds nothing at all, and the chance climbs
-  // from there to stoneBest at perfect work. Which stone it is, where one is found, is
-  // the same tilt every other table is read with: how well it went says whether, and who
-  // was brought says which.
+  // content/nodes.js. Work below stoneFloor finds nothing, and the chance climbs from
+  // there to stoneBest at perfect work. Which stone it is bends on the same tilt as every
+  // other table: how well it went decides whether, and who was brought decides which.
   stoneFloor: 0.5,
   stoneBest: 0.35,
 
@@ -688,10 +687,10 @@ export const TUNING = {
     // already down pays neither: the blow that put the last one down was that turn.
     swapOpens: 2,
     // Badly hurt: this far down and a side has decisions to make. A foe written to look
-    // after itself pulls back behind a fresher one rather than dying in front of you —
-    // costing them the blow they would have thrown, and handing your next swing the same
-    // swapOpens their side pays. What comes back later comes back as hurt as it went.
-    // It is also the point at which either side may try to leave the fight altogether.
+    // after itself pulls back behind a fresher one instead of dying in front of you. That
+    // costs it the blow it would have thrown and hands your next swing the same swapOpens
+    // your side pays. Anything that comes back later comes back as hurt as it went, and
+    // this is also the point where either side may try to leave the fight.
     badlyHurt: 0.3,
     // Breaking off. It costs the turn whether or not it works — no swing, and the other
     // side takes the opening — and it is a bare d20 against this, because running is not
