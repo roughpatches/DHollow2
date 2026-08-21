@@ -1,16 +1,16 @@
 // What moves in a place when nothing is happening in it.
 //
-// Ambient movement is drawing and nothing else: nothing here is asked anything by the
-// game and nothing here asks the game anything, which is why a leaf landing in the wrong
-// place costs nothing to be wrong about. Everything is tuned from tuning.js.
+// Ambient movement is drawing and nothing else. Nothing here is asked anything by the
+// game and nothing here asks the game anything, so a leaf landing in the wrong place
+// costs nothing to be wrong about. Everything is tuned from tuning.js.
 
 import { TUNING, COLORS, blend, hex } from '../tuning.js';
 
 // Leaves coming down through a wood. A fixed handful of them, each falling at its own
 // rate and fluttering as it goes, put back above the band whenever one reaches the
-// ground — so a wood that never stops shedding costs the same as one leaf falling once.
-// They are drawn into the walk's own container, which is what gives them its depth and
-// what takes them away with it.
+// ground — so a wood that never stops shedding costs the same as one leaf falling
+// once. They are drawn into the walk's own container, which gives them its depth and
+// takes them away with it.
 export function createLeaves(scene, layer, rect, ground, night) {
   const [across, down] = TUNING.questLeafPx;
   const leaves = [];
@@ -23,9 +23,9 @@ export function createLeaves(scene, layer, rect, ground, night) {
       .setOrigin(0.5, 0.5);
     layer.add(sp);
     const leaf = { sp, ...cast(rect) };
-    // The first fall is spread down the whole band rather than started above it: the wood
-    // is already shedding when it comes on screen, instead of filling up from empty over
-    // the first few seconds of a run.
+    // The first fall is spread down the whole band rather than started above it, so the
+    // wood is already shedding when it comes on screen instead of filling up from empty
+    // over the first few seconds of a run.
     leaf.y = rect.y + Math.random() * (ground - rect.y);
     leaves.push(leaf);
   }
@@ -62,9 +62,10 @@ export function createLeaves(scene, layer, rect, ground, night) {
 // where across the band it falls, each rolled between the two ends tuning gives it. It
 // starts above the band and is held there unseen, so leaves come back a few at a time
 // rather than all together whenever the last of them lands.
-// Where it is let go is inset by its own swing and by half its own width, so a leaf at the
-// end of a swing is still inside the band rather than out over the ironwork beside it. Both
-// halves matter: inset by the swing alone and the far edge of the leaf still hangs over.
+// Where it is let go is inset by its own swing and by half its own width, so a leaf at
+// the end of a swing is still inside the band and not out over the ironwork beside it.
+// Both halves matter: inset by the swing alone and the far edge of the leaf still hangs
+// over.
 function cast(rect) {
   const sway = between(TUNING.questLeafSway);
   const edge = sway + TUNING.questLeafPx[0] / 2;
@@ -95,11 +96,11 @@ function darkened(colour) {
 // pot at the top: a plume is one thing moving, not a race between puffs, and puffs given
 // their own paces overtake each other and break the column into a row of squares.
 // So the pace, the height and the lean belong to the vent — the wind is the wind — and
-// what a puff has of its own is a wobble, which makes the column waver rather than fan.
-// The lean is per pixel risen rather than per second, so it never wanders off the panel.
-// What this is drawn over is a painting, so a puff steps between a few alphas rather than
-// fading smoothly: a painting blended against continuously is a smear, and three greys
-// laid over it are weather.
+// what a puff has of its own is a wobble, which makes the column waver instead of
+// fanning. The lean is per pixel risen rather than per second, so it never wanders off
+// the panel. What this is drawn over is a painting, so a puff steps between a few
+// alphas rather than fading smoothly: blending continuously against a painting gives
+// a smear, and three greys laid over it give weather.
 // Each vent brings its own colour, read off the sky it stands against; see skyward().
 export function createSmoke(scene, vents, depth) {
   const puffs = [];
