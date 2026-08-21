@@ -197,16 +197,22 @@ export function qualityOf(judgments) {
   return total / judgments.length;
 }
 
-// how it reads on the card afterwards
+// how it reads on the card afterwards: the verdict on the work in the words somebody
+// standing there would use, and nothing counted off it
 export function qualityLine(node) {
   if (node.quality === undefined) return null;
   if (node.failed) return 'Botched it.';
   // It went wrong and something held it: the work is not lost, and nobody is pretending
   // it went well either.
   if (node.saved) return 'It went wrong, and what you drank held it. Nothing worse than that.';
-  const pct = Math.round(node.quality * 100);
-  const said = node.quality >= 0.9 ? 'Clean work.'
+  return node.quality >= 0.9 ? 'Clean work.'
     : node.quality >= TUNING.activityConGood ? 'Well done.'
       : node.quality >= 0.5 ? 'It came down.' : 'Hard going.';
-  return `${said}  ${pct}% of what the work was worth.`;
+}
+
+// and the figure behind that verdict, which goes on the tally with the rest of the
+// numbers. Nothing for work that was botched or held: neither of those has a share.
+export function qualityPct(node) {
+  if (node.quality === undefined || node.failed || node.saved) return null;
+  return `${Math.round(node.quality * 100)}% of what the work was worth.`;
 }

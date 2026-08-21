@@ -1098,11 +1098,14 @@ export default class Quest extends Phaser.Scene {
       });
     }
 
-    // What the node gave up, raised the moment it is settled and gone again on its own.
-    // Once per node: the card under it is redrawn on every keypress, and a tally that
-    // came back with the page turn would be a tally nobody could read past.
-    if (r.state === 'running' && r.phase === 'node' && !this.approaching && !this.holding
-      && this.toasted !== r.at) {
+    // What the node gave up, raised the moment it is settled and taken down again when the
+    // party walks on from it — the card under it says nothing about what it paid, so the
+    // tally has to stand as long as the card does. Raised once per node: the card is
+    // redrawn on every keypress, and a tally that came back with the page turn would be a
+    // tally nobody could read past.
+    const settled = r.state === 'running' && r.phase === 'node';
+    if (!settled || this.toasted !== r.at) clearToast();
+    if (settled && !this.approaching && !this.holding && this.toasted !== r.at) {
       this.toasted = r.at;
       rewardToast(this, band.walk, r.nodes[r.at], r.when === 'night');
     }
@@ -1589,8 +1592,6 @@ export default class Quest extends Phaser.Scene {
     if (passed) {
       for (const para of e.body) out.push([para, TUNING.questBodySize, COLORS.menuDim]);
       out.push([passed, TUNING.questBodySize, COLORS.menuMapFolk]);
-      const con = run.conLines(n);
-      if (con) out.push([con, TUNING.questBodySize, COLORS.menuMapFolk]);
       return out;
     }
     // How the work went, in the words written for it. A node whose account was read on the
@@ -1611,21 +1612,14 @@ export default class Quest extends Phaser.Scene {
     }
     const worked = qualityLine(n);
     if (worked) out.push([worked, TUNING.questBodySize, n.failed ? COLORS.menuMapFolk : COLORS.menuMapMark]);
-    // What went in the pack rather than what the node gave up: they are the same thing
-    // until the pack is full, and the day they are not is the day the difference matters.
-    out.push([`Taken: ${run.listOf(n.packed || n.spoils)}.    ${n.xp} xp each.`,
-      TUNING.questBodySize, COLORS.menuAccent]);
-    const left = run.leftLine(n);
-    if (left) out.push([left, TUNING.questBodySize, COLORS.menuMapFolk]);
-    out.push([run.packLine(), TUNING.questHintSize, COLORS.menuDim]);
+    // The one thing out of the spoil worth saying in words rather than counting: a stone
+    // is not what the face owed and it is not turned up often, so it is said here, where
+    // it happened, and counted with the rest of it on the tally.
     const stone = run.stoneLine(n);
     if (stone) out.push([stone, TUNING.questBodySize, COLORS.menuMapMark]);
-    // what the work they chose was worth, and what is still standing here after it
-    const worth = run.harvestLine(n);
-    if (worth) out.push([worth, TUNING.questHintSize, COLORS.menuDim]);
-    for (const line of run.leftLines(n)) out.push([line, TUNING.questHintSize, COLORS.menuMapFolk]);
-    const con = run.conLines(n);
-    if (con) out.push([con, TUNING.questBodySize, n.con >= 0 ? COLORS.menuMapMark : COLORS.menuMapFolk]);
+    // What the node paid — what was taken, what would not fit, what it cost the pool and
+    // how full they are — is on the tally raised over the road and nowhere else. This card
+    // is the account of how the work went, and a column of numbers is not that.
     // Last, and in the small type, because it is a note to the workshop rather than to the
     // party: what was written for this node is what the player came here to read, and a
     // line about an engine that has not landed does not go in front of it.

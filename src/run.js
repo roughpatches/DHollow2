@@ -1543,13 +1543,6 @@ export function packLine() {
   return `Pack ${packUsed()} of ${run.room} squares${spare ? '' : ' — full'}.`;
 }
 
-// What would not go in and was left where it fell. Said at the node, in the same voice
-// as work left standing: it is the same kind of regret.
-export function leftLine(node) {
-  const left = (node && node.left) || {};
-  return Object.keys(left).length ? `Left on the ground: ${listOf(left)}.` : null;
-}
-
 // The thing standing in front of a full pack, and the sentence that says what the choice
 // is. Nobody is asked to read a table to work out that they are out of room.
 export function offerLine() {
