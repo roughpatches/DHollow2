@@ -34,6 +34,12 @@ function mealResult(meal) {
     : ' — and nothing came off it worth eating';
 }
 
+// The last row on a work card, and when it is written. Where the party can do exactly one
+// thing here, leaving it is the other answer and the card has to say so; where there are
+// two, the card is a question already and a third row saying nothing happens is noise.
+const WALK_ON = 'Continue on.';
+const walkRow = (node) => node.worked.length === 1;
+
 const CARD = 'plaque'; // the panel a node's account is written on
 const COLUMN = 'band'; // and the one stood on its end beside the road
 const PIP = 'plate'; // and the small square a walked node is hung in, down on the trail
@@ -366,16 +372,23 @@ export default class Quest extends Phaser.Scene {
     // cursor steps over work nobody walking can do rather than landing on it.
     if (r.phase === 'choose') {
       if (this.approaching) return; // they have not got to it yet
-      const hs = r.nodes[r.at].harvests;
+      const n = r.nodes[r.at];
+      const hs = n.harvests;
+      // the walking-on row is last and is always open: it asks nothing of anybody
+      const rows = hs.length + (walkRow(n) ? 1 : 0);
       const step = (d) => {
-        for (let i = 1; i <= hs.length; i++) {
-          const at = (((this.row + d * i) % hs.length) + hs.length) % hs.length;
-          if (hs[at].score) { this.row = at; return; }
+        for (let i = 1; i <= rows; i++) {
+          const at = (((this.row + d * i) % rows) + rows) % rows;
+          if (at === hs.length || hs[at].score) { this.row = at; return; }
         }
       };
       if (k === 'arrowup' || k === 'w') step(-1);
       else if (k === 'arrowdown' || k === 's') step(1);
-      else if (k === 'enter' || k === ' ' || k === 'e') { run.pickWork(this.row); this.row = 0; }
+      else if (k === 'enter' || k === ' ' || k === 'e') {
+        if (this.row === hs.length) run.walkOn();
+        else run.pickWork(this.row);
+        this.row = 0;
+      }
       else if (k === 'escape') run.abandon();
       this.draw();
       return;
@@ -1149,11 +1162,11 @@ export default class Quest extends Phaser.Scene {
     else if (r.phase === 'fight') this.hint('[Up/Down] Choose    [Enter] Do it    [Esc] Break off');
     else if (r.phase === 'fork') this.hint('[Up/Down] Choose a way    [Enter] Take it    [Esc] Turn back');
     else if (r.phase === 'choose' && !this.approaching) {
-      // one thing to do here is not a question, so it is not asked as one
+      // Every work card is a question now: where there is one thing to do, the other
+      // answer is to leave it, and a card with nothing on it that anybody can do never
+      // gets this far.
       const pack = this.campKeys();
-      this.hint((r.nodes[r.at].worked.length > 1
-        ? '[Up/Down] Choose    [Enter] Work it'
-        : '[Enter] Get to work') + `${pack}    [Esc] Turn back`);
+      this.hint(`[Up/Down] Choose    [Enter] Do it${pack}    [Esc] Turn back`);
     }
     else if (r.phase === 'activity') this.hint(this.activity ? hintFor(run.playing()) : 'Walking.');
     else if (r.phase === 'beat' && !this.approaching) {
@@ -1785,8 +1798,10 @@ export default class Quest extends Phaser.Scene {
   workLines(r) {
     const n = r.nodes[r.at];
     const hs = n.harvests;
-    // the cursor never rests on work nobody can do, including on the first draw
-    if (!hs[this.row] || !hs[this.row].score) {
+    // The cursor never rests on work nobody can do, including on the first draw. The
+    // walking-on row sits past the end of the harvests and is not work, so it is left
+    // alone: it is the one row that is always open.
+    if (!(walkRow(n) && this.row === hs.length) && (!hs[this.row] || !hs[this.row].score)) {
       this.row = Math.max(0, hs.findIndex((h) => h.score));
     }
     const out = run.kindOf(n.kind).body.map((para) => [para, TUNING.questBodySize, COLORS.menuDim]);
@@ -1801,6 +1816,13 @@ export default class Quest extends Phaser.Scene {
       out.push([`${shut ? '·' : on ? '>' : ' '} ${h.text || `${h.activity} — ${h.skill.name}`}`,
         TUNING.questBodySize, shut ? COLORS.menuRule : on ? COLORS.menuAccent : COLORS.menuDim]);
     });
+    // One thing to do here is still a question, because the other answer is to leave it.
+    // A card with two is a choice already and does not need a third way written into it.
+    if (walkRow(n)) {
+      const on = this.row === hs.length;
+      out.push([`${on ? '>' : ' '} ${WALK_ON}`,
+        TUNING.questBodySize, on ? COLORS.menuAccent : COLORS.menuDim]);
+    }
     return [...out, ...this.packLines()];
   }
 

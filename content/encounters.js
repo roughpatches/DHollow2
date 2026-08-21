@@ -96,14 +96,31 @@ export const ENCOUNTERS = [
     con: [-1, 0],
     body: ['[Placeholder Text]'],
 
+    // The description, and then the two answers to it. A way with no `then` is the end of
+    // the beats, which at a node with an activity is the controls; a way to a beat marked
+    // `pass` is the party leaving it where it is. Nothing else on the card asks a question,
+    // so the description does not ask one either.
     beats: [
       {
         id: 'water',
         text: [
           'The trees give out onto water. A stream, wide and shallow and peat-brown.',
           "It's slow enough that you have to watch a leaf a while to be sure which way it's going.",
-          'Skaters and flies ripple on the surface. Cast a line?',
+          'Skaters and flies ripple on the surface.',
         ],
+        then: 'ways',
+      },
+      {
+        id: 'ways',
+        choose: [
+          { text: '[Cast a line.]' }, // no way on: the beats run out and the rod takes over
+          { text: '[Continue on.]', then: 'onward' },
+        ],
+      },
+      {
+        id: 'onward',
+        pass: true, // offered and not taken: nothing is rolled, played or paid here
+        text: ['You leave the water where it is. The path picks up again inside the treeline.'],
       },
     ],
   },
@@ -449,6 +466,7 @@ export const ENCOUNTERS = [
     con: [-1, 0],
     body: ['[Placeholder Text]'],
 
+    // The same shape as the stream: what is standing there, and then the two answers.
     beats: [
       {
         id: 'oak',
@@ -456,8 +474,20 @@ export const ENCOUNTERS = [
           'The oak stands alone in a clearing it made for itself. Nothing else has been allowed to get tall within thirty feet of it.',
           'One limb is down — old, storm-torn, half sunk into the ground and still attached at the shoulder.',
           'The heartwood in the break is dark and dry and sound.',
-          'Fell the oak?',
         ],
+        then: 'ways',
+      },
+      {
+        id: 'ways',
+        choose: [
+          { text: '[Fell the oak.]' }, // no way on: the beats run out and the axe takes over
+          { text: '[Continue on.]', then: 'onward' },
+        ],
+      },
+      {
+        id: 'onward',
+        pass: true,
+        text: ['You leave the oak standing. The limb will still be down the next time anybody comes this way.'],
       },
     ],
   },

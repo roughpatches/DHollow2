@@ -993,6 +993,18 @@ export function pickWork(i) {
   return run;
 }
 
+// The other row on a work card: the party looks at what is here and goes on. Same end as
+// a node nobody could have worked — nothing rolled, nothing taken, nothing paid — and the
+// only difference is that this one was a choice.
+export function walkOn() {
+  if (!run || run.phase !== 'choose') return run;
+  const node = run.nodes[run.at];
+  node.passed = true;
+  node.walkedOn = true;
+  settle(null);
+  return run;
+}
+
 // and what happens once it is settled which work is being done: the engine, or straight
 // to the tally where there is no engine for it yet
 function toWork(node) {
@@ -1088,6 +1100,10 @@ function toBeat(node, id) {
   if (b.con) node.conBeat += b.con;
   if (b.spoils) Object.assign(node.beatSpoils, b.spoils);
   if (b.draw) node.beatDraw = b.draw; // the beat walked into decides which table, if any
+  // The way on the card that is not the work: the party was offered it and said no, so
+  // the beats end here and nothing is rolled, played or paid. Its own words are the
+  // account of it, which is why passedLine below stays quiet for a scene.
+  if (b.pass) { node.passed = true; node.walkedOn = true; }
 
   // Every way on closed to this party and no plain way past: there is nothing here they
   // can do, so the scene ends where it stands. Content that always writes one way through
@@ -1550,6 +1566,10 @@ export function offerLine() {
 // the take, because there was neither.
 export function passedLine(node) {
   if (!node.passed) return null;
+  // Offered it and said no, which is not the same as not being able to. A scene has
+  // written its own words for it and does not want a second set on top of them; a work
+  // card has none of its own, so they are here.
+  if (node.walkedOn) return node.beat ? null : 'You leave it where it is and pick the path back up.';
   const named = (node.harvests || []).map((h) => h.skill.name);
   const skill = named.length ? named.join(' or ') : 'this work';
   return `Nobody walking this knows ${skill}. The party looks at it a while and goes on.`;
