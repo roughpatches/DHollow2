@@ -1321,11 +1321,6 @@ export function pickBeat(i) {
   return run;
 }
 
-// who would take a given option, so the party can be told before they take it
-export function actorFor(skill) {
-  return run ? bestAt(run.party, skill) : null;
-}
-
 // What the node came to. `played` is what an engine handed back — { judgments, failed } —
 // or null for a node nobody had to do anything at.
 export function settle(played) {
