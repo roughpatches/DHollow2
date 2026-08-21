@@ -41,8 +41,8 @@ function clamp01(v) {
 }
 
 // How fast the charge runs in each zone. Cold does nothing; the band is the honest one.
-// Hotter melts quicker, which is the whole of the temptation — and it is exactly where the
-// pool is being spoiled.
+// Hotter melts quicker, which is the whole temptation — and it is exactly where the pool
+// is being spoiled.
 const HEAT_FACTOR = { cold: 0, cool: 0.45, sweet: 1, warm: 1.15, scorch: 1.25 };
 
 const ZONE = {
@@ -183,8 +183,8 @@ export class SmeltEngine {
     const zone = this.heat.zone();
     this.molten = clamp01(this.molten + c.meltRatePerSec * HEAT_FACTOR[zone] * dt);
     // Held above the band, the pool takes air and the purity goes with it. Scorching costs
-    // more than merely hot, which is what makes the top of the gauge a place to visit
-    // rather than a place to sit.
+    // more than merely hot, which makes the top of the gauge a place to visit rather than
+    // a place to sit.
     if (zone === 'warm' || zone === 'scorch') {
       this.purity = Math.max(0, this.purity - c.oxidePerSec * (zone === 'scorch' ? 1 : 0.4) * dt);
     }
@@ -266,7 +266,7 @@ export class SmeltEngine {
 
     this.surfaceText.setText(`Surface — ${this.skims} skim${this.skims === 1 ? '' : 's'} left`);
     // The surface: a socket for every place a clump can sit, filled where one is. A fresh
-    // clump is pale and a set one is dark, because which it is is the whole of the decision.
+    // clump is pale and a set one is dark, because that is the whole decision.
     this.g.clear();
     const held = new Map(this.dross.map((d) => [d.slot, d]));
     for (let i = 0; i < c.maxSurfaceDross; i++) {

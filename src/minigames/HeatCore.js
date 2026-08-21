@@ -35,7 +35,7 @@ export class HeatCore {
   }
 
   // 'cold' | 'cool' | 'sweet' | 'warm' | 'scorch' — which of the five the fire is in, and
-  // the whole of what the rest of the game asks a fire.
+  // the only thing the rest of the game asks a fire.
   zone() {
     const b = this.sweetBand;
     if (this.value < b.low - this.warmTolerance) return 'cold';
