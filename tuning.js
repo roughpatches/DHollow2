@@ -373,8 +373,8 @@ export const TUNING = {
     scorchChip: 0.16, // a blow struck off a burning piece
     coldChip: 0.06, // and off a cold one, which is cheaper and gets nothing done
     wildChip: 0.1, // a swing wound past the top of the bar
-    // The tub. It gives the soundness back and takes the heat with it, which is the whole
-    // of the decision: nobody quenches for free.
+    // The tub. It gives the soundness back and takes the heat with it, so nobody quenches
+    // for free: that trade is the decision.
     quenchCoolPerSec: 0.5,
     quenchRegenPerSec: 0.14,
     settleMs: 900, // how long a finished piece is left to be looked at

@@ -10,7 +10,7 @@
 //   slot  — weapon, offhand, body or jewellery. One thing to a slot, and the four are read
 //           together.
 //   stat  — the one number it moves: hit, harm, guard, hp or con. Bronze carries one buff
-//           and no more, which is what makes a slot a question rather than a sum. Left off
+//           and no more, which keeps a slot a question rather than a sum. Left off
 //           for jewellery, which does nothing on its own: a ring is somewhere to put a
 //           stone and is not otherwise worth wearing.
 //   sockets — how many cut stones it will hold, for the pieces that hold them whatever

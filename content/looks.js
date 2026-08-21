@@ -680,8 +680,8 @@ const hollow = (name) => ({
     still: `${name}/rotations/${name}.png`,
     // A hole in the ground is a hole the road runs to the lip of, so its floor line goes
     // to the middle of the paint rather than the bottom of it: the far rim stays back
-    // among the trunks and the near rim comes on past the party, which is what makes it
-    // read as something you are looking down into rather than a patch beyond the path.
+    // among the trunks and the near rim comes on past the party, so it reads as
+    // something you are looking down into rather than a patch beyond the path.
     ground: 84,
     // The moss. The wood has no green in it at all — not one pixel of the backdrop's floor
     // band is green-dominant, where a sixth of this export is — so there is nothing to

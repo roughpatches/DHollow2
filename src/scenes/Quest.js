@@ -1652,8 +1652,8 @@ export default class Quest extends Phaser.Scene {
   }
 
   // Who goes and stands in front of it. Asked when a fight starts with more than one
-  // fighter on the run, and again the moment one of them is carried — which is the whole
-  // of what a second fighter is for.
+  // fighter on the run, and again the moment one of them is carried — which is the
+  // reason to bring a second fighter at all.
   fighterLines(r) {
     const up = run.standing();
     if (this.row >= up.length) this.row = 0;
