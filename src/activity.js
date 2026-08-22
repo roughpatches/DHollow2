@@ -196,16 +196,3 @@ export function qualityOf(judgments) {
   const total = judgments.reduce((n, j) => n + (worth[j] ?? worth.miss), 0);
   return total / judgments.length;
 }
-
-// how it reads on the card afterwards: the verdict on the work in the words somebody
-// standing there would use, and nothing counted off it
-export function qualityLine(node) {
-  if (node.quality === undefined) return null;
-  if (node.failed) return 'Botched it.';
-  // It went wrong and something held it: the work is not lost, and nobody is pretending
-  // it went well either.
-  if (node.saved) return 'It went wrong, and what you drank held it. Nothing worse than that.';
-  return node.quality >= 0.9 ? 'Clean work.'
-    : node.quality >= TUNING.activityConGood ? 'Well done.'
-      : node.quality >= 0.5 ? 'It came down.' : 'Hard going.';
-}
