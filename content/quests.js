@@ -72,24 +72,9 @@ export const QUESTS = [
   },
   {
     // The standing job. Gregorious does not run out of work and never has: this is the
-    // one row on the board that is always there, and what it turns out to be is three
-    // questions asked on the way out of town rather than anything written here.
-    id: 'wildwork',
-    needs: 'firstday-done',
-    label: 'Standing work in the wilds',
-    procedural: true,
-    when: 'any',
-    party: 2,
-    tags: ['forest', 'wild', 'leavingtown'],
-    giver: 'gregorious',
-    check: null,
-    goal: 'Walk out, work what is out there, and bring it back.',
-    body: ['[Placeholder Text]'],
-  },
-  {
-    // The wood, over and over. Standing work above is wherever the party fancies; this is
-    // the Greywood by name, so the only thing left to settle is how far in they go. It
-    // never leaves the board — the wood does not run out of trees or of trouble.
+    // one row on the board that is always there, and what it turns out to be is two
+    // questions asked on the way out of town rather than anything written here. The wood
+    // does not run out of trees or of trouble, and it never leaves the board.
     id: 'greywoodexcursion',
     needs: 'firstday-done',
     label: 'Greywood Excursion',
