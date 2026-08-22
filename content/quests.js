@@ -5,10 +5,14 @@
 //   label — shown on the board and in the Quest Log.
 //   size  — short, medium, or long. The node count for each is in tuning.js. Leave it
 //           out on a job marked `procedural` and the player sets it when they take it.
-//   procedural — standing work rather than a written job: no `line`, no `size` and no
-//           `at`, because the player picks the length, the hour and the place when they
-//           take it off the board. What they can pick is in tuning.js and in the `work`
-//           flag in content/places.js. The nodes come from content/nodes.js.
+//   procedural — standing work rather than a written job: no `line` and no `size`,
+//           because the player picks the length, the hour and the place when they take it
+//           off the board. What they can pick is in tuning.js and in the `work` flag in
+//           content/places.js. The nodes come from content/nodes.js.
+//   where — the zone a procedural job is walked in, named here instead of asked for. A
+//           job that is about one place knows its own ground, so the place screen is
+//           skipped and only the length and the hour are left to answer. Unlike `at` it
+//           does not take the job off the board: it is still work Gregorious hands out.
 //   when  — day, night, or any. A job fixed to one time can only be walked at that
 //           time; 'any' lets the party choose when they set out. A day run has nothing
 //           in it to fight; a night run does, and will not go out without somebody
@@ -68,18 +72,20 @@ export const QUESTS = [
   },
   {
     // The standing job. Gregorious does not run out of work and never has: this is the
-    // one row on the board that is always there, and what it turns out to be is three
-    // questions asked on the way out of town rather than anything written here.
-    id: 'wildwork',
+    // one row on the board that is always there, and what it turns out to be is two
+    // questions asked on the way out of town rather than anything written here. The wood
+    // does not run out of trees or of trouble, and it never leaves the board.
+    id: 'greywoodexcursion',
     needs: 'firstday-done',
-    label: 'Standing work in the wilds',
+    label: 'Greywood Excursion',
     procedural: true,
+    where: 'greywood',
     when: 'any',
     party: 2,
-    tags: ['forest', 'wild', 'leavingtown'],
+    tags: ['forest', 'timber', 'wild', 'leavingtown'],
     giver: 'gregorious',
     check: null,
-    goal: 'Walk out, work what is out there, and bring it back.',
+    goal: 'Walk into the Greywood as far as you have the daylight for, work it, and come back out.',
     body: ['[Placeholder Text]'],
   },
   {

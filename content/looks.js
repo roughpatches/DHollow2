@@ -141,14 +141,15 @@ export const LOOKS = [
     foot: 46,
     walk: { folder: 'Walking/animations/Walk', frames: 6 },
     idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
-    portrait: 'Idle/portrait.png',
+    // the face off the bar export, which is the one painted from the man he is now
+    portrait: '../gregorious-bar/Idle/portrait.png',
     indoors: 'gregorious-bar', // behind his own bar he is painted at the room's size
   },
   {
     // The same man behind his own bar, at the size the room is painted at: he unfolds his
     // arms, takes up a glass and polishes it, and folds them again. Painted from the side,
-    // so his west is his east flipped. He keeps the face above for talking — this export
-    // has none, and a landlord does not need two.
+    // so his west is his east flipped. The face for talking is exported here and the
+    // street look above borrows it, so a landlord has one face rather than two.
     id: 'gregorious-bar',
     path: 'art/gregorious-bar',
     size: 168,
@@ -516,8 +517,10 @@ const OAK = {
     // Painted a good deal brighter and oranger than the wood behind it, so it is knocked
     // back toward the trunks it is standing among rather than sitting in front of them.
     shade: 0xbcc6f5,
-    folder: 'A_large_ancient_oak_treee_w/animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown',
-    frames: 9,
+    // It stands there and does nothing until it is cut, so it is the one painted picture
+    // rather than a loop. The paint sits in the frame exactly where the loop's first frame
+    // had it, so it meets the road at the same line.
+    still: 'A_large_ancient_oak_treee_w/rotations/A_large_ancient_oak_treee_w.png',
     ground: 7,
   },
   done: {

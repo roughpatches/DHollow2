@@ -27,6 +27,7 @@ export const DEPTH = {
   // under it — over the painting, and under everyone standing on it
   npc: 30,
   player: 40,
+  front: 45, // furniture painted nearer the eye than the line anybody walks: over everyone
   hint: 50,
 };
 
@@ -77,9 +78,15 @@ export function createStreet(scene, def) {
   // which is enough to walk along and place things against
   if (scene.textures.exists(def.art)) {
     for (let i = 0; i < def.repeats; i++) {
-      const img = scene.add.image(i * w, 0, def.art).setOrigin(0, 0).setDepth(DEPTH.town);
+      // The whole painting by name. Anything cut out of it later — the bare stretch of bar
+      // laid over the mug, below — is filed on this same texture as a frame of its own, and
+      // a texture asked for a picture without being told which frame hands back the first
+      // frame added to it rather than the whole. Unnamed, the room came up right the first
+      // time it was walked into and as a scrap of counter every time after that.
+      const img = scene.add.image(i * w, 0, def.art, '__BASE').setOrigin(0, 0).setDepth(DEPTH.town);
       if (i % 2) img.setFlipX(true);
     }
+    frontOf(scene, def, w);
   }
 
   return {
@@ -150,6 +157,47 @@ function vents(scene, def, w) {
     }
   }
   return out;
+}
+
+// Furniture the room is painted with that stands nearer the eye than the line anybody
+// walks along — the tables at the near corners of the Sea Hag. The painting is one picture
+// at one depth, so those pieces of it are cut out and laid again over everybody: cross the
+// floor and you pass behind them rather than through them.
+//
+// Cut to their outline and not to a box around it. A round table in a rectangle brings the
+// floor at its corners with it, and the floor either side of the pedestal, which lands over
+// the legs of whoever is standing behind it and cuts them off at the waist. Each piece is
+// a ring of points read off the painting instead, so what is laid back over the room is the
+// table and nothing else, and a person behind it shows through everywhere the table is not.
+// See `front` in content/maps.js.
+function frontOf(scene, def, w) {
+  const src = scene.textures.get(def.art).getSourceImage();
+  (def.front || []).forEach((points, n) => {
+    const xs = points.map((p) => p[0]);
+    const ys = points.map((p) => p[1]);
+    const x = Math.min(...xs);
+    const y = Math.min(...ys);
+    const pw = Math.max(...xs) - x;
+    const ph = Math.max(...ys) - y;
+    const key = `front_${def.art}_${n}`;
+    if (!scene.textures.exists(key)) {
+      const tex = scene.textures.createCanvas(key, pw, ph);
+      const ctx = tex.getContext();
+      ctx.imageSmoothingEnabled = false;
+      ctx.beginPath();
+      for (const [px, py] of points) ctx.lineTo(px - x, py - y);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(src, -x, -y);
+      tex.refresh();
+    }
+    for (let i = 0; i < def.repeats; i++) {
+      // every second copy of the painting is mirrored, so what is cut out of it is too
+      const flip = i % 2 === 1;
+      scene.add.image(i * w + (flip ? w - x - pw : x), y, key)
+        .setOrigin(0, 0).setDepth(DEPTH.front).setFlipX(flip);
+    }
+  });
 }
 
 // A mug painted into the room, taken off it. The painting cannot be moved and nothing can

@@ -57,10 +57,21 @@ window.DH_ASSETS = ${JSON.stringify(manifest)};
   Phaser.Loader.FileTypesManager.install(types);
   var image = types.image;
   var missing = [];
+  // Art asked for by a path that climbs back out of a folder — art/a/../b/c.png — is the
+  // same picture as art/b/c.png, which is the name it is filed under here.
+  var tidy = function (url) {
+    var parts = [];
+    url.split('/').forEach(function (part) {
+      if (part === '..') parts.pop();
+      else if (part !== '.' && part !== '') parts.push(part);
+    });
+    return parts.join('/');
+  };
   var swap = function (url) {
     if (typeof url !== 'string' || url.slice(0, 5) === 'data:') return url;
-    if (window.DH_ASSETS[url]) return window.DH_ASSETS[url];
-    if (missing.indexOf(url) < 0) { missing.push(url); console.warn('not in this build:', url); }
+    var path = tidy(url);
+    if (window.DH_ASSETS[path]) return window.DH_ASSETS[path];
+    if (missing.indexOf(path) < 0) { missing.push(path); console.warn('not in this build:', path); }
     return url;
   };
   Phaser.Loader.FileTypesManager.register('image', function (key, url, xhr) {
