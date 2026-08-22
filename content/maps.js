@@ -240,14 +240,33 @@ export const MAPS = {
       repeats: 1, // one room; a room laid twice is two bars and one landlord
       // The two corners the room is painted from are nearer the eye than the aisle, so
       // what stands in them is laid back over whoever is crossing it: the table and its
-      // two chairs at the right-hand corner, where you come in, and the table and chair
-      // at the left-hand one under the bar. Read off the painting, [x, y, width, height].
+      // two chairs at the right-hand corner, where you come in, and the table, its bottle
+      // and the chair at the left-hand one under the bar. Each is traced round rather than
+      // boxed in — points read off the painting — so somebody standing behind the table
+      // shows between its top and its foot instead of ending at the cloth. A chair back is
+      // taken as solid; the slats are three pixels apart and nobody is seen through them.
       front: [
-        [528, 273, 52, 88], // the chair this side of the near table
-        [560, 285, 98, 88], // the table, its cloth and the foot it stands on
-        [638, 275, 50, 96], // and the chair the far side of it, cut by the frame
-        [0, 357, 88, 27], // the corner table under the bar, cut by two edges
-        [90, 344, 48, 40], // and the chair pulled out from it
+        // the near table: the cloth, the pedestal under it, and the foot it splays into
+        [[558, 301], [571, 290], [600, 285], [628, 285], [651, 291], [663, 300],
+          [648, 311], [628, 318], [600, 320], [575, 313]],
+        [[604, 312], [620, 312], [620, 352], [604, 352]],
+        [[590, 352], [634, 352], [636, 366], [624, 370], [600, 370], [588, 366]],
+        // the chair this side of it: back, seat, and the two legs facing the room
+        [[530, 277], [556, 277], [557, 316], [532, 316]],
+        [[534, 313], [576, 313], [576, 329], [534, 330]],
+        [[535, 328], [543, 328], [543, 361], [535, 361]],
+        [[559, 329], [567, 329], [567, 361], [559, 361]],
+        // and the chair the far side, which the frame cuts through
+        [[660, 279], [681, 279], [681, 322], [660, 322]],
+        [[638, 316], [681, 316], [681, 337], [638, 337]],
+        [[639, 336], [646, 336], [646, 362], [639, 362]],
+        [[653, 337], [661, 337], [661, 360], [653, 360]],
+        [[679, 330], [688, 330], [688, 362], [679, 362]],
+        // the corner table under the bar, cut by two edges, with a bottle standing on it
+        [[0, 357], [30, 361], [58, 366], [80, 372], [92, 381], [92, 384], [0, 384]],
+        [[8, 349], [22, 349], [22, 364], [8, 364]],
+        // and the chair pulled out from it, whose legs are all below the walking line
+        [[90, 343], [130, 343], [130, 384], [90, 384]],
       ],
     },
     spawn: [33],

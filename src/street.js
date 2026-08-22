@@ -156,21 +156,43 @@ function vents(scene, def, w) {
 
 // Furniture the room is painted with that stands nearer the eye than the line anybody
 // walks along — the tables at the near corners of the Sea Hag. The painting is one picture
-// at one depth, so the piece of it those tables are in is cut out and laid again over
-// everybody: cross the floor and you pass behind them rather than through them. Rects are
-// measured off the painting; see `front` in content/maps.js.
+// at one depth, so those pieces of it are cut out and laid again over everybody: cross the
+// floor and you pass behind them rather than through them.
+//
+// Cut to their outline and not to a box around it. A round table in a rectangle brings the
+// floor at its corners with it, and the floor either side of the pedestal, which lands over
+// the legs of whoever is standing behind it and cuts them off at the waist. Each piece is
+// a ring of points read off the painting instead, so what is laid back over the room is the
+// table and nothing else, and a person behind it shows through everywhere the table is not.
+// See `front` in content/maps.js.
 function frontOf(scene, def, w) {
-  const tex = scene.textures.get(def.art);
-  for (const [x, y, rw, rh] of def.front || []) {
-    const name = `front_${x}_${y}_${rw}_${rh}`;
-    if (!tex.has(name)) tex.add(name, 0, x, y, rw, rh);
+  const src = scene.textures.get(def.art).getSourceImage();
+  (def.front || []).forEach((points, n) => {
+    const xs = points.map((p) => p[0]);
+    const ys = points.map((p) => p[1]);
+    const x = Math.min(...xs);
+    const y = Math.min(...ys);
+    const pw = Math.max(...xs) - x;
+    const ph = Math.max(...ys) - y;
+    const key = `front_${def.art}_${n}`;
+    if (!scene.textures.exists(key)) {
+      const tex = scene.textures.createCanvas(key, pw, ph);
+      const ctx = tex.getContext();
+      ctx.imageSmoothingEnabled = false;
+      ctx.beginPath();
+      for (const [px, py] of points) ctx.lineTo(px - x, py - y);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(src, -x, -y);
+      tex.refresh();
+    }
     for (let i = 0; i < def.repeats; i++) {
       // every second copy of the painting is mirrored, so what is cut out of it is too
       const flip = i % 2 === 1;
-      scene.add.image(i * w + (flip ? w - x - rw : x), y, def.art, name)
+      scene.add.image(i * w + (flip ? w - x - pw : x), y, key)
         .setOrigin(0, 0).setDepth(DEPTH.front).setFlipX(flip);
     }
-  }
+  });
 }
 
 // A mug painted into the room, taken off it. The painting cannot be moved and nothing can
