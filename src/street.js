@@ -78,7 +78,12 @@ export function createStreet(scene, def) {
   // which is enough to walk along and place things against
   if (scene.textures.exists(def.art)) {
     for (let i = 0; i < def.repeats; i++) {
-      const img = scene.add.image(i * w, 0, def.art).setOrigin(0, 0).setDepth(DEPTH.town);
+      // The whole painting by name. Anything cut out of it later — the bare stretch of bar
+      // laid over the mug, below — is filed on this same texture as a frame of its own, and
+      // a texture asked for a picture without being told which frame hands back the first
+      // frame added to it rather than the whole. Unnamed, the room came up right the first
+      // time it was walked into and as a scrap of counter every time after that.
+      const img = scene.add.image(i * w, 0, def.art, '__BASE').setOrigin(0, 0).setDepth(DEPTH.town);
       if (i % 2) img.setFlipX(true);
     }
     frontOf(scene, def, w);
