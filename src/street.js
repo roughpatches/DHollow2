@@ -27,6 +27,7 @@ export const DEPTH = {
   // under it — over the painting, and under everyone standing on it
   npc: 30,
   player: 40,
+  front: 45, // furniture painted nearer the eye than the line anybody walks: over everyone
   hint: 50,
 };
 
@@ -80,6 +81,7 @@ export function createStreet(scene, def) {
       const img = scene.add.image(i * w, 0, def.art).setOrigin(0, 0).setDepth(DEPTH.town);
       if (i % 2) img.setFlipX(true);
     }
+    frontOf(scene, def, w);
   }
 
   return {
@@ -150,6 +152,25 @@ function vents(scene, def, w) {
     }
   }
   return out;
+}
+
+// Furniture the room is painted with that stands nearer the eye than the line anybody
+// walks along — the tables at the near corners of the Sea Hag. The painting is one picture
+// at one depth, so the piece of it those tables are in is cut out and laid again over
+// everybody: cross the floor and you pass behind them rather than through them. Rects are
+// measured off the painting; see `front` in content/maps.js.
+function frontOf(scene, def, w) {
+  const tex = scene.textures.get(def.art);
+  for (const [x, y, rw, rh] of def.front || []) {
+    const name = `front_${x}_${y}_${rw}_${rh}`;
+    if (!tex.has(name)) tex.add(name, 0, x, y, rw, rh);
+    for (let i = 0; i < def.repeats; i++) {
+      // every second copy of the painting is mirrored, so what is cut out of it is too
+      const flip = i % 2 === 1;
+      scene.add.image(i * w + (flip ? w - x - rw : x), y, def.art, name)
+        .setOrigin(0, 0).setDepth(DEPTH.front).setFlipX(flip);
+    }
+  }
 }
 
 // A mug painted into the room, taken off it. The painting cannot be moved and nothing can

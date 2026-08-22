@@ -238,6 +238,17 @@ export const MAPS = {
       sill: 352, // where the stool legs and the bar front meet the boards
       body: 183, // and a man standing on them, waist to the bar top
       repeats: 1, // one room; a room laid twice is two bars and one landlord
+      // The two corners the room is painted from are nearer the eye than the aisle, so
+      // what stands in them is laid back over whoever is crossing it: the table and its
+      // two chairs at the right-hand corner, where you come in, and the table and chair
+      // at the left-hand one under the bar. Read off the painting, [x, y, width, height].
+      front: [
+        [528, 273, 52, 88], // the chair this side of the near table
+        [560, 285, 98, 88], // the table, its cloth and the foot it stands on
+        [638, 275, 50, 96], // and the chair the far side of it, cut by the frame
+        [0, 357, 88, 27], // the corner table under the bar, cut by two edges
+        [90, 344, 48, 40], // and the chair pulled out from it
+      ],
     },
     spawn: [33],
     doors: [
