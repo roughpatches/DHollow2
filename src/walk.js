@@ -44,26 +44,27 @@ export function createWalk(scene, rect, party, when, backdrop) {
   layer.add(sky);
 
   // The painting, at 1:1 and tiled across the width — scaling pixel art by a fraction is
-  // how it stops being pixel art. It is cut along its own floor line and laid down as two
-  // strips: the trees behind the party, drifting at the far rate, and the ground under
-  // their feet, going past at the near rate. One image, two speeds, and the party stands
+  // how it stops being pixel art. One strip and one speed, laid so the party stands
   // exactly where the painting says the ground is.
+  //
+  // It used to be cut along its floor line and run as two: the trees behind at the far
+  // rate, the ground under their feet at the near one. But a painting of a wood is one
+  // scene and not two layers — a trunk meets its own roots, a branch lies across the line,
+  // leaves fall either side of it — and running the halves at different speeds tore every
+  // one of those in two. Parallax between separately painted layers is the bands below;
+  // there is no parallax to be had inside a single picture.
   const bands = [];
   if (painted) {
     const tall = scene.textures.get(painted.image).getSourceImage().height;
     const above = ground - land.y; // room between the top of the painting and the road
     const crop = Math.max(0, painted.ground - above); // what hangs off the top, cut off
     const top = land.y + Math.max(0, above - painted.ground);
-    const strip = (y, h, from, rate) => {
-      const t = scene.add.tileSprite(land.x, y, land.w, h, painted.image).setOrigin(0, 0);
-      t.tilePositionY = from;
-      if (night) t.setTint(COLORS.questNightTint);
-      layer.add(t);
-      bands.push({ t, rate });
-      return t;
-    };
-    strip(top, painted.ground - crop, crop, TUNING.questParallax[0]);
-    strip(ground, tall - painted.ground, painted.ground, TUNING.questParallax[2]);
+    const t = scene.add.tileSprite(land.x, top, land.w, tall - crop, painted.image)
+      .setOrigin(0, 0);
+    t.tilePositionY = crop;
+    if (night) t.setTint(COLORS.questNightTint);
+    layer.add(t);
+    bands.push({ t, rate: TUNING.questParallax[2] });
   }
 
   // Each band is tiled across the width and scrolled at its own fraction of the near
@@ -199,7 +200,9 @@ export function createWalk(scene, rect, party, when, backdrop) {
     update(delta) {
       // The wood does not stop because the party has. Standing at a node the bands behind
       // them keep creeping, at a fraction of the walking pace, so a run at rest still has
-      // air in it. The near ground is what their feet are on and holds still with them.
+      // air in it. The near ground is what their feet are on and holds still with them —
+      // and a painted zone is all near ground, being one picture, so it holds still too and
+      // what keeps a wood at rest from being a photograph there is the leaves coming down.
       const pace = moving ? 1 : TUNING.questIdleDrift;
       for (const b of bands) {
         if (!moving && b.rate >= 1) continue;
