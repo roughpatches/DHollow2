@@ -131,7 +131,7 @@ export default class Quest extends Phaser.Scene {
     this.job = job;
     this.times = job.procedural ? run.allTimes(job) : run.timesFor(job);
     this.size_ = job.size || run.SIZES[0];
-    this.where_ = job.at || null;
+    this.where_ = job.at || job.where || null;
     this.row = 0;
     if (job.procedural) this.mode = 'length';
     else if (this.times.length === 1) this.toRecruiting(this.times[0]);
@@ -143,7 +143,8 @@ export default class Quest extends Phaser.Scene {
     if (!run.timeOpen(this.job, when)) return; // there is nothing out there to walk yet
     this.when_ = when;
     this.row = 0;
-    if (this.job.procedural) this.mode = 'where';
+    // standing work asks where; a job that names its own ground has already answered it
+    if (this.job.procedural && !this.where_) this.mode = 'where';
     else this.toRecruiting(when);
   }
 
@@ -238,8 +239,11 @@ export default class Quest extends Phaser.Scene {
     if (this.mode === 'party') {
       const all = roster();
       if (k === 'escape') {
-        if (this.job.procedural) { this.mode = 'where'; this.row = 0; }
+        // back out onto the last screen that asked something, which for a job that names
+        // its own ground is the hour, or the length where there was only one hour to have
+        if (this.job.procedural && !this.job.where) { this.mode = 'where'; this.row = 0; }
         else if (this.times.length > 1) { this.mode = 'when'; this.row = 0; }
+        else if (this.job.procedural) { this.mode = 'length'; this.row = 0; }
         else if (this.job.at) this.close();
         else { this.mode = 'board'; this.row = 0; }
       }

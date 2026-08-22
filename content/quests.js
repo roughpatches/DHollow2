@@ -5,10 +5,14 @@
 //   label — shown on the board and in the Quest Log.
 //   size  — short, medium, or long. The node count for each is in tuning.js. Leave it
 //           out on a job marked `procedural` and the player sets it when they take it.
-//   procedural — standing work rather than a written job: no `line`, no `size` and no
-//           `at`, because the player picks the length, the hour and the place when they
-//           take it off the board. What they can pick is in tuning.js and in the `work`
-//           flag in content/places.js. The nodes come from content/nodes.js.
+//   procedural — standing work rather than a written job: no `line` and no `size`,
+//           because the player picks the length, the hour and the place when they take it
+//           off the board. What they can pick is in tuning.js and in the `work` flag in
+//           content/places.js. The nodes come from content/nodes.js.
+//   where — the zone a procedural job is walked in, named here instead of asked for. A
+//           job that is about one place knows its own ground, so the place screen is
+//           skipped and only the length and the hour are left to answer. Unlike `at` it
+//           does not take the job off the board: it is still work Gregorious hands out.
 //   when  — day, night, or any. A job fixed to one time can only be walked at that
 //           time; 'any' lets the party choose when they set out. A day run has nothing
 //           in it to fight; a night run does, and will not go out without somebody
@@ -80,6 +84,23 @@ export const QUESTS = [
     giver: 'gregorious',
     check: null,
     goal: 'Walk out, work what is out there, and bring it back.',
+    body: ['[Placeholder Text]'],
+  },
+  {
+    // The wood, over and over. Standing work above is wherever the party fancies; this is
+    // the Greywood by name, so the only thing left to settle is how far in they go. It
+    // never leaves the board — the wood does not run out of trees or of trouble.
+    id: 'greywoodexcursion',
+    needs: 'firstday-done',
+    label: 'Greywood Excursion',
+    procedural: true,
+    where: 'greywood',
+    when: 'any',
+    party: 2,
+    tags: ['forest', 'timber', 'wild', 'leavingtown'],
+    giver: 'gregorious',
+    check: null,
+    goal: 'Walk into the Greywood as far as you have the daylight for, work it, and come back out.',
     body: ['[Placeholder Text]'],
   },
   {

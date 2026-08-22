@@ -374,7 +374,7 @@ export function mixAt(when, where) {
 // Where a job is walked: the place it is set out from, or the one the player chose for
 // work they picked the place of.
 function placeOf(q, where) {
-  const id = where || (q && q.at);
+  const id = where || (q && (q.at || q.where));
   return (id && ZONE[id]) || null;
 }
 
@@ -408,7 +408,7 @@ export function start(id, when, party, choice = {}, bring = {}) {
   const quest = questOf(id);
   const at = timesFor(quest).includes(when) ? when : timesFor(quest)[0];
   const size = quest.size || choice.size || 'short';
-  const where = quest.at || choice.where || null;
+  const where = quest.at || quest.where || choice.where || null;
   // The player and whoever was recruited walk it: they take the wounds, earn the
   // experience, and are the only ones who can read a fork. The player is always on it, so
   // their three skills are the three the party always has.
