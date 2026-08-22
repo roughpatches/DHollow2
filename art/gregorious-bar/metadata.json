@@ -53,9 +53,14 @@
             ]
           }
         }
+      },
+      "portrait": {
+        "path": "Idle/portrait.png",
+        "size": 128,
+        "generated_at": "2026-08-16T22:39:22.876735"
       }
     }
   ],
   "export_version": "3.1",
-  "export_date": "2026-08-16T20:59:59.048761"
+  "export_date": "2026-08-22T11:51:19.185085"
 }

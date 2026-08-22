@@ -141,14 +141,15 @@ export const LOOKS = [
     foot: 46,
     walk: { folder: 'Walking/animations/Walk', frames: 6 },
     idle: { folder: 'Idle/animations/Breathing_Idle', frames: 4 },
-    portrait: 'Idle/portrait.png',
+    // the face off the bar export, which is the one painted from the man he is now
+    portrait: '../gregorious-bar/Idle/portrait.png',
     indoors: 'gregorious-bar', // behind his own bar he is painted at the room's size
   },
   {
     // The same man behind his own bar, at the size the room is painted at: he unfolds his
     // arms, takes up a glass and polishes it, and folds them again. Painted from the side,
-    // so his west is his east flipped. He keeps the face above for talking — this export
-    // has none, and a landlord does not need two.
+    // so his west is his east flipped. The face for talking is exported here and the
+    // street look above borrows it, so a landlord has one face rather than two.
     id: 'gregorious-bar',
     path: 'art/gregorious-bar',
     size: 168,
