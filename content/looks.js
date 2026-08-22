@@ -517,8 +517,10 @@ const OAK = {
     // Painted a good deal brighter and oranger than the wood behind it, so it is knocked
     // back toward the trunks it is standing among rather than sitting in front of them.
     shade: 0xbcc6f5,
-    folder: 'A_large_ancient_oak_treee_w/animations/Tree_is_cut_town_the_trunk_collapsing_to_the_righ/unknown',
-    frames: 9,
+    // It stands there and does nothing until it is cut, so it is the one painted picture
+    // rather than a loop. The paint sits in the frame exactly where the loop's first frame
+    // had it, so it meets the road at the same line.
+    still: 'A_large_ancient_oak_treee_w/rotations/A_large_ancient_oak_treee_w.png',
     ground: 7,
   },
   done: {
